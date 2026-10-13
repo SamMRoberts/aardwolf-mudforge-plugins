@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "name": "Aardwolf MudForge Plugins",
+  "description": "Shared Aardwolf API and example plugins for MudForge.",
+  "plugins": [
+    {
+      "id": "aardwolf-api-core",
+      "name": "Aardwolf API Core",
+      "version": "0.1.0",
+      "author": "Sam Roberts",
+      "description": "Shared Aardwolf session state and exclusive GMCP negotiation.",
+      "category": "utilities",
+      "tags": [
+        "aardwolf",
+        "gmcp",
+        "core"
+      ],
+      "downloadUrl": "dist/plugins/aardwolf-api-core.lua",
+      "sha256": "0ac184081d1674babb9a790f05e149b5f6f05a6926a7cd343a560ca55b8cbebb",
+      "size": 8151,
+      "format": "lua"
+    },
+    {
+      "id": "aardwolf-api-vitals-example",
+      "name": "Aardwolf API Vitals Example",
+      "version": "0.1.0",
+      "author": "Sam Roberts",
+      "description": "Small reactive vitals panel demonstrating the shared Aardwolf API.",
+      "category": "development",
+      "tags": [
+        "aardwolf",
+        "example",
+        "vitals"
+      ],
+      "downloadUrl": "dist/plugins/aardwolf-api-vitals-example.lua",
+      "sha256": "06621760bbea7d9e0b1bda9523fcf1f919e1db59322f37f9d8c88ca85058a96c",
+      "size": 5933,
+      "format": "lua"
+    }
+  ],
+  "libraries": [
+    {
+      "name": "aardwolf-api",
+      "version": "0.1.0",
+      "author": "Sam Roberts",
+      "description": "Session-scoped Aardwolf data, events, storage and UI helpers.",
+      "tags": [
+        "aardwolf",
+        "gmcp",
+        "api"
+      ],
+      "downloadUrl": "dist/libs/aardwolf-api.lua",
+      "sha256": "5ba80e1a077d68786fe94aaadedeee37852bd4e025379d0a30ce6960b9655073",
+      "size": 17248
+    }
+  ]
+}
