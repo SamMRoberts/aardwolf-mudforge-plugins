@@ -65,28 +65,36 @@ save refusal, reactive updates, simulated preference reload, lifecycle and
 session isolation. An isolated JavaScript fixture checks the form property
 handler. These checks do not execute MudForge's transpiler, iframe sanitizer,
 native message delivery, rendering, disk persistence or live GMCP transport.
-Implementation validation is limited to repository checks; this checklist
-requires separate authorization for disposable native or live testing.
+Standalone Chromium checks cover 220–640 px panel widths, 8–48 px fonts,
+long numeric readouts, alert and unknown states, reduced motion, and settings
+layout/editing. These use the plugin's generated HTML with synthetic bindings;
+they do not test native iframe sanitization or widget message delivery.
+This checklist requires separate authorization for disposable native or live testing.
 
-- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.0 in a
-  disposable world. Verify one horizontal strip with HP/mana/moves cards.
-- Resize above/below 480 px, expand Settings and try large fonts. Expect readable
-  wrapping, accessible controls, vertical scrolling and preserved geometry.
+- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.1 in a
+  disposable world. Verify one compact horizontal strip with left labels and
+  overlaid numeric readouts.
+- Resize above/below 480 px, open the floating Settings window and try large
+  fonts. Expect readable wrapping, accessible controls, vertical scrolling and
+  preserved geometry.
 - Send current/maxima packets in either order and partial/invalid data. Verify
   unknown values are neutral, zero maxima suppress alerts, and over-max values
   preserve numeric readouts while bars remain bounded.
-- Cross each configured threshold, including equality. Verify amber Low, red
-  Critical, a gentle critical border pulse and recovery to normal. Enable OS
+- Cross each configured threshold, including equality. Verify red HP, blue mana
+  and yellow moves, their matching Low/Critical shades, a gentle critical border
+  pulse and recovery to normal. Enable OS
   reduced motion and verify the pulse stops.
-- Navigate and operate Refresh, Settings, Save and Reset using the keyboard.
+- Navigate and operate Refresh, Settings, Close, Save and Reset using the keyboard.
+  Close settings with Escape and ×; reopen repeatedly and confirm one window,
+  intact unfinished edits, and continued vitals updates. Save/Reset stays open.
   Confirm native action/submit payloads and the iframe ready/property handshake.
 - Change font family/size/weight/style and per-vital thresholds. Check validation
   errors, refused saves, successful reset and feedback separate from session
   status. Type unfinished settings during repeated GMCP updates; edits and
   focus must remain intact.
 - Save settings, disable/reload, and close/reopen the disposable world. Verify
-  actual disk persistence, one panel, and no stale callbacks. Test disconnect,
-  Core reload and two sessions with different vitals and preferences.
+  actual disk persistence, one vitals panel, settings closed until requested,
+  and no stale callbacks. Test disconnect, Core reload and two sessions with different vitals and preferences.
 - With a separately authorized live Aardwolf connection, observe current and
   maximum GMCP fields, use Refresh and verify a fresh server response. This is
   independent of native loopback or offline fixture results.

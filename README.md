@@ -9,7 +9,7 @@ and widget helpers, a small reactive vitals example, and a configurable vitals H
 | `aardwolf-api` library | Data subscriptions, snapshots, refresh requests, local persistence and consumer-owned UI |
 | Aardwolf API Core | One GMCP negotiation owner and one authoritative state cache per session |
 | Aardwolf API Vitals Example | HP/mana/moves bindings, an explicit refresh button and saved font-size preferences |
-| Aardwolf Vitals | Horizontal HP/mana/moves cards, configurable typography and independent low-vital alerts |
+| Aardwolf Vitals | Compact HP/mana/moves bars, floating settings and independent low-vital alerts |
 
 ## Installation
 
@@ -44,10 +44,12 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Vitals
 
-The panel shows **HP, mana and moves** side by side, with current/max values,
-percentages and progress bars. It stacks the cards below 480 px panel width;
-settings remain scrollable within the panel. MudForge owns saved placement,
-size and visibility. Default size is 640 × 190 px.
+Aardwolf Vitals **0.1.1** shows **HP, mana and moves** side by side, with labels
+to the left and current/max values plus percentages over each bar. Bars are
+24 px tall at the default font size and grow for larger fonts or wrapped values.
+The panel stacks the bars below 480 px width; larger fonts also wrap the bars
+as needed. MudForge owns saved placement,
+size and visibility; existing geometry is preserved. Initial size is 640 × 110 px.
 
 Current values come from `char.vitals`; maxima come from `char.maxstats`
 (`maxhp`, `maxmana`, `maxmoves`), as documented in the
@@ -56,13 +58,21 @@ Missing or invalid values display `?`, and missing/nonpositive maxima suppress
 percentage alerts. Bars clamp to 0–100% without changing the displayed server
 numbers. Disconnect or Core unavailability clears the display.
 
-Open **Settings** to choose a plain font family name (for example `system-ui`,
+Click the **Settings** gear icon to open a separate floating **Aardwolf Vitals Settings**
+window (initially 420 × 520 px). Its controls scroll at smaller sizes.
+**Close**, Escape, or the window's × hides it. Clicking Settings reopens the
+same window with unfinished edits intact until plugin reload; the window is
+created only when requested and stays closed after reload.
+
+Use the settings window to choose a plain font family name (for example `system-ui`,
 `Menlo` or `SF Pro Text`), an integer size from 8–48 px, normal/bold weight, and
 normal/italic style. Fonts use those available on the device; no font files are
 downloaded. Defaults are `system-ui`, 13 px, normal weight and style.
 
-Each vital has independent warning and critical percentages. Defaults are
-**Low at ≤30%** (amber) and **Critical at ≤15%** (red with a gentle border pulse).
+HP uses red, mana blue, and moves yellow. Each vital has independent warning
+and critical percentages. Defaults are **Low at ≤30%** and **Critical at ≤15%**
+with a gentle border pulse. HP alerts use orange and rose, mana alerts cyan and
+indigo, and moves alerts amber and orange; the pulse matches the critical color.
 Critical styling takes priority. Thresholds must satisfy
 `0 ≤ critical < warning ≤ 100`; fractional thresholds are supported. The pulse
 stops when the vital recovers or becomes unknown, and is disabled by the
@@ -70,13 +80,17 @@ device's reduced-motion preference. Text labels accompany the alert colors.
 
 **Save settings** and **Reset defaults** persist through the shared API's
 plugin/world storage. Failed saves leave applied settings unchanged and show
-feedback. Invalid stored settings use defaults without overwriting the stored
-record. Ordinary data updates preserve unfinished form edits and focus;
-successful Save/Reset synchronizes controls without replacing the widget markup.
+feedback in the settings window. Save and Reset keep the window open. Invalid
+stored settings use defaults without overwriting the stored record. Ordinary
+data updates preserve unfinished form edits and focus;
+successful Save/Reset synchronizes controls without replacing either widget's
+markup.
 
-**Refresh** explicitly requests fresh character GMCP data through API Core.
-It reports a useful failure when Core, negotiation or the connection is
-unavailable. The plugin does not automatically send refresh requests.
+The **Refresh** circular-arrow icon explicitly requests fresh character GMCP
+data through API Core.
+It reports feedback in the vitals panel, including a useful failure when Core,
+negotiation or the connection is unavailable. The plugin does not automatically
+send refresh requests.
 
 ## Writing a consumer
 
@@ -149,8 +163,9 @@ transpiler, native widgets, persistence engine or GMCP transport.
 The initial native target is MudForge **2.0.3701**. Native and live-MUD
 acceptance remain pending; follow [the separate checklist](docs/NATIVE-ACCEPTANCE.md).
 No existing worlds, maps or installed plugins were changed. Aardwolf Vitals
-has repository fixture coverage; native rendering, pulse behavior, keyboard
-interaction, disk persistence and live GMCP acceptance remain pending.
+has repository fixture coverage and standalone Chromium layout checks; native
+rendering, pulse behavior, keyboard interaction, disk persistence and live GMCP
+acceptance remain pending.
 
 `npm audit` currently reports the unpatched moderate `sprintf-js` precision
 specifier advisory through Fengari. These are development-only dependencies;
