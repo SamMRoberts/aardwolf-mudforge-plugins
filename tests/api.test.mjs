@@ -7,6 +7,58 @@ const cases = {
     assert(lib.version == "0.1.0" and type(lib.new) == "function")
     assert(not pcall(lib.new, {}))
   `,
+  'package requirements accept numeric string keys from the JavaScript runtime': `
+    local lib = freshLibrary()
+    for _, input in ipairs({
+      { "Char", "Group", "Char", "Comm", "Room", "Core" },
+      { ["1"] = "Char", ["2"] = "Group", ["3"] = "Char", ["4"] = "Comm", ["5"] = "Room", ["6"] = "Core" },
+      { ["0"] = "Char", ["1"] = "Group", ["2"] = "Char", ["3"] = "Comm", ["4"] = "Room", ["5"] = "Core" }
+    }) do
+      local names = lib.protocol.requirements(input)
+      assert(#names == 5 and table.concat(names, ",") == "Char,Comm,Core,Group,Room")
+    end
+  `,
+  'package requirements still reject named keys and unsupported values': `
+    local lib = freshLibrary()
+    assert(#lib.protocol.requirements(nil) == 0 and #lib.protocol.requirements({}) == 0)
+    for _, input in ipairs({
+      "Char", { Char = "Char" }, { [""] = "Char" }, { [" "] = "Char" },
+      { ["1x"] = "Char" }, { ["1"] = "char" }, { ["0"] = "Unknown" },
+      { ["1"] = true }, { ["1"] = {} }, { "Char", named = "Group" }
+    }) do
+      assert(not pcall(lib.protocol.requirements, input))
+    end
+  `,
+  'vitals consumers load and register with string keys from pairs': `
+    local original = libraryEnvironment
+    function libraryEnvironment()
+      local env = original()
+      env.pairs = function(value)
+        local iterator, state, key = pairs(value)
+        return function()
+          local item
+          key, item = iterator(state, key)
+          if key ~= nil then return tostring(key), item end
+        end
+      end
+      return env
+    end
+    for _, source in ipairs({ "vitals", "example" }) do
+      local world = newWorld()
+      local panel = world.loadPlugin(source, "panel", "Fixture Vitals")
+      assert(panel.widgets["panel:vitals"] and #panel.errors == 0)
+      local core = world.core()
+      world.connect(); world.packet("char.base", { name = "Fixture" })
+      world.packet("char.vitals", { hp = 50, mana = 20, moves = 10 })
+      world.packet("char.maxstats", { maxhp = 100, maxmana = 100, maxmoves = 100 })
+      assert(panel.widgets["panel:vitals"].bindings.status == "Live vitals")
+      assert(#core.errors == 0 and has(world.supports(), "Char 1"))
+      world.unload(panel)
+      assert(panel.widgets["panel:vitals"] == nil)
+      panel.enabled = true; panel.env.init()
+      assert(panel.widgets["panel:vitals"].bindings.status == "Live vitals")
+    end
+  `,
   'Core-first and consumer-first startup discover installed IDs': `
     for _, order in ipairs({ "core-first", "consumer-first" }) do
       local world = newWorld()
