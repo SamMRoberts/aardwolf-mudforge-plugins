@@ -129,6 +129,11 @@ hashes/sizes. Commit source and generated files together when making a release.
 The generator has no timestamps or network dependency and resolves paths
 relative to this repository, including when run from another directory.
 
+Builds and tests reject JavaScript reserved names in Lua bindings (parameters,
+locals, loop variables and bare function names). Names such as `package` are
+valid Lua but can fail in MudForge's JavaScript runtime; use `packageName`
+for variables while keeping protocol fields such as `data.package` unchanged.
+
 Tests check Lua 5.1 syntax and execute behavior in **Fengari's Lua 5.3 VM**
 with injected host fixtures. This verifies library logic, simulated lifecycle,
 and deterministic distribution; it does not execute MudForge's JavaScript
