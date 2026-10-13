@@ -111,26 +111,26 @@ local function bootstrap()
   negotiate()
 end
 
-local function handlePacket(package, payload)
+local function handlePacket(packageName, payload)
   if not initialized or not connected then return end
-  local data, invalid = api.protocol.normalize(package, payload)
+  local data, invalid = api.protocol.normalize(packageName, payload)
   if type(data) ~= "table" then return end
   local isState = false
-  for _, name in ipairs(api.protocol.statePackages) do if name == package then isState = true end end
+  for _, name in ipairs(api.protocol.statePackages) do if name == packageName then isState = true end end
   if isState then
-    if string.sub(package, 1, 5) == "char." then
-      local merged = api.protocol.copy(snapshots[package] or {})
+    if string.sub(packageName, 1, 5) == "char." then
+      local merged = api.protocol.copy(snapshots[packageName] or {})
       for key in pairs(invalid) do merged[key] = nil end
       for key, value in pairs(data) do merged[key] = value end
       local bounded = pcall(api.protocol.copy, merged)
       if not bounded then return end
-      snapshots[package] = merged
-    else snapshots[package] = data end
-    data = snapshots[package]
+      snapshots[packageName] = merged
+    else snapshots[packageName] = data end
+    data = snapshots[packageName]
   end
-  if package == "char.base" and not reattaching then bootstrap() end
+  if packageName == "char.base" and not reattaching then bootstrap() end
   for id in pairs(consumers) do
-    deliver(id, "update", { version = 1, package = package, payload = data })
+    deliver(id, "update", { version = 1, package = packageName, payload = data })
   end
 end
 
@@ -172,8 +172,8 @@ local function reattached()
   reattaching = true
   -- Character scalars are useful on screen reattachment. Room and Group are
   -- not restored from the client's merged cache: deleted entries may linger.
-  for _, package in ipairs(api.protocol.statePackages) do
-    if string.sub(package, 1, 5) == "char." then handlePacket(package, getGMCPData(package)) end
+  for _, packageName in ipairs(api.protocol.statePackages) do
+    if string.sub(packageName, 1, 5) == "char." then handlePacket(packageName, getGMCPData(packageName)) end
   end
   reattaching = false
 end
@@ -184,12 +184,12 @@ function init()
   initialized = true
   if not registered then
     onPluginBroadcast(receive)
-    for _, package in ipairs(api.protocol.statePackages) do
-      local name = package
+    for _, packageName in ipairs(api.protocol.statePackages) do
+      local name = packageName
       onGMCPUpdate(name, function(data) handlePacket(name, data) end)
     end
-    for _, package in ipairs(api.protocol.eventPackages) do
-      local name = package
+    for _, packageName in ipairs(api.protocol.eventPackages) do
+      local name = packageName
       onGMCPUpdate(name, function(data) handlePacket(name, data) end)
     end
     registered = true

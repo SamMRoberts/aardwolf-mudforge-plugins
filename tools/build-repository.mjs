@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import luaparse from 'luaparse';
+import { parseMudForgeLua } from './lua-compatibility.mjs';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const entries = [
@@ -12,8 +12,8 @@ const entries = [
   { kind: 'library', file: 'aardwolf-api.lua', tags: ['aardwolf', 'gmcp', 'api'] },
 ];
 
-function metadata(source, kind) {
-  const tree = luaparse.parse(source, { luaVersion: '5.1', encodingMode: 'x-user-defined' });
+function metadata(source, kind, label) {
+  const tree = parseMudForgeLua(source, label);
   const assignment = tree.body.find(node => node.type === 'AssignmentStatement'
     && node.variables.length === 1 && node.variables[0].name === kind);
   const table = assignment?.init[0];
@@ -36,7 +36,7 @@ export async function buildOutputs() {
   for (const entry of entries) {
     const folder = entry.kind === 'plugin' ? 'plugins' : 'libs';
     const bytes = await readFile(resolve(root, 'src', folder, entry.file));
-    const fields = metadata(bytes.toString('utf8'), entry.kind);
+    const fields = metadata(bytes.toString('utf8'), entry.kind, `src/${folder}/${entry.file}`);
     const identity = entry.kind === 'plugin' ? fields.id : fields.name;
     if (identities.has(identity)) throw new Error(`Duplicate identity: ${identity}`);
     identities.add(identity);

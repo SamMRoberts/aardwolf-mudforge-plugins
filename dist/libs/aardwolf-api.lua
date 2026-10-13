@@ -93,22 +93,22 @@ local function fields(data, names, numeric, invalid)
   end
 end
 
-local function normalize(package, payload)
-  if not contains(STATE, package) and not contains(EVENTS, package) then return nil, "unsupported package" end
+local function normalize(packageName, payload)
+  if not contains(STATE, packageName) and not contains(EVENTS, packageName) then return nil, "unsupported package" end
   if type(payload) ~= "table" then return nil, "payload must be a table" end
   local ok, data = pcall(copy, payload)
   if not ok then return nil, "payload is not bounded JSON-compatible data" end
   local invalid = {}
-  fields(data, NUMBER_FIELDS[package] or {}, true, invalid)
-  fields(data, TEXT_FIELDS[package] or {}, false, invalid)
-  if package == "room.info" then
+  fields(data, NUMBER_FIELDS[packageName] or {}, true, invalid)
+  fields(data, TEXT_FIELDS[packageName] or {}, false, invalid)
+  if packageName == "room.info" then
     if type(data.exits) == "table" then
       for direction, destination in pairs(data.exits) do data.exits[direction] = finite(destination) end
     else data.exits = nil end
     if type(data.coord) == "table" then
       fields(data.coord, { "id", "x", "y", "cont" }, true, {})
     else data.coord = nil end
-  elseif package == "group" then
+  elseif packageName == "group" then
     if type(data.members) == "table" then
       -- JS-origin arrays may be zero-based. Sort numeric keys explicitly so
       -- both representations produce the same ordered Lua member list.
@@ -180,9 +180,9 @@ local function storageFor(host)
   function storage.status()
     return requireHost(host, "storageStatus")()
   end
-  function storage.get(key, default)
+  function storage.get(key, defaultValue)
     local saved = requireHost(host, "loadTable")(name(key))
-    if type(saved) ~= "table" then return copy(default) end
+    if type(saved) ~= "table" then return copy(defaultValue) end
     if saved.schemaVersion ~= 1 then return nil, "unsupported storage schema" end
     if type(saved.value) == "nil" then return nil, "invalid stored value" end
     local ok, value = pcall(copy, saved.value)
@@ -335,13 +335,13 @@ function M.new(host, options)
       }
       snapshots = {}
       if session.connected then
-        for _, package in ipairs(STATE) do
-          local value = normalize(package, data.snapshots[package])
-          if type(value) == "table" then snapshots[package] = value end
+        for _, packageName in ipairs(STATE) do
+          local value = normalize(packageName, data.snapshots[packageName])
+          if type(value) == "table" then snapshots[packageName] = value end
         end
       end
       notify("session", session)
-      for _, package in ipairs(STATE) do notify(package, snapshots[package]) end
+      for _, packageName in ipairs(STATE) do notify(packageName, snapshots[packageName]) end
     elseif message == PREFIX .. "update" and session.connected then
       local value = normalize(data.package, data.payload)
       if type(value) ~= "table" then return end
@@ -373,9 +373,9 @@ function M.new(host, options)
     self.ui.cleanup()
   end
   function self.status() return copy(session) end
-  function self.get(package)
-    assert(contains(STATE, package), "get supports state packages only")
-    return copy(snapshots[package])
+  function self.get(packageName)
+    assert(contains(STATE, packageName), "get supports state packages only")
+    return copy(snapshots[packageName])
   end
   function self.on(topic, callback)
     assert(topic == "session" or contains(STATE, topic) or contains(EVENTS, topic), "unsupported topic")
