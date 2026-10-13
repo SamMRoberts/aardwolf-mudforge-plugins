@@ -31,6 +31,13 @@ package or world/profile data is included. A user-edited/file library can take
 precedence over a repository library of the same name; check the loaded copy
 when testing updates.
 
+If Vitals reports `loadPlugin(): unsupported Aardwolf package`, update the
+shared `aardwolf-api` library from `dist/libs/aardwolf-api.lua`, then reload
+API Core and Vitals. Earlier library copies rejected the numeric string keys
+returned by MudForge's `pairs()` when reading a valid `{ "Char" }` package list.
+Check for an older user-edited/file library taking precedence over the updated
+repository copy.
+
 Core discovers registered consumers in either load order. Each consuming
 plugin gets its own library instance; Core communicates with them using
 world/session-scoped messages. The API does not connect to the MUD itself.

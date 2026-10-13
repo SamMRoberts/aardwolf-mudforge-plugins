@@ -139,7 +139,9 @@ local function requirements(value)
   assert(type(value) == "table", "packages must be a list")
   local result = {}
   for key, name in pairs(value) do
-    assert(type(key) == "number" and type(name) == "string" and PACKAGES[name] == true, "unsupported Aardwolf package")
+    -- MudForge's pairs uses Object.entries, so list indexes arrive as strings.
+    local listKey = type(key) == "number" or (type(key) == "string" and string.match(key, "^%d+$") ~= nil)
+    assert(listKey and type(name) == "string" and PACKAGES[name] == true, "unsupported Aardwolf package")
     if not contains(result, name) then table.insert(result, name) end
   end
   table.sort(result)
