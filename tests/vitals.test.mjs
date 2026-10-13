@@ -158,7 +158,7 @@ const cases = {
       panel.env.cleanup(); panel.storage["aardwolf-api:preferences"] = envelope; panel.env.init()
       widget = panel.widgets["vitals-file-id:vitals"]
       assert(widget.bindings.fontFamily == "system-ui" and widget.bindings.fontSize == "13px")
-      assert(string.find(widget.bindings.feedback, "Using defaults:", 1, true))
+      assert(string.find(widget.bindings.settingsHint, "Using defaults:", 1, true))
       assert(panel.writes == 0 and panel.storage["aardwolf-api:preferences"] == envelope)
     end
   `,
@@ -187,14 +187,22 @@ const cases = {
     assert(#world.sent == sent)
     widget.events.action({ action = "refresh" })
     assert(#world.sent == sent + 1 and world.sent[#world.sent].package == "request char")
+    assert(widget.bindings.refreshHint == "Refresh vitals" and widget.bindings.feedback == nil)
+    assert(not string.find(widget.content, 'data-mud-bind="feedback"', 1, true))
     world.refuseTransport = true; widget.events.action({ action = "refresh" })
-    assert(widget.bindings.feedback == "Refresh unavailable: transport refused the request")
+    assert(widget.bindings.refreshHint == "Refresh unavailable: transport refused the request")
     assert(widget.bindings.status == "Live vitals" and #world.sent == sent + 1)
     world.disconnect(); widget.events.action({ action = "refresh" })
-    assert(widget.bindings.feedback == "Refresh unavailable: disconnected")
+    assert(widget.bindings.refreshHint == "Refresh unavailable: disconnected")
     world.connect(); widget.events.action({ action = "refresh" })
-    assert(string.find(widget.bindings.feedback, "Refresh unavailable:", 1, true))
+    assert(string.find(widget.bindings.refreshHint, "Refresh unavailable:", 1, true))
     widget.events.action({ action = "unknown" }); assert(#world.sent == sent + 1)
+    world.refuseTransport = false; world.packet("char.base", { name = "Fixture" })
+    local recoveredSent = #world.sent
+    widget.events.action({ action = "refresh" })
+    assert(#world.sent == recoveredSent + 1 and world.sent[#world.sent].package == "request char")
+    assert(widget.bindings.refreshHint == "Refresh vitals")
+    assert(widget.bindings.feedback == nil and widget.contentWrites == 1)
   `,
   'vitals clears on disconnect and Core loss, rediscovers and cleans up idempotently': `
     local world, panel, widget, core = panelWorld(); fullVitals(world, 10, 20, 30)
@@ -205,7 +213,7 @@ const cases = {
     world.packet("char.base", { name = "New" }); fullVitals(world, 80, 90, 100)
     world.unload(core)
     assert(widget.bindings.status == "Aardwolf API Core unavailable" and widget.bindings.hpValues == "? / ?")
-    widget.events.action({ action = "refresh" }); assert(string.find(widget.bindings.feedback, "Refresh unavailable:", 1, true))
+    widget.events.action({ action = "refresh" }); assert(string.find(widget.bindings.refreshHint, "Refresh unavailable:", 1, true))
     core = world.core("reloaded"); world.tick(1000); fullVitals(world, 70, 80, 90)
     assert(widget.bindings.hpValues == "70 / 100" and widget.bindings.hpLevel == "normal")
     panel.env.cleanup(); panel.env.cleanup(); assert(next(panel.widgets) == nil and #panel.events.disconnected == 0)
@@ -242,7 +250,7 @@ const cases = {
     local world, panel, widget = panelWorld(); fullVitals(world)
     local settings = openPreferences(panel, widget)
     local content, controls = settings.content, settings.vitalsPreferences
-    assert(widget.config.size.width == 640 and widget.config.size.height == 110)
+    assert(widget.config.size.width == 640 and widget.config.size.height == 90)
     assert(settings.config.size.width == 420 and settings.config.size.height == 520)
     assert(settings.config.title == "Aardwolf Vitals Settings" and settings.visible and settings.lastShowForced)
     assert(not string.find(widget.content, '<form', 1, true))
@@ -266,7 +274,7 @@ const cases = {
     settings.events.submit({ formData = form() })
     assert(settings.visible and settings.bindings.feedback == "Preferences saved." and widget.bindings.feedback == nil)
     widget.events.action({ action = "refresh" })
-    assert(widget.bindings.feedback == "Refresh requested." and settings.bindings.feedback == "Preferences saved.")
+    assert(widget.bindings.refreshHint == "Refresh vitals" and widget.bindings.feedback == nil and settings.bindings.feedback == "Preferences saved.")
     settings.events.action({ action = "reset-defaults" }); assert(settings.visible)
     panel.env.cleanup(); panel.env.cleanup(); assert(next(panel.widgets) == nil)
     panel.env.init(); assert(panel.widgets["vitals-file-id:vitals-settings"] == nil)
@@ -280,11 +288,12 @@ const cases = {
     panel.failWidgetName = "vitals-settings"
     widget.events.action({ action = "settings" })
     assert(panel.widgets["vitals-file-id:vitals-settings"] == nil)
-    assert(widget.bindings.feedback == "Settings unavailable: widget creation failed")
+    assert(widget.bindings.settingsHint == "Settings unavailable: widget creation failed")
     world.core(); world.connect(); world.packet("char.base", { name = "Fixture" }); fullVitals(world, 50, 60, 70)
     assert(widget.bindings.hpValues == "50 / 100")
     panel.failWidgetName = nil
     assert(openPreferences(panel, widget).visible)
+    assert(widget.bindings.settingsHint == "Settings" and widget.bindings.feedback == nil)
   `,
 
 };
