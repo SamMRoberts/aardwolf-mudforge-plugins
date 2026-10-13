@@ -75,10 +75,27 @@ function newWorld(sessionId)
     end
     function host.storageStatus() return context.storageState, context.storageReason end
     function host.createWidget(config)
+      if context.failWidgetName == config.name then return "" end
       world.nextWidget = world.nextWidget + 1
       local widget = id .. ":" .. config.name
       context.widgets[widget] = context.widgets[widget] or { config = config, bindings = {}, events = {}, contentWrites = 0 }
       return widget
+    end
+    function host.showWidget(widget, force)
+      local current = context.widgets[widget]
+      current.showCalls = (current.showCalls or 0) + 1
+      current.lastShowForced = force
+      if not current.userClosed or force then current.visible = true; current.userClosed = false end
+    end
+    function host.hideWidget(widget, force)
+      local current = context.widgets[widget]
+      current.visible = false
+      if force then current.userClosed = true end
+    end
+    function context.closeWidget(widget)
+      host.hideWidget(widget, true)
+      local callback = context.widgets[widget].events.close
+      if callback then callback({}) end
     end
     function host.destroyWidget(widget) context.widgets[widget] = nil end
     function host.setWidgetProperty(widget, property, value)

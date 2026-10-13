@@ -18,6 +18,12 @@ const setup = `
     world.packet("char.vitals", { hp = hp or 100, mana = mana or 100, moves = moves or 100 })
     world.packet("char.maxstats", { maxhp = 100, maxmana = 100, maxmoves = 100 })
   end
+  function openPreferences(panel, widget)
+    widget.events.action({ action = "settings" })
+    local settings = panel.widgets["vitals-file-id:vitals-settings"]
+    settings.events.luamsg({ event = "ready" })
+    return settings
+  end
   function form()
     return { fontFamily = "system-ui", fontSize = "13", fontWeight = "normal", fontStyle = "normal",
       hpWarning = "30", hpCritical = "15", manaWarning = "30", manaCritical = "15", movesWarning = "30", movesCritical = "15" }
@@ -25,16 +31,20 @@ const setup = `
 `;
 
 const cases = {
-  'vitals starts before Core and synchronizes controls after the iframe is ready': `
+  'vitals starts before Core and synchronizes settings only after their iframe is ready': `
     local world = newWorld()
     local panel = world.loadPlugin("vitals", "vitals-file-id", "Aardwolf Vitals")
     local widget = panel.widgets["vitals-file-id:vitals"]
-    assert(widget.bindings.status == "Aardwolf API Core unavailable" and widget.vitalsPreferences == nil)
-    widget.events.luamsg({ event = "unrelated" }); assert(widget.vitalsPreferences == nil)
-    widget.events.luamsg({ event = "ready" }); assert(json.decode(widget.vitalsPreferences).fontSize == 13)
+    assert(widget.bindings.status == "Aardwolf API Core unavailable")
+    assert(panel.widgets["vitals-file-id:vitals-settings"] == nil and widget.events.submit == nil)
+    widget.events.action({ action = "settings" })
+    local settings = panel.widgets["vitals-file-id:vitals-settings"]
+    assert(settings.vitalsPreferences == nil)
+    settings.events.luamsg({ event = "unrelated" }); assert(settings.vitalsPreferences == nil)
+    settings.events.luamsg({ event = "ready" }); assert(json.decode(settings.vitalsPreferences).fontSize == 13)
     world.core(); world.connect(); world.packet("char.base", { name = "Fixture" }); fullVitals(world, 20, 50, 80)
     assert(widget.bindings.hpValues == "20 / 100" and widget.bindings.hpLevel == "warning")
-    assert(#panel.broadcasts == 1 and widget.contentWrites == 1 and panel.writes == 0)
+    assert(#panel.broadcasts == 1 and widget.contentWrites == 1 and settings.contentWrites == 1 and panel.writes == 0)
   `,
   'vitals handles either packet order, numeric strings and partial updates': `
     for _, first in ipairs({ "vitals", "maxima" }) do
@@ -88,30 +98,34 @@ const cases = {
   `,
   'vitals saves independent thresholds and typography with no markup rebuild': `
     local world, panel, widget = panelWorld(); fullVitals(world, 40, 40, 40)
+    local settings = openPreferences(panel, widget)
     assert(widget.bindings.fontFamily == "system-ui" and widget.bindings.fontSize == "13px")
     local fields = form()
     fields.fontFamily, fields.fontSize, fields.fontWeight, fields.fontStyle = "SF Pro Text", "18", "bold", "italic"
     fields.hpWarning, fields.hpCritical = "60", "45"
     fields.manaWarning, fields.manaCritical = "45", "10"
-    widget.events.submit({ formData = fields })
-    assert(panel.writes == 1 and widget.bindings.feedback == "Preferences saved.")
+    settings.events.submit({ formData = fields })
+    assert(panel.writes == 1 and settings.bindings.feedback == "Preferences saved.")
     assert(widget.bindings.hpLevel == "critical" and widget.bindings.manaLevel == "warning" and widget.bindings.movesLevel == "normal")
     assert(widget.bindings.fontFamily == "'SF Pro Text'" and widget.bindings.fontSize == "18px")
     assert(widget.bindings.fontWeight == "bold" and widget.bindings.fontStyle == "italic")
-    local values = json.decode(widget.vitalsPreferences)
+    local values = json.decode(settings.vitalsPreferences)
     assert(values.fontSize == 18 and values.hpWarning == 60)
-    local controls = widget.vitalsPreferences
-    world.packet("char.vitals", { mana = 30 }); assert(widget.vitalsPreferences == controls)
+    local controls = settings.vitalsPreferences
+    world.packet("char.vitals", { mana = 30 }); assert(settings.vitalsPreferences == controls)
     assert(widget.contentWrites == 1)
     panel.env.cleanup(); panel.env.init()
     widget = panel.widgets["vitals-file-id:vitals"]
     assert(widget.bindings.fontSize == "18px" and widget.bindings.hpLevel == "critical")
-    assert(string.find(widget.content, 'value="SF Pro Text"', 1, true))
-    widget.events.luamsg({ event = "ready" })
-    assert(json.decode(widget.vitalsPreferences).fontWeight == "bold")
+    assert(panel.widgets["vitals-file-id:vitals-settings"] == nil)
+    settings = openPreferences(panel, widget)
+    assert(string.find(settings.content, 'value="SF Pro Text"', 1, true))
+    settings.events.luamsg({ event = "ready" })
+    assert(json.decode(settings.vitalsPreferences).fontWeight == "bold")
   `,
   'vitals rejects malformed, non-finite and injectable preferences before saving': `
     local world, panel, widget = panelWorld(); fullVitals(world)
+    local settings = openPreferences(panel, widget)
     for _, invalid in ipairs({
       { "fontFamily", "x';color:red" }, { "fontFamily", "<img src=x>" }, { "fontFamily", "" }, { "fontFamily", "   " },
       { "fontFamily", string.rep("a", 81) }, { "fontSize", "13.5" }, { "fontSize", "7" }, { "fontSize", "49" },
@@ -120,19 +134,19 @@ const cases = {
       { "hpCritical", "-1" }, { "hpCritical", "31" }, { "manaWarning", "" }, { "movesCritical", math.huge }
     }) do
       local fields = form(); fields[invalid[1]] = invalid[2]
-      widget.events.submit({ formData = fields })
+      settings.events.submit({ formData = fields })
       assert(panel.writes == 0 and widget.bindings.fontSize == "13px" and widget.bindings.fontFamily == "system-ui")
-      assert(widget.bindings.feedback ~= "Preferences saved." and widget.bindings.status == "Live vitals")
+      assert(settings.bindings.feedback ~= "Preferences saved." and widget.bindings.status == "Live vitals")
     end
     local missing = form(); missing.hpCritical = nil
-    widget.events.submit({ formData = missing }); assert(panel.writes == 0)
-    widget.events.submit({}); assert(panel.writes == 0)
+    settings.events.submit({ formData = missing }); assert(panel.writes == 0)
+    settings.events.submit({}); assert(panel.writes == 0)
     for _, size in ipairs({ "8", "48" }) do
       local fields = form(); fields.fontSize = size; fields.hpWarning = "100"; fields.hpCritical = "0"
-      widget.events.submit({ formData = fields }); assert(widget.bindings.fontSize == size .. "px")
+      settings.events.submit({ formData = fields }); assert(widget.bindings.fontSize == size .. "px")
     end
     local fields = form(); fields.hpWarning, fields.hpCritical = "30.5", "15.5"
-    widget.events.submit({ formData = fields }); assert(panel.writes == 3)
+    settings.events.submit({ formData = fields }); assert(panel.writes == 3)
     assert(widget.contentWrites == 1)
   `,
   'vitals falls back on malformed or future storage without overwriting it': `
@@ -150,19 +164,20 @@ const cases = {
   `,
   'vitals refused saves and resets preserve applied preferences and connection status': `
     local world, panel, widget = panelWorld(); fullVitals(world, 40, 40, 40)
+    local settings = openPreferences(panel, widget)
     local fields = form(); fields.fontSize = "20"; fields.hpWarning = "60"
-    widget.events.submit({ formData = fields }); assert(panel.writes == 1)
+    settings.events.submit({ formData = fields }); assert(panel.writes == 1)
     panel.refuseWrites = true
-    fields.fontSize = "30"; widget.events.submit({ formData = fields })
+    fields.fontSize = "30"; settings.events.submit({ formData = fields })
     assert(widget.bindings.fontSize == "20px" and widget.bindings.status == "Live vitals")
-    assert(widget.bindings.feedback == "Preferences not saved: storage refused the write")
-    widget.events.action({ action = "reset-defaults" })
+    assert(settings.bindings.feedback == "Preferences not saved: storage refused the write")
+    settings.events.action({ action = "reset-defaults" })
     assert(panel.writes == 1 and widget.bindings.fontSize == "20px" and widget.bindings.hpLevel == "warning")
     panel.refuseWrites = false; panel.storageState = "starting"
-    widget.events.action({ action = "reset-defaults" }); assert(panel.writes == 1)
-    panel.storageState = "ready"; widget.events.action({ action = "reset-defaults" })
+    settings.events.action({ action = "reset-defaults" }); assert(panel.writes == 1)
+    panel.storageState = "ready"; settings.events.action({ action = "reset-defaults" })
     assert(panel.writes == 2 and widget.bindings.fontSize == "13px" and widget.bindings.hpLevel == "normal")
-    assert(json.decode(widget.vitalsPreferences).hpWarning == 30 and widget.bindings.feedback == "Defaults restored.")
+    assert(json.decode(settings.vitalsPreferences).hpWarning == 30 and settings.bindings.feedback == "Defaults restored.")
     assert(widget.contentWrites == 1)
   `,
   'vitals refresh is explicit and reports unavailable and refused transport': `
@@ -204,13 +219,16 @@ const cases = {
   'vitals isolates data and saved preferences between sessions and the example': `
     local a, pa, wa = panelWorld("a"); local b, pb, wb = panelWorld("b")
     fullVitals(a, 10, 20, 30); fullVitals(b, 80, 90, 100)
-    local fields = form(); fields.fontSize = "22"; wa.events.submit({ formData = fields })
+    local sa = openPreferences(pa, wa); local sb = openPreferences(pb, wb)
+    local fields = form(); fields.fontSize = "22"; sa.events.submit({ formData = fields })
     assert(wb.bindings.fontSize == "13px" and pb.writes == 0)
     a.disconnect(); assert(wa.bindings.hpLevel == "unknown" and wb.bindings.hpValues == "80 / 100")
     local example = b.loadPlugin("example", "example-id", "Aardwolf API Vitals Example")
     local sample = example.widgets["example-id:vitals"]
-    wb.events.action({ action = "reset-defaults" }); assert(example.writes == 0)
-    b.unload(pb); assert(sample and example.widgets["example-id:vitals"] == sample)
+    sb.events.action({ action = "reset-defaults" }); assert(example.writes == 0)
+    assert(sb.visible and json.decode(sb.vitalsPreferences).fontSize == 13)
+    a.unload(pa); assert(next(pa.widgets) == nil and sb.visible)
+    b.unload(pb); assert(next(pb.widgets) == nil); assert(sample and example.widgets["example-id:vitals"] == sample)
   `,
   'vitals reports failed widget creation and can initialize again': `
     local world, panel, widget = panelWorld()
@@ -220,6 +238,55 @@ const cases = {
     assert(panel.errors[#panel.errors] == "Aardwolf Vitals: widget creation failed")
     panel.env.createWidget = create; panel.env.init(); assert(panel.widgets["vitals-file-id:vitals"])
   `,
+  'settings reopens one window, preserves markup and controls, and closes independently': `
+    local world, panel, widget = panelWorld(); fullVitals(world)
+    local settings = openPreferences(panel, widget)
+    local content, controls = settings.content, settings.vitalsPreferences
+    assert(widget.config.size.width == 640 and widget.config.size.height == 110)
+    assert(settings.config.size.width == 420 and settings.config.size.height == 520)
+    assert(settings.config.title == "Aardwolf Vitals Settings" and settings.visible and settings.lastShowForced)
+    assert(not string.find(widget.content, '<form', 1, true))
+    assert(string.find(widget.content, 'data-mud-action="settings"', 1, true))
+    local created = world.nextWidget
+    for i = 1, 3 do
+      panel.closeWidget("vitals-file-id:vitals-settings")
+      assert(not settings.visible and settings.userClosed)
+      widget.events.action({ action = "settings" })
+      assert(settings.visible and settings.lastShowForced)
+    end
+    assert(world.nextWidget == created and settings.contentWrites == 1 and settings.content == content)
+    fullVitals(world, 10, 20, 30)
+    assert(settings.vitalsPreferences == controls)
+    settings.events.keydown({ key = "Enter" }); assert(settings.visible)
+    settings.events.keydown({ key = "Escape" }); assert(not settings.visible)
+    widget.events.action({ action = "settings" }); assert(settings.visible)
+    settings.events.action({ action = "close-settings" }); assert(not settings.visible)
+    assert(panel.widgets["vitals-file-id:vitals"] == widget and widget.bindings.hpValues == "10 / 100")
+    widget.events.action({ action = "settings" })
+    settings.events.submit({ formData = form() })
+    assert(settings.visible and settings.bindings.feedback == "Preferences saved." and widget.bindings.feedback == nil)
+    widget.events.action({ action = "refresh" })
+    assert(widget.bindings.feedback == "Refresh requested." and settings.bindings.feedback == "Preferences saved.")
+    settings.events.action({ action = "reset-defaults" }); assert(settings.visible)
+    panel.env.cleanup(); panel.env.cleanup(); assert(next(panel.widgets) == nil)
+    panel.env.init(); assert(panel.widgets["vitals-file-id:vitals-settings"] == nil)
+    settings = openPreferences(panel, panel.widgets["vitals-file-id:vitals"])
+    assert(settings ~= nil and json.decode(settings.vitalsPreferences).fontSize == 13)
+  `,
+  'failed settings creation leaves the HUD working and can be retried': `
+    local world = newWorld()
+    local panel = world.loadPlugin("vitals", "vitals-file-id", "Aardwolf Vitals")
+    local widget = panel.widgets["vitals-file-id:vitals"]
+    panel.failWidgetName = "vitals-settings"
+    widget.events.action({ action = "settings" })
+    assert(panel.widgets["vitals-file-id:vitals-settings"] == nil)
+    assert(widget.bindings.feedback == "Settings unavailable: widget creation failed")
+    world.core(); world.connect(); world.packet("char.base", { name = "Fixture" }); fullVitals(world, 50, 60, 70)
+    assert(widget.bindings.hpValues == "50 / 100")
+    panel.failWidgetName = nil
+    assert(openPreferences(panel, widget).visible)
+  `,
+
 };
 
 for (const [name, source] of Object.entries(cases)) test(name, () => runLua(setup + source));

@@ -1,9 +1,11 @@
 plugin = {
-  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.0",
+  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.1",
   author = "Sam Roberts", description = "Responsive HP, mana and moves with configurable typography and low-vital alerts."
 }
 
-local client, widget, apiLibrary = nil, nil, nil
+local client, widget, settingsWidget, apiLibrary = nil, nil, nil, nil
+local settingsReady = false
+local openSettings
 local unsubscribers = {}
 local preferences = nil
 local stats = { "hp", "mana", "moves" }
@@ -49,8 +51,8 @@ local function validate(candidate)
   return updated
 end
 
-local function feedback(message)
-  client.ui.bind(widget, "feedback", message)
+local function feedback(message, target)
+  client.ui.bind(target or settingsWidget or widget, "feedback", message)
 end
 
 local function formValues()
@@ -65,7 +67,7 @@ end
 
 local function syncControls()
   -- Custom properties are delivered only after the iframe's ready handshake.
-  setWidgetProperty(widget, "vitalsPreferences", json.encode(formValues()))
+  if settingsReady then setWidgetProperty(settingsWidget, "vitalsPreferences", json.encode(formValues())) end
 end
 
 local function applyTypography()
@@ -145,54 +147,73 @@ end
 
 local function action(event)
   if type(event) ~= "table" then return end
-  if event.action == "reset-defaults" then persist(defaults(), "Defaults restored.")
+  if event.action == "settings" then openSettings()
   elseif event.action == "refresh" then
     local sent, reason = client.request("char")
-    feedback(sent and "Refresh requested." or ("Refresh unavailable: " .. tostring(reason)))
+    feedback(sent and "Refresh requested." or ("Refresh unavailable: " .. tostring(reason)), widget)
   end
 end
 
-local function markup()
-  local html = { [[
+local function styles()
+  return [[
 <style>
   *{box-sizing:border-box}body{margin:0;background:#101722;color:#eef3fc;font:13px system-ui;line-height:1.45}
-  main{padding:12px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  main{padding:8px}header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
   h1{font-size:1em;margin:0;font-weight:700;letter-spacing:.04em}small{color:#b5c1d6;font-size:.85em}
-  .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  .card{--accent:#6de2b0;min-width:0;background:#192333;border:1px solid #354359;border-radius:12px;padding:12px}
-  .mana{--accent:#8bb8ff}.moves{--accent:#c5a1ff}.heading,.readout{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
-  .name{font-weight:700}.state{color:var(--accent);font-size:.8em}.values{font-size:1.08em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-  .percent{color:#b5c1d6;font-size:.85em;font-variant-numeric:tabular-nums}.readout{margin:8px 0 10px}
-  .track{height:7px;background:#354359;border-radius:6px;overflow:hidden}.fill{height:100%;width:0;background:var(--accent);border-radius:6px}
-  .card[data-level="warning"]{--accent:#f5ca78;border-color:#9c7843;background:#2b261e}
-  .card[data-level="critical"]{--accent:#ffa0ad;border-color:#d87587;background:#30212d;animation:critical-pulse 2.4s ease-in-out infinite}
+  .cards{display:flex;flex-wrap:wrap;gap:10px}
+  .card{--accent:#f87171;--warning:#fb923c;--critical:#fb7185;--critical-pulse:#fb718580;min-width:0;flex:1 1 calc(9em + 6px);display:grid;grid-template-columns:minmax(0,min(3.8em,30%)) minmax(0,1fr);gap:6px;align-items:center}
+  .mana{--accent:#60a5fa;--warning:#38bdf8;--critical:#818cf8;--critical-pulse:#818cf880}
+  .moves{--accent:#facc15;--warning:#fbbf24;--critical:#fb923c;--critical-pulse:#fb923c80}
+  .heading{min-width:0;overflow-wrap:anywhere}.name{font-weight:700}.state{display:block;color:var(--accent);font-size:.7em}
+  .card[data-level="normal"] .state{display:none}
+  .track{position:relative;min-width:0;min-height:24px;background:#192333;border:1px solid #354359;border-radius:5px;overflow:hidden}
+  .fill{position:absolute;inset:0 auto 0 0;width:0;background:var(--accent);opacity:.4}
+  .readout{position:relative;z-index:1;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:2px 6px;padding:2px 5px;min-height:22px;
+    font-size:.9em;font-variant-numeric:tabular-nums;text-align:center;text-shadow:0 1px 2px #101722}
+  .values{min-width:0;overflow-wrap:anywhere}.percent{font-size:.85em;white-space:nowrap}
+  .card[data-level="warning"]{--accent:var(--warning)}.card[data-level="warning"] .track{border-color:var(--accent)}
+  .card[data-level="critical"]{--accent:var(--critical)}.card[data-level="critical"] .track{border-color:var(--accent);animation:critical-pulse 2.4s ease-in-out infinite}
   .card[data-level="unknown"]{--accent:#b5c1d6}
-  @keyframes critical-pulse{0%,100%{box-shadow:0 0 0 0 #d8758700}50%{box-shadow:0 0 0 3px #d875874d}}
-  @media(prefers-reduced-motion:reduce){.card[data-level="critical"]{animation:none}}
-  @media(max-width:480px){.cards{grid-template-columns:1fr}}
-  details{margin-top:12px;border-top:1px solid #354359;padding-top:8px}summary{cursor:pointer;color:#c9d4e6}
-  form{margin-top:10px}.font-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  @keyframes critical-pulse{0%,100%{box-shadow:inset 0 0 0 0 transparent}50%{box-shadow:inset 0 0 0 2px var(--critical-pulse)}}
+  @media(prefers-reduced-motion:reduce){.card[data-level="critical"] .track{animation:none}}
+  @media(max-width:480px){.card{flex-basis:100%}}
+  .font-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   label{display:flex;flex-direction:column;gap:4px;color:#c9d4e6;font-size:.9em}
   input,select,button{font:inherit;color:inherit;border:1px solid #4a5b74;border-radius:6px;background:#1d2a3d;padding:5px 8px}
   input,select{width:100%;min-width:0}button{cursor:pointer}button:hover{background:#293b55}
-  :focus-visible{outline:2px solid #8bb8ff;outline-offset:3px}fieldset{border:1px solid #354359;border-radius:8px;margin:10px 0;padding:8px}
+  .toolbar{display:flex;flex-wrap:wrap;max-width:100%;gap:5px}
+  .toolbar button{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;flex:none;line-height:1}
+  .toolbar .icon{font:18px system-ui}
+  :focus-visible{outline:2px solid #8bb8ff;outline-offset:2px}fieldset{min-width:0;border:1px solid #354359;border-radius:8px;margin:10px 0;padding:8px}
   legend{color:#c9d4e6;font-size:.9em}.thresholds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .actions{display:flex;gap:8px;flex-wrap:wrap}.feedback{font-size:.85em;color:#c9d4e6;margin:8px 0 0;overflow-wrap:anywhere}
-  .feedback:empty{display:none}@media(max-width:260px){.font-settings,.thresholds{grid-template-columns:1fr}header{flex-wrap:wrap}}
+  .feedback:empty{display:none}@media(max-width:260px){.font-settings,.thresholds{grid-template-columns:1fr}}
 </style>
+]]
+end
+
+local function markup()
+  local html = { styles(), [[
 <main data-mud-bind-style="font-family:fontFamily;font-size:fontSize;font-weight:fontWeight;font-style:fontStyle">
   <header><div><h1>Vitals</h1><small data-mud-bind="status" role="status">Waiting for Core</small></div>
-    <button type="button" data-mud-action="refresh" aria-label="Refresh vitals">Refresh</button></header>
+    <div class="toolbar"><button type="button" data-mud-action="settings" aria-label="Open vitals settings" title="Settings"><span class="icon" aria-hidden="true">&#9881;&#65038;</span></button>
+    <button type="button" data-mud-action="refresh" aria-label="Refresh vitals" title="Refresh"><span class="icon" aria-hidden="true">&#8635;</span></button></div></header>
   <div class="cards">
 ]] }
   for _, stat in ipairs(stats) do
     table.insert(html, '<section class="card ' .. stat .. '" data-level="unknown" data-mud-bind-attr="data-level:' .. stat .. 'Level;aria-label:' .. stat .. 'Description">'
       .. '<div class="heading"><span class="name">' .. labels[stat] .. '</span><span class="state" data-mud-bind="' .. stat .. 'State">Waiting</span></div>'
-      .. '<div class="readout"><span class="values" data-mud-bind="' .. stat .. 'Values">? / ?</span><span class="percent" data-mud-bind="' .. stat .. 'Percent">--</span></div>'
-      .. '<div class="track" aria-hidden="true"><div class="fill" data-mud-bind-style="width:' .. stat .. 'Width"></div></div></section>')
+      .. '<div class="track"><div class="fill" aria-hidden="true" data-mud-bind-style="width:' .. stat .. 'Width"></div>'
+      .. '<div class="readout"><span class="values" data-mud-bind="' .. stat .. 'Values">? / ?</span><span class="percent" data-mud-bind="' .. stat .. 'Percent">--</span></div></div></section>')
   end
+  table.insert(html, '</div><p class="feedback" data-mud-bind="feedback" role="status"></p></main>')
+  return table.concat(html)
+end
+
+local function settingsMarkup()
+  local html = { styles(), '<main><header><h1>Vitals settings</h1><button type="button" data-mud-action="close-settings">Close</button></header>' }
   local values = formValues()
-  table.insert(html, [[</div><details><summary>Settings</summary><form id="preferences"><div class="font-settings">]])
+  table.insert(html, [[<form id="preferences"><div class="font-settings">]])
   table.insert(html, '<label>Font family<input name="fontFamily" maxlength="80" required value="' .. apiLibrary.escape(values.fontFamily) .. '"></label>')
   table.insert(html, '<label>Font size (px)<input name="fontSize" type="number" min="8" max="48" step="1" required value="' .. tostring(values.fontSize) .. '"></label>')
   for _, choice in ipairs({ { name = "fontWeight", label = "Weight", other = "bold" }, { name = "fontStyle", label = "Style", other = "italic" } }) do
@@ -213,7 +234,7 @@ local function markup()
   end
   table.insert(html, [[
   <div class="actions"><button type="submit">Save settings</button><button type="button" data-mud-action="reset-defaults">Reset defaults</button></div>
-  </form></details><p class="feedback" data-mud-bind="feedback" role="status"></p>
+  </form><p class="feedback" data-mud-bind="feedback" role="status"></p>
 </main>
 <script>
   mudforge.onProperty("vitalsPreferences", function(encoded) {
@@ -228,6 +249,33 @@ local function markup()
 </script>
 ]])
   return table.concat(html)
+end
+
+openSettings = function()
+  if type(settingsWidget) == "string" then showWidget(settingsWidget, true); return end
+  local failure
+  settingsWidget, failure = client.ui.create({ type = "html", name = "vitals-settings", title = "Aardwolf Vitals Settings",
+    position = { x = 120, y = 160 }, size = { width = 420, height = 520 } })
+  if type(settingsWidget) ~= "string" then
+    feedback("Settings unavailable: " .. tostring(failure), widget)
+    return
+  end
+  settingsReady = false
+  client.ui.on(settingsWidget, "submit", savePreferences)
+  client.ui.on(settingsWidget, "action", function(event)
+    if type(event) ~= "table" then return end
+    if event.action == "reset-defaults" then persist(defaults(), "Defaults restored.")
+    elseif event.action == "close-settings" then hideWidget(settingsWidget, true) end
+  end)
+  client.ui.on(settingsWidget, "keydown", function(event)
+    if type(event) == "table" and event.key == "Escape" then hideWidget(settingsWidget, true) end
+  end)
+  client.ui.on(settingsWidget, "luamsg", function(event)
+    if type(event) == "table" and event.event == "ready" then settingsReady = true; syncControls() end
+  end)
+  client.ui.content(settingsWidget, settingsMarkup())
+  -- This is an explicit user request, including when saved visibility was closed.
+  showWidget(settingsWidget, true)
 end
 
 function init()
@@ -247,17 +295,13 @@ function init()
   if updated then preferences = updated end
   local failure
   widget, failure = client.ui.create({ type = "html", name = "vitals", title = "Aardwolf Vitals",
-    position = { x = 80, y = 100 }, size = { width = 640, height = 190 } })
+    position = { x = 80, y = 100 }, size = { width = 640, height = 110 } })
   if type(widget) ~= "string" then
     echo("Aardwolf Vitals: " .. tostring(failure))
     client.stop(); client, apiLibrary, preferences = nil, nil, nil
     return
   end
-  client.ui.on(widget, "submit", savePreferences)
   client.ui.on(widget, "action", action)
-  client.ui.on(widget, "luamsg", function(event)
-    if type(event) == "table" and event.event == "ready" then syncControls() end
-  end)
   client.ui.content(widget, markup())
   applyTypography()
   if not updated then feedback("Using defaults: " .. tostring(reason or problem)) end
@@ -273,5 +317,6 @@ function cleanup()
   for _, unsubscribe in ipairs(unsubscribers) do unsubscribe() end
   unsubscribers = {}
   client.stop()
-  client, widget, apiLibrary, preferences = nil, nil, nil, nil
+  client, widget, settingsWidget, apiLibrary, preferences = nil, nil, nil, nil, nil
+  settingsReady = false
 end
