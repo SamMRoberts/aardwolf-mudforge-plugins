@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "Aardwolf MudForge Plugins",
-  "description": "Shared Aardwolf API and example plugins for MudForge.",
+  "description": "Shared Aardwolf API and plugins for MudForge.",
   "plugins": [
     {
       "id": "aardwolf-api-core",
@@ -35,6 +35,23 @@
       "downloadUrl": "dist/plugins/aardwolf-api-vitals-example.lua",
       "sha256": "06621760bbea7d9e0b1bda9523fcf1f919e1db59322f37f9d8c88ca85058a96c",
       "size": 5933,
+      "format": "lua"
+    },
+    {
+      "id": "aardwolf-vitals",
+      "name": "Aardwolf Vitals",
+      "version": "0.1.0",
+      "author": "Sam Roberts",
+      "description": "Responsive HP, mana and moves with configurable typography and low-vital alerts.",
+      "category": "widgets",
+      "tags": [
+        "aardwolf",
+        "gmcp",
+        "vitals"
+      ],
+      "downloadUrl": "dist/plugins/aardwolf-vitals.lua",
+      "sha256": "b9c53fbd120e3cd33d56f43c33e12e9f00c51d815ca3f32ed47578750f9670a7",
+      "size": 14922,
       "format": "lua"
     }
   ],
