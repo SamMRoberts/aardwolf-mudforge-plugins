@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.1",
+  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.2",
   author = "Sam Roberts", description = "Responsive HP, mana and moves with configurable typography and low-vital alerts."
 }
 
@@ -52,7 +52,11 @@ local function validate(candidate)
 end
 
 local function feedback(message, target)
-  client.ui.bind(target or settingsWidget or widget, "feedback", message)
+  if target == widget or type(settingsWidget) ~= "string" then
+    client.ui.bind(widget, "settingsHint", message)
+  else
+    client.ui.bind(settingsWidget, "feedback", message)
+  end
 end
 
 local function formValues()
@@ -150,7 +154,7 @@ local function action(event)
   if event.action == "settings" then openSettings()
   elseif event.action == "refresh" then
     local sent, reason = client.request("char")
-    feedback(sent and "Refresh requested." or ("Refresh unavailable: " .. tostring(reason)), widget)
+    client.ui.bind(widget, "refreshHint", sent and "Refresh vitals" or ("Refresh unavailable: " .. tostring(reason)))
   end
 end
 
@@ -160,6 +164,10 @@ local function styles()
   *{box-sizing:border-box}body{margin:0;background:#101722;color:#eef3fc;font:13px system-ui;line-height:1.45}
   main{padding:8px}header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
   h1{font-size:1em;margin:0;font-weight:700;letter-spacing:.04em}small{color:#b5c1d6;font-size:.85em}
+  .hud{padding:6px}.hud header{gap:6px;margin-bottom:4px;flex-wrap:nowrap}
+  .header-title{display:flex;align-items:baseline;gap:6px;min-width:0;flex:1}
+  .header-title h1{font-size:.95em;flex:none;max-width:100%;overflow-wrap:anywhere}
+  .header-title small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .cards{display:flex;flex-wrap:wrap;gap:10px}
   .card{--accent:#f87171;--warning:#fb923c;--critical:#fb7185;--critical-pulse:#fb718580;min-width:0;flex:1 1 calc(9em + 6px);display:grid;grid-template-columns:minmax(0,min(3.8em,30%)) minmax(0,1fr);gap:6px;align-items:center}
   .mana{--accent:#60a5fa;--warning:#38bdf8;--critical:#818cf8;--critical-pulse:#818cf880}
@@ -194,10 +202,10 @@ end
 
 local function markup()
   local html = { styles(), [[
-<main data-mud-bind-style="font-family:fontFamily;font-size:fontSize;font-weight:fontWeight;font-style:fontStyle">
-  <header><div><h1>Vitals</h1><small data-mud-bind="status" role="status">Waiting for Core</small></div>
-    <div class="toolbar"><button type="button" data-mud-action="settings" aria-label="Open vitals settings" title="Settings"><span class="icon" aria-hidden="true">&#9881;&#65038;</span></button>
-    <button type="button" data-mud-action="refresh" aria-label="Refresh vitals" title="Refresh"><span class="icon" aria-hidden="true">&#8635;</span></button></div></header>
+<main class="hud" data-mud-bind-style="font-family:fontFamily;font-size:fontSize;font-weight:fontWeight;font-style:fontStyle">
+  <header><div class="header-title"><h1>Vitals</h1><small data-mud-bind="status" data-mud-bind-attr="title:status" role="status">Waiting for Core</small></div>
+    <div class="toolbar"><button type="button" data-mud-action="settings" aria-label="Open vitals settings" title="Settings" data-mud-bind-attr="title:settingsHint"><span class="icon" aria-hidden="true">&#9881;&#65038;</span></button>
+    <button type="button" data-mud-action="refresh" aria-label="Refresh vitals" title="Refresh" data-mud-bind-attr="title:refreshHint"><span class="icon" aria-hidden="true">&#8635;</span></button></div></header>
   <div class="cards">
 ]] }
   for _, stat in ipairs(stats) do
@@ -206,7 +214,7 @@ local function markup()
       .. '<div class="track"><div class="fill" aria-hidden="true" data-mud-bind-style="width:' .. stat .. 'Width"></div>'
       .. '<div class="readout"><span class="values" data-mud-bind="' .. stat .. 'Values">? / ?</span><span class="percent" data-mud-bind="' .. stat .. 'Percent">--</span></div></div></section>')
   end
-  table.insert(html, '</div><p class="feedback" data-mud-bind="feedback" role="status"></p></main>')
+  table.insert(html, '</div></main>')
   return table.concat(html)
 end
 
@@ -252,7 +260,11 @@ local function settingsMarkup()
 end
 
 openSettings = function()
-  if type(settingsWidget) == "string" then showWidget(settingsWidget, true); return end
+  if type(settingsWidget) == "string" then
+    client.ui.bind(widget, "settingsHint", "Settings")
+    showWidget(settingsWidget, true)
+    return
+  end
   local failure
   settingsWidget, failure = client.ui.create({ type = "html", name = "vitals-settings", title = "Aardwolf Vitals Settings",
     position = { x = 120, y = 160 }, size = { width = 420, height = 520 } })
@@ -274,6 +286,7 @@ openSettings = function()
     if type(event) == "table" and event.event == "ready" then settingsReady = true; syncControls() end
   end)
   client.ui.content(settingsWidget, settingsMarkup())
+  client.ui.bind(widget, "settingsHint", "Settings")
   -- This is an explicit user request, including when saved visibility was closed.
   showWidget(settingsWidget, true)
 end
@@ -295,7 +308,7 @@ function init()
   if updated then preferences = updated end
   local failure
   widget, failure = client.ui.create({ type = "html", name = "vitals", title = "Aardwolf Vitals",
-    position = { x = 80, y = 100 }, size = { width = 640, height = 110 } })
+    position = { x = 80, y = 100 }, size = { width = 640, height = 90 } })
   if type(widget) ~= "string" then
     echo("Aardwolf Vitals: " .. tostring(failure))
     client.stop(); client, apiLibrary, preferences = nil, nil, nil

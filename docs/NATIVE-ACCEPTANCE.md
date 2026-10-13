@@ -71,9 +71,10 @@ layout/editing. These use the plugin's generated HTML with synthetic bindings;
 they do not test native iframe sanitization or widget message delivery.
 This checklist requires separate authorization for disposable native or live testing.
 
-- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.1 in a
+- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.2 in a
   disposable world. Verify one compact horizontal strip with left labels and
-  overlaid numeric readouts.
+  overlaid numeric readouts, status beside the title, and no message area below
+  the bars.
 - Resize above/below 480 px, open the floating Settings window and try large
   fonts. Expect readable wrapping, accessible controls, vertical scrolling and
   preserved geometry.
@@ -85,6 +86,8 @@ This checklist requires separate authorization for disposable native or live tes
   pulse and recovery to normal. Enable OS
   reduced motion and verify the pulse stops.
 - Navigate and operate Refresh, Settings, Close, Save and Reset using the keyboard.
+  Confirm Refresh failures appear in its hover text and successful refreshes
+  add no message area below the bars.
   Close settings with Escape and ×; reopen repeatedly and confirm one window,
   intact unfinished edits, and continued vitals updates. Save/Reset stays open.
   Confirm native action/submit payloads and the iframe ready/property handshake.

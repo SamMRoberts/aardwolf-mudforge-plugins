@@ -44,12 +44,13 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Vitals
 
-Aardwolf Vitals **0.1.1** shows **HP, mana and moves** side by side, with labels
-to the left and current/max values plus percentages over each bar. Bars are
+Aardwolf Vitals **0.1.2** shows **HP, mana and moves** side by side, with labels
+to the left and current/max values plus percentages over each bar. The compact
+header places the connection/data status beside the Vitals title. Bars are
 24 px tall at the default font size and grow for larger fonts or wrapped values.
 The panel stacks the bars below 480 px width; larger fonts also wrap the bars
 as needed. MudForge owns saved placement,
-size and visibility; existing geometry is preserved. Initial size is 640 × 110 px.
+size and visibility; existing geometry is preserved. Initial size is 640 × 90 px.
 
 Current values come from `char.vitals`; maxima come from `char.maxstats`
 (`maxhp`, `maxmana`, `maxmoves`), as documented in the
@@ -88,9 +89,9 @@ markup.
 
 The **Refresh** circular-arrow icon explicitly requests fresh character GMCP
 data through API Core.
-It reports feedback in the vitals panel, including a useful failure when Core,
-negotiation or the connection is unavailable. The plugin does not automatically
-send refresh requests.
+Refresh sends no message below the bars. If Core, negotiation or the connection
+is unavailable, the reason appears in the Refresh icon's hover text. The plugin
+does not automatically send refresh requests.
 
 ## Writing a consumer
 
