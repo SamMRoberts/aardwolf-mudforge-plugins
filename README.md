@@ -1,14 +1,15 @@
 # aardwolf-mudforge-plugins
 
-A shared Lua API for Aardwolf plugins in [MudForge](https://mudforge.org/).
+A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
 Version **0.1.0** provides a session Core, an injected library facade, storage
-and widget helpers, and a small reactive vitals example.
+and widget helpers, a small reactive vitals example, and a configurable vitals HUD.
 
 | Component | Purpose |
 | --- | --- |
 | `aardwolf-api` library | Data subscriptions, snapshots, refresh requests, local persistence and consumer-owned UI |
 | Aardwolf API Core | One GMCP negotiation owner and one authoritative state cache per session |
 | Aardwolf API Vitals Example | HP/mana/moves bindings, an explicit refresh button and saved font-size preferences |
+| Aardwolf Vitals | Horizontal HP/mana/moves cards, configurable typography and independent low-vital alerts |
 
 ## Installation
 
@@ -20,9 +21,10 @@ have **not been published or installed** by this scaffold.
 2. Disable any other Aardwolf GMCP negotiation owner, including **Aardwolf
    Core** / `aw-core` / `aardwolf-core`, in the target world.
 3. Install and enable `dist/plugins/aardwolf-api-core.lua` as a plugin.
-4. Optionally install `dist/plugins/aardwolf-api-vitals-example.lua`.
+4. Install `dist/plugins/aardwolf-vitals.lua` for the configurable vitals HUD.
+   The development example `dist/plugins/aardwolf-api-vitals-example.lua` remains optional.
 
-With these files hosted, the root `plugins.json` publishes both plugin and
+With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
 then install the library and plugins from their respective tabs. No `.mfp`
 package or world/profile data is included. A user-edited/file library can take
@@ -32,6 +34,42 @@ when testing updates.
 Core discovers registered consumers in either load order. Each consuming
 plugin gets its own library instance; Core communicates with them using
 world/session-scoped messages. The API does not connect to the MUD itself.
+
+## Aardwolf Vitals
+
+The panel shows **HP, mana and moves** side by side, with current/max values,
+percentages and progress bars. It stacks the cards below 480 px panel width;
+settings remain scrollable within the panel. MudForge owns saved placement,
+size and visibility. Default size is 640 × 190 px.
+
+Current values come from `char.vitals`; maxima come from `char.maxstats`
+(`maxhp`, `maxmana`, `maxmoves`), as documented in the
+[Aardwolf GMCP reference](https://www.aardwolf.com/wiki/index.php/Clients/GMCP).
+Missing or invalid values display `?`, and missing/nonpositive maxima suppress
+percentage alerts. Bars clamp to 0–100% without changing the displayed server
+numbers. Disconnect or Core unavailability clears the display.
+
+Open **Settings** to choose a plain font family name (for example `system-ui`,
+`Menlo` or `SF Pro Text`), an integer size from 8–48 px, normal/bold weight, and
+normal/italic style. Fonts use those available on the device; no font files are
+downloaded. Defaults are `system-ui`, 13 px, normal weight and style.
+
+Each vital has independent warning and critical percentages. Defaults are
+**Low at ≤30%** (amber) and **Critical at ≤15%** (red with a gentle border pulse).
+Critical styling takes priority. Thresholds must satisfy
+`0 ≤ critical < warning ≤ 100`; fractional thresholds are supported. The pulse
+stops when the vital recovers or becomes unknown, and is disabled by the
+device's reduced-motion preference. Text labels accompany the alert colors.
+
+**Save settings** and **Reset defaults** persist through the shared API's
+plugin/world storage. Failed saves leave applied settings unchanged and show
+feedback. Invalid stored settings use defaults without overwriting the stored
+record. Ordinary data updates preserve unfinished form edits and focus;
+successful Save/Reset synchronizes controls without replacing the widget markup.
+
+**Refresh** explicitly requests fresh character GMCP data through API Core.
+It reports a useful failure when Core, negotiation or the connection is
+unavailable. The plugin does not automatically send refresh requests.
 
 ## Writing a consumer
 
@@ -98,7 +136,9 @@ transpiler, native widgets, persistence engine or GMCP transport.
 
 The initial native target is MudForge **2.0.3701**. Native and live-MUD
 acceptance remain pending; follow [the separate checklist](docs/NATIVE-ACCEPTANCE.md).
-No existing worlds, maps or plugins were changed.
+No existing worlds, maps or installed plugins were changed. Aardwolf Vitals
+has repository fixture coverage; native rendering, pulse behavior, keyboard
+interaction, disk persistence and live GMCP acceptance remain pending.
 
 `npm audit` currently reports the unpatched moderate `sprintf-js` precision
 specifier advisory through Fengari. These are development-only dependencies;

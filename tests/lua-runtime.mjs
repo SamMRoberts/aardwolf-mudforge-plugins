@@ -66,6 +66,7 @@ export function runLua(source) {
       'aardwolf-api': 'src/libs/aardwolf-api.lua',
       core: 'src/plugins/aardwolf-api-core.lua',
       example: 'src/plugins/aardwolf-api-vitals-example.lua',
+      vitals: 'src/plugins/aardwolf-vitals.lua',
     };
     if (!files[name]) return lauxlib.luaL_error(state, to_luastring('unknown fixture source'));
     const code = readFileSync(resolve(root, files[name]), 'utf8');

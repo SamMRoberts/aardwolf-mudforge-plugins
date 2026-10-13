@@ -8,6 +8,7 @@ export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const entries = [
   { kind: 'plugin', file: 'aardwolf-api-core.lua', category: 'utilities', tags: ['aardwolf', 'gmcp', 'core'] },
   { kind: 'plugin', file: 'aardwolf-api-vitals-example.lua', category: 'development', tags: ['aardwolf', 'example', 'vitals'] },
+  { kind: 'plugin', file: 'aardwolf-vitals.lua', category: 'widgets', tags: ['aardwolf', 'gmcp', 'vitals'] },
   { kind: 'library', file: 'aardwolf-api.lua', tags: ['aardwolf', 'gmcp', 'api'] },
 ];
 
@@ -29,7 +30,7 @@ function metadata(source, kind) {
 }
 
 export async function buildOutputs() {
-  const catalog = { schemaVersion: 1, name: 'Aardwolf MudForge Plugins', description: 'Shared Aardwolf API and example plugins for MudForge.', plugins: [], libraries: [] };
+  const catalog = { schemaVersion: 1, name: 'Aardwolf MudForge Plugins', description: 'Shared Aardwolf API and plugins for MudForge.', plugins: [], libraries: [] };
   const outputs = new Map();
   const identities = new Set();
   for (const entry of entries) {
