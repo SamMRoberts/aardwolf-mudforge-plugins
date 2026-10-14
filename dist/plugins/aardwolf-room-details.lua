@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.1.2",
+  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.2.0",
   author = "Sam Roberts", description = "Formatted, selectable room characters and objects in a compact dockable panel."
 }
 
@@ -12,7 +12,8 @@ local pending, pendingAuto, requiredPrompt, promptSerial = false, false, 0, 0
 local lastActivity, lastLook, lastPrompt, promptClosed = 0, -1000, -1000, true
 local provisionalPrompt = nil
 local inFlight, ownSend, previousState, combatPrompt = false, false, nil, 0
-local revision, lifetime, issue, sgr = 0, 0, nil, {}
+local revision, lifetime, faults, sgr = 0, 0, {}, {}
+local lastPublished = nil
 local publish, schedule, synchronize
 local OPEN = { ["{roomchars}"] = "chars", ["{roomobjs}"] = "objs" }
 local CLOSE = { ["{/roomchars}"] = "chars", ["{/roomobjs}"] = "objs" }
@@ -61,24 +62,55 @@ local function terminalFont()
   return { family = value.family, size = value.size, weight = terminal.weight or "normal" }
 end
 
+local function waitingReason()
+  local state = (client.get("char.status") or {}).state
+  if state == 9 then return "Character is sleeping; wake to refresh the room" end
+  if state == 7 then return "Waiting for the pager to close" end
+  if state == 8 then return "Waiting for combat to end" end
+  if state ~= 3 then return "Waiting for an active character" end
+  if capture then return "Waiting for room output to finish" end
+  if client.spells.status().refreshing then return "Waiting for Spells collection to finish" end
+  if pending and promptSerial < requiredPrompt then return "Waiting for the next room prompt" end
+  return nil
+end
+
 local function statusText()
-  if issue then return issue end
+  for _, key in ipairs({ "panel", "setup", "send", "timer", "preference", "response" }) do
+    if faults[key] then return faults[key] end
+  end
+  for _, kind in ipairs({ "chars", "objs" }) do
+    if snapshots[kind] and snapshots[kind].error then return snapshots[kind].error end
+  end
   if not connected() then return "Waiting for Aardwolf API Core and a connection" end
   if not character then return "Waiting for login" end
   if not font or type(parseAnsiText) ~= "function" then return "Formatting API unavailable; room output stays in console" end
-  if not configured then return "Waiting to enable room tags" end
   if inFlight then return "Refreshing room..." end
-  if pending then return "Room refresh queued" end
+  if not configured or pending then
+    return waitingReason() or (configured and "Room refresh queued" or "Waiting to enable room tags")
+  end
   return ""
 end
 
 publish = function()
   if widget and ready then
+    local status = statusText()
+    local statusVisible = status ~= "" and status ~= "Refreshing room..." and status ~= "Room refresh queued"
+    local disabled = pending or inFlight or not connected() or character == nil
+    local hint = status ~= "" and status or (waitingReason() or "Refresh room")
+    local signature = { snapshots.chars and snapshots.chars.revision or 0, snapshots.objs and snapshots.objs.revision or 0,
+      selection and selection.kind or "", selection and selection.revision or 0, selection and selection.index or 0,
+      automatic, status, statusVisible, disabled, inFlight, pending, hint, roomNumber or 0, character or "",
+      font and font.family or "", font and font.size or 0, font and font.weight or "" }
+    local changed = lastPublished == nil
+    for index, value in ipairs(signature) do if not lastPublished or lastPublished[index] ~= value then changed = true end end
+    if not changed then return end
     local ok = pcall(setWidgetProperty, widget, "roomDetails", json.encode({
       chars = snapshots.chars, objs = snapshots.objs, selection = selection,
-      automatic = automatic, status = statusText(), font = font
+      automatic = automatic, status = status, font = font, statusVisible = statusVisible,
+      refreshDisabled = disabled, refreshBusy = inFlight, refreshPending = pending, refreshHint = hint
     }))
-    if not ok then ready = false; issue = "Panel update failed; room output stays in console" end
+    if ok then lastPublished = signature
+    else ready = false; faults.panel = "Panel update failed; room output stays in console" end
   end
 end
 
@@ -175,16 +207,34 @@ local function formatted(raw, clean, prefix)
   return { text = clean, runs = runs }
 end
 
+local function sameRows(previous, rows, incomplete)
+  if not previous or previous.incomplete ~= (incomplete ~= nil) or previous.error ~= incomplete
+    or #previous.rows ~= #rows then return false end
+  for index, row in ipairs(rows) do
+    local saved = previous.rows[index]
+    if saved.text ~= row.text or #saved.runs ~= #row.runs then return false end
+    for offset, run in ipairs(row.runs) do
+      for _, key in ipairs({ "text", "color", "background", "italic", "underline" }) do
+        if saved.runs[offset][key] ~= run[key] then return false end
+      end
+    end
+  end
+  return true
+end
+
 local function finishCapture(incomplete)
   if not capture then return end
   stopTimer(captureTimer); captureTimer = nil
   local current = capture
   capture = nil
-  revision = revision + 1
-  local snapshot = { revision = revision, rows = current.rows, incomplete = incomplete ~= nil }
+  local snapshot = snapshots[current.kind]
+  if not sameRows(snapshot, current.rows, incomplete) then
+    revision = revision + 1
+    snapshot = { revision = revision, rows = current.rows, incomplete = incomplete ~= nil, error = incomplete }
+    if selection and selection.kind == current.kind then selection = nil end
+  end
   snapshots[current.kind], cycle[current.kind] = snapshot, snapshot
-  if selection and selection.kind == current.kind then selection = nil end
-  if incomplete then issue = incomplete end
+  if not incomplete then faults.response = nil end
   publish()
   schedule()
 end
@@ -200,7 +250,7 @@ local function resetSession()
   cancelWork()
   snapshots, cycle, selection, sgr = {}, {}, nil, {}
   character, roomNumber, previousState = nil, nil, nil
-  configured, setupAttempted, issue = false, false, nil
+  configured, setupAttempted, faults, lastPublished = false, false, {}, nil
   promptSerial, requiredPrompt, combatPrompt = 0, 0, 0
   provisionalPrompt = nil
   lastLook, lastActivity, lastPrompt, promptClosed = -1000, getCurrentTime(), -1000, true
@@ -212,11 +262,12 @@ local function sendFixed(command)
   local ok, accepted = pcall(send, command)
   ownSend = false
   if not ok or accepted == false then
-    issue = "Could not send " .. command .. "; use Refresh to try again"
+    faults[command == "look" and "send" or "setup"] = "Could not send " .. command .. "; use Refresh to try again"
     pending, pendingAuto = false, false
     publish()
     return false
   end
+  faults[command == "look" and "send" or "setup"] = nil
   return true
 end
 
@@ -233,16 +284,17 @@ local function runRefresh()
     configured, pending, pendingAuto, requiredPrompt = true, true, false, 0
   end
   if not configured or not pending or promptSerial < requiredPrompt then return end
-  pending, pendingAuto, inFlight, issue = false, false, true, nil
+  pending, pendingAuto, inFlight = false, false, true
   lastLook = getCurrentTime()
   responseTimer = timer(5000, function()
     responseTimer, inFlight, pending, pendingAuto = nil, false, false, false
-    issue = "Room response timed out; use Refresh to try again"
+    faults.response = "Room response timed out; use Refresh to try again"
     publish()
   end)
   if not responseTimer then
-    inFlight = false; issue = "Refresh timer unavailable; use Refresh to try again"; publish(); return
+    inFlight = false; faults.timer = "Refresh timer unavailable; use Refresh to try again"; publish(); return
   end
+  faults.timer = nil
   if not sendFixed("look") then stopTimer(responseTimer); responseTimer, inFlight = nil, false end
   publish()
 end
@@ -259,8 +311,8 @@ schedule = function()
   end)
   if not refreshTimer then
     setupAttempted, pending, pendingAuto = true, false, false
-    issue = "Refresh timer unavailable; use Refresh to try again"; publish()
-  end
+    faults.timer = "Refresh timer unavailable; use Refresh to try again"; publish()
+  else faults.timer = nil end
 end
 
 local function requestLook(isAutomatic, boundary)
@@ -302,6 +354,15 @@ synchronize = function()
   if room and room ~= roomNumber then
     local preserve = not promptClosed or getCurrentTime() - lastPrompt <= 300
     snapshots = preserve and { chars = cycle.chars, objs = cycle.objs } or {}
+    -- Even identical descriptions in a different room are new selectable rows.
+    for _, kind in ipairs({ "chars", "objs" }) do
+      local snapshot = snapshots[kind]
+      if snapshot then
+        revision = revision + 1
+        snapshots[kind] = { revision = revision, rows = snapshot.rows, incomplete = snapshot.incomplete, error = snapshot.error }
+        cycle[kind] = snapshots[kind]
+      end
+    end
     roomNumber, selection = room, nil
   end
   updateFont(); schedule(); publish()
@@ -357,7 +418,7 @@ local function lineBoundary(event)
     if event.provisional then provisionalPrompt = event.clean end
     if not promptClosed then promptSerial = promptSerial + 1 end
     promptClosed, lastPrompt = true, getCurrentTime()
-    if inFlight then stopTimer(responseTimer); responseTimer, inFlight = nil, false end
+    if inFlight then stopTimer(responseTimer); responseTimer, inFlight, faults.response = nil, false, nil end
     schedule(); publish()
   end
 end
@@ -379,7 +440,6 @@ local function command(argument)
   if text == "show" then showWidget(widget, true); updateFont(); publish(); return "Room Details shown." end
   if text == "hide" then hideWidget(widget); return "Room Details hidden; room output stays in console." end
   if text == "refresh" then
-    issue = nil
     if not configured then setupAttempted = false end
     requiredPrompt = 0; requestLook(false, 0)
     return "Room refresh requested."
@@ -387,7 +447,8 @@ local function command(argument)
   if text == "auto on" or text == "auto off" then
     local enabled = text == "auto on"
     local saved, reason = client.storage.set("room-details:automatic", enabled)
-    if not saved then issue = reason or "Could not save Auto preference"; publish(); return issue end
+    if not saved then faults.preference = reason or "Could not save Auto preference"; publish(); return faults.preference end
+    faults.preference = nil
     automatic = enabled
     if not automatic and pendingAuto then pending, pendingAuto, requiredPrompt = false, false, 0 end
     publish(); return automatic and "Automatic room refresh enabled." or "Automatic room refresh disabled."
@@ -400,93 +461,169 @@ local function markup()
   return [=[<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Room Details</title><style>
 :root{color-scheme:dark;color:#e6edf5;background:#131b27;font:12px system-ui,sans-serif}*{box-sizing:border-box}
-body{margin:0;padding:6px}header{display:flex;align-items:center;gap:8px;margin-bottom:5px;font:12px system-ui,sans-serif}
-header strong{margin-right:auto}header button{font:inherit;color:inherit;background:#233247;border:1px solid #43546b;border-radius:4px;padding:2px 6px}
-label{display:flex;align-items:center;gap:3px;white-space:nowrap}input{margin:0}h2{font:600 11px system-ui,sans-serif;color:#b9c7d8;margin:6px 0 3px}
-.entry{display:block;width:100%;text-align:left;color:inherit;background:transparent;border:0;border-radius:3px;padding:1px 3px;margin:0;
+body{margin:0;padding:4px}header{display:flex;align-items:center;gap:5px;margin-bottom:2px;font:12px system-ui,sans-serif}
+header strong{margin-right:auto}button{color:inherit;background:#233247;border:1px solid #43546b;border-radius:4px;font:inherit;cursor:pointer}
+header button{width:24px;height:24px;padding:1px;font-size:17px;line-height:1}button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid #c7e2ff;outline-offset:1px}
+label{display:flex;align-items:center;gap:3px;white-space:nowrap}input{margin:0}h2{font:600 11px system-ui,sans-serif;color:#b9c7d8;margin:3px 0 1px}
+.entry{display:block;width:100%;text-align:left;color:inherit;background:transparent;border:0;border-radius:3px;padding:0 2px;margin:0;
 font:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;user-select:text;cursor:pointer;line-height:1.2}
 .entry[aria-pressed="true"]{outline:1px solid #8bc3ff;outline-offset:-1px}.entry:focus-visible{outline:2px solid #c7e2ff;outline-offset:-2px}
-.blank{display:none}.empty,#status{color:#aebdcc;font:11px system-ui,sans-serif}#status:empty{display:none}
-#status{margin:4px 0}.empty{padding:2px 3px}.incomplete{color:#ffd18b;font:11px system-ui,sans-serif}
-</style></head><body><header><strong>Room Details</strong><label><input id="auto" type="checkbox" checked>Auto</label><button id="refresh" type="button">Refresh</button></header>
-<div id="status" role="status"></div><main><section aria-labelledby="chars-title"><h2 id="chars-title">Characters <span id="chars-count">0</span></h2><div id="chars"></div></section>
-<section aria-labelledby="objs-title"><h2 id="objs-title">Objects <span id="objs-count">0</span></h2><div id="objs"></div></section></main><script>
+.blank{display:none}.empty,#status,#copy-status{color:#aebdcc;font:11px system-ui,sans-serif}[hidden]{display:none!important}
+#status{margin:3px 0}.empty{padding:1px 2px}.incomplete{color:#ffd18b;font:11px system-ui,sans-serif}
+dialog{color:inherit;background:#131b27;border:1px solid #71859e;border-radius:6px;padding:8px;width:calc(100% - 12px);max-width:620px;max-height:calc(100% - 12px);overflow:auto}
+dialog::backdrop{background:#0008}dialog header{gap:6px}dialog header button{font:12px system-ui,sans-serif;width:auto;height:24px;padding:2px 6px}
+#detail-text{white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;line-height:1.2;margin:6px 0;max-height:60vh;overflow:auto}
+#copy-status:empty{display:none}
+</style></head><body><header><strong>Room Details</strong><label><input id="auto" type="checkbox" checked>Auto</label><button id="details" type="button" aria-label="Show selected entry details" title="Show selected entry details" disabled>&#9432;</button><button id="refresh" type="button" aria-label="Refresh room" title="Refresh room">&#8635;</button></header>
+<div id="status" role="status" hidden></div><main class="terminal"><section aria-labelledby="chars-title"><h2 id="chars-title">Characters <span id="chars-count">0</span></h2><div id="chars"></div></section>
+<section aria-labelledby="objs-title"><h2 id="objs-title">Objects <span id="objs-count">0</span></h2><div id="objs"></div></section></main>
+<dialog id="detail-dialog" aria-labelledby="detail-title"><header><strong id="detail-title">Entry details</strong><button id="copy" type="button">Copy</button><button id="close" type="button">Close</button></header><div id="detail-text" class="terminal" tabindex="0"></div><div id="copy-status" role="status"></div></dialog><script>
 (function(){
-  var current = {chars:null,objs:null}, selected = null;
-  function array(value){return Array.isArray(value) ? value : [];}
-  function select(kind, revision, index){mudforge.send('select',{kind:kind,revision:revision,index:index});}
-  function characterRuns(runs){
+  var current={chars:null,objs:null}, snapshots={}, selected=null, selectedKey='', detailsKey='', pendingDetails='', opener=null, copyGeneration=0;
+  var dialog=document.getElementById('detail-dialog'), detailText=document.getElementById('detail-text');
+  function array(value){return Array.isArray(value)?value:[];}
+  function key(value){return value?value.kind+':'+value.revision+':'+value.index:'';}
+  function select(kind,revision,index){mudforge.send('select',{kind:kind,revision:revision,index:index});}
+  function displayRuns(runs,kind){
     var text=runs.map(function(run){return typeof run.text==='string'?run.text:'';}).join('');
-    var keep=new Array(text.length).fill(true), depth=0, start=0, nested=false, previousEnd=-1;
-    for(var i=0;i<text.length;i++){
+    var keep=new Array(text.length).fill(true),depth=0,start=0,nested=false,previousEnd=-1;
+    var leading=/^\s*/.exec(text)[0].length;
+    if(kind==='objs') keep.fill(false,0,leading);
+    for(var i=kind==='objs'?leading:0;i<text.length;i++){
+      if(kind==='objs' && depth===0 && text[i]!=='(') break;
       if(text[i]==='('){if(depth===0){start=i;nested=false;}else nested=true;depth++;}
       else if(text[i]===')' && depth>0){
         depth--;
-        if(depth===0 && !nested){
-          var body=text.slice(start+1,i), first=/\S/u.exec(body);
+        if(depth===0){
+          if(nested) {if(kind==='objs') break;continue;}
+          var body=text.slice(start+1,i),first=/\S/u.exec(body);
           keep.fill(false,start+1,i);
           if(first){var index=start+1+first.index;keep.fill(true,index,index+String.fromCodePoint(text.codePointAt(index)).length);}
           if(previousEnd>=0 && /^\s*$/.test(text.slice(previousEnd+1,start))) keep.fill(false,previousEnd+1,start);
           previousEnd=i;
+          if(kind==='objs'){
+            var next=i+1;while(next<text.length && /\s/.test(text[next])) next++;
+            if(text[next]!=='(') break;
+            i=next-1;
+          }
         }
       }
     }
-    // Slice the original spans rather than restyling the shortened text.
-    var offset=0, shortened=[];
+    // Slice original spans so abbreviation retains ANSI colors and attributes.
+    var offset=0,shortened=[];
     runs.forEach(function(run){
-      var value=typeof run.text==='string'?run.text:'', visible='';
+      var value=typeof run.text==='string'?run.text:'',visible='';
       for(var j=0;j<value.length;j++) if(keep[offset+j]) visible+=value[j];
       offset+=value.length;
       if(visible) shortened.push(Object.assign({},run,{text:visible}));
     });
     return shortened;
   }
-  function rows(kind, snapshot){
-    var root = document.getElementById(kind);
-    if (current[kind] === (snapshot && snapshot.revision)) return;
-    var focus = document.activeElement, restore = root.contains(focus) ? Number(focus.dataset.index) : null;
-    root.replaceChildren(); current[kind] = snapshot && snapshot.revision;
-    var entries = array(snapshot && snapshot.rows), count = 0;
-    entries.forEach(function(row, offset){
-      var nonempty = typeof row.text === 'string' && row.text.trim().length > 0;
-      var entry = document.createElement(nonempty ? 'button' : 'div');
-      entry.className = nonempty ? 'entry' : 'blank';
+  function appendRuns(target,runs){
+    runs.forEach(function(run){
+      var span=document.createElement('span');span.textContent=typeof run.text==='string'?run.text:'';
+      // Styles are validated by Lua from the native ANSI parser; text stays literal.
+      if(typeof run.color==='string') span.style.color=run.color;
+      if(typeof run.background==='string') span.style.backgroundColor=run.background;
+      if(run.italic===true) span.style.fontStyle='italic';
+      if(run.underline===true) span.style.textDecoration='underline';
+      target.appendChild(span);
+    });
+  }
+  function selectedRow(){
+    var snapshot=selected && snapshots[selected.kind];
+    return snapshot && snapshot.revision===selected.revision && array(snapshot.rows)[selected.index-1];
+  }
+  function closeDetails(){
+    pendingDetails='';detailsKey='';copyGeneration++;
+    if(dialog.open) dialog.close();
+  }
+  function openDetails(target){
+    var row=selectedRow();if(!row) return;
+    opener=target || document.activeElement;detailsKey=selectedKey;pendingDetails='';copyGeneration++;
+    document.getElementById('detail-title').textContent=selected.kind==='chars'?'Character details':'Object details';
+    detailText.replaceChildren();appendRuns(detailText,array(row.runs));
+    document.getElementById('copy-status').textContent='';
+    if(!dialog.open) dialog.showModal();
+    document.getElementById('close').focus();
+  }
+  function rows(kind,snapshot){
+    var root=document.getElementById(kind);
+    if(current[kind]===(snapshot && snapshot.revision)) return false;
+    var focus=document.activeElement,restore=root.contains(focus)?Number(focus.dataset.index):null;
+    root.replaceChildren();current[kind]=snapshot && snapshot.revision;
+    var entries=array(snapshot && snapshot.rows),count=0;
+    entries.forEach(function(row,offset){
+      var nonempty=typeof row.text==='string' && row.text.trim().length>0;
+      var entry=document.createElement(nonempty?'button':'div');entry.className=nonempty?'entry':'blank';
       if(nonempty){
-        count++; entry.type='button'; entry.dataset.kind=kind; entry.dataset.index=String(offset+1);
-        entry.title=row.text;
+        count++;entry.type='button';entry.dataset.kind=kind;entry.dataset.index=String(offset+1);entry.title=row.text;
         entry.setAttribute('aria-pressed','false');
-        entry.addEventListener('click',function(){if(!String(window.getSelection())) select(kind,snapshot.revision,offset+1);});
+        entry.addEventListener('click',function(event){if((event && event.detail===0) || !String(window.getSelection())) select(kind,snapshot.revision,offset+1);});
+        entry.addEventListener('dblclick',function(){
+          var identity={kind:kind,revision:snapshot.revision,index:offset+1};
+          if(key(identity)===selectedKey) openDetails(entry);
+          else {pendingDetails=key(identity);opener=entry;select(kind,snapshot.revision,offset+1);}
+        });
+        entry.addEventListener('keydown',function(event){
+          if(event.key==='Enter' && selectedKey===key({kind:kind,revision:snapshot.revision,index:offset+1})){
+            event.preventDefault();openDetails(entry);
+          }
+        });
       }
-      var runs=array(row.runs);
-      if(kind==='chars') runs=characterRuns(runs);
-      runs.forEach(function(run){
-        var span=document.createElement('span'); span.textContent=typeof run.text==='string'?run.text:'';
-        // Values originate in the native ANSI parser, never server-authored CSS.
-        if(typeof run.color==='string') span.style.color=run.color;
-        if(typeof run.background==='string') span.style.backgroundColor=run.background;
-        if(run.italic===true) span.style.fontStyle='italic';
-        if(run.underline===true) span.style.textDecoration='underline';
-        entry.appendChild(span);
-      });
-      root.appendChild(entry);
+      appendRuns(entry,displayRuns(array(row.runs),kind));root.appendChild(entry);
     });
     document.getElementById(kind+'-count').textContent=String(count);
     if(!count){var empty=document.createElement('div');empty.className='empty';empty.textContent=snapshot?'None here':'Waiting for room output';root.appendChild(empty);}
     if(snapshot && snapshot.incomplete){var note=document.createElement('div');note.className='incomplete';note.textContent='Incomplete room output';root.appendChild(note);}
     if(restore!==null){var buttons=root.querySelectorAll('button');var target=Array.from(buttons).find(function(b){return Number(b.dataset.index)===restore;})||buttons[0];if(target)target.focus({preventScroll:true});}
+    return true;
   }
+  function property(element,name,value){if(element[name]!==value) element[name]=value;}
+  function attribute(element,name,value){if(element.getAttribute(name)!==value) element.setAttribute(name,value);}
   mudforge.onProperty('roomDetails',function(encoded){
-    var scroll=document.scrollingElement.scrollTop;
-    var value=JSON.parse(encoded); rows('chars',value.chars);rows('objs',value.objs);
+    var scroll=document.scrollingElement.scrollTop,value=JSON.parse(encoded);
+    snapshots={chars:value.chars,objs:value.objs};
+    var charsChanged=rows('chars',value.chars),objsChanged=rows('objs',value.objs),nextKey=key(value.selection);
     selected=value.selection;
-    document.querySelectorAll('.entry').forEach(function(b){b.setAttribute('aria-pressed',String(!!selected && selected.kind===b.dataset.kind && selected.index===Number(b.dataset.index)));});
-    document.getElementById('status').textContent=value.status||'';
-    document.getElementById('auto').checked=value.automatic===true;
-    if(value.font){document.querySelector('main').style.fontFamily=value.font.family;document.querySelector('main').style.fontSize=value.font.size+'px';document.querySelector('main').style.fontWeight=value.font.weight;}
+    if(selectedKey!==nextKey || charsChanged || objsChanged){
+      selectedKey=nextKey;
+      document.querySelectorAll('.entry').forEach(function(b){attribute(b,'aria-pressed',String(!!selected && selected.kind===b.dataset.kind && selected.index===Number(b.dataset.index)));});
+      property(document.getElementById('details'),'disabled',!selectedRow());
+    }
+    if(detailsKey && (detailsKey!==selectedKey || !selectedRow())) closeDetails();
+    if(pendingDetails && pendingDetails===selectedKey) openDetails(opener);
+    var status=document.getElementById('status');property(status,'textContent',value.status||'');property(status,'hidden',value.statusVisible!==true);
+    property(document.getElementById('auto'),'checked',value.automatic===true);
+    var refresh=document.getElementById('refresh');property(refresh,'disabled',value.refreshDisabled===true);
+    property(refresh,'title',value.refreshHint||'Refresh room');attribute(refresh,'aria-label',value.refreshHint||'Refresh room');
+    attribute(refresh,'aria-busy',String(value.refreshBusy===true));property(refresh,'textContent',value.refreshBusy?'...':(value.refreshPending?'\u25f7':'\u21bb'));
+    if(value.font) document.querySelectorAll('.terminal').forEach(function(element){
+      property(element.style,'fontFamily',value.font.family);property(element.style,'fontSize',value.font.size+'px');property(element.style,'fontWeight',value.font.weight);
+    });
     document.scrollingElement.scrollTop=scroll;
   });
   document.getElementById('auto').addEventListener('change',function(e){mudforge.send('auto',{enabled:e.target.checked});});
   document.getElementById('refresh').addEventListener('click',function(){mudforge.send('refresh',{});});
+  document.getElementById('details').addEventListener('click',function(){openDetails(document.activeElement);});
+  document.getElementById('close').addEventListener('click',closeDetails);
+  dialog.addEventListener('cancel',function(event){event.preventDefault();closeDetails();});
+  dialog.addEventListener('close',function(){
+    detailsKey='';copyGeneration++;
+    (opener && opener.isConnected && !opener.disabled?opener:document.getElementById('auto')).focus({preventScroll:true});opener=null;
+  });
+  document.getElementById('copy').addEventListener('click',async function(){
+    var row=selectedRow(),generation=++copyGeneration;if(!row || !dialog.open) return;
+    var message='Copied original text.';
+    try{if(!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard unavailable');await navigator.clipboard.writeText(row.text);}
+    catch(error){
+      if(generation!==copyGeneration || !dialog.open) return;
+      var range=document.createRange();range.selectNodeContents(detailText);var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);detailText.focus();
+      message='Clipboard unavailable. Text selected; use your system Copy command.';
+    }
+    if(generation===copyGeneration && dialog.open) document.getElementById('copy-status').textContent=message;
+  });
   mudforge.send('ready',{});
 })();
 </script></body></html>]=]
@@ -494,7 +631,7 @@ end
 
 local function widgetMessage(event)
   if not initialized or type(event) ~= "table" or (event.sessionId and event.sessionId ~= getSessionId()) then return end
-  if event.event == "ready" then ready = true; updateFont(); publish()
+  if event.event == "ready" then ready, lastPublished, faults.panel = true, nil, nil; updateFont(); publish()
   elseif event.event == "refresh" then command("refresh")
   elseif event.event == "auto" and type(event.data) == "table" and type(event.data.enabled) == "boolean" then
     command(event.data.enabled and "auto on" or "auto off")
@@ -547,6 +684,6 @@ function cleanup()
   subscriptions = {}
   client.stop(); destroyWidget(widget)
   client, widget = nil, nil
-  snapshots, cycle, selection, sgr, font = {}, {}, nil, {}, nil
+  snapshots, cycle, selection, sgr, font, faults, lastPublished = {}, {}, nil, {}, nil, {}, nil
   character, configured, setupAttempted, previousState, roomNumber = nil, false, false, nil, nil
 end

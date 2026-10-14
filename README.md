@@ -149,26 +149,40 @@ does not automatically send refresh requests.
 
 ## Aardwolf Room Details
 
-**0.1.2** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
+**0.2.0** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
 **Room Details** panel with Characters above Objects. Initial size is 360 × 240;
 drag it to an edge of another widget to dock it. MudForge restores saved placement,
 size and visibility. Each completed tagged block replaces its own section;
 an empty block clears it. Descriptions, aura prefixes, order, duplicate rows,
-indentation and full descriptions are preserved. Each nonempty received line is
-one compact, selectable row; long descriptions use an ellipsis. Row text is
-selectable/copyable, with the original description in a hover tooltip. Blank spacer
-lines remain in the captured data but take no space in the panel.
-Character rows abbreviate parenthesized markers to their first non-space
-character and remove whitespace between adjacent markers: `(Golden Aura)
-(White Aura)` displays as `(G)(W)`. Original text remains in the tooltip and
-captured data; object descriptions are unchanged.
+original whitespace and full descriptions remain in the captured data. Each
+nonempty received line is one compact, selectable row; long descriptions use an
+ellipsis. Blank spacer lines take no space in the panel. Characters abbreviate
+simple parenthesized markers to their first non-space character and join adjacent
+markers: `(Golden Aura) (White Aura)` displays as `(G)(W)`. Objects remove leading
+indentation for display and abbreviate only consecutive leading markers:
+`    (Magic) (Hum) A bag (open).` displays as `(M)(H) A bag (open).`
 
 The panel follows the terminal font and uses MudForge's native `parseAnsiText`
 segments for foreground/background colors, italic, underline and native bright
 color handling for intensity. SGR state carries across lines, including styles
 set before the opening tag. Text is rendered as text nodes, never as server HTML.
-Click or keyboard-activate a row to select it; the outline does not recolor its
-text. Selection sends no game command. You can drag across text to copy it.
+Click or press Space to select a row; the outline preserves text colors. Open
+**Details** with the information icon, double-click, or Enter on a selected row.
+The dialog shows the original formatted description, including indentation and
+unabridged markers. **Copy** copies the original plain text; if clipboard access
+is unavailable, it selects the text and explains how to copy manually. Close or
+Escape returns focus. Selection and details send no game commands. Identical
+snapshots retain selection/details; changed selected lists, rooms, characters
+and connections clear them. Unrelated updates preserve focus and scrolling.
+
+The circular-arrow **Refresh** icon shows queued/in-flight feedback in its hover
+text and accessible name. Actionable waiting reasons (including sleeping, pager,
+Spells collection or missing connection) and unresolved errors appear below the
+toolbar when needed. Recovered operations clear only their corresponding errors.
+Unchanged view states are not sent to the widget, and unchanged lists are not
+rebuilt. The compact toolbar always keeps **Auto** visible. To reclaim unused
+space below the lists, resize the native dock tile manually; the plugin preserves
+MudForge's saved geometry.
 
 On installation/enabling in an authenticated active session, and on each login,
 Room Details sends `tags roomobjs on`, `tags roomchars on`, then one `look`.
@@ -202,7 +216,7 @@ Room/character changes and disconnects clear stale selection and room data;
 only the Auto preference persists.
 
 Offline and browser checks do not establish native formatting, gagging, docking,
-or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--012-acceptance-pending).
+or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--020-acceptance-pending).
 
 ## Aardwolf Spells
 
