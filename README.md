@@ -149,15 +149,19 @@ does not automatically send refresh requests.
 
 ## Aardwolf Room Details
 
-**0.1.1** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
+**0.1.2** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
 **Room Details** panel with Characters above Objects. Initial size is 360 × 240;
 drag it to an edge of another widget to dock it. MudForge restores saved placement,
 size and visibility. Each completed tagged block replaces its own section;
 an empty block clears it. Descriptions, aura prefixes, order, duplicate rows,
 indentation and full descriptions are preserved. Each nonempty received line is
-one compact, selectable row; long descriptions use an ellipsis with the full
-text in a hover tooltip and available for text selection/copying. Blank spacer
+one compact, selectable row; long descriptions use an ellipsis. Row text is
+selectable/copyable, with the original description in a hover tooltip. Blank spacer
 lines remain in the captured data but take no space in the panel.
+Character rows abbreviate parenthesized markers to their first non-space
+character and remove whitespace between adjacent markers: `(Golden Aura)
+(White Aura)` displays as `(G)(W)`. Original text remains in the tooltip and
+captured data; object descriptions are unchanged.
 
 The panel follows the terminal font and uses MudForge's native `parseAnsiText`
 segments for foreground/background colors, italic, underline and native bright
@@ -198,7 +202,7 @@ Room/character changes and disconnects clear stale selection and room data;
 only the Auto preference persists.
 
 Offline and browser checks do not establish native formatting, gagging, docking,
-or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--011-acceptance-pending).
+or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--012-acceptance-pending).
 
 ## Aardwolf Spells
 
