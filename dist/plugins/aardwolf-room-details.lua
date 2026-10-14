@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.2.0",
+  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.2.1",
   author = "Sam Roberts", description = "Formatted, selectable room characters and objects in a compact dockable panel."
 }
 
@@ -461,9 +461,10 @@ local function markup()
   return [=[<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Room Details</title><style>
 :root{color-scheme:dark;color:#e6edf5;background:#131b27;font:12px system-ui,sans-serif}*{box-sizing:border-box}
-body{margin:0;padding:4px}header{display:flex;align-items:center;gap:5px;margin-bottom:2px;font:12px system-ui,sans-serif}
+html{scroll-padding-bottom:36px}body{margin:0;padding:4px;min-height:100vh;display:flex;flex-direction:column}body>*{flex-shrink:0}header{display:flex;align-items:center;gap:5px;margin-bottom:2px;font:12px system-ui,sans-serif}
 header strong{margin-right:auto}button{color:inherit;background:#233247;border:1px solid #43546b;border-radius:4px;font:inherit;cursor:pointer}
-header button{width:24px;height:24px;padding:1px;font-size:17px;line-height:1}button:disabled{opacity:.5;cursor:default}
+.panel-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:auto;padding-top:4px;position:sticky;bottom:0;z-index:2;background:#131b27}
+.panel-actions button{width:24px;height:24px;padding:1px;font-size:17px;line-height:1}button:disabled{opacity:.5;cursor:default}
 button:focus-visible,input:focus-visible{outline:2px solid #c7e2ff;outline-offset:1px}
 label{display:flex;align-items:center;gap:3px;white-space:nowrap}input{margin:0}h2{font:600 11px system-ui,sans-serif;color:#b9c7d8;margin:3px 0 1px}
 .entry{display:block;width:100%;text-align:left;color:inherit;background:transparent;border:0;border-radius:3px;padding:0 2px;margin:0;
@@ -471,14 +472,15 @@ font:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;user-select:
 .entry[aria-pressed="true"]{outline:1px solid #8bc3ff;outline-offset:-1px}.entry:focus-visible{outline:2px solid #c7e2ff;outline-offset:-2px}
 .blank{display:none}.empty,#status,#copy-status{color:#aebdcc;font:11px system-ui,sans-serif}[hidden]{display:none!important}
 #status{margin:3px 0}.empty{padding:1px 2px}.incomplete{color:#ffd18b;font:11px system-ui,sans-serif}
-dialog{color:inherit;background:#131b27;border:1px solid #71859e;border-radius:6px;padding:8px;width:calc(100% - 12px);max-width:620px;max-height:calc(100% - 12px);overflow:auto}
-dialog::backdrop{background:#0008}dialog header{gap:6px}dialog header button{font:12px system-ui,sans-serif;width:auto;height:24px;padding:2px 6px}
+dialog{scroll-padding-bottom:36px;color:inherit;background:#131b27;border:1px solid #71859e;border-radius:6px;padding:8px;width:calc(100% - 12px);max-width:620px;max-height:calc(100% - 12px);overflow:auto}
+dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:flex-end;gap:6px;padding-top:4px;position:sticky;bottom:0;z-index:2;background:#131b27}.dialog-actions button{font:12px system-ui,sans-serif;width:auto;height:24px;padding:2px 6px}
 #detail-text{white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;line-height:1.2;margin:6px 0;max-height:60vh;overflow:auto}
 #copy-status:empty{display:none}
-</style></head><body><header><strong>Room Details</strong><label><input id="auto" type="checkbox" checked>Auto</label><button id="details" type="button" aria-label="Show selected entry details" title="Show selected entry details" disabled>&#9432;</button><button id="refresh" type="button" aria-label="Refresh room" title="Refresh room">&#8635;</button></header>
+</style></head><body><header><strong>Room Details</strong></header>
 <div id="status" role="status" hidden></div><main class="terminal"><section aria-labelledby="chars-title"><h2 id="chars-title">Characters <span id="chars-count">0</span></h2><div id="chars"></div></section>
 <section aria-labelledby="objs-title"><h2 id="objs-title">Objects <span id="objs-count">0</span></h2><div id="objs"></div></section></main>
-<dialog id="detail-dialog" aria-labelledby="detail-title"><header><strong id="detail-title">Entry details</strong><button id="copy" type="button">Copy</button><button id="close" type="button">Close</button></header><div id="detail-text" class="terminal" tabindex="0"></div><div id="copy-status" role="status"></div></dialog><script>
+<footer class="panel-actions" aria-label="Room details controls"><label><input id="auto" type="checkbox" checked>Auto</label><button id="details" type="button" aria-label="Show selected entry details" title="Show selected entry details" disabled>&#9432;</button><button id="refresh" type="button" aria-label="Refresh room" title="Refresh room">&#8635;</button></footer>
+<dialog id="detail-dialog" aria-labelledby="detail-title"><header><strong id="detail-title">Entry details</strong></header><div id="detail-text" class="terminal" tabindex="0"></div><div id="copy-status" role="status"></div><footer class="dialog-actions" aria-label="Entry details controls"><button id="copy" type="button">Copy</button><button id="close" type="button">Close</button></footer></dialog><script>
 (function(){
   var current={chars:null,objs:null}, snapshots={}, selected=null, selectedKey='', detailsKey='', pendingDetails='', opener=null, copyGeneration=0;
   var dialog=document.getElementById('detail-dialog'), detailText=document.getElementById('detail-text');
