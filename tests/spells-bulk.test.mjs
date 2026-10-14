@@ -11,6 +11,55 @@ const setup = `
   local panel = world.panel()
 `;
 
+test('Refresh all accepts the supplied blank damage skill and continues to spells', () => {
+  const lines = readFileSync(resolve(root, 'tests/fixtures/skills-combat.txt'), 'utf8').split('\n');
+  runLua(fixture + setup + `
+    world.action("refresh-all")
+    for _, line in ipairs(example_lines()) do world.line(line) end
+    assert(world.sends[3] == "spells combat" and not reader.client.spells.status().error)
+    world.line("No spells found.")
+    assert(not reader.client.spells.status().refreshing and not reader.client.spells.status().error)
+    local names = {}; for _, item in ipairs(reader.client.spells.get().entries) do names[item.name] = item end
+    assert(names.Hammerswing.level == 51 and names.Hammerswing.percent == 85)
+    assert(names.Sap.percent == 86 and panel.bindings.skill_bash_name == "Sap")
+    assert(world.databases.fixture.details.hammerswing.kind == "skill")
+    for _, members in pairs(world.databases.fixture.members) do assert(not members.hammerswing) end
+  `, { example_lines: () => lines });
+});
+
+test('blank damage skill and spell continuation rows retain their fields without memberships', () => runLua(fixture + setup + `
+  world.query("skill"); world.damageHeader("skill")
+  world.line("Level 50 : Sap 86% Bash")
+  world.line("           Hammerswing 85%  ")
+  world.damageFooter()
+  world.query("spell"); world.damageHeader("spell")
+  world.line("Level 38 : Fireball 30 85% 45 Fire")
+  world.line("           Untyped spell 25 90% 46  ")
+  world.damageFooter()
+  assert(not reader.client.spells.status().error)
+  local names = {}; for _, item in ipairs(reader.client.spells.get().entries) do names[item.name] = item end
+  assert(names.Hammerswing.level == 50 and names.Hammerswing.percent == 85)
+  assert(names["Untyped spell"].level == 38 and names["Untyped spell"].sn == 46)
+  assert(names["Untyped spell"].percent == 90 and world.databases.fixture.details["untyped spell"].mana == 25)
+  assert(panel.bindings.skill_bash_name == "Sap" and panel.bindings.spell_fire_name == "Fireball")
+  for _, members in pairs(world.databases.fixture.members) do
+    assert(not members.hammerswing and not members["untyped spell"])
+  end
+`));
+
+test('blank damage rows preserve duplicate and conflicting row rejection', () => runLua(fixture + setup + `
+  world.query("skill"); world.bash()
+  for _, rows in ipairs({ { "Level 51 : Hammerswing 85%", "           Hammerswing 85%" },
+    { "Level 51 : Hammerswing 85%", "           Hammerswing 86% Bash" },
+    { "Level 51 : Hammerswing 86% Bash", "           Hammerswing 85%" } }) do
+    world.query("skill"); world.damageHeader("skill")
+    for _, row in ipairs(rows) do world.line(row) end
+    world.damageFooter()
+    assert(reader.client.spells.status().error and panel.bindings.skill_bash_name == "Sap")
+    assert(not world.databases.fixture.details.hammerswing)
+  end
+`));
+
 test('the supplied combat-format output parses every continuation row and damage type', () => {
   const lines = readFileSync(resolve(root, 'tests/fixtures/spells-damage.txt'), 'utf8').split('\n');
   runLua(fixture + setup + `

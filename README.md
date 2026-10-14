@@ -145,7 +145,7 @@ does not automatically send refresh requests.
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.2.3** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.2.4** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
@@ -246,7 +246,9 @@ Bulk results atomically update canonical ability fields and replace all damage
 memberships and details for the queried kind, preserving the other kind.
 Omitted/forgotten entries disappear from that kind's damage groups without
 deleting canonical abilities or command overrides. An ability can belong to
-multiple damage types. Full-list replacement preserves damage enrichment for
+multiple damage types. A blank Damage column is accepted: the ability remains
+in the catalog without a damage-group membership. Unknown nonempty damage types
+still reject the collection. Full-list replacement preserves damage enrichment for
 retained names and prunes removed associations. Kind, mana, memberships, filter
 timestamps and command overrides use additive tables in the existing database;
 0.1.0 databases upgrade without deleting their saved abilities. Overrides remain

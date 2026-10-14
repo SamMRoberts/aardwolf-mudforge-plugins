@@ -174,7 +174,7 @@ and percentage fields are omitted for server dashes. Percentage includes zero.
 `unusable` is a boolean from an explicit star, not inferred from level or
 percentage. Both skills and spells are represented without inferring a type.
 
-Spells 0.2.3 also merges committed `skills combat` and `spells combat` results
+Spells 0.2.4 also merges committed `skills combat` and `spells combat` results
 into these canonical fields. A bulk refresh retains unrelated entries and
 existing display order, appending newly discovered names. `collectedAt` reflects
 the latest committed full or bulk collection, not command-override changes.
