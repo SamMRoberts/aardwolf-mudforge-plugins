@@ -1,4 +1,4 @@
-# Aardwolf API 0.1.0
+# Aardwolf API 0.2.0
 
 ## Lifecycle and host adapters
 
@@ -12,6 +12,7 @@ construction. Supply only the functions the consumer uses.
 | Required lifecycle/messaging | `findPluginByName`, `onPluginBroadcast`, `broadcastToPlugin`, `on`, `off` |
 | Explicit refresh requests | `sendGMCP` |
 | Storage | `loadTable`, `saveTable`, `storageStatus` |
+| Optional SQLite | `sqliteReadFile`, `sqliteWriteFile`, `sqliteRenameFile`, `sqliteRemoveFile`, `getPluginId`, `getSession`, `getCurrentTime`, `addTimer`, `removeTimer` |
 | Widget creation/cleanup | `createWidget`, `destroyWidget` |
 | Static HTML and reactive bindings | `setWidgetProperty`, `setBoundValue` |
 | Widget events | `registerWidgetEvent` |
@@ -114,6 +115,24 @@ plugin and world; no app-wide or cross-plugin store is used. Numbers, booleans,
 strings and tables preserve their types. Save preferences when they change;
 do not rely on cleanup as the sole save point. Live protocol caches are never
 persisted by Core.
+
+## SQLite
+
+Optional `options.sqlite` adds callback-based local SQL operations through a
+separately launched Python helper. Supply a stable `characterKey`, optional
+`bridgeDirectory` and `timeoutMs`, plus the SQLite adapters listed above.
+Operations require File System Access, `client.start()` and a connected session;
+GMCP Core availability is independent. No adapters are called during construction.
+
+`client.sqlite.status()`, `open(name, callback)` and `openAlias(alias, callback)`
+provide availability and handles. Handles expose dot-call `query(sql, params,
+callback)`, `execute(sql, params, callback)`, `transaction(statements, callback)`
+and `close()`. Callbacks receive `(result, error)` exactly once. Stop closes
+handles and cancels pending delivery; submitted work may have an unknown outcome.
+
+See [SQLite setup, values and complete contracts](SQLITE.md), including NULL,
+BLOB/int64 wrappers, registered aliases, limits and retry semantics. Existing
+`client.storage` behavior and stored records are unchanged.
 
 ## UI helpers
 

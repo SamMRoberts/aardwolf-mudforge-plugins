@@ -12,7 +12,8 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  version is 0.1.0, including library precedence over repository/package copies.
+  library version is 0.2.0 and Core/example versions are 0.1.0, including library
+  precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
   callbacks into unloaded consumers.
@@ -57,6 +58,35 @@ private messages, world exports and raw gameplay logs out of this repository.
 Record observed results and concrete blockers separately from offline tests.
 Any connection to live Aardwolf remains a separate, explicitly authorized
 acceptance step; loopback transport does not establish live-server behavior.
+
+## SQLite — native acceptance pending
+
+Offline tests execute Fengari, real temporary SQLite databases and the Lua/Python
+file protocol together. They do not verify MudForge's transpiler, File System
+Access toggle, text-file handles, rename semantics or native timer delivery.
+
+- With separate authorization, create a disposable world and a dedicated helper
+  bridge directory inside the home folder. Start the Python helper manually;
+  record Python/SQLite and MudForge versions. Do not register existing databases.
+- Install library 0.2.0 and `examples/sqlite-consumer.lua`. Connect only to the
+  disposable loopback fixture. The example does not require API Core or GMCP.
+- With File System Access off, confirm a clear unavailable result and no helper
+  request. Enable it for the example, then run `awsql-demo disposable-character`.
+  Observe the success message and inspect the created managed SQLite file through
+  Python/sqlite3 after the operation. Verify actual atomic file rename and response
+  delivery, rather than inferring them from the offline filesystem adapters.
+- Run twice, reload the plugin and reopen the world. Confirm one command, no
+  duplicate poll timers and persisted schema. Test separate character keys and
+  plugins; only explicitly registered disposable aliases may be shared.
+- Exercise NULL between populated columns, Unicode/NUL TEXT, BLOB/base64 and int64
+  wrappers through native JSON encode/decode, including empty and zero-based arrays.
+- Stop the helper, restart it during a request, refuse permissions and inject
+  malformed replies. Confirm safe errors, no automatic write retries and no
+  callbacks after unloading. Disconnect during submitted and queued operations;
+  observe unknown/rejected outcomes and reject new disconnected operations.
+- Test helper locking, a read-only disposable alias, rollback, oversized results
+  and reopen persistence. Remove only disposable artifacts, restore the original
+  selected world and record evidence separately from live Aardwolf acceptance.
 
 ## Aardwolf Vitals — native and live acceptance pending
 

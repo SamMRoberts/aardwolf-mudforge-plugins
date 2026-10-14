@@ -58,17 +58,17 @@
   "libraries": [
     {
       "name": "aardwolf-api",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": "Sam Roberts",
-      "description": "Session-scoped Aardwolf data, events, storage and UI helpers.",
+      "description": "Session-scoped Aardwolf data, events, storage, SQLite and UI helpers.",
       "tags": [
         "aardwolf",
         "gmcp",
         "api"
       ],
       "downloadUrl": "dist/libs/aardwolf-api.lua",
-      "sha256": "f221e83535bfbd0c2380310c2e73b196d0d3ce72b6c13ace4a7eb60373b4d183",
-      "size": 17499
+      "sha256": "66a0bc5ead63da561315a4cc983b4a24cde9e9f6128b0f20404d51937a3f6042",
+      "size": 33903
     }
   ]
 }
