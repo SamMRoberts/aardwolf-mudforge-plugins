@@ -20,9 +20,9 @@ test('catalog lists exact generated source bytes and correct integrity metadata'
   const outputs = await buildOutputs();
   const catalog = JSON.parse(outputs.get('plugins.json'));
   assert.equal(catalog.schemaVersion, 1);
-  assert.equal(catalog.plugins.length, 4);
+  assert.equal(catalog.plugins.length, 5);
   assert.deepEqual(catalog.plugins.map(plugin => plugin.id), [
-    'aardwolf-api-core', 'aardwolf-api-vitals-example', 'aardwolf-vitals', 'aardwolf-spells',
+    'aardwolf-api-core', 'aardwolf-api-vitals-example', 'aardwolf-vitals', 'aardwolf-spells', 'aardwolf-room-details',
   ]);
   assert.equal(catalog.libraries.length, 1);
   assert.equal(catalog.libraries[0].name, 'aardwolf-api');
@@ -47,5 +47,5 @@ test('build output is deterministic and generated artifacts are current', async 
 test('build check resolves paths from an unrelated working directory', () => {
   assert.match(execFileSync(process.execPath, [resolve(root, 'tools/build-repository.mjs'), '--check'], {
     cwd: '/tmp', encoding: 'utf8',
-  }), /Checked 6 repository files/);
+  }), /Checked 7 repository files/);
 });

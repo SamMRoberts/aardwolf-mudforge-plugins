@@ -72,6 +72,24 @@
       "sha256": "d03bf56173aa864956cdb7783d5bcce8e513f317cdcfe262d342357bc4e5be2d",
       "size": 62988,
       "format": "lua"
+    },
+    {
+      "id": "aardwolf-room-details",
+      "name": "Aardwolf Room Details",
+      "version": "0.1.0",
+      "author": "Sam Roberts",
+      "description": "Formatted, selectable room characters and objects in a compact dockable panel.",
+      "category": "widgets",
+      "tags": [
+        "aardwolf",
+        "room",
+        "characters",
+        "objects"
+      ],
+      "downloadUrl": "dist/plugins/aardwolf-room-details.lua",
+      "sha256": "f0f32d17951c531a60c012d51020789c8401cbea6a9b252a67b89d125aa42013",
+      "size": 26121,
+      "format": "lua"
     }
   ],
   "libraries": [

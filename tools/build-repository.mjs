@@ -10,6 +10,7 @@ const entries = [
   { kind: 'plugin', file: 'aardwolf-api-vitals-example.lua', category: 'development', tags: ['aardwolf', 'example', 'vitals'] },
   { kind: 'plugin', file: 'aardwolf-vitals.lua', category: 'widgets', tags: ['aardwolf', 'gmcp', 'vitals'] },
   { kind: 'plugin', file: 'aardwolf-spells.lua', category: 'widgets', tags: ['aardwolf', 'spells', 'skills', 'damage', 'sqlite'] },
+  { kind: 'plugin', file: 'aardwolf-room-details.lua', category: 'widgets', tags: ['aardwolf', 'room', 'characters', 'objects'] },
   { kind: 'library', file: 'aardwolf-api.lua', tags: ['aardwolf', 'gmcp', 'api'] },
 ];
 
