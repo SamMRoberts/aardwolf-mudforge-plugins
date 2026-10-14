@@ -119,11 +119,11 @@ test('spells collector persists atomic character snapshots through real SQLite',
       header(); line(" Axe    1 - -"); footer(); waitIdle()
       world.packet("char.status", { level = 200 })
       local panel = context.widgets["real-spells:damage-abilities"]
-      local function damageQuery(kind, damageType, rows, unknown)
+      local function damageQuery(kind, rows, unknown)
         local before = #sends
-        panel.events.action({ action = "refresh:" .. kind .. ":" .. damageType })
+        env.send(kind .. "s damage")
         pump(function() return #sends == before + 1 end)
-        assert(sends[#sends] == kind .. "s " .. damageType)
+        assert(sends[#sends] == kind .. "s damage")
         if unknown then bridge_unknown() end
         if rows then
           line(kind == "skill" and "Skill name Learned Damage" or "Spell name Mana Learned Spell# Damage")
@@ -132,25 +132,26 @@ test('spells collector persists atomic character snapshots through real SQLite',
         else line("No " .. kind .. "s found.") end
         waitIdle()
       end
-      damageQuery("skill", "bash", { "Level 1 : Kick 100% Bash", "Level 17 : Dirt kicking 85% Bash", "Level 50 : Sap 85% Bash" })
+      damageQuery("skill", { "Level 1 : Kick 100% Bash", "Level 17 : Dirt kicking 85% Bash", "Level 50 : Sap 85% Bash" })
       assert(panel.bindings.skill_bash_name == "Sap")
-      damageQuery("spell", "fire", { "Level 38 : Fireball 30 85% 45 Fire" })
+      damageQuery("spell", { "Level 38 : Fireball 30 85% 45 Fire" })
       assert(panel.bindings.spell_fire_name == "Fireball")
-      -- An ability may appear in more than one damage filter.
-      damageQuery("skill", "fire", { "Level 1 : Kick 100% Fire" })
+      -- A bulk list can put the same ability in more than one damage group.
+      damageQuery("skill", { "Level 1 : Kick 100% Bash", "          Kick 100% Fire",
+        "Level 17 : Dirt kicking 85% Bash", "Level 50 : Sap 85% Bash" })
       assert(bridge_memberships("kick") == 2)
       assert(bridge_damage_info() == "spell:30:45:85")
       bridge_trigger(true)
-      damageQuery("skill", "bash", { "Level 70 : Rejectme 85% Bash" })
+      damageQuery("skill", { "Level 70 : Rejectme 85% Bash" })
       assert(panel.bindings.skill_bash_name == "Sap" and reader.client.spells.status().error)
       assert(bridge_memberships("kick") == 2)
       bridge_trigger(false)
-      damageQuery("skill", "bash", { "Level 17 : Dirt kicking 85% Bash" }, true)
+      damageQuery("skill", { "Level 17 : Dirt kicking 85% Bash" }, true)
       assert(panel.bindings.skill_bash_name == "Dirt kicking" and not reader.client.spells.status().error)
-      assert(bridge_memberships("kick") == 1)
+      assert(bridge_memberships("kick") == 0)
       commands.awspells('command "Dirt kicking" kick'); waitIdle()
       assert(bridge_command() == "kick")
-      damageQuery("skill", "electric", nil, true)
+      damageQuery("skill", { "Level 17 : Dirt kicking 85% Bash" }, true)
       assert(panel.bindings.skill_electric_name == "None learned" and not reader.client.spells.status().error)
 
       -- Reload restores all private metadata and overrides before any new output.
@@ -165,16 +166,16 @@ test('spells collector persists atomic character snapshots through real SQLite',
       assert(bridge_memberships("kick") == 0 and bridge_command() == "kick")
       commands.awspells('command-reset "Dirt kicking"'); waitIdle()
       assert(bridge_command() == "none")
-      damageQuery("spell", "fire", nil, true)
+      damageQuery("spell", nil, true)
       assert(panel.bindings.spell_fire_name == "None learned" and not reader.client.spells.status().error)
       assert(bridge_memberships("fireball") == 0)
 
       -- More than one private metadata page, with real batched details/members.
       local earthRows = {}
       for index = 1, 250 do earthRows[index] = "Level 1 : Earth ability " .. tostring(index) .. " 85% Earth" end
-      damageQuery("skill", "earth", earthRows)
+      damageQuery("skill", earthRows)
       assert(#reader.client.spells.get().entries == 253 and not reader.client.spells.status().error)
-      damageQuery("skill", "earth", nil)
+      damageQuery("skill", nil)
       assert(panel.bindings.skill_earth_name == "None learned" and not reader.client.spells.status().error)
 
       -- A verified new character routes to a separate managed database.
