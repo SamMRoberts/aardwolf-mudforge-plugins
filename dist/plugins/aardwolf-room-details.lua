@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.1.1",
+  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.1.2",
   author = "Sam Roberts", description = "Formatted, selectable room characters and objects in a compact dockable panel."
 }
 
@@ -415,6 +415,32 @@ font:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;user-select:
   var current = {chars:null,objs:null}, selected = null;
   function array(value){return Array.isArray(value) ? value : [];}
   function select(kind, revision, index){mudforge.send('select',{kind:kind,revision:revision,index:index});}
+  function characterRuns(runs){
+    var text=runs.map(function(run){return typeof run.text==='string'?run.text:'';}).join('');
+    var keep=new Array(text.length).fill(true), depth=0, start=0, nested=false, previousEnd=-1;
+    for(var i=0;i<text.length;i++){
+      if(text[i]==='('){if(depth===0){start=i;nested=false;}else nested=true;depth++;}
+      else if(text[i]===')' && depth>0){
+        depth--;
+        if(depth===0 && !nested){
+          var body=text.slice(start+1,i), first=/\S/u.exec(body);
+          keep.fill(false,start+1,i);
+          if(first){var index=start+1+first.index;keep.fill(true,index,index+String.fromCodePoint(text.codePointAt(index)).length);}
+          if(previousEnd>=0 && /^\s*$/.test(text.slice(previousEnd+1,start))) keep.fill(false,previousEnd+1,start);
+          previousEnd=i;
+        }
+      }
+    }
+    // Slice the original spans rather than restyling the shortened text.
+    var offset=0, shortened=[];
+    runs.forEach(function(run){
+      var value=typeof run.text==='string'?run.text:'', visible='';
+      for(var j=0;j<value.length;j++) if(keep[offset+j]) visible+=value[j];
+      offset+=value.length;
+      if(visible) shortened.push(Object.assign({},run,{text:visible}));
+    });
+    return shortened;
+  }
   function rows(kind, snapshot){
     var root = document.getElementById(kind);
     if (current[kind] === (snapshot && snapshot.revision)) return;
@@ -431,7 +457,9 @@ font:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;user-select:
         entry.setAttribute('aria-pressed','false');
         entry.addEventListener('click',function(){if(!String(window.getSelection())) select(kind,snapshot.revision,offset+1);});
       }
-      array(row.runs).forEach(function(run){
+      var runs=array(row.runs);
+      if(kind==='chars') runs=characterRuns(runs);
+      runs.forEach(function(run){
         var span=document.createElement('span'); span.textContent=typeof run.text==='string'?run.text:'';
         // Values originate in the native ANSI parser, never server-authored CSS.
         if(typeof run.color==='string') span.style.color=run.color;
