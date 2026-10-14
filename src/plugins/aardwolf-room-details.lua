@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.1.0",
+  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.1.1",
   author = "Sam Roberts", description = "Formatted, selectable room characters and objects in a compact dockable panel."
 }
 
@@ -403,10 +403,10 @@ local function markup()
 body{margin:0;padding:6px}header{display:flex;align-items:center;gap:8px;margin-bottom:5px;font:12px system-ui,sans-serif}
 header strong{margin-right:auto}header button{font:inherit;color:inherit;background:#233247;border:1px solid #43546b;border-radius:4px;padding:2px 6px}
 label{display:flex;align-items:center;gap:3px;white-space:nowrap}input{margin:0}h2{font:600 11px system-ui,sans-serif;color:#b9c7d8;margin:6px 0 3px}
-.entry{display:block;width:100%;text-align:left;color:inherit;background:transparent;border:0;border-radius:3px;padding:2px 3px;margin:1px 0;
-font:inherit;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;cursor:pointer;line-height:1.3}
+.entry{display:block;width:100%;text-align:left;color:inherit;background:transparent;border:0;border-radius:3px;padding:1px 3px;margin:0;
+font:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;user-select:text;cursor:pointer;line-height:1.2}
 .entry[aria-pressed="true"]{outline:1px solid #8bc3ff;outline-offset:-1px}.entry:focus-visible{outline:2px solid #c7e2ff;outline-offset:-2px}
-.blank{white-space:pre-wrap;min-height:1.3em}.empty,#status{color:#aebdcc;font:11px system-ui,sans-serif}#status:empty{display:none}
+.blank{display:none}.empty,#status{color:#aebdcc;font:11px system-ui,sans-serif}#status:empty{display:none}
 #status{margin:4px 0}.empty{padding:2px 3px}.incomplete{color:#ffd18b;font:11px system-ui,sans-serif}
 </style></head><body><header><strong>Room Details</strong><label><input id="auto" type="checkbox" checked>Auto</label><button id="refresh" type="button">Refresh</button></header>
 <div id="status" role="status"></div><main><section aria-labelledby="chars-title"><h2 id="chars-title">Characters <span id="chars-count">0</span></h2><div id="chars"></div></section>
@@ -427,6 +427,7 @@ font:inherit;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;cursor
       entry.className = nonempty ? 'entry' : 'blank';
       if(nonempty){
         count++; entry.type='button'; entry.dataset.kind=kind; entry.dataset.index=String(offset+1);
+        entry.title=row.text;
         entry.setAttribute('aria-pressed','false');
         entry.addEventListener('click',function(){if(!String(window.getSelection())) select(kind,snapshot.revision,offset+1);});
       }
