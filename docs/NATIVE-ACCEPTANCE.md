@@ -88,6 +88,48 @@ Access toggle, text-file handles, rename semantics or native timer delivery.
   and reopen persistence. Remove only disposable artifacts, restore the original
   selected world and record evidence separately from live Aardwolf acceptance.
 
+## Room Details — 0.1.0 acceptance pending
+
+Offline fixtures exercise capture/suppression return values, ANSI state passed
+to a stubbed native formatter, bounded recovery, login sequencing, selection,
+room-event ordering and refresh scheduling. They do not execute MudForge's
+transpiler, ANSI parser, actual suppression or docking. Browser checks exercise
+the real panel markup with synthetic native messages, not live room transport.
+
+- In an independently authorized disposable world, install `aardwolf-api`, API
+  Core and Room Details 0.1.0. No helper, database or file permission is required.
+  Record the client version. Keep Core as the only GMCP negotiation owner.
+- Observe the initial 360 × 240 widget, drag-to-dock, resizing at 200/360/540 px,
+  close/show, reload and world reopen. Confirm saved placement/visibility.
+- After authenticated active status, observe exactly `tags roomobjs on`,
+  `tags roomchars on`, then `look`. Repeat status packets, reconnect, enable in
+  an already connected world and restart Core. A new plugin runtime performs
+  one setup; a temporary Core restart does not repeat it.
+- Feed the example in `tests/fixtures/room-details.txt`, empty blocks, duplicate
+  descriptions and multiline output. Compare panel text against unsuppressed
+  console output: terminal font, 16/256/true colors, foreground/background,
+  native intensity, italic/underline and styles spanning tags/lines. Change
+  terminal font and verify synchronization on incoming output/show/resize.
+- Verify only ready/visible panel captures are suppressed. Close the panel,
+  delay its ready message and remove a formatting API in a fixture: output
+  must remain readable. Exercise mismatched/nested tags, missing close, 500-line,
+  128-KiB and five-second bounds; confirm incomplete content and released gagging.
+- Select either kind with mouse/keyboard, copy text and preserve focus/scroll
+  through updates to the other section. Selection must send no command and
+  must clear on its section/room/character changing. Server markup stays text.
+- Confirm room GMCP before/after tagged blocks and the prompt preserves the new
+  lists without mixing old-room content. Test two sessions and disconnect.
+- Combat ending and the documented item commands should coalesce into one look
+  after a normal prompt, active state and 300 ms quiet, never faster than one
+  per second. Confirm no looks during combat, pager, a room block, or Spells
+  collection/save. Native provisional/newline prompts must not double-send.
+- Verify Refresh, Auto on/off, failed sends, refused timers and five-second
+  response timeout. Auto is the only persisted preference. Cleanup must cancel
+  timers/unsubscribe/destroy the widget and must not send tag-off commands.
+- Record connected Aardwolf acceptance separately, including automatic look
+  timing with real command aliases and server output. Complete preservation and
+  cleanup checks before marking native or live acceptance complete.
+
 ## Aardwolf Spells — native and live acceptance pending
 
 Offline fixtures test parsing, collection lifecycle and shared access. The real

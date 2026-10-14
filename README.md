@@ -15,6 +15,7 @@ a connected session.
 | Aardwolf API Vitals Example | HP/mana/moves bindings, an explicit refresh button and saved font-size preferences |
 | Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
 | Aardwolf Spells | SQLite skill/spell snapshots and a dockable panel of learned damage abilities |
+| Aardwolf Room Details | Formatted tagged room characters/objects, selection, and automatic room refreshes |
 
 ## Installation
 
@@ -30,6 +31,9 @@ have **not been published or installed** by this scaffold.
    The development example `dist/plugins/aardwolf-api-vitals-example.lua` remains optional.
 5. Optionally install `dist/plugins/aardwolf-spells.lua`. Follow the
    [Spells setup](#aardwolf-spells) below before enabling automatic collection.
+6. Optionally install `dist/plugins/aardwolf-room-details.lua` for
+   [Room Details](#aardwolf-room-details). It enables room tags and requests a look
+   after login; it needs no SQLite helper or file permission.
 
 With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
@@ -142,6 +146,57 @@ data through API Core.
 Refresh sends no message below the bars. If Core, negotiation or the connection
 is unavailable, the reason appears in the Refresh icon's hover text. The plugin
 does not automatically send refresh requests.
+
+## Aardwolf Room Details
+
+**0.1.0** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
+**Room Details** panel with Characters above Objects. Initial size is 360 × 240;
+drag it to an edge of another widget to dock it. MudForge restores saved placement,
+size and visibility. Each completed tagged block replaces its own section;
+an empty block clears it. Descriptions, aura prefixes, order, duplicate rows,
+indentation and blank lines are preserved. Each nonempty received line is one
+selectable entry; long lines wrap within that entry.
+
+The panel follows the terminal font and uses MudForge's native `parseAnsiText`
+segments for foreground/background colors, italic, underline and native bright
+color handling for intensity. SGR state carries across lines, including styles
+set before the opening tag. Text is rendered as text nodes, never as server HTML.
+Click or keyboard-activate a row to select it; the outline does not recolor its
+text. Selection sends no game command. You can drag across text to copy it.
+
+On installation/enabling in an authenticated active session, and on each login,
+Room Details sends `tags roomobjs on`, `tags roomchars on`, then one `look`.
+Repeated status packets and temporary Core restarts do not repeat the setup.
+A full plugin reload creates a new runtime and performs one setup again.
+Core owns GMCP negotiation; Room Details consumes `Char` and `Room` through
+`aardwolf-api`. Disabling/uninstalling the plugin does not turn server tags off.
+
+**Auto** is enabled by default. It queues a follow-up look when combat ends or
+after outgoing `get`, `take`, `drop`, `put`, `give`, `sacrifice`, `sac`, `donate`,
+`buy` or `sell` commands (including aliases that expand to those commands).
+Activity coalesces until the next normal Aardwolf prompt, active state, and
+300 ms of quiet, with at least one second between looks. Refreshes wait for any
+room block and an available Spells provider's collection/save to finish. There
+is no dependency on Spells being installed. Automatic refreshes do not guess
+death messages or mutate descriptions. Tag snapshots remain authoritative.
+
+- `awroomdetails show` / `hide` reopens or hides the panel.
+- `awroomdetails refresh` (or **Refresh**) requests one look; failed setup can
+  be retried explicitly here. Failed sends and response timeouts do not retry.
+- `awroomdetails auto on` / `auto off` changes the saved Auto preference.
+- `awroomdetails status` reports availability, pending work, or the last error.
+
+Tag markers and their contents are hidden from the console only when the panel
+is ready, visible and has working formatting APIs. Other output stays visible.
+The panel continues collecting while hidden, so it has current data on reopening.
+Each block is bounded to 500 lines, 128 KiB and five seconds. Malformed boundaries,
+missing closing tags or overflow surface buffered content as incomplete and
+release console suppression. Missing/failed formatting leaves output visible.
+Room/character changes and disconnects clear stale selection and room data;
+only the Auto preference persists.
+
+Offline and browser checks do not establish native formatting, gagging, docking,
+or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--010-acceptance-pending).
 
 ## Aardwolf Spells
 
