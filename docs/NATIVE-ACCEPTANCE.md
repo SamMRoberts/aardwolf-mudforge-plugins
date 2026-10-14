@@ -88,7 +88,7 @@ Access toggle, text-file handles, rename semantics or native timer delivery.
   and reopen persistence. Remove only disposable artifacts, restore the original
   selected world and record evidence separately from live Aardwolf acceptance.
 
-## Room Details — 0.1.2 acceptance pending
+## Room Details — 0.2.0 acceptance pending
 
 Offline fixtures exercise capture/suppression return values, ANSI state passed
 to a stubbed native formatter, bounded recovery, login sequencing, selection,
@@ -97,9 +97,9 @@ transpiler, ANSI parser, actual suppression or docking. Browser checks exercise
 the real panel markup with synthetic native messages, not live room transport.
 
 - In an independently authorized disposable world, install `aardwolf-api`, API
-  Core and Room Details 0.1.2. No helper, database or file permission is required.
+  Core and Room Details 0.2.0. No helper, database or file permission is required.
   Record the client version. Keep Core as the only GMCP negotiation owner.
-- Observe the initial 360 × 240 widget, drag-to-dock, resizing at 200/360/540 px,
+- Observe the initial 360 × 240 widget, drag-to-dock, resizing at 200/360/540/900 px,
   close/show, reload and world reopen. Confirm saved placement/visibility.
 - After authenticated active status, observe exactly `tags roomobjs on`,
   `tags roomchars on`, then `look`. Repeat status packets, reconnect, enable in
@@ -116,13 +116,24 @@ the real panel markup with synthetic native messages, not live room transport.
   128-KiB and five-second bounds; confirm incomplete content and released gagging.
 - Select either kind with mouse/keyboard, copy text and preserve focus/scroll
   through updates to the other section. Selection must send no command and
-  must clear on its section/room/character changing. Server markup stays text.
+  must survive identical snapshots and clear on its changed section/room/character
+  or connection. Server markup stays text. Confirm unchanged status packets send
+  no widget updates after initial ready delivery; iframe ready forces a full view.
 - Check character markers across differently colored ANSI spans: `(Golden Aura)
   (White Aura)` displays as `(G)(W)` with each retained character styled as in
-  the original. Hover retains the full description, and objects are unchanged.
+  the original. Leading object indentation disappears for display only;
+  `(Magic) (Hum) A bag (open).` becomes `(M)(H) A bag (open).`
+  Description parentheses and original text in Details remain unchanged.
 - Long descriptions stay on one compact row at every width, with an ellipsis
   and full-text tooltip. Verify copying preserves the displayed text and
   ANSI spans retain their styling. Blank spacer rows occupy no vertical space.
+- Open Details with the toolbar icon, double-click and Enter on a selected row.
+  Check native dialog focus containment, Close/Escape focus restoration, narrow
+  layout, scrolling and preserved original ANSI formatting. Copy must use original
+  plain text; refused/unavailable clipboard must select text with honest fallback
+  instructions. Unrelated updates must preserve the dialog; changed selected
+  snapshots/room/character/connection must close it. No selection/detail action
+  may send a game command.
 - Confirm room GMCP before/after tagged blocks and the prompt preserves the new
   lists without mixing old-room content. Test two sessions and disconnect.
 - Combat ending and the documented item commands should coalesce into one look
@@ -130,7 +141,10 @@ the real panel markup with synthetic native messages, not live room transport.
   per second. Confirm no looks during combat, pager, a room block, or Spells
   collection/save. Native provisional/newline prompts must not double-send.
 - Verify Refresh, Auto on/off, failed sends, refused timers and five-second
-  response timeout. Auto is the only persisted preference. Cleanup must cancel
+  response timeout. Pending/in-flight feedback stays in the toolbar; sleeping,
+  pager, prompt, Spells and connection waits explain the actual blocking reason.
+  Resolved capture/refresh faults disappear while unrelated failures remain.
+  Auto is the only persisted preference. Cleanup must cancel
   timers/unsubscribe/destroy the widget and must not send tag-off commands.
 - Record connected Aardwolf acceptance separately, including automatic look
   timing with real command aliases and server output. Complete preservation and

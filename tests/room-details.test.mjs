@@ -7,6 +7,86 @@ import { root } from '../tools/build-repository.mjs';
 const fixture = readFileSync(resolve(root, 'tests/fixtures/room-details.lua'), 'utf8');
 const setup = `local world, context, env = roomWorld(); world.ready(); world.active(); world.tick(300); world.prompt()`;
 const cases = {
+  'unchanged snapshots preserve revisions, duplicate rows and selection, but styled changes invalidate them': `
+    ${setup}
+    world.block("chars", { "A man.", "A man." })
+    local revision = world.state().chars.revision
+    world.message("select", { kind = "chars", revision = revision, index = 2 })
+    world.block("chars", { "A man.", "A man." })
+    assert(world.state().chars.revision == revision and #world.state().chars.rows == 2)
+    assert(world.state().selection.index == 2)
+    env.parseAnsiText = function(raw) return { { text = "A man.", color = "#ffffff", italic = true } } end
+    world.block("chars", { "A man.", "A man." })
+    assert(world.state().chars.revision ~= revision and world.state().selection == nil)
+  `,
+  'snapshot identity includes original text, order and completeness and never survives a room change': `
+    ${setup}
+    world.packet("room.info", { num = 1 })
+    world.block("objs", { "A key.", "A bag." })
+    local first = world.state().objs.revision
+    world.message("select", { kind = "objs", revision = first, index = 1 })
+    world.block("objs", { "A bag.", "A key." })
+    assert(world.state().objs.revision ~= first and world.state().selection == nil)
+    local reordered = world.state().objs.revision
+    world.line("{roomobjs}"); world.line("A bag."); world.line("A key."); world.tick(5000)
+    assert(world.state().objs.revision ~= reordered and world.state().objs.incomplete)
+    local incomplete = world.state().objs.revision
+    world.block("objs", { "A bag.", "A key." })
+    assert(world.state().objs.revision ~= incomplete and not world.state().objs.incomplete)
+    local complete = world.state().objs.revision
+    world.message("select", { kind = "objs", revision = complete, index = 1 })
+    world.packet("room.info", { num = 2 })
+    assert(world.state().objs.revision ~= complete and world.state().selection == nil)
+    world.message("select", { kind = "objs", revision = complete, index = 1 })
+    assert(world.state().selection == nil)
+  `,
+  'unchanged status packets do not publish panel data, and ready forces a fresh delivery': `
+    ${setup}
+    world.block("chars", { "A man." }); world.block("objs", { "A key." })
+    local count, encodes = 0, 0
+    env.json = { encode = function(value) encodes = encodes + 1; return json.encode(value) end }
+    local original = env.setWidgetProperty
+    env.setWidgetProperty = function(id, key, value)
+      if key == "roomDetails" then count = count + 1 end
+      return original(id, key, value)
+    end
+    for index = 1, 100 do world.packet("char.status", { state = 3 }) end
+    assert(count == 0 and encodes == 0)
+    world.ready(); assert(count == 1 and encodes == 1 and #world.state().chars.rows == 1)
+    world.packet("char.status", { state = 3 }); assert(count == 1)
+  `,
+  'capture recovery clears only its own error and preserves unrelated failures': `
+    ${setup}
+    world.line("{roomchars}"); world.line("A man."); world.tick(5000)
+    assert(world.state().chars.incomplete)
+    world.block("chars", { "A recovered man." })
+    assert(world.state().status == "" and not world.state().chars.incomplete)
+    context.refuseWrites = true; world.commands.awroomdetails("auto off")
+    local savedError = world.state().status
+    world.line("{roomobjs}"); world.line("A key."); world.tick(5000)
+    world.block("objs", { "A recovered key." })
+    assert(world.state().status == savedError and not world.state().objs.incomplete)
+    context.refuseWrites = false; world.commands.awroomdetails("auto off")
+    assert(world.state().status == "")
+    world.line("{roomchars}"); world.line("A man."); world.tick(5000)
+    world.block("objs", { "A key." })
+    assert(string.find(world.state().status, "Incomplete", 1, true))
+  `,
+  'refresh controls explain sleeping, pager, Spells and prompt waits without a normal activity row': `
+    ${setup}
+    world.packet("char.status", { state = 9 }); world.commands.awroomdetails("refresh")
+    assert(string.find(world.state().status, "sleeping", 1, true))
+    assert(world.state().statusVisible and world.state().refreshDisabled)
+    world.packet("char.status", { state = 7 })
+    assert(string.find(world.state().status, "pager", 1, true))
+    world.spellsBusy(true); world.packet("char.status", { state = 3 })
+    assert(string.find(world.state().status, "Spells", 1, true))
+    world.spellsBusy(false); world.tick(1000)
+    assert(world.state().refreshBusy and not world.state().statusVisible)
+    world.prompt(); assert(not world.state().refreshDisabled)
+    env.onSend(world.id, "get key")
+    assert(string.find(world.state().status, "prompt", 1, true))
+  `,
   'login configures tags in order once, waits for authentication and handles reconnect': `
     local world, context, env = roomWorld()
     world.ready(); world.tick(1000); assert(#world.sends == 0)
