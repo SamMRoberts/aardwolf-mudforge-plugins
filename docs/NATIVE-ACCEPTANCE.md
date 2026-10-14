@@ -71,16 +71,29 @@ layout/editing. These use the plugin's generated HTML with synthetic bindings;
 they do not test native iframe sanitization or widget message delivery.
 This checklist requires separate authorization for disposable native or live testing.
 
-- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.2 in a
+- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.3 in a
   disposable world. Verify one compact horizontal strip with left labels and
   overlaid numeric readouts, status beside the title, and no message area below
-  the bars.
+  the bars. The new Target/Alignment row and character summary should fit at
+  640 × 150 px with default typography.
 - Resize above/below 480 px, open the floating Settings window and try large
   fonts. Expect readable wrapping, accessible controls, vertical scrolling and
   preserved geometry.
 - Send current/maxima packets in either order and partial/invalid data. Verify
   unknown values are neutral, zero maxima suppress alerts, and over-max values
   preserve numeric readouts while bars remain bounded.
+- Feed the supplied `char.status` sample. Verify an owl at 93%, alignment
+  +1867 Good, Level 210, TNL 1000, Hunger/Thirst 70, Active and Standing.
+- Send partial status packets, all documented state codes, unknown codes and
+  invalid fields. Confirm ordinary updates preserve settings edits and focus.
+- Replace and clear the enemy; distinguish No target from Target unknown.
+  Confirm names containing markup remain literal text, long names truncate
+  with full hover text, missing HP is unknown, and only the target fill clamps.
+- Check alignment at −2500, −875, −874, 0, 874, 875 and 2500. Verify segment
+  colors, signed values, categories and marker placement, including out-of-range
+  clamping and a hidden marker for unknown data.
+- Disconnect, reload Core and reconnect; confirm all character-status displays
+  clear while unavailable and remain isolated between two disposable sessions.
 - Cross each configured threshold, including equality. Verify red HP, blue mana
   and yellow moves, their matching Low/Critical shades, a gentle critical border
   pulse and recovery to normal. Enable OS

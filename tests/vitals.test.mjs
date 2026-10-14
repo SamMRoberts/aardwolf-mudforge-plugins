@@ -250,7 +250,7 @@ const cases = {
     local world, panel, widget = panelWorld(); fullVitals(world)
     local settings = openPreferences(panel, widget)
     local content, controls = settings.content, settings.vitalsPreferences
-    assert(widget.config.size.width == 640 and widget.config.size.height == 90)
+    assert(widget.config.size.width == 640 and widget.config.size.height == 150)
     assert(settings.config.size.width == 420 and settings.config.size.height == 520)
     assert(settings.config.title == "Aardwolf Vitals Settings" and settings.visible and settings.lastShowForced)
     assert(not string.find(widget.content, '<form', 1, true))
@@ -294,6 +294,118 @@ const cases = {
     panel.failWidgetName = nil
     assert(openPreferences(panel, widget).visible)
     assert(widget.bindings.settingsHint == "Settings" and widget.bindings.feedback == nil)
+  `,
+
+  'character status renders the supplied snapshot without replacing either widget': `
+    local world, panel, widget = panelWorld(); fullVitals(world)
+    local settings = openPreferences(panel, widget)
+    local controls = settings.vitalsPreferences
+    world.packet("char.status", { level = 210, tnl = 1000, hunger = 70, thirst = 70,
+      align = 1867, state = 3, pos = "Standing", enemy = "an owl", enemypct = 93 })
+    assert(widget.bindings.targetName == "an owl" and widget.bindings.targetPercent == "93%")
+    assert(widget.bindings.targetWidth == "93%" and widget.bindings.targetLevel == "normal")
+    assert(widget.bindings.alignmentText == "+1867 Good" and widget.bindings.alignmentPosition == "87.34%")
+    assert(widget.bindings.alignmentKnown == "true" and widget.bindings.alignmentMarkerOpacity == "1")
+    assert(widget.bindings.characterlevel == "210" and widget.bindings.charactertnl == "1000")
+    assert(widget.bindings.characterhunger == "70" and widget.bindings.characterthirst == "70")
+    assert(widget.bindings.characterState == "Active" and widget.bindings.characterPosition == "Standing")
+    assert(widget.contentWrites == 1 and settings.contentWrites == 1 and settings.vitalsPreferences == controls)
+    world.packet("char.status", { tnl = "900", enemypct = "45" })
+    assert(widget.bindings.charactertnl == "900" and widget.bindings.targetPercent == "45%")
+    assert(widget.bindings.targetName == "an owl" and widget.bindings.alignmentText == "+1867 Good")
+    assert(widget.contentWrites == 1 and settings.vitalsPreferences == controls and panel.writes == 0)
+  `,
+  'character state names cover every documented code and preserve position text': `
+    local world, panel, widget = panelWorld()
+    for _, sample in ipairs({ {1, "Login"}, {2, "MOTD/login"}, {3, "Active"}, {4, "AFK"}, {5, "Note"},
+      {6, "Building/edit"}, {7, "Pager"}, {8, "Combat"}, {9, "Sleeping"}, {11, "Resting/sitting"}, {12, "Running"} }) do
+      world.packet("char.status", { state = tostring(sample[1]), pos = "Standing" })
+      assert(widget.bindings.characterState == sample[2] and widget.bindings.characterPosition == "Standing")
+    end
+    world.packet("char.status", { state = 10, pos = "Sitting" })
+    assert(widget.bindings.characterState == "State 10" and widget.bindings.characterPosition == "Sitting")
+    world.packet("char.status", { state = "invalid", pos = false })
+    assert(widget.bindings.characterState == "?" and widget.bindings.characterPosition == "?")
+    world.packet("char.status", { pos = "   " }); assert(widget.bindings.characterPosition == "?")
+  `,
+  'target HP distinguishes empty and unknown enemies, merges partial data and bounds only the fill': `
+    local world, panel, widget = panelWorld()
+    assert(widget.bindings.targetName == "Target unknown" and widget.bindings.targetPercent == "--")
+    world.packet("char.status", { enemy = "an owl", state = 3 })
+    assert(widget.bindings.targetName == "an owl" and widget.bindings.targetWidth == "0%")
+    assert(widget.bindings.targetPercent == "--" and widget.bindings.targetLevel == "unknown")
+    for _, sample in ipairs({ {0, "0%"}, {100, "100%"}, {-5, "0%"}, {120, "100%"} }) do
+      world.packet("char.status", { enemypct = sample[1] })
+      assert(widget.bindings.targetPercent == tostring(sample[1]) .. "%" and widget.bindings.targetWidth == sample[2])
+      assert(widget.bindings.targetLevel == "normal")
+    end
+    world.packet("char.status", { enemy = "another owl", enemypct = "75" })
+    assert(widget.bindings.targetName == "another owl" and widget.bindings.targetPercent == "75%")
+    world.packet("char.status", { enemy = "a third owl" })
+    assert(widget.bindings.targetName == "a third owl" and widget.bindings.targetPercent == "75%")
+    world.packet("char.status", { enemy = "" })
+    assert(widget.bindings.targetName == "No target" and widget.bindings.targetPercent == "--" and widget.bindings.targetWidth == "0%")
+    world.packet("char.status", { enemy = "   " }); assert(widget.bindings.targetName == "No target")
+    world.packet("char.status", { enemy = false })
+    assert(widget.bindings.targetName == "Target unknown" and widget.bindings.targetPercent == "--")
+    world.packet("char.status", { enemy = "an owl", enemypct = "bad" })
+    assert(widget.bindings.targetPercent == "--" and widget.bindings.targetWidth == "0%")
+    world.packet("char.status", { enemy = '<img src=x onerror="alert(1)">', enemypct = 25 })
+    assert(widget.bindings.targetName == '<img src=x onerror="alert(1)">')
+    assert(not string.find(widget.content, '<img src=x', 1, true))
+    assert(string.find(widget.bindings.targetDescription, '<img src=x', 1, true))
+  `,
+  'alignment categories and marker positions respect boundaries and preserve reported values': `
+    local world, panel, widget = panelWorld()
+    assert(widget.bindings.alignmentText == "?" and widget.bindings.alignmentMarkerOpacity == "0")
+    for _, sample in ipairs({ {-2500,"-2500 Evil","0%"}, {-875,"-875 Evil","32.5%"},
+      {-874,"-874 Neutral","32.52%"}, {0,"0 Neutral","50%"}, {874,"+874 Neutral","67.48%"},
+      {875,"+875 Good","67.5%"}, {2500,"+2500 Good","100%"},
+      {-4000,"-4000 Evil","0%"}, {4000,"+4000 Good","100%"} }) do
+      world.packet("char.status", { align = tostring(sample[1]) })
+      assert(widget.bindings.alignmentText == sample[2])
+      local marker = tonumber(string.sub(widget.bindings.alignmentPosition, 1, -2))
+      local expected = tonumber(string.sub(sample[3], 1, -2))
+      assert(marker and math.abs(marker - expected) < 0.0001)
+      assert(widget.bindings.alignmentKnown == "true" and widget.bindings.alignmentMarkerOpacity == "1")
+    end
+    world.packet("char.status", { align = "bad" })
+    assert(widget.bindings.alignmentText == "?" and widget.bindings.alignmentKnown == "false")
+    assert(widget.bindings.alignmentMarkerOpacity == "0")
+  `,
+  'summary metrics preserve zero, numeric strings and unknown fields': `
+    local world, panel, widget = panelWorld()
+    assert(widget.bindings.characterlevel == "?" and widget.bindings.charactertnl == "?")
+    assert(widget.bindings.characterhunger == "?" and widget.bindings.characterthirst == "?")
+    world.packet("char.status", { level = "210", tnl = "0", hunger = 0, thirst = "70" })
+    assert(widget.bindings.characterlevel == "210" and widget.bindings.charactertnl == "0")
+    assert(widget.bindings.characterhunger == "0" and widget.bindings.characterthirst == "70")
+    world.packet("char.status", { level = "bad", tnl = {}, hunger = " ", thirst = false })
+    assert(widget.bindings.characterlevel == "?" and widget.bindings.charactertnl == "?")
+    assert(widget.bindings.characterhunger == "?" and widget.bindings.characterthirst == "?")
+  `,
+  'character status clears with session availability and stays isolated across worlds and reloads': `
+    local a, pa, wa, core = panelWorld("a"); local b, pb, wb = panelWorld("b")
+    a.packet("char.status", { enemy = "owl", enemypct = 93, align = 1867, state = 8, level = 210, pos = "Fighting" })
+    b.packet("char.status", { enemy = "wolf", enemypct = 20, align = -875, state = 4, level = 100 })
+    pa.env.init(); assert(#pa.broadcasts == 1 and #pa.events.disconnected == 1)
+    a.disconnect()
+    assert(wa.bindings.targetName == "Target unknown" and wa.bindings.alignmentMarkerOpacity == "0")
+    assert(wa.bindings.characterlevel == "?" and wa.bindings.characterState == "?" and wa.bindings.characterPosition == "?")
+    assert(wb.bindings.targetName == "wolf" and wb.bindings.alignmentText == "-875 Evil")
+    a.connect(); a.packet("char.status", { enemy = "early owl", enemypct = 99, align = 2000 })
+    assert(wa.bindings.targetName == "Target unknown")
+    a.packet("char.base", { name = "Fixture" })
+    assert(wa.bindings.targetName == "early owl")
+    a.unload(core)
+    assert(wa.bindings.targetName == "Target unknown" and wa.bindings.alignmentKnown == "false")
+    core = a.core("reloaded"); a.tick(1000)
+    a.packet("char.status", { enemy = "new owl", enemypct = 45, align = 0, state = 3 })
+    assert(wa.bindings.targetName == "new owl" and wa.bindings.alignmentText == "0 Neutral")
+    pa.env.cleanup(); pa.env.cleanup(); assert(next(pa.widgets) == nil)
+    pa.env.init(); wa = pa.widgets["vitals-file-id:vitals"]
+    assert(wa.bindings.targetName == "new owl" and wa.contentWrites == 1)
+    a.unload(pa); assert(next(pa.widgets) == nil and wb.bindings.targetName == "wolf")
   `,
 
 };
