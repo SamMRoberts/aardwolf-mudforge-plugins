@@ -57,18 +57,20 @@
     {
       "id": "aardwolf-spells",
       "name": "Aardwolf Spells",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": "Sam Roberts",
-      "description": "Collects allspells skills and spells into character-specific SQLite snapshots.",
-      "category": "utilities",
+      "description": "Character-specific skills, spells and damage ability buttons backed by SQLite.",
+      "category": "widgets",
       "tags": [
         "aardwolf",
         "spells",
+        "skills",
+        "damage",
         "sqlite"
       ],
       "downloadUrl": "dist/plugins/aardwolf-spells.lua",
-      "sha256": "99a0dd80bf91b0b4ad21eb475879d3cf626146617d874b98709ed6ecceffbd62",
-      "size": 19906,
+      "sha256": "dc294121461778c78d1b6155a279aba84bc9a28119f4aa8ab98bdb5222712368",
+      "size": 47206,
       "format": "lua"
     }
   ],

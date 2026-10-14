@@ -14,7 +14,7 @@ a connected session.
 | Aardwolf API Core | One GMCP negotiation owner and one authoritative state cache per session |
 | Aardwolf API Vitals Example | HP/mana/moves bindings, an explicit refresh button and saved font-size preferences |
 | Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
-| Aardwolf Spells | Character-specific SQLite skill/spell snapshots collected from `allspells` |
+| Aardwolf Spells | SQLite skill/spell snapshots and a dockable panel of learned damage abilities |
 
 ## Installation
 
@@ -145,49 +145,108 @@ does not automatically send refresh requests.
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.1.0** queries plain `allspells` once after login and stores
+Aardwolf Spells **0.2.0** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
-Sn or percentage. It sends no casts or training commands and creates no widget.
-The original command output, pager controls and character prompt stay visible.
+Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
+Drag it into MudForge's tiled layout; its saved placement and visibility survive
+reloads. The original command output, pager controls and prompt remain visible.
 
 Install the **0.3.0** `aardwolf-api` library and API Core. Start
 `python3 tools/sqlite_helper.py` and enable **File System Access** for Spells;
 see [SQLite setup](docs/SQLITE.md). The plugin does not start the helper.
-It waits for a verified `char.base.name`, connected/negotiated Core state and
-`char.status.state == 3`. The lowercase character name selects its managed
+Collection waits for a verified `char.base.name`, connected/negotiated Core state
+and `char.status.state == 3`. The lowercase character name selects its managed
 `spells` database; installed plugin IDs and character names isolate databases.
 Renaming a character or changing the installed plugin ID selects a new database.
 These SQLite files live outside the portable world file.
 
-- `awspells refresh` explicitly collects a new list; it also works after resolving
-  missing helper/permission errors. Overlapping refreshes are refused.
-- `awspells status` (or `awspells`) reports character, saved count/time, current
-  operation and any dependency or capture error.
-- Sending plain `allspells` also captures the list when storage is ready.
-  Filtered variants such as `allspells spellup` never replace the full list.
+### Damage ability panel
 
-The header starts parsing and the exact
+Each row displays the best **skill** and best **spell** separately for acid, air,
+bash, cold, earth, electric, energy, fire, holy, light, magic, mental, negative,
+pierce, slash, shadow, sonic and water. Only entries learned **above 1%** qualify;
+starred unusable abilities and entries above the known character level are
+excluded. Highest level wins, followed by highest learned percentage and then
+alphabetical name. Hover over a button for level, percentage, command and last
+refresh time. Rows stack their controls at narrow widths and scroll vertically.
+
+Damage data is collected manually. Click the small refresh beside a skill or
+spell to send `skills <type>` or `spells <type>`. **Refresh all** queries all 36
+lists sequentially, skill then spell for each row. Saved results appear on load;
+**Not refreshed** means that filter has never completed, while **None learned**
+means it completed but currently has no qualifying ability. Refreshing or an
+error retains the prior committed result. **Cancel** stops capture and remaining
+requests. A sent query's remaining output is discarded until its footer, empty
+result, prompt or original timeout; new refreshes wait for that boundary. An
+already submitted SQLite transaction finishes and reconciles first.
+Errors stop Refresh all; recover and explicitly run it again. No automatic damage
+queries, pager changes, pager-control commands or background retries are sent.
+
+Clicking an ability sends one command without a target. Spell buttons send
+`cast <spell number>`; skills use a saved override, a verified mapping (currently
+`Dirt kicking` → `dirt`), or the lowercased skill name. Aardwolf decides the default
+target. Ability buttons work in active or combat state; refreshes require active
+state. Collection/save disables ability buttons to avoid interrupting its output.
+Some skills require a command different from their label; configure an override
+when necessary. Unsafe fallback commands are disabled.
+
+- `awspells refresh` collects the full `allspells` list and recovers after resolving
+  dependency errors. Overlapping collections/saves are refused.
+- `awspells refresh-all` collects all damage filters; `awspells cancel` stops it.
+- `awspells show` explicitly reopens a closed panel.
+- `awspells status` (or `awspells`) reports character, saved count/time and errors.
+- `awspells command "Dirt kicking"` inspects the effective command.
+- `awspells command "Dirt kicking" dirt` saves a per-character override for a skill
+  discovered in a damage list. Overrides are single commands, 1–128 characters,
+  using ASCII letters/digits, spaces, underscore, apostrophe or hyphen; command
+  separators and multiline commands are refused.
+- `awspells command-reset "Dirt kicking"` removes the override.
+
+Sending plain `allspells` or an exact supported `skills <type>`/`spells <type>`
+command also captures its output when storage is ready and collection is idle.
+Other filtered commands interrupt capture and never replace the full list.
+
+### Collection and persistence
+
+The full-list header starts parsing and the exact
 `* means that you cannot use the skill/spell.` footer completes it. Names,
-levels, nullable spell numbers/percentages, explicit star flags and display
-order are preserved. A dash percentage does not imply an unusable star flag.
-Repeated page headers are accepted; continue the pager yourself. Collection
-expires after **60 seconds** and is limited to **1,000 rows**.
+levels, nullable spell numbers/percentages, explicit star flags and display order
+are preserved. A dash percentage does not imply an unusable star flag.
+Damage tables start at their Skill/Spell header and complete at
+`To see all skills/spells for your class, use 'allspells <class>'`.
+`No skills found.` and `No spells found.` are successful empty results.
+Repeated page headers are accepted; continue the pager yourself. Each capture
+expires after **60 seconds** and is limited to **1,000 unique abilities**; the
+merged canonical list also has a 1,000-entry limit.
 
-Completed lists replace the SQLite abilities and metadata together in one
-transaction. Partial, malformed, duplicate or interrupted output leaves the
-previous list intact. Missing dependencies produce one automatic-query error
-and require manual recovery; there is no background retry. An unknown write
-outcome is read back before another refresh. Disconnects clear exposed data.
+Filtered results atomically update canonical ability fields and replace only
+the queried skill/spell damage membership. Omitted/forgotten entries disappear
+from that filter without deleting unrelated abilities. An ability can belong to
+multiple damage types. Full-list replacement preserves damage enrichment for
+retained names and prunes removed associations. Kind, mana, memberships, filter
+timestamps and command overrides use additive tables in the existing database;
+0.1.0 databases upgrade without deleting their saved abilities. Overrides remain
+saved if an ability temporarily disappears.
+
+Partial, malformed, duplicate, mismatched or interrupted output retains the
+previous committed data. An unknown write outcome is read back before another
+refresh, without replaying the write. Disconnect, lost Core and character changes
+clear exposed data and cancel pending work. SQLite collection timestamps reflect
+the latest committed full or filtered collection; changing a command override
+does not change collection time.
 
 Other plugins opt into `{ spells = true }` and use
-`client.spells.get()`, `client.spells.status()` or
-`client.spells.on(callback)` to read committed snapshots through targeted
-messages. They need no SQLite adapters or file permission. See
-[the spells API](docs/API.md#spells).
+`client.spells.get()`, `client.spells.status()` or `client.spells.on(callback)`.
+The public snapshot remains schema version 1, with updated canonical fields;
+damage enrichment is private to the provider. Readers need no SQLite adapters or
+file permission. See [the spells API](docs/API.md#spells).
 
-Offline fixtures and the real SQLite bridge test cover this behavior. Native
-transpilation, file permission/I/O, command hooks, pager behavior and live
-Aardwolf capture remain pending; see [native acceptance](docs/NATIVE-ACCEPTANCE.md).
+Offline fixtures and real SQLite bridge tests cover parsing, selection, command
+dispatch, upgrade, rollback, reconciliation, persistence and isolation. Chromium
+checks use generated widget HTML with synthetic bindings; they do not establish
+native docking or event delivery. Native transpilation, file permission/I/O,
+widget hooks, pager behavior and live Aardwolf capture remain pending; see
+[native acceptance](docs/NATIVE-ACCEPTANCE.md).
 
 ## Writing a consumer
 
