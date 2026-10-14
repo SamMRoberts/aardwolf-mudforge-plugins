@@ -55,7 +55,7 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Vitals
 
-Aardwolf Vitals **0.1.3** shows **HP, mana and moves** side by side, with labels
+Aardwolf Vitals **0.1.4** shows **HP, mana and moves** side by side, with labels
 to the left and current/max values plus percentages over each bar. The compact
 header places the connection/data status beside the Vitals title. Bars are
 24 px tall at the default font size and grow for larger fonts or wrapped values.
@@ -141,6 +141,8 @@ data updates preserve unfinished form edits and focus;
 successful Save/Reset synchronizes controls without replacing either widget's
 markup.
 
+The bottom-right **Settings** and **Refresh** icons remain visible while the
+panel scrolls. Settings places Save, Reset and Close at the lower right.
 The **Refresh** circular-arrow icon explicitly requests fresh character GMCP
 data through API Core.
 Refresh sends no message below the bars. If Core, negotiation or the connection
@@ -149,7 +151,7 @@ does not automatically send refresh requests.
 
 ## Aardwolf Room Details
 
-**0.2.0** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
+**0.2.1** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
 **Room Details** panel with Characters above Objects. Initial size is 360 × 240;
 drag it to an edge of another widget to dock it. MudForge restores saved placement,
 size and visibility. Each completed tagged block replaces its own section;
@@ -178,11 +180,12 @@ and connections clear them. Unrelated updates preserve focus and scrolling.
 The circular-arrow **Refresh** icon shows queued/in-flight feedback in its hover
 text and accessible name. Actionable waiting reasons (including sleeping, pager,
 Spells collection or missing connection) and unresolved errors appear below the
-toolbar when needed. Recovered operations clear only their corresponding errors.
+title when needed. Recovered operations clear only their corresponding errors.
 Unchanged view states are not sent to the widget, and unchanged lists are not
-rebuilt. The compact toolbar always keeps **Auto** visible. To reclaim unused
-space below the lists, resize the native dock tile manually; the plugin preserves
-MudForge's saved geometry.
+rebuilt. The compact bottom-right toolbar keeps **Auto**, **Details** and
+**Refresh** visible while the lists scroll. Copy and Close sit at the lower right
+of the Details dialog. To reclaim unused space below the lists, resize the native
+dock tile manually; the plugin preserves MudForge's saved geometry.
 
 On installation/enabling in an authenticated active session, and on each login,
 Room Details sends `tags roomobjs on`, `tags roomchars on`, then one `look`.
@@ -216,11 +219,11 @@ Room/character changes and disconnects clear stale selection and room data;
 only the Auto preference persists.
 
 Offline and browser checks do not establish native formatting, gagging, docking,
-or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--020-acceptance-pending).
+or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--021-acceptance-pending).
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.2.4** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.2.5** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
@@ -246,7 +249,8 @@ alphabetical name. Hover over a button for level, percentage, command and last
 refresh time. Rows stack their controls at narrow widths and scroll vertically.
 
 The compact pane opens at 540 × 400 px unless MudForge restores a saved size.
-Its toolbar uses icons: pencil for **Edit layout**, circular arrow for **Refresh
+Its bottom-right toolbar stays visible while the ability list scrolls and uses
+icons: pencil for **Edit layout**, circular arrow for **Refresh
 all**, and × for **Cancel collection**. Hover for labels or use the keyboard.
 Toggle Edit to reveal drag handles and visibility checkboxes for every damage
 type and its skill/spell slots, including hidden ones. Checked means visible.

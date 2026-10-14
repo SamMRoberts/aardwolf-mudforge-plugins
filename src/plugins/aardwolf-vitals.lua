@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.3",
+  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.4",
   author = "Sam Roberts", description = "Compact vitals, target HP, alignment and character status with configurable typography and low-vital alerts."
 }
 
@@ -205,8 +205,8 @@ end
 local function styles()
   return [[
 <style>
-  *{box-sizing:border-box}body{margin:0;background:#101722;color:#eef3fc;font:13px system-ui;line-height:1.45}
-  main{padding:8px}header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  html{scroll-padding-bottom:90px}*{box-sizing:border-box}body{margin:0;background:#101722;color:#eef3fc;font:13px system-ui;line-height:1.45}
+  main{padding:8px;min-height:100vh;display:flex;flex-direction:column}main>*,form>*{flex-shrink:0}form{flex:1;display:flex;flex-direction:column}header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
   h1{font-size:1em;margin:0;font-weight:700;letter-spacing:.04em}small{color:#b5c1d6;font-size:.85em}
   .hud{padding:6px}.hud header{gap:6px;margin-bottom:4px;flex-wrap:nowrap}
   .header-title{display:flex;align-items:baseline;gap:6px;min-width:0;flex:1}
@@ -245,12 +245,12 @@ local function styles()
   label{display:flex;flex-direction:column;gap:4px;color:#c9d4e6;font-size:.9em}
   input,select,button{font:inherit;color:inherit;border:1px solid #4a5b74;border-radius:6px;background:#1d2a3d;padding:5px 8px}
   input,select{width:100%;min-width:0}button{cursor:pointer}button:hover{background:#293b55}
-  .toolbar{display:flex;flex-wrap:wrap;max-width:100%;gap:5px}
+  .toolbar{display:flex;flex-wrap:wrap;justify-content:flex-end;max-width:100%;gap:5px;margin-top:auto;padding-top:4px;position:sticky;bottom:0;z-index:2;background:#101722}
   .toolbar button{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;flex:none;line-height:1}
   .toolbar .icon{font:18px system-ui}
   :focus-visible{outline:2px solid #8bb8ff;outline-offset:2px}fieldset{min-width:0;border:1px solid #354359;border-radius:8px;margin:10px 0;padding:8px}
   legend{color:#c9d4e6;font-size:.9em}.thresholds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .actions{display:flex;gap:8px;flex-wrap:wrap}.feedback{font-size:.85em;color:#c9d4e6;margin:8px 0 0;overflow-wrap:anywhere}
+  .actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px;position:sticky;bottom:0;z-index:2;background:#101722}.feedback{font-size:.85em;color:#c9d4e6;margin:8px 0 0;overflow-wrap:anywhere}
   .feedback:empty{display:none}@media(max-width:260px){.font-settings,.thresholds{grid-template-columns:1fr}}
 </style>
 ]]
@@ -259,9 +259,7 @@ end
 local function markup()
   local html = { styles(), [[
 <main class="hud" data-mud-bind-style="font-family:fontFamily;font-size:fontSize;font-weight:fontWeight;font-style:fontStyle">
-  <header><div class="header-title"><h1>Vitals</h1><small data-mud-bind="status" data-mud-bind-attr="title:status" role="status">Waiting for Core</small></div>
-    <div class="toolbar"><button type="button" data-mud-action="settings" aria-label="Open vitals settings" title="Settings" data-mud-bind-attr="title:settingsHint"><span class="icon" aria-hidden="true">&#9881;&#65038;</span></button>
-    <button type="button" data-mud-action="refresh" aria-label="Refresh vitals" title="Refresh" data-mud-bind-attr="title:refreshHint"><span class="icon" aria-hidden="true">&#8635;</span></button></div></header>
+  <header><div class="header-title"><h1>Vitals</h1><small data-mud-bind="status" data-mud-bind-attr="title:status" role="status">Waiting for Core</small></div></header>
   <div class="cards">
 ]] }
   for _, stat in ipairs(stats) do
@@ -289,12 +287,13 @@ local function markup()
     { "State", "State" }, { "Position", "Position" } }) do
     table.insert(html, '<div><dt>' .. field[2] .. '</dt><dd data-mud-bind="character' .. field[1] .. '">?</dd></div>')
   end
-  table.insert(html, '</dl></main>')
+  table.insert(html, [[</dl><footer class="toolbar" aria-label="Vitals controls"><button type="button" data-mud-action="settings" aria-label="Open vitals settings" title="Settings" data-mud-bind-attr="title:settingsHint"><span class="icon" aria-hidden="true">&#9881;&#65038;</span></button>
+    <button type="button" data-mud-action="refresh" aria-label="Refresh vitals" title="Refresh" data-mud-bind-attr="title:refreshHint"><span class="icon" aria-hidden="true">&#8635;</span></button></footer></main>]])
   return table.concat(html)
 end
 
 local function settingsMarkup()
-  local html = { styles(), '<main><header><h1>Vitals settings</h1><button type="button" data-mud-action="close-settings">Close</button></header>' }
+  local html = { styles(), '<main><header><h1>Vitals settings</h1></header>' }
   local values = formValues()
   table.insert(html, [[<form id="preferences"><div class="font-settings">]])
   table.insert(html, '<label>Font family<input name="fontFamily" maxlength="80" required value="' .. apiLibrary.escape(values.fontFamily) .. '"></label>')
@@ -316,8 +315,9 @@ local function settingsMarkup()
     table.insert(html, '</div></fieldset>')
   end
   table.insert(html, [[
-  <div class="actions"><button type="submit">Save settings</button><button type="button" data-mud-action="reset-defaults">Reset defaults</button></div>
-  </form><p class="feedback" data-mud-bind="feedback" role="status"></p>
+  <p class="feedback" data-mud-bind="feedback" role="status"></p>
+  <footer class="actions" aria-label="Settings controls"><button type="submit">Save settings</button><button type="button" data-mud-action="reset-defaults">Reset defaults</button><button type="button" data-mud-action="close-settings">Close</button></footer>
+  </form>
 </main>
 <script>
   mudforge.onProperty("vitalsPreferences", function(encoded) {

@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.4",
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.5",
   author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons backed by SQLite."
 }
 
@@ -914,8 +914,8 @@ end
 local function panelMarkup()
   local html = { [[<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aardwolf Damage Abilities</title><style>
 :root{color-scheme:dark;font:12px system-ui,sans-serif;color:#e6edf5;background:#131b27}*{box-sizing:border-box}
-[hidden]{display:none!important}body{margin:0;padding:6px}header{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:4px}
-h1{font-size:13px;margin:0;font-weight:650}.toolbar{display:flex;gap:3px}button{font:inherit;color:inherit;background:#233247;
+html{scroll-padding-bottom:36px}[hidden]{display:none!important}body{margin:0;padding:6px;min-height:100vh;display:flex;flex-direction:column}body>*{flex-shrink:0}header{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:4px}
+h1{font-size:13px;margin:0;font-weight:650}.toolbar{display:flex;justify-content:flex-end;gap:3px;margin-top:auto;padding-top:4px;position:sticky;bottom:0;z-index:2;background:#131b27}button{font:inherit;color:inherit;background:#233247;
  border:1px solid #435772;border-radius:4px;min-height:24px;padding:2px 5px;cursor:pointer}button:hover:not(:disabled){background:#30465f}
 button:focus-visible,input:focus-visible{outline:2px solid #8bc3ff;outline-offset:1px}button:disabled{opacity:.5;cursor:default}
 button[aria-pressed="true"]{background:#355779;border-color:#8bc3ff}.icon{flex:none;width:24px;padding:2px;font-size:15px}
@@ -936,10 +936,7 @@ body.editing .row{grid-template-columns:98px minmax(0,1fr)}.damage{grid-row:1 / 
 header{flex-wrap:wrap}}
 @media(max-width:259px){body.editing .row{grid-template-columns:minmax(0,1fr)}body.editing .damage{grid-row:auto}
 body.editing .row .skill,body.editing .row .spell{grid-column:1}}
-</style></head><body><header><h1>Damage Abilities</h1><div class="toolbar">
-<button id="edit" type="button" class="icon" aria-label="Edit layout" title="Edit layout" aria-pressed="false" disabled><span aria-hidden="true">&#9998;</span></button>
-<button type="button" class="icon" data-mud-action="refresh-all" aria-label="Refresh all" title="Refresh all" aria-disabled="true" disabled data-mud-bind-attr="aria-disabled:refreshDisabled"><span aria-hidden="true">&#8635;</span></button>
-<button type="button" class="icon" data-mud-action="cancel" aria-label="Cancel collection" title="Cancel collection" aria-disabled="true" disabled data-mud-bind-attr="aria-disabled:cancelDisabled"><span aria-hidden="true">&#215;</span></button></div></header>
+</style></head><body><header><h1>Damage Abilities</h1></header>
 <p class="status" role="status" aria-live="polite" data-mud-bind="status">Waiting for API Core</p>
 <p id="layout-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
 <p id="edit-help" class="edit-help" hidden>Checked = visible. Drag types or focus a handle and use Alt+&#8593;/&#8595;.</p>
@@ -961,7 +958,10 @@ body.editing .row .skill,body.editing .row .spell{grid-column:1}}
     end
     table.insert(html, '</section>')
   end
-  table.insert(html, [[</main><script>
+  table.insert(html, [[</main><footer class="toolbar" aria-label="Damage ability controls">
+<button id="edit" type="button" class="icon" aria-label="Edit layout" title="Edit layout" aria-pressed="false" disabled><span aria-hidden="true">&#9998;</span></button>
+<button type="button" class="icon" data-mud-action="refresh-all" aria-label="Refresh all" title="Refresh all" aria-disabled="true" disabled data-mud-bind-attr="aria-disabled:refreshDisabled"><span aria-hidden="true">&#8635;</span></button>
+<button type="button" class="icon" data-mud-action="cancel" aria-label="Cancel collection" title="Cancel collection" aria-disabled="true" disabled data-mud-bind-attr="aria-disabled:cancelDisabled"><span aria-hidden="true">&#215;</span></button></footer><script>
 // ARIA bindings are strings; mirror them to the native boolean property.
 function syncDisabled(button) { if (button.hasAttribute('aria-disabled')) button.disabled = button.getAttribute('aria-disabled') !== 'false'; }
 document.querySelectorAll('button[aria-disabled]').forEach(syncDisabled);
