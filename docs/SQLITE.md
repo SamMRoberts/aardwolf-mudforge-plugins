@@ -1,10 +1,14 @@
-# Local SQLite support — aardwolf-api 0.2.0
+# Local SQLite support — aardwolf-api 0.3.0
 
 Plugins can create and query real SQLite databases through a separately running
 local helper. MudForge's built-in `sqlite` library is read-only and has no SQL
 execution; its plugin HTTP API cannot reach local helper services. This bridge
 uses text files with the consuming plugin's **File System Access** permission.
 Only the helper reads or writes binary database files.
+
+[Aardwolf Spells](../README.md#aardwolf-spells) is a production consumer of this
+bridge. It selects its stable character key only after Core supplies a verified
+GMCP character name, then recreates its single API consumer with SQLite configured.
 
 ## Setup
 

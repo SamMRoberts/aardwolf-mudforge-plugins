@@ -9,6 +9,7 @@ const entries = [
   { kind: 'plugin', file: 'aardwolf-api-core.lua', category: 'utilities', tags: ['aardwolf', 'gmcp', 'core'] },
   { kind: 'plugin', file: 'aardwolf-api-vitals-example.lua', category: 'development', tags: ['aardwolf', 'example', 'vitals'] },
   { kind: 'plugin', file: 'aardwolf-vitals.lua', category: 'widgets', tags: ['aardwolf', 'gmcp', 'vitals'] },
+  { kind: 'plugin', file: 'aardwolf-spells.lua', category: 'utilities', tags: ['aardwolf', 'spells', 'sqlite'] },
   { kind: 'library', file: 'aardwolf-api.lua', tags: ['aardwolf', 'gmcp', 'api'] },
 ];
 

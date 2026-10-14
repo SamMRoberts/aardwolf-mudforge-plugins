@@ -1,4 +1,4 @@
-# Aardwolf API 0.2.0
+# Aardwolf API 0.3.0
 
 ## Lifecycle and host adapters
 
@@ -133,6 +133,56 @@ handles and cancels pending delivery; submitted work may have an unknown outcome
 See [SQLite setup, values and complete contracts](SQLITE.md), including NULL,
 BLOB/int64 wrappers, registered aliases, limits and retry semantics. Existing
 `client.storage` behavior and stored records are unchanged.
+
+## Spells
+
+Pass `spells = true` when constructing a consumer to subscribe to the optional
+**Aardwolf Spells** provider. Existing consumers are opted out by default.
+This uses only the required lifecycle/messaging adapters; SQLite adapters and
+file permission belong to the provider alone. Start/stop the consumer as usual.
+The provider owns collection and sends only committed SQLite snapshots.
+
+| Method | Behavior |
+| --- | --- |
+| `client.spells.get()` | Defensive snapshot, or `nil` before a saved list is loaded and after disconnect/provider shutdown. |
+| `client.spells.status()` | Defensive `{ available, connected, refreshing, characterName?, reason?, error? }`. |
+| `client.spells.on(callback)` | Subscribe to snapshot/status changes; returns an idempotent unsubscribe function. Callback receives `(snapshotOrNil, status)`. |
+
+Subscribe before `start()` for initial discovery. Calling `on()` does not
+immediately invoke the callback; use `get()` and `status()` for an already
+started instance. Callback errors are contained and do not block other readers.
+`available` means the provider responded, independently of GMCP Core status.
+During refresh or a failed replacement, `get()` retains the prior committed
+snapshot. Consumers do not trigger automatic queries or SQL work by reading.
+
+```lua
+local client = aardwolf.new(host, { spells = true })
+local unsubscribe = client.spells.on(function(snapshot, status)
+  if type(snapshot) == "table" then
+    echo("Saved abilities: " .. tostring(#snapshot.entries))
+  end
+end)
+client.start()
+-- Later: unsubscribe(); client.stop()
+```
+
+Snapshots are
+`{ schemaVersion = 1, characterName, collectedAt, entries = { ... } }`.
+`collectedAt` is Unix milliseconds. Entries are in server display order:
+`{ name, level, sn?, percent?, unusable }`. Names are preserved; integer Sn
+and percentage fields are omitted for server dashes. Percentage includes zero.
+`unusable` is a boolean from an explicit star, not inferred from level or
+percentage. Both skills and spells are represented without inferring a type.
+
+Discovery works in either load order using the installed provider ID found by
+name. The `aardwolf-spells:` channel uses `ready`, `stopped`,
+`subscribe`, `unsubscribe`, and targeted `state` messages.
+Subscribe carries `{ version = 1 }`; state carries
+`{ version = 1, status, snapshot? }`. Readers accept state only from the
+discovered provider, validate names/numeric fields/flags/schema, and bound
+messages to 1 MiB and snapshots to 1,000 unique entries. Shutdown/disconnect
+invalidates cached data; reconnect and provider reload discover again.
+This leaves Core's GMCP package messages and negotiation contract unchanged.
 
 ## UI helpers
 
