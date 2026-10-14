@@ -145,7 +145,7 @@ does not automatically send refresh requests.
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.2.2** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.2.3** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
@@ -191,7 +191,7 @@ retain their order and visibility, with Disease and Special appended and visible
 Refresh all includes hidden types and slots.
 
 Damage data is collected manually. **Refresh all** sends just two commands,
-`skills damage` followed by `spells damage`, and groups their rows by the Damage
+`skills combat` followed by `spells combat`, and groups their rows by the Damage
 column. There are no per-type refresh buttons. Saved results appear on load;
 **Not refreshed** means that kind's damage list has not completed for the group,
 while **None learned** means it completed but currently has no qualifying ability.
@@ -223,8 +223,9 @@ when necessary. Unsafe fallback commands are disabled.
   separators and multiline commands are refused.
 - `awspells command-reset "Dirt kicking"` removes the override.
 
-Sending plain `allspells`, `skills damage` or `spells damage`
-command also captures its output when storage is ready and collection is idle.
+Sending plain `allspells`, `skills combat` or `spells combat`
+also captures its output when storage is ready and collection is idle.
+Legacy `skills damage` and `spells damage` commands remain supported for manual capture.
 Other filtered commands interrupt capture and never replace the full list.
 
 ### Collection and persistence

@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.2",
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.3",
   author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons backed by SQLite."
 }
 
@@ -562,7 +562,7 @@ local function refreshAll()
   if not ready then return message end
   queue, queueTotal = {}, 2
   for _, kind in ipairs({ "skill", "spell" }) do
-    table.insert(queue, { kind = kind, command = kind .. "s damage" })
+    table.insert(queue, { kind = kind, command = kind .. "s combat" })
   end
   nextRefresh()
   return "Damage refresh requested."
@@ -704,11 +704,11 @@ end
 function onSend(sessionId, text)
   if not initialized or sessionId ~= getSessionId() or type(text) ~= "string" then return end
   local command = string.lower(trim(text))
-  local kind = string.match(command, "^(%a+)s%s+damage$")
+  local kind = string.match(command, "^(%a+)s%s+combat$") or string.match(command, "^(%a+)s%s+damage$")
   local request
   if command == "allspells" then request = { command = command }
   elseif kind == "skill" or kind == "spell" then
-    request = { command = kind .. "s damage", kind = kind }
+    request = { command = command, kind = kind }
   end
   if request then
     if capture then

@@ -96,7 +96,7 @@ an unknown commit outcome, reloads persisted data and separates characters.
 These tests do not execute MudForge's transpiler, real file adapters, command
 hooks, provisional output, pager or connected Aardwolf transport.
 
-- With separate authorization, install library 0.3.0, API Core and Spells 0.2.2
+- With separate authorization, install library 0.3.0, API Core and Spells 0.2.3
   in a disposable world. Start the helper manually and record client/helper
   versions. Confirm both provider/consumer load orders and the actual installed IDs.
 - With the helper absent or File System Access off, complete simulated login.
@@ -123,7 +123,7 @@ hooks, provisional output, pager or connected Aardwolf transport.
   compare stored rows with the visible output. Record live acceptance separately.
   Restore the original selected world and remove only disposable test artifacts.
 
-### Damage panel — 0.2.2 acceptance pending
+### Damage panel — 0.2.3 acceptance pending
 
 Offline fixtures cover the supplied tables and mixed-type continuation rows,
 empty bulk lists, two sequential requests, selection, command overrides, cancellation, malformed data and
@@ -161,7 +161,7 @@ and establish only rendered HTML behavior.
   `sap`, `dirt` or `cast <sn>` as applicable, with no appended target; verify
   refreshed output is preserved. Test active/combat/ineligible/disconnected
   states and unsafe/invalid widget actions without sending commands.
-- Run Refresh all: expect only `skills damage` followed by `spells damage`, including `No skills found.` and
+- Run Refresh all: expect only `skills combat` followed by `spells combat`, including `No skills found.` and
   `No spells found.`. Confirm native empty-output wording and table footers,
   repeated headers, ANSI-clean lines, manual pager continuation and bounded
   timeouts. Cancel while capturing, preparing and saving; no further queued

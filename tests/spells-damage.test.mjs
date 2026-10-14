@@ -71,7 +71,7 @@ const cases = {
     local count = 1
     for _, kind in ipairs({ "skill", "spell" }) do
       count = count + 1
-      assert(#world.sends == count and world.sends[count] == kind .. "s damage")
+      assert(#world.sends == count and world.sends[count] == kind .. "s combat")
       assert(reader.client.spells.status().refreshing)
       world.line("No " .. kind .. "s found.")
     end
@@ -87,7 +87,7 @@ const cases = {
     world.action("refresh-all"); world.packet("char.status", { state = 8 })
     world.line("No skills found."); assert(#world.sends == 3)
     world.packet("char.status", { state = 3 }); world.action("refresh-all")
-    provider.env.onSend(world.id, "skills damage")
+    provider.env.onSend(world.id, "skills combat")
     assert(not reader.client.spells.status().refreshing and #world.sends == 4)
     world.action("refresh-all"); world.damageHeader("skill"); world.line("Level 1 : Kick 100% Bogus")
     assert(#world.sends == 5 and reader.client.spells.status().error)
@@ -110,7 +110,7 @@ const cases = {
   `,
   'cancel while preparing a manual query retains ownership until its output ends': `
     world.delay = true
-    provider.env.onSend(world.id, "skills damage")
+    provider.env.onSend(world.id, "skills combat")
     world.action("cancel"); world.drain()
     assert(reader.client.spells.status().refreshing)
     local before = #world.sends
@@ -143,7 +143,7 @@ const cases = {
     world.line("Level 1 : Kick 100% Bash", nil, "\\27[31mLevel 1 : Kick 100% Bash\\27[0m")
     world.damageHeader("skill"); world.line("Level 50 : Sap 85% Bash"); world.damageFooter()
     assert(panel.bindings.skill_bash_name == "Sap")
-    provider.env.onSend(world.id, "spells damage"); world.fire()
+    provider.env.onSend(world.id, "spells combat"); world.fire()
     assert(panel.bindings.spell_fire_name == "None learned")
   `,
   'damage commands validate actions and current state, including combat': `
@@ -245,7 +245,7 @@ const cases = {
     local sendCommand = provider.env.send
     provider.env.send = function() return false end
     world.action("refresh-all")
-    assert(string.find(panel.bindings.status, "Could not send skills damage", 1, true))
+    assert(string.find(panel.bindings.status, "Could not send skills combat", 1, true))
     assert(not reader.client.spells.status().refreshing)
     provider.env.send = sendCommand
     world.action("refresh-all"); world.bash(); world.line("No spells found.")
