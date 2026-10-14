@@ -96,7 +96,7 @@ an unknown commit outcome, reloads persisted data and separates characters.
 These tests do not execute MudForge's transpiler, real file adapters, command
 hooks, provisional output, pager or connected Aardwolf transport.
 
-- With separate authorization, install library 0.3.0, API Core and Spells 0.2.0
+- With separate authorization, install library 0.3.0, API Core and Spells 0.2.2
   in a disposable world. Start the helper manually and record client/helper
   versions. Confirm both provider/consumer load orders and the actual installed IDs.
 - With the helper absent or File System Access off, complete simulated login.
@@ -123,34 +123,54 @@ hooks, provisional output, pager or connected Aardwolf transport.
   compare stored rows with the visible output. Record live acceptance separately.
   Restore the original selected world and remove only disposable test artifacts.
 
-### Damage panel — 0.2.0 acceptance pending
+### Damage panel — 0.2.2 acceptance pending
 
-Offline fixtures cover both supplied tables, empty filters, 36 sequential
-requests, selection, command overrides, cancellation, malformed data and
+Offline fixtures cover the supplied tables and mixed-type continuation rows,
+empty bulk lists, two sequential requests, selection, command overrides, cancellation, malformed data and
 character isolation. The real bridge exercises a 0.1.0-shaped database upgrade,
-scoped membership replacement, mana/spell-number persistence, rollback, unknown
+kind-wide membership replacement, mana/spell-number persistence, rollback, unknown
 outcome readback and reload. Browser checks use synthetic bindings/action capture
 and establish only rendered HTML behavior.
 
-- In an authorized disposable world, observe the 540 × 560 panel, then dock it,
+- In an authorized disposable world, observe the 540 × 400 panel, then dock it,
   resize to narrow/wide tiles, close/reopen with `awspells show`, reload and reopen
   the world. Verify saved docking, position and visibility, readable stacked
   rows, vertical scrolling and one panel through character/client rebuilds.
+- Check the icon-only Edit, Refresh all and Cancel collection toolbar labels,
+  tooltips and keyboard focus. Enter Edit: all 20 types and 40 slots must be
+  visible with checked-means-visible checkboxes, and ability execution disabled.
+  Hide one type, one slot and both slots of a row; leave Edit and confirm the
+  correct controls disappear. Re-enter Edit to restore them, including after
+  hiding every row. Refresh all must still collect both bulk lists.
+- Drag a type using its handle; verify a single immediate native save and the
+  resulting order. Focus a handle and use Alt+Up/Down, including first/last-row
+  boundaries. Ordinary updates must preserve drag state, focus and scroll.
+  Resize to 220, 360 and 540 px and inspect both normal and edit layouts.
+- Reload/reopen the disposable world and switch verified characters: order and
+  visibility must persist independently, with Edit off. Refuse native storage
+  writes and verify the previous layout is restored with feedback; delayed
+  messages from the prior character must not alter the new character's layout.
+  Confirm native `luamsg` delivery and the ready/property handshake directly.
+- Load an existing 18-type layout with custom order and hidden slots. Confirm
+  those settings survive, Disease and Special appear at the end, and the next
+  explicit layout change saves the expanded configuration.
 - Feed the supplied bash and fire lists: expect Sap and None learned respectively.
   Include 0/1/2% practice, stars, equal levels/percentages and a level decrease.
   Verify actual text/attribute bindings, disabled state and retained focus/scroll.
-- Click and keyboard-activate an ability and each adjacent refresh. Verify one
+- Click and keyboard-activate an ability and the toolbar's Refresh all. Verify one
   `sap`, `dirt` or `cast <sn>` as applicable, with no appended target; verify
   refreshed output is preserved. Test active/combat/ineligible/disconnected
   states and unsafe/invalid widget actions without sending commands.
-- Run Refresh all through all 36 filters, including `No skills found.` and
+- Run Refresh all: expect only `skills damage` followed by `spells damage`, including `No skills found.` and
   `No spells found.`. Confirm native empty-output wording and table footers,
   repeated headers, ANSI-clean lines, manual pager continuation and bounded
   timeouts. Cancel while capturing, preparing and saving; no further queued
   query may begin. Disconnect/change character/lose eligibility mid-queue.
-- Refresh one filter, lower practice or omit its prior winner, and verify the
-  new winner without erasing other memberships. Test an ability in two filters,
-  full `allspells` replacement, malformed/duplicate/mismatched rows, helper
+- Feed mixed Damage columns, inherited levels, Disease and Special, lower
+  practice or omit a prior winner. Verify replacement across all groups of that
+  kind, empty omitted groups, and preservation of the other kind. Confirm there
+  are no per-type refresh controls. Test an ability in two damage groups,
+  full `allspells` replacement, malformed/duplicate/conflicting rows, helper
   failure and an unknown commit outcome without retrying writes.
 - Save, inspect and reset a skill command override. Reload/reopen and switch
   characters; verify database isolation, persistence and command precedence.

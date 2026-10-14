@@ -145,7 +145,7 @@ does not automatically send refresh requests.
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.2.0** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.2.2** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
@@ -163,18 +163,39 @@ These SQLite files live outside the portable world file.
 ### Damage ability panel
 
 Each row displays the best **skill** and best **spell** separately for acid, air,
-bash, cold, earth, electric, energy, fire, holy, light, magic, mental, negative,
-pierce, slash, shadow, sonic and water. Only entries learned **above 1%** qualify;
+bash, cold, disease, earth, electric, energy, fire, holy, light, magic, mental,
+negative, pierce, slash, shadow, sonic, special and water. Only entries learned **above 1%** qualify;
 starred unusable abilities and entries above the known character level are
 excluded. Highest level wins, followed by highest learned percentage and then
 alphabetical name. Hover over a button for level, percentage, command and last
 refresh time. Rows stack their controls at narrow widths and scroll vertically.
 
-Damage data is collected manually. Click the small refresh beside a skill or
-spell to send `skills <type>` or `spells <type>`. **Refresh all** queries all 36
-lists sequentially, skill then spell for each row. Saved results appear on load;
-**Not refreshed** means that filter has never completed, while **None learned**
-means it completed but currently has no qualifying ability. Refreshing or an
+The compact pane opens at 540 × 400 px unless MudForge restores a saved size.
+Its toolbar uses icons: pencil for **Edit layout**, circular arrow for **Refresh
+all**, and × for **Cancel collection**. Hover for labels or use the keyboard.
+Toggle Edit to reveal drag handles and visibility checkboxes for every damage
+type and its skill/spell slots, including hidden ones. Checked means visible.
+Drag a type by its handle, or focus the handle and press **Alt+Up/Down**, to move
+the entire row. Toggle Edit off to return to the ability buttons; using abilities
+is disabled during editing, while Refresh and Cancel remain available.
+
+Each change saves immediately for the verified character in native plugin table
+storage, independently of the SQLite helper. Hiding a type preserves its skill
+and spell settings; hiding both slots hides that row. Slot visibility applies
+regardless of which best ability occupies it. The Edit button remains available
+when all rows are hidden. Reloading or changing character exits Edit and restores
+that character's layout. Missing preferences use alphabetical order with every
+slot visible; invalid preferences use defaults and show feedback. A failed save
+restores the last accepted layout and shows the reason. Existing 18-type layouts
+retain their order and visibility, with Disease and Special appended and visible.
+Refresh all includes hidden types and slots.
+
+Damage data is collected manually. **Refresh all** sends just two commands,
+`skills damage` followed by `spells damage`, and groups their rows by the Damage
+column. There are no per-type refresh buttons. Saved results appear on load;
+**Not refreshed** means that kind's damage list has not completed for the group,
+while **None learned** means it completed but currently has no qualifying ability.
+Damage types absent from a completed bulk list are also marked empty. Refreshing or an
 error retains the prior committed result. **Cancel** stops capture and remaining
 requests. A sent query's remaining output is discarded until its footer, empty
 result, prompt or original timeout; new refreshes wait for that boundary. An
@@ -192,7 +213,7 @@ when necessary. Unsafe fallback commands are disabled.
 
 - `awspells refresh` collects the full `allspells` list and recovers after resolving
   dependency errors. Overlapping collections/saves are refused.
-- `awspells refresh-all` collects all damage filters; `awspells cancel` stops it.
+- `awspells refresh-all` collects both bulk damage lists; `awspells cancel` stops it.
 - `awspells show` explicitly reopens a closed panel.
 - `awspells status` (or `awspells`) reports character, saved count/time and errors.
 - `awspells command "Dirt kicking"` inspects the effective command.
@@ -202,7 +223,7 @@ when necessary. Unsafe fallback commands are disabled.
   separators and multiline commands are refused.
 - `awspells command-reset "Dirt kicking"` removes the override.
 
-Sending plain `allspells` or an exact supported `skills <type>`/`spells <type>`
+Sending plain `allspells`, `skills damage` or `spells damage`
 command also captures its output when storage is ready and collection is idle.
 Other filtered commands interrupt capture and never replace the full list.
 
@@ -215,24 +236,26 @@ are preserved. A dash percentage does not imply an unusable star flag.
 Damage tables start at their Skill/Spell header and complete at
 `To see all skills/spells for your class, use 'allspells <class>'`.
 `No skills found.` and `No spells found.` are successful empty results.
-Repeated page headers are accepted; continue the pager yourself. Each capture
-expires after **60 seconds** and is limited to **1,000 unique abilities**; the
+Repeated page headers are accepted, and indented continuation rows inherit the
+preceding level, including across page separators. Continue the pager yourself.
+Each capture expires after **60 seconds** and is limited to **1,000 rows**; the
 merged canonical list also has a 1,000-entry limit.
 
-Filtered results atomically update canonical ability fields and replace only
-the queried skill/spell damage membership. Omitted/forgotten entries disappear
-from that filter without deleting unrelated abilities. An ability can belong to
+Bulk results atomically update canonical ability fields and replace all damage
+memberships and details for the queried kind, preserving the other kind.
+Omitted/forgotten entries disappear from that kind's damage groups without
+deleting canonical abilities or command overrides. An ability can belong to
 multiple damage types. Full-list replacement preserves damage enrichment for
 retained names and prunes removed associations. Kind, mana, memberships, filter
 timestamps and command overrides use additive tables in the existing database;
 0.1.0 databases upgrade without deleting their saved abilities. Overrides remain
 saved if an ability temporarily disappears.
 
-Partial, malformed, duplicate, mismatched or interrupted output retains the
+Partial, malformed, duplicate memberships, conflicting or interrupted output retains the
 previous committed data. An unknown write outcome is read back before another
 refresh, without replaying the write. Disconnect, lost Core and character changes
 clear exposed data and cancel pending work. SQLite collection timestamps reflect
-the latest committed full or filtered collection; changing a command override
+the latest committed full or bulk collection; changing a command override
 does not change collection time.
 
 Other plugins opt into `{ spells = true }` and use

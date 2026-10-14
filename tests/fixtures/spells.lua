@@ -109,9 +109,13 @@ function spellsWorld(readerFirst)
                 stored.members[key][params[first+2]] = true
               end
             elseif string.find(sqlText, "INSERT INTO damage_refreshes ", 1, true) then
-              stored.times[params[1] .. ":" .. params[2]] = params[3]
-            elseif sqlText == "DELETE FROM damage_memberships WHERE kind=? AND damage_type=?" then
-              stored.members[params[1] .. ":" .. params[2]] = {}
+              for first = 1, #params, 3 do stored.times[params[first] .. ":" .. params[first+1]] = params[first+2] end
+            elseif sqlText == "DELETE FROM damage_memberships WHERE kind=?" then
+              for key in pairs(stored.members) do
+                if string.sub(key, 1, #params[1]+1) == params[1] .. ":" then stored.members[key] = nil end
+              end
+            elseif sqlText == "DELETE FROM ability_details WHERE kind=?" then
+              for name, info in pairs(stored.details) do if info.kind == params[1] then stored.details[name] = nil end end
             elseif string.find(sqlText, "INSERT INTO skill_commands ", 1, true) then stored.commands[params[1]] = params[2]
             elseif sqlText == "DELETE FROM skill_commands WHERE name=?" then stored.commands[params[1]] = nil
             elseif string.find(sqlText, "WHERE name NOT IN", 1, true) then
@@ -169,6 +173,8 @@ function spellsWorld(readerFirst)
   end
   function world.panel() return context.widgets["spells-id:damage-abilities"] end
   function world.action(action) world.panel().events.action({ action = action }) end
+  -- An outgoing manual bulk query is captured without the UI's two-query queue.
+  function world.query(kind) env.onSend(world.id, kind .. "s damage") end
   function world.damageHeader(kind)
     world.line(kind == "skill" and "           Skill name                 Learned  Damage"
       or "           Spell name                 Mana  Learned  Spell#  Damage")
@@ -181,7 +187,7 @@ function spellsWorld(readerFirst)
     world.line("[1543/1543hp 1239/1239mn 1562/1562mv 0qt 1987tnl] >")
   end
   function world.bash()
-    world.line("> skills bash")
+    world.line("> skills damage")
     world.damageHeader("skill")
     for _, row in ipairs({ "Level 1  : Kick                          100%  Bash",
       "Level 11 : Bash                           85%  Bash", "Level 17 : Dirt kicking                   85%  Bash",
@@ -192,7 +198,7 @@ function spellsWorld(readerFirst)
     world.damageFooter()
   end
   function world.fire()
-    world.line("> spells fire")
+    world.line("> spells damage")
     world.damageHeader("spell")
     for _, row in ipairs({ "Level 5  : Soulburn                     10       1%     363  Fire",
       "Level 9  : Burning hands                15       1%       7  Fire",
