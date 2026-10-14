@@ -55,7 +55,7 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Vitals
 
-Aardwolf Vitals **0.1.4** shows **HP, mana and moves** side by side, with labels
+Aardwolf Vitals **0.1.5** shows **HP, mana and moves** side by side, with labels
 to the left and current/max values plus percentages over each bar. The compact
 header places the connection/data status beside the Vitals title. Bars are
 24 px tall at the default font size and grow for larger fonts or wrapped values.
@@ -142,7 +142,8 @@ successful Save/Reset synchronizes controls without replacing either widget's
 markup.
 
 The bottom-right **Settings** and **Refresh** icons remain visible while the
-panel scrolls. Settings places Save, Reset and Close at the lower right.
+panel scrolls. Settings places Save, Reset and Close at the lower right. Both
+action bars reserve 26 px of space after the buttons to keep the corner clear.
 The **Refresh** circular-arrow icon explicitly requests fresh character GMCP
 data through API Core.
 Refresh sends no message below the bars. If Core, negotiation or the connection
@@ -151,7 +152,7 @@ does not automatically send refresh requests.
 
 ## Aardwolf Room Details
 
-**0.2.1** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
+**0.2.2** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
 **Room Details** panel with Characters above Objects. Initial size is 360 × 240;
 drag it to an edge of another widget to dock it. MudForge restores saved placement,
 size and visibility. Each completed tagged block replaces its own section;
@@ -184,7 +185,8 @@ title when needed. Recovered operations clear only their corresponding errors.
 Unchanged view states are not sent to the widget, and unchanged lists are not
 rebuilt. The compact bottom-right toolbar keeps **Auto**, **Details** and
 **Refresh** visible while the lists scroll. Copy and Close sit at the lower right
-of the Details dialog. To reclaim unused space below the lists, resize the native
+of the Details dialog. Both action bars reserve 24 px of space after the controls
+to keep the corner clear. To reclaim unused space below the lists, resize the native
 dock tile manually; the plugin preserves MudForge's saved geometry.
 
 On installation/enabling in an authenticated active session, and on each login,
@@ -219,11 +221,11 @@ Room/character changes and disconnects clear stale selection and room data;
 only the Auto preference persists.
 
 Offline and browser checks do not establish native formatting, gagging, docking,
-or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--021-acceptance-pending).
+or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--022-acceptance-pending).
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.2.5** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.2.6** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
@@ -251,7 +253,8 @@ refresh time. Rows stack their controls at narrow widths and scroll vertically.
 The compact pane opens at 540 × 400 px unless MudForge restores a saved size.
 Its bottom-right toolbar stays visible while the ability list scrolls and uses
 icons: pencil for **Edit layout**, circular arrow for **Refresh
-all**, and × for **Cancel collection**. Hover for labels or use the keyboard.
+all**, and × for **Cancel collection**. The bar reserves 24 px of space after
+the buttons to keep the corner clear. Hover for labels or use the keyboard.
 Toggle Edit to reveal drag handles and visibility checkboxes for every damage
 type and its skill/spell slots, including hidden ones. Checked means visible.
 Drag a type by its handle, or focus the handle and press **Alt+Up/Down**, to move

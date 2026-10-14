@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.5",
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.6",
   author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons backed by SQLite."
 }
 
@@ -915,7 +915,7 @@ local function panelMarkup()
   local html = { [[<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aardwolf Damage Abilities</title><style>
 :root{color-scheme:dark;font:12px system-ui,sans-serif;color:#e6edf5;background:#131b27}*{box-sizing:border-box}
 html{scroll-padding-bottom:36px}[hidden]{display:none!important}body{margin:0;padding:6px;min-height:100vh;display:flex;flex-direction:column}body>*{flex-shrink:0}header{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:4px}
-h1{font-size:13px;margin:0;font-weight:650}.toolbar{display:flex;justify-content:flex-end;gap:3px;margin-top:auto;padding-top:4px;position:sticky;bottom:0;z-index:2;background:#131b27}button{font:inherit;color:inherit;background:#233247;
+h1{font-size:13px;margin:0;font-weight:650}.toolbar{display:flex;justify-content:flex-end;gap:3px;margin-top:auto;padding-top:4px;padding-inline-end:24px;position:sticky;bottom:0;z-index:2;background:#131b27}button{font:inherit;color:inherit;background:#233247;
  border:1px solid #435772;border-radius:4px;min-height:24px;padding:2px 5px;cursor:pointer}button:hover:not(:disabled){background:#30465f}
 button:focus-visible,input:focus-visible{outline:2px solid #8bc3ff;outline-offset:1px}button:disabled{opacity:.5;cursor:default}
 button[aria-pressed="true"]{background:#355779;border-color:#8bc3ff}.icon{flex:none;width:24px;padding:2px;font-size:15px}
