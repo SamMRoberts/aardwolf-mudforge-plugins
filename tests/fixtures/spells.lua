@@ -174,7 +174,7 @@ function spellsWorld(readerFirst)
   function world.panel() return context.widgets["spells-id:damage-abilities"] end
   function world.action(action) world.panel().events.action({ action = action }) end
   -- An outgoing manual bulk query is captured without the UI's two-query queue.
-  function world.query(kind) env.onSend(world.id, kind .. "s damage") end
+  function world.query(kind) env.onSend(world.id, kind .. "s combat") end
   function world.damageHeader(kind)
     world.line(kind == "skill" and "           Skill name                 Learned  Damage"
       or "           Spell name                 Mana  Learned  Spell#  Damage")
@@ -187,7 +187,7 @@ function spellsWorld(readerFirst)
     world.line("[1543/1543hp 1239/1239mn 1562/1562mv 0qt 1987tnl] >")
   end
   function world.bash()
-    world.line("> skills damage")
+    world.line("> skills combat")
     world.damageHeader("skill")
     for _, row in ipairs({ "Level 1  : Kick                          100%  Bash",
       "Level 11 : Bash                           85%  Bash", "Level 17 : Dirt kicking                   85%  Bash",
@@ -198,7 +198,7 @@ function spellsWorld(readerFirst)
     world.damageFooter()
   end
   function world.fire()
-    world.line("> spells damage")
+    world.line("> spells combat")
     world.damageHeader("spell")
     for _, row in ipairs({ "Level 5  : Soulburn                     10       1%     363  Fire",
       "Level 9  : Burning hands                15       1%       7  Fire",

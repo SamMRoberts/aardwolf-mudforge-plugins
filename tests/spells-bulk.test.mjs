@@ -49,7 +49,7 @@ test('old individual refresh actions are ignored and filtered manual commands ar
   for _, action in ipairs({ "refresh:skill:bash", "refresh:spell:fire", "refresh:skill:disease" }) do world.action(action) end
   assert(#world.sends == before and not reader.client.spells.status().refreshing)
   provider.env.onSend(world.id, "skills bash"); world.bash()
-  provider.env.onSend(world.id, "spells combat"); world.fire()
+  provider.env.onSend(world.id, "spells fire"); world.fire()
   assert(panel.bindings.skill_bash_name == "Not refreshed" and panel.bindings.spell_fire_name == "Not refreshed")
   world.action("refresh-all"); provider.env.onSend(world.id, "spells fire")
   assert(reader.client.spells.status().error and not reader.client.spells.status().refreshing)
@@ -57,12 +57,12 @@ test('old individual refresh actions are ignored and filtered manual commands ar
 
 test('Refresh all uses exactly two bulk queries and marks absent damage groups empty', () => runLua(fixture + setup + `
   world.action("refresh-all")
-  assert(world.sends[2] == "skills damage")
+  assert(world.sends[2] == "skills combat")
   world.damageHeader("skill")
   world.line("Level 1 : Kick 100% Bash")
   world.line("          Acid attack 85% Acid")
   world.damageFooter()
-  assert(world.sends[3] == "spells damage")
+  assert(world.sends[3] == "spells combat")
   world.damageHeader("spell")
   world.line("Level 38 : Fireball 30 85% 45 Fire")
   world.line("           Major swarm 30 85% 192 Disease")
@@ -74,4 +74,12 @@ test('Refresh all uses exactly two bulk queries and marks absent damage groups e
   assert(panel.bindings.spell_special_name == "Spirit bolt")
   assert(panel.bindings.skill_fire_name == "None learned" and panel.bindings.spell_bash_name == "None learned")
   assert(not string.find(panel.content, 'data-mud-action="refresh:', 1, true))
+`));
+
+test('legacy manual damage queries still capture complete results', () => runLua(fixture + setup + `
+  provider.env.onSend(world.id, "skills damage"); world.bash()
+  provider.env.onSend(world.id, "spells damage"); world.damageHeader("spell")
+  world.line("Level 38 : Fireball 30 85% 45 Fire"); world.damageFooter()
+  assert(panel.bindings.skill_bash_name == "Sap" and panel.bindings.spell_fire_name == "Fireball")
+  assert(not reader.client.spells.status().refreshing and not reader.client.spells.status().error)
 `));

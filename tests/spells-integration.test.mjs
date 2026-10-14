@@ -121,9 +121,9 @@ test('spells collector persists atomic character snapshots through real SQLite',
       local panel = context.widgets["real-spells:damage-abilities"]
       local function damageQuery(kind, rows, unknown)
         local before = #sends
-        env.send(kind .. "s damage")
+        env.send(kind .. "s combat")
         pump(function() return #sends == before + 1 end)
-        assert(sends[#sends] == kind .. "s damage")
+        assert(sends[#sends] == kind .. "s combat")
         if unknown then bridge_unknown() end
         if rows then
           line(kind == "skill" and "Skill name Learned Damage" or "Spell name Mana Learned Spell# Damage")
