@@ -112,10 +112,76 @@ test('spells collector persists atomic character snapshots through real SQLite',
       assert(reader.client.spells.get().entries[1].name == "Fly")
       header(); line(" Axe    1 - -"); footer(); waitIdle()
 
+      -- Simulate an existing 0.1.0 database: only abilities and metadata exist.
+      bridge_legacy()
+      env.cleanup(); env.init(); pump(function() return #sends == 5 end)
+      assert(reader.client.spells.get().entries[1].name == "Axe")
+      header(); line(" Axe    1 - -"); footer(); waitIdle()
+      world.packet("char.status", { level = 200 })
+      local panel = context.widgets["real-spells:damage-abilities"]
+      local function damageQuery(kind, damageType, rows, unknown)
+        local before = #sends
+        panel.events.action({ action = "refresh:" .. kind .. ":" .. damageType })
+        pump(function() return #sends == before + 1 end)
+        assert(sends[#sends] == kind .. "s " .. damageType)
+        if unknown then bridge_unknown() end
+        if rows then
+          line(kind == "skill" and "Skill name Learned Damage" or "Spell name Mana Learned Spell# Damage")
+          for _, row in ipairs(rows) do line(row) end
+          line("To see all skills/spells for your class, use 'allspells <class>'")
+        else line("No " .. kind .. "s found.") end
+        waitIdle()
+      end
+      damageQuery("skill", "bash", { "Level 1 : Kick 100% Bash", "Level 17 : Dirt kicking 85% Bash", "Level 50 : Sap 85% Bash" })
+      assert(panel.bindings.skill_bash_name == "Sap")
+      damageQuery("spell", "fire", { "Level 38 : Fireball 30 85% 45 Fire" })
+      assert(panel.bindings.spell_fire_name == "Fireball")
+      -- An ability may appear in more than one damage filter.
+      damageQuery("skill", "fire", { "Level 1 : Kick 100% Fire" })
+      assert(bridge_memberships("kick") == 2)
+      assert(bridge_damage_info() == "spell:30:45:85")
+      bridge_trigger(true)
+      damageQuery("skill", "bash", { "Level 70 : Rejectme 85% Bash" })
+      assert(panel.bindings.skill_bash_name == "Sap" and reader.client.spells.status().error)
+      assert(bridge_memberships("kick") == 2)
+      bridge_trigger(false)
+      damageQuery("skill", "bash", { "Level 17 : Dirt kicking 85% Bash" }, true)
+      assert(panel.bindings.skill_bash_name == "Dirt kicking" and not reader.client.spells.status().error)
+      assert(bridge_memberships("kick") == 1)
+      commands.awspells('command "Dirt kicking" kick'); waitIdle()
+      assert(bridge_command() == "kick")
+      damageQuery("skill", "electric", nil, true)
+      assert(panel.bindings.skill_electric_name == "None learned" and not reader.client.spells.status().error)
+
+      -- Reload restores all private metadata and overrides before any new output.
+      local before = #sends
+      env.cleanup(); env.init(); pump(function() return #sends == before + 1 end)
+      panel = context.widgets["real-spells:damage-abilities"]
+      assert(panel.bindings.skill_bash_name == "Dirt kicking" and panel.bindings.spell_fire_name == "Fireball")
+      assert(panel.bindings.skill_electric_name == "None learned")
+      assert(commands.awspells('command "Dirt kicking"') == "dirt kicking: kick")
+      header(); line(" Axe 1 - -"); line(" Dirt kicking 17 - 85"); line(" Fireball 38 45 1"); footer(); waitIdle()
+      assert(panel.bindings.spell_fire_name == "None learned" and panel.bindings.skill_fire_name == "None learned")
+      assert(bridge_memberships("kick") == 0 and bridge_command() == "kick")
+      commands.awspells('command-reset "Dirt kicking"'); waitIdle()
+      assert(bridge_command() == "none")
+      damageQuery("spell", "fire", nil, true)
+      assert(panel.bindings.spell_fire_name == "None learned" and not reader.client.spells.status().error)
+      assert(bridge_memberships("fireball") == 0)
+
+      -- More than one private metadata page, with real batched details/members.
+      local earthRows = {}
+      for index = 1, 250 do earthRows[index] = "Level 1 : Earth ability " .. tostring(index) .. " 85% Earth" end
+      damageQuery("skill", "earth", earthRows)
+      assert(#reader.client.spells.get().entries == 253 and not reader.client.spells.status().error)
+      damageQuery("skill", "earth", nil)
+      assert(panel.bindings.skill_earth_name == "None learned" and not reader.client.spells.status().error)
+
       -- A verified new character routes to a separate managed database.
+      local beforeOther = #sends
       world.packet("char.base", { name = "Other" })
       assert(reader.client.spells.get() == nil)
-      pump(function() return #sends == 5 end)
+      pump(function() return #sends == beforeOther + 1 end)
       header(); line(" Heal    60 54 -"); footer(); waitIdle()
       assert(reader.client.spells.get().characterName == "Other")
       assert(reader.client.spells.get().entries[1].name == "Heal")
@@ -163,11 +229,18 @@ test('spells collector persists atomic character snapshots through real SQLite',
         execFileSync('python3', ['-c', 'from pathlib import Path; import sqlite3, sys; p=next((Path(sys.argv[1])/"databases").glob("*/spells.sqlite")); c=sqlite3.connect(p); c.execute(sys.argv[2]); c.commit(); c.close()', directory, sql]);
         return true;
       },
+      bridge_legacy: () => {
+        execFileSync('python3', ['-c', 'from pathlib import Path; import sqlite3, sys; p=next((Path(sys.argv[1])/"databases").glob("*/spells.sqlite")); c=sqlite3.connect(p); c.executescript("DROP TABLE ability_details; DROP TABLE damage_memberships; DROP TABLE damage_refreshes; DROP TABLE skill_commands;"); c.close()', directory]);
+        return true;
+      },
+      bridge_memberships: name => Number(execFileSync('python3', ['-c', 'from pathlib import Path; import sqlite3, sys; p=next((Path(sys.argv[1])/"databases").glob("*/spells.sqlite")); c=sqlite3.connect(p); print(c.execute("SELECT count(*) FROM damage_memberships WHERE name=?",(sys.argv[2],)).fetchone()[0]); c.close()', directory, name], { encoding: 'utf8' }).trim()),
+      bridge_damage_info: () => execFileSync('python3', ['-c', 'from pathlib import Path; import sqlite3, sys; p=next((Path(sys.argv[1])/"databases").glob("*/spells.sqlite")); c=sqlite3.connect(p); print(":".join(map(str,c.execute("SELECT d.kind,d.mana,a.sn,a.percent FROM ability_details d JOIN abilities a ON a.name=d.name WHERE d.name=\'fireball\'").fetchone()))); c.close()', directory], { encoding: 'utf8' }).trim(),
+      bridge_command: () => execFileSync('python3', ['-c', 'from pathlib import Path; import sqlite3, sys; p=next((Path(sys.argv[1])/"databases").glob("*/spells.sqlite")); c=sqlite3.connect(p); row=c.execute("SELECT command FROM skill_commands WHERE name=\'dirt kicking\'").fetchone(); print(row[0] if row else "none"); c.close()', directory], { encoding: 'utf8' }).trim(),
       bridge_count: () => Number(execFileSync('python3', ['-c', 'from pathlib import Path; import sqlite3, sys; p=next((Path(sys.argv[1])/"databases").glob("*/spells.sqlite")); c=sqlite3.connect(p); print(c.execute("SELECT count(*) FROM abilities").fetchone()[0]); c.close()', directory], { encoding: 'utf8' }).trim()),
       bridge_databases: () => Number(execFileSync('python3', ['-c', 'from pathlib import Path; import sys; print(len(list((Path(sys.argv[1])/"databases").glob("*/spells.sqlite"))))', directory], { encoding: 'utf8' }).trim()),
     });
-    assert.equal(replacements, 5, 'unknown outcomes must not replay replacement transactions');
-    assert.equal(reconciliations, 1, 'unknown outcomes must query the committed snapshot');
+    assert.equal(replacements, 16, 'unknown outcomes must not replay replacement transactions');
+    assert.equal(reconciliations, 4, 'unknown outcomes must query the committed snapshot');
     assert.equal(errors, '');
   } finally {
     const exited = helper.exitCode === null && helper.signalCode === null ? once(helper, 'exit') : null;

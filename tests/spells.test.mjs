@@ -30,7 +30,7 @@ const cases = {
     assert(saved.entries[3].name == "Globe of invulnerability" and saved.entries[3].percent == nil)
     assert(not saved.entries[3].unusable and saved.entries[4].level == 190)
     assert(string.find(world.commands.awspells("status"), "4 entries", 1, true))
-    assert(world.commands.awspells("other") == "Usage: awspells refresh | status")
+    assert(string.find(world.commands.awspells("other"), "Usage: awspells refresh", 1, true))
   `,
   'spells handles stars, repeated page headers, ANSI-clean lines and chatter': `
     local world, reader = spellsWorld(true); world.active()
@@ -140,7 +140,7 @@ const cases = {
     world.header()
     for i = 1, 250 do world.line(" Ability " .. tostring(i) .. "    1 - 85") end
     world.footer()
-    assert(#reader.client.spells.get().entries == 250 and world.lastBatchSize == 5)
+    assert(#reader.client.spells.get().entries == 250 and world.lastBatchSize == 7)
     world.rollback = true; world.commands.awspells("refresh"); world.sample()
     assert(#reader.client.spells.get().entries == 250)
     world.rollback = false; world.commands.awspells("refresh"); world.sample()

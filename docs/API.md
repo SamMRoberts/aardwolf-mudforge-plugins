@@ -174,6 +174,15 @@ and percentage fields are omitted for server dashes. Percentage includes zero.
 `unusable` is a boolean from an explicit star, not inferred from level or
 percentage. Both skills and spells are represented without inferring a type.
 
+Spells 0.2.0 also merges committed `skills <damage>` and `spells <damage>` results
+into these canonical fields. A filtered refresh retains unrelated entries and
+existing display order, appending newly discovered names. `collectedAt` reflects
+the latest committed full or filtered collection, not command-override changes.
+Damage memberships, ability kind/mana, per-filter timestamps and command
+mappings remain provider-owned; the public methods and schema are unchanged.
+Empty filtered results clear only that filter's membership, retaining canonical
+entries. Only `allspells` replaces the complete list.
+
 Discovery works in either load order using the installed provider ID found by
 name. The `aardwolf-spells:` channel uses `ready`, `stopped`,
 `subscribe`, `unsubscribe`, and targeted `state` messages.

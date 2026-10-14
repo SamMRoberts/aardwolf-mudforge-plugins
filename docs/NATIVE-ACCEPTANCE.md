@@ -96,7 +96,7 @@ an unknown commit outcome, reloads persisted data and separates characters.
 These tests do not execute MudForge's transpiler, real file adapters, command
 hooks, provisional output, pager or connected Aardwolf transport.
 
-- With separate authorization, install library 0.3.0, API Core and Spells 0.1.0
+- With separate authorization, install library 0.3.0, API Core and Spells 0.2.0
   in a disposable world. Start the helper manually and record client/helper
   versions. Confirm both provider/consumer load orders and the actual installed IDs.
 - With the helper absent or File System Access off, complete simulated login.
@@ -122,6 +122,42 @@ hooks, provisional output, pager or connected Aardwolf transport.
 - With a separately authorized live Aardwolf connection, run one collection and
   compare stored rows with the visible output. Record live acceptance separately.
   Restore the original selected world and remove only disposable test artifacts.
+
+### Damage panel — 0.2.0 acceptance pending
+
+Offline fixtures cover both supplied tables, empty filters, 36 sequential
+requests, selection, command overrides, cancellation, malformed data and
+character isolation. The real bridge exercises a 0.1.0-shaped database upgrade,
+scoped membership replacement, mana/spell-number persistence, rollback, unknown
+outcome readback and reload. Browser checks use synthetic bindings/action capture
+and establish only rendered HTML behavior.
+
+- In an authorized disposable world, observe the 540 × 560 panel, then dock it,
+  resize to narrow/wide tiles, close/reopen with `awspells show`, reload and reopen
+  the world. Verify saved docking, position and visibility, readable stacked
+  rows, vertical scrolling and one panel through character/client rebuilds.
+- Feed the supplied bash and fire lists: expect Sap and None learned respectively.
+  Include 0/1/2% practice, stars, equal levels/percentages and a level decrease.
+  Verify actual text/attribute bindings, disabled state and retained focus/scroll.
+- Click and keyboard-activate an ability and each adjacent refresh. Verify one
+  `sap`, `dirt` or `cast <sn>` as applicable, with no appended target; verify
+  refreshed output is preserved. Test active/combat/ineligible/disconnected
+  states and unsafe/invalid widget actions without sending commands.
+- Run Refresh all through all 36 filters, including `No skills found.` and
+  `No spells found.`. Confirm native empty-output wording and table footers,
+  repeated headers, ANSI-clean lines, manual pager continuation and bounded
+  timeouts. Cancel while capturing, preparing and saving; no further queued
+  query may begin. Disconnect/change character/lose eligibility mid-queue.
+- Refresh one filter, lower practice or omit its prior winner, and verify the
+  new winner without erasing other memberships. Test an ability in two filters,
+  full `allspells` replacement, malformed/duplicate/mismatched rows, helper
+  failure and an unknown commit outcome without retrying writes.
+- Save, inspect and reset a skill command override. Reload/reopen and switch
+  characters; verify database isolation, persistence and command precedence.
+  Check upgrade from a disposable 0.1.0 database retains its abilities.
+- Live acceptance remains separately authorized. Compare both list formats and
+  actual commands with visible server output, then complete preservation/cleanup
+  checks before recording success.
 
 ## Aardwolf Vitals — native and live acceptance pending
 
