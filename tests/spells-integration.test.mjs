@@ -132,8 +132,17 @@ test('spells collector persists atomic character snapshots through real SQLite',
         else line("No " .. kind .. "s found.") end
         waitIdle()
       end
-      damageQuery("skill", { "Level 1 : Kick 100% Bash", "Level 17 : Dirt kicking 85% Bash", "Level 50 : Sap 85% Bash" })
+      damageQuery("skill", { "Level 1 : Kick 100% Bash", "Level 17 : Dirt kicking 85% Bash", "Level 50 : Sap 85% Bash",
+        "Level 51 : Hammerswing 85%" })
       assert(panel.bindings.skill_bash_name == "Sap")
+      assert(not reader.client.spells.status().error and bridge_memberships("hammerswing") == 0)
+      local foundHammerswing = false
+      for _, item in ipairs(reader.client.spells.get().entries) do
+        if item.name == "Hammerswing" then
+          foundHammerswing = true; assert(item.level == 51 and item.percent == 85)
+        end
+      end
+      assert(foundHammerswing)
       damageQuery("spell", { "Level 38 : Fireball 30 85% 45 Fire" })
       assert(panel.bindings.spell_fire_name == "Fireball")
       -- A bulk list can put the same ability in more than one damage group.
@@ -160,6 +169,11 @@ test('spells collector persists atomic character snapshots through real SQLite',
       panel = context.widgets["real-spells:damage-abilities"]
       assert(panel.bindings.skill_bash_name == "Dirt kicking" and panel.bindings.spell_fire_name == "Fireball")
       assert(panel.bindings.skill_electric_name == "None learned")
+      foundHammerswing = false
+      for _, item in ipairs(reader.client.spells.get().entries) do
+        if item.name == "Hammerswing" then foundHammerswing = true end
+      end
+      assert(foundHammerswing and bridge_memberships("hammerswing") == 0)
       assert(commands.awspells('command "Dirt kicking"') == "dirt kicking: kick")
       header(); line(" Axe 1 - -"); line(" Dirt kicking 17 - 85"); line(" Fireball 38 45 1"); footer(); waitIdle()
       assert(panel.bindings.spell_fire_name == "None learned" and panel.bindings.skill_fire_name == "None learned")

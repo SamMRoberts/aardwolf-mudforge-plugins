@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.3",
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.4",
   author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons backed by SQLite."
 }
 
@@ -615,12 +615,18 @@ local function damageLine(line, cleanLine)
   local name, percentText, damageText, manaText, snText
   if request.kind == "skill" then
     name, percentText, damageText = string.match(body, "^(.-)%s+(%d+)%%%s+(%a+)%s*$")
+    if not name then name, percentText = string.match(body, "^(.-)%s+(%d+)%%%s*$") end
   else
     name, manaText, percentText, snText, damageText = string.match(body,
       "^(.-)%s+(%d+)%s+(%d+)%%%s+(%d+)%s+(%a+)%s*$")
+    if not name then
+      name, manaText, percentText, snText = string.match(body, "^(.-)%s+(%d+)%s+(%d+)%%%s+(%d+)%s*$")
+    end
   end
   local damageType = damageText and string.lower(damageText)
-  if not name or not typeSet[damageType] then failure("Malformed or unknown damage row; previous list retained."); return end
+  if not name or (damageType and not typeSet[damageType]) then
+    failure("Malformed or unknown damage row; previous list retained."); return
+  end
   name = trim(name)
   local unusable = false
   if string.sub(name, 1, 1) == "*" then unusable, name = true, trim(string.sub(name, 2)) end
@@ -635,15 +641,20 @@ local function damageLine(line, cleanLine)
   capture.rowCount = capture.rowCount + 1
   local existing = capture.names[key]
   if existing then
-    if existing.damageTypes[damageType] then failure("Duplicate damage row; previous list retained."); return end
+    if (damageType and existing.damageTypes[damageType]) or (not damageType and existing.blankDamage) then
+      failure("Duplicate damage row; previous list retained."); return
+    end
     if existing.level ~= item.level or existing.percent ~= item.percent or existing.sn ~= item.sn
       or existing.mana ~= item.mana or existing.unusable ~= item.unusable then
       failure("Conflicting damage rows; previous list retained."); return
     end
-    existing.damageTypes[damageType] = true
+    if damageType then existing.damageTypes[damageType] = true
+    else existing.blankDamage = true end
     return
   end
-  item.damageTypes = { [damageType] = true }
+  -- Combat lists can omit Damage; retain the ability without assigning a group.
+  item.damageTypes, item.blankDamage = {}, not damageType
+  if damageType then item.damageTypes[damageType] = true end
   capture.names[key] = item
   table.insert(capture.entries, item)
 end

@@ -122,7 +122,7 @@ const cases = {
   'damage failures retain prior results and never publish partial rows': `
     world.query("skill"); world.bash()
     for _, row in ipairs({ "Level BAD : Broken 85% Bash", "Level 0 : Broken 85% Bash",
-      "Level 4 : Broken 101% Bash", "Level 5 : Broken 85% Bogus", "Level 5 : Broken 85%", "Level 5 : Broken BAD% Bash" }) do
+      "Level 4 : Broken 101% Bash", "Level 5 : Broken 85% Bogus", "Level 5 : Broken", "Level 5 : Broken BAD% Bash" }) do
       world.query("skill"); world.damageHeader("skill"); world.line(row); world.damageFooter()
       assert(panel.bindings.skill_bash_name == "Sap" and reader.client.spells.status().error)
     end
