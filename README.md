@@ -1,8 +1,12 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-Version **0.1.0** provides a session Core, an injected library facade, storage
+The **0.2.0** library provides a session Core, an injected library facade, storage
 and widget helpers, a small reactive vitals example, and a configurable vitals HUD.
+It also supports writable local SQLite through an optional Python helper and
+file bridge. See [SQLite setup and API](docs/SQLITE.md). Existing plugins retain
+their versions; the SQLite helper requires Python 3.11+, File System Access and
+a connected session.
 
 | Component | Purpose |
 | --- | --- |
@@ -203,6 +207,8 @@ Tests check Lua 5.1 syntax and execute behavior in **Fengari's Lua 5.3 VM**
 with injected host fixtures. This verifies library logic, simulated lifecycle,
 and deterministic distribution; it does not execute MudForge's JavaScript
 transpiler, native widgets, persistence engine or GMCP transport.
+`npm test` also runs Python helper tests against temporary SQLite databases and
+a Lua-to-helper integration test through real files; Python 3.11+ is required.
 
 The initial native target is MudForge **2.0.3701**. Native and live-MUD
 acceptance remain pending; follow [the separate checklist](docs/NATIVE-ACCEPTANCE.md).

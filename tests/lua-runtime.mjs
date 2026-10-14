@@ -44,7 +44,7 @@ function readValue(L, index) {
   return Object.fromEntries(entries);
 }
 
-export function runLua(source) {
+export function runLua(source, globals = {}) {
   const L = lauxlib.luaL_newstate();
   lualib.luaL_openlibs(L);
   const fail = error => lauxlib.luaL_error(L, to_luastring(error.message));
@@ -67,6 +67,7 @@ export function runLua(source) {
       core: 'src/plugins/aardwolf-api-core.lua',
       example: 'src/plugins/aardwolf-api-vitals-example.lua',
       vitals: 'src/plugins/aardwolf-vitals.lua',
+      'sqlite-example': 'examples/sqlite-consumer.lua',
     };
     if (!files[name]) return lauxlib.luaL_error(state, to_luastring('unknown fixture source'));
     const code = readFileSync(resolve(root, files[name]), 'utf8');
@@ -78,6 +79,16 @@ export function runLua(source) {
     return 1;
   });
   lua.lua_setglobal(L, to_luastring('load_source'));
+  for (const [name, callback] of Object.entries(globals)) {
+    lua.lua_pushjsfunction(L, state => {
+      try {
+        const args = Array.from({ length: lua.lua_gettop(state) }, (_, index) => readValue(state, index + 1));
+        pushValue(state, callback(...args));
+        return 1;
+      } catch (error) { return fail(error); }
+    });
+    lua.lua_setglobal(L, to_luastring(name));
+  }
   const fixture = readFileSync(resolve(root, 'tests/fixtures/world.lua'), 'utf8');
   try {
     const status = lauxlib.luaL_loadstring(L, to_luastring(`${fixture}\n${source}`));
