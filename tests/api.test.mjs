@@ -4,7 +4,7 @@ import { runLua } from './lua-runtime.mjs';
 const cases = {
   'library loads without host globals or registrations': `
     local lib = freshLibrary()
-    assert(lib.version == "0.2.0" and type(lib.new) == "function")
+    assert(lib.version == "0.3.0" and type(lib.new) == "function")
     assert(not pcall(lib.new, {}))
   `,
   'package requirements accept numeric string keys from the JavaScript runtime': `

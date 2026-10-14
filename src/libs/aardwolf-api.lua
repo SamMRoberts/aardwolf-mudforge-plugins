@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.2.0", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.3.0", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, storage, SQLite and UI helpers."
 }
 
-local M = { version = "0.2.0", coreName = "Aardwolf API Core" }
+local M = { version = "0.3.0", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -594,14 +594,142 @@ local function sqliteFor(host, config)
   return api, start, cleanup, function() cancel("disconnected") end
 end
 
+local function spellInteger(value, minimum, maximum)
+  return type(value) == "number" and finite(value) ~= nil and value == math.floor(value)
+    and value >= minimum and value <= maximum
+end
+
+local function spellText(value, maximum)
+  return type(value) == "string" and #value <= maximum and string.match(value, "%S") ~= nil
+    and string.find(value, "%c") == nil
+end
+
+local function spellsSnapshot(value)
+  assert(type(value) == "table" and value.schemaVersion == 1, "invalid spells schema")
+  assert(spellText(value.characterName, 128), "invalid spells character")
+  assert(spellInteger(value.collectedAt, 0, 9007199254740991), "invalid spells timestamp")
+  local result = { schemaVersion = 1, characterName = value.characterName, collectedAt = value.collectedAt, entries = {} }
+  local names = {}
+  for _, item in ipairs(sqliteList(value.entries, 1000)) do
+    assert(type(item) == "table" and spellText(item.name, 128), "invalid ability name")
+    assert(spellInteger(item.level, 1, 9007199254740991), "invalid ability level")
+    assert(type(item.sn) == "nil" or spellInteger(item.sn, 1, 9007199254740991), "invalid ability Sn")
+    assert(type(item.percent) == "nil" or spellInteger(item.percent, 0, 100), "invalid ability percent")
+    assert(type(item.unusable) == "boolean", "invalid ability flag")
+    local key = string.lower(item.name)
+    assert(not names[key], "duplicate ability")
+    names[key] = true
+    table.insert(result.entries, { name = item.name, level = item.level, sn = item.sn,
+      percent = item.percent, unusable = item.unusable })
+  end
+  assert(#result.entries > 0, "empty spells snapshot")
+  return result
+end
+
+M.protocol.spellsSnapshot = spellsSnapshot
+
+-- A provider distributes committed snapshots; consumers never open its database.
+local function spellsFor(host, enabled)
+  local prefix = "aardwolf-spells:"
+  local provider, snapshot = nil, nil
+  local active, disconnected = false, false
+  local subscribers = {}
+  local status = { available = false, connected = false, refreshing = false, reason = enabled and "not started" or "not enabled" }
+  local api = {}
+  local function notify()
+    local callbacks = {}
+    for _, item in ipairs(subscribers) do if item.active then table.insert(callbacks, item.callback) end end
+    for _, callback in ipairs(callbacks) do
+      local ok = pcall(callback, copy(snapshot), copy(status))
+      if not ok and type(host.reportError) == "function" then pcall(host.reportError, "aardwolf-api spells subscriber failed") end
+    end
+  end
+  local function clear(reason)
+    snapshot = nil
+    status = { available = false, connected = false, refreshing = false, reason = reason }
+    notify()
+  end
+  local function discover()
+    if not active then return end
+    local found = host.findPluginByName("Aardwolf Spells")
+    if type(found) ~= "table" or type(found.id) ~= "string" or found.enabled == false then
+      provider = nil; clear("Spells provider is unavailable"); return
+    end
+    provider = found.id
+    clear("waiting for Spells provider")
+    host.broadcastToPlugin(provider, prefix .. "subscribe", json.encode({ version = 1 }))
+  end
+  local function receive(sender, message, encoded)
+    if not active then return end
+    if message == prefix .. "ready" then discover(); return end
+    if sender ~= provider then return end
+    if message == prefix .. "stopped" then provider = nil; clear("Spells provider stopped"); return end
+    if message ~= prefix .. "state" or type(encoded) ~= "string" or #encoded > 1048576 then return end
+    local ok, data = pcall(json.decode, encoded)
+    if not ok or type(data) ~= "table" or data.version ~= 1 or type(data.status) ~= "table" then return end
+    local state = data.status
+    if type(state.connected) ~= "boolean" or type(state.refreshing) ~= "boolean"
+      or (type(state.characterName) ~= "nil" and not spellText(state.characterName, 128))
+      or (type(state.reason) ~= "nil" and not spellText(state.reason, 256))
+      or (type(state.error) ~= "nil" and not spellText(state.error, 256)) then return end
+    local candidate
+    if type(data.snapshot) ~= "nil" then
+      local valid
+      valid, candidate = pcall(spellsSnapshot, data.snapshot)
+      if not valid or not state.connected or type(state.characterName) ~= "string"
+        or string.lower(candidate.characterName) ~= string.lower(state.characterName) then return end
+    end
+    if disconnected then return end
+    snapshot = candidate
+    status = { available = true, connected = state.connected, refreshing = state.refreshing,
+      characterName = state.characterName, reason = state.reason, error = state.error }
+    notify()
+  end
+  function api.get() return copy(snapshot) end
+  function api.status() return copy(status) end
+  function api.on(callback)
+    assert(type(callback) == "function", "spells subscriber callback is required")
+    local item = { active = true, callback = callback }
+    table.insert(subscribers, item)
+    return function() item.active = false; item.callback = nil end
+  end
+  local function onDisconnect()
+    if not active then return end
+    disconnected = true; clear("disconnected")
+  end
+  local function onConnect()
+    disconnected = false; discover()
+  end
+  local function start()
+    if not enabled or active then return end
+    active, disconnected = true, false
+    host.on("connected", onConnect)
+    host.on("disconnected", onDisconnect)
+    discover()
+  end
+  local function stop()
+    if not active then return end
+    active = false
+    if provider then host.broadcastToPlugin(provider, prefix .. "unsubscribe") end
+    provider = nil
+    host.off("connected", onConnect)
+    host.off("disconnected", onDisconnect)
+    clear("not started")
+  end
+  return api, start, stop, receive
+end
+
 function M.new(host, options)
   assert(type(host) == "table", "host adapter is required")
   for _, name in ipairs({ "findPluginByName", "onPluginBroadcast", "broadcastToPlugin", "on", "off" }) do requireHost(host, name) end
   local opts = options or {}
+  assert(type(opts.spells) == "nil" or type(opts.spells) == "boolean", "spells option must be boolean")
   local packages = requirements(opts.packages)
   local self = {}
   local sqliteStart, sqliteStop, sqliteDisconnect
   self.sqlite, sqliteStart, sqliteStop, sqliteDisconnect = sqliteFor(host, opts.sqlite)
+  local spellsStart, spellsStop, spellsReceive
+  self.spells, spellsStart, spellsStop, spellsReceive = spellsFor(host, opts.spells == true)
   local active, registered = false, false
   local coreId = nil
   local snapshots, subscribers = {}, {}
@@ -638,6 +766,7 @@ function M.new(host, options)
   end
   local function receive(sender, message, encoded)
     if not active then return end
+    spellsReceive(sender, message, encoded)
     if message == PREFIX .. "ready" then
       discover()
       return
@@ -684,9 +813,11 @@ function M.new(host, options)
     if not registered then host.onPluginBroadcast(receive); registered = true end
     host.on("disconnected", disconnected)
     discover()
+    spellsStart()
     return self.status()
   end
   function self.stop()
+    spellsStop()
     sqliteStop()
     if not active then self.ui.cleanup(); return end
     active = false

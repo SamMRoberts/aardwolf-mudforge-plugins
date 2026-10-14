@@ -1,7 +1,7 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.2.0** library provides a session Core, an injected library facade, storage
+The **0.3.0** library provides a session Core, an injected library facade, storage
 and widget helpers, a small reactive vitals example, and a configurable vitals HUD.
 It also supports writable local SQLite through an optional Python helper and
 file bridge. See [SQLite setup and API](docs/SQLITE.md). Existing plugins retain
@@ -14,6 +14,7 @@ a connected session.
 | Aardwolf API Core | One GMCP negotiation owner and one authoritative state cache per session |
 | Aardwolf API Vitals Example | HP/mana/moves bindings, an explicit refresh button and saved font-size preferences |
 | Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
+| Aardwolf Spells | Character-specific SQLite skill/spell snapshots collected from `allspells` |
 
 ## Installation
 
@@ -27,6 +28,8 @@ have **not been published or installed** by this scaffold.
 3. Install and enable `dist/plugins/aardwolf-api-core.lua` as a plugin.
 4. Install `dist/plugins/aardwolf-vitals.lua` for the configurable vitals HUD.
    The development example `dist/plugins/aardwolf-api-vitals-example.lua` remains optional.
+5. Optionally install `dist/plugins/aardwolf-spells.lua`. Follow the
+   [Spells setup](#aardwolf-spells) below before enabling automatic collection.
 
 With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
@@ -139,6 +142,52 @@ data through API Core.
 Refresh sends no message below the bars. If Core, negotiation or the connection
 is unavailable, the reason appears in the Refresh icon's hover text. The plugin
 does not automatically send refresh requests.
+
+## Aardwolf Spells
+
+Aardwolf Spells **0.1.0** queries plain `allspells` once after login and stores
+every skill and spell row, including future-level entries and rows with a dash
+Sn or percentage. It sends no casts or training commands and creates no widget.
+The original command output, pager controls and character prompt stay visible.
+
+Install the **0.3.0** `aardwolf-api` library and API Core. Start
+`python3 tools/sqlite_helper.py` and enable **File System Access** for Spells;
+see [SQLite setup](docs/SQLITE.md). The plugin does not start the helper.
+It waits for a verified `char.base.name`, connected/negotiated Core state and
+`char.status.state == 3`. The lowercase character name selects its managed
+`spells` database; installed plugin IDs and character names isolate databases.
+Renaming a character or changing the installed plugin ID selects a new database.
+These SQLite files live outside the portable world file.
+
+- `awspells refresh` explicitly collects a new list; it also works after resolving
+  missing helper/permission errors. Overlapping refreshes are refused.
+- `awspells status` (or `awspells`) reports character, saved count/time, current
+  operation and any dependency or capture error.
+- Sending plain `allspells` also captures the list when storage is ready.
+  Filtered variants such as `allspells spellup` never replace the full list.
+
+The header starts parsing and the exact
+`* means that you cannot use the skill/spell.` footer completes it. Names,
+levels, nullable spell numbers/percentages, explicit star flags and display
+order are preserved. A dash percentage does not imply an unusable star flag.
+Repeated page headers are accepted; continue the pager yourself. Collection
+expires after **60 seconds** and is limited to **1,000 rows**.
+
+Completed lists replace the SQLite abilities and metadata together in one
+transaction. Partial, malformed, duplicate or interrupted output leaves the
+previous list intact. Missing dependencies produce one automatic-query error
+and require manual recovery; there is no background retry. An unknown write
+outcome is read back before another refresh. Disconnects clear exposed data.
+
+Other plugins opt into `{ spells = true }` and use
+`client.spells.get()`, `client.spells.status()` or
+`client.spells.on(callback)` to read committed snapshots through targeted
+messages. They need no SQLite adapters or file permission. See
+[the spells API](docs/API.md#spells).
+
+Offline fixtures and the real SQLite bridge test cover this behavior. Native
+transpilation, file permission/I/O, command hooks, pager behavior and live
+Aardwolf capture remain pending; see [native acceptance](docs/NATIVE-ACCEPTANCE.md).
 
 ## Writing a consumer
 

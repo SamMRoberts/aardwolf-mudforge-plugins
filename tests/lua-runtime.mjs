@@ -68,6 +68,7 @@ export function runLua(source, globals = {}) {
       example: 'src/plugins/aardwolf-api-vitals-example.lua',
       vitals: 'src/plugins/aardwolf-vitals.lua',
       'sqlite-example': 'examples/sqlite-consumer.lua',
+      spells: 'src/plugins/aardwolf-spells.lua',
     };
     if (!files[name]) return lauxlib.luaL_error(state, to_luastring('unknown fixture source'));
     const code = readFileSync(resolve(root, files[name]), 'utf8');

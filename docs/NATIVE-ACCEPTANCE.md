@@ -12,7 +12,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.2.0 and Core/example versions are 0.1.0, including library
+  library version is 0.3.0 and Core/example versions are 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -68,7 +68,7 @@ Access toggle, text-file handles, rename semantics or native timer delivery.
 - With separate authorization, create a disposable world and a dedicated helper
   bridge directory inside the home folder. Start the Python helper manually;
   record Python/SQLite and MudForge versions. Do not register existing databases.
-- Install library 0.2.0 and `examples/sqlite-consumer.lua`. Connect only to the
+- Install library 0.3.0 and `examples/sqlite-consumer.lua`. Connect only to the
   disposable loopback fixture. The example does not require API Core or GMCP.
 - With File System Access off, confirm a clear unavailable result and no helper
   request. Enable it for the example, then run `awsql-demo disposable-character`.
@@ -87,6 +87,41 @@ Access toggle, text-file handles, rename semantics or native timer delivery.
 - Test helper locking, a read-only disposable alias, rollback, oversized results
   and reopen persistence. Remove only disposable artifacts, restore the original
   selected world and record evidence separately from live Aardwolf acceptance.
+
+## Aardwolf Spells — native and live acceptance pending
+
+Offline fixtures test parsing, collection lifecycle and shared access. The real
+file bridge test stores 250 abilities in SQLite, verifies rollback, reads back
+an unknown commit outcome, reloads persisted data and separates characters.
+These tests do not execute MudForge's transpiler, real file adapters, command
+hooks, provisional output, pager or connected Aardwolf transport.
+
+- With separate authorization, install library 0.3.0, API Core and Spells 0.1.0
+  in a disposable world. Start the helper manually and record client/helper
+  versions. Confirm both provider/consumer load orders and the actual installed IDs.
+- With the helper absent or File System Access off, complete simulated login.
+  Expect one actionable error, no `allspells` send and no repeated retries.
+  Enable access/start the helper and invoke `awspells refresh`.
+- Deliver `char.base.name` and active state in either order. Expect one
+  automatic query only after negotiated GMCP and state 3, including enable
+  during an existing active session. Repeat updates; no additional query occurs.
+- Feed the supplied table with ANSI, dash fields, stars, repeated page headers
+  and chatter. Verify display order, preserved terminal output/prompt and the
+  saved database content after the footer. Verify Lua pattern behavior and
+  provisional line delivery directly in the installed client.
+- Test plain user `allspells`, filtered variants, overlapping refreshes, manual
+  pager continuation, malformed/duplicate rows and missing footer. Wait 60
+  seconds for a partial capture; the previous database snapshot must survive.
+  Do not change the character's pager settings or send pager-control commands.
+- Inspect committed snapshots from a separate `spells = true` consumer with no
+  file permission. Reload/disable the provider, disconnect during capture/save
+  and switch character identity. Verify cache invalidation and no stale callbacks.
+- Simulate helper restart/lost commit receipts using only disposable data.
+  Confirm readback without write replay and explicit recovery after a failed
+  reconciliation. Save/reopen the world and verify actual SQLite persistence.
+- With a separately authorized live Aardwolf connection, run one collection and
+  compare stored rows with the visible output. Record live acceptance separately.
+  Restore the original selected world and remove only disposable test artifacts.
 
 ## Aardwolf Vitals — native and live acceptance pending
 
