@@ -1,6 +1,6 @@
 plugin = {
-  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.2",
-  author = "Sam Roberts", description = "Responsive HP, mana and moves with configurable typography and low-vital alerts."
+  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.3",
+  author = "Sam Roberts", description = "Compact vitals, target HP, alignment and character status with configurable typography and low-vital alerts."
 }
 
 local client, widget, settingsWidget, apiLibrary = nil, nil, nil, nil
@@ -10,6 +10,11 @@ local unsubscribers = {}
 local preferences = nil
 local stats = { "hp", "mana", "moves" }
 local labels = { hp = "HP", mana = "Mana", moves = "Moves" }
+local characterStates = {
+  [1] = "Login", [2] = "MOTD/login", [3] = "Active", [4] = "AFK", [5] = "Note",
+  [6] = "Building/edit", [7] = "Pager", [8] = "Combat", [9] = "Sleeping",
+  [11] = "Resting/sitting", [12] = "Running"
+}
 
 local function defaults()
   return { typography = { family = "system-ui", size = 13, weight = "normal", style = "normal" },
@@ -88,15 +93,53 @@ local function displayNumber(value)
   return type(value) == "number" and string.format("%.15g", value) or "?"
 end
 
+local function renderCharacter(character)
+  local enemy, percent = character.enemy, character.enemypct
+  local hasTarget = type(enemy) == "string" and string.match(enemy, "^%s*$") == nil
+  local targetName = "Target unknown"
+  if hasTarget then targetName = enemy
+  elseif type(enemy) == "string" then targetName = "No target" end
+  local targetPercent = hasTarget and type(percent) == "number" and displayNumber(percent) .. "%" or "--"
+  client.ui.bind(widget, "targetName", targetName)
+  client.ui.bind(widget, "targetPercent", targetPercent)
+  client.ui.bind(widget, "targetWidth", string.format("%g%%", hasTarget and (apiLibrary.percent(percent, 100) or 0) or 0))
+  client.ui.bind(widget, "targetLevel", hasTarget and type(percent) == "number" and "normal" or "unknown")
+  client.ui.bind(widget, "targetDescription", "Target: " .. targetName .. ". HP " .. targetPercent)
+
+  local alignment = character.align
+  local known = type(alignment) == "number"
+  local category, value, position = "Unknown", "?", 50
+  if known then
+    category = alignment <= -875 and "Evil" or (alignment >= 875 and "Good" or "Neutral")
+    value = (alignment > 0 and "+" or "") .. displayNumber(alignment)
+    position = (math.max(-2500, math.min(2500, alignment)) + 2500) / 5000 * 100
+  end
+  client.ui.bind(widget, "alignmentText", known and value .. " " .. category or "?")
+  client.ui.bind(widget, "alignmentKnown", known and "true" or "false")
+  client.ui.bind(widget, "alignmentPosition", string.format("%.2f%%", position))
+  client.ui.bind(widget, "alignmentMarkerOpacity", known and "1" or "0")
+  client.ui.bind(widget, "alignmentDescription", "Alignment: " .. value .. " " .. category
+    .. ". Evil -2500 to -875; Neutral -874 to 874; Good 875 to 2500.")
+
+  for _, field in ipairs({ "level", "tnl", "hunger", "thirst" }) do
+    client.ui.bind(widget, "character" .. field, displayNumber(character[field]))
+  end
+  local state = character.state
+  client.ui.bind(widget, "characterState", type(state) == "number" and (characterStates[state] or "State " .. displayNumber(state)) or "?")
+  local positionText = character.pos
+  client.ui.bind(widget, "characterPosition", type(positionText) == "string" and string.match(positionText, "^%s*$") == nil and positionText or "?")
+end
+
 local function render()
   local status = client.status()
-  local vitals, maxima = {}, {}
+  local vitals, maxima, character = {}, {}, {}
   local message = "Waiting for character data"
   if not status.available then message = "Aardwolf API Core unavailable"
   elseif not status.connected then message = "Disconnected"
   elseif not status.negotiated then message = status.reason or "Waiting for GMCP"
   else
     vitals, maxima = client.get("char.vitals") or {}, client.get("char.maxstats") or {}
+    character = client.get("char.status") or {}
     local complete, any = true, false
     for _, stat in ipairs(stats) do
       if type(vitals[stat]) == "number" then any = true end
@@ -124,6 +167,7 @@ local function render()
     client.ui.bind(widget, stat .. "Description", labels[stat] .. ": " .. displayNumber(value) .. " of "
       .. displayNumber(maximum) .. ". " .. label)
   end
+  renderCharacter(character)
 end
 
 local function persist(candidate, message)
@@ -182,9 +226,21 @@ local function styles()
   .card[data-level="warning"]{--accent:var(--warning)}.card[data-level="warning"] .track{border-color:var(--accent)}
   .card[data-level="critical"]{--accent:var(--critical)}.card[data-level="critical"] .track{border-color:var(--accent);animation:critical-pulse 2.4s ease-in-out infinite}
   .card[data-level="unknown"]{--accent:#b5c1d6}
+  .details-row{margin-top:6px}.details-row .card{flex-basis:calc(13em + 6px);grid-template-columns:minmax(0,min(5.8em,32%)) minmax(0,1fr)}
+  .target .readout{flex-wrap:nowrap;justify-content:space-between}
+  .target-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+  .target .percent{max-width:50%;flex-shrink:0;white-space:normal;overflow-wrap:anywhere}
+  .alignment-scale{position:absolute;inset:0;display:flex;opacity:.4}
+  .alignment-zone.evil{width:32.5%;background:#f87171}.alignment-zone.neutral{width:35%;background:#b5c1d6}.alignment-zone.good{width:32.5%;background:#6de2b0}
+  .alignment[data-known="false"] .alignment-zone{background:#b5c1d6}
+  .alignment-marker{position:absolute;top:0;bottom:0;left:50%;width:8px;transform:translateX(-50%);opacity:0;z-index:2;pointer-events:none}
+  .alignment-marker::before,.alignment-marker::after{content:"";position:absolute;left:0;border-left:4px solid transparent;border-right:4px solid transparent}
+  .alignment-marker::before{top:0;border-top:5px solid #eef3fc}.alignment-marker::after{bottom:0;border-bottom:5px solid #eef3fc}
+  .character-status{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0;font-size:.85em}
+  .character-status>div{display:flex;gap:4px;min-width:0}.character-status dt{color:#b5c1d6}.character-status dd{margin:0;min-width:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
   @keyframes critical-pulse{0%,100%{box-shadow:inset 0 0 0 0 transparent}50%{box-shadow:inset 0 0 0 2px var(--critical-pulse)}}
   @media(prefers-reduced-motion:reduce){.card[data-level="critical"] .track{animation:none}}
-  @media(max-width:480px){.card{flex-basis:100%}}
+  @media(max-width:480px){.card,.details-row .card{flex-basis:100%}}
   .font-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   label{display:flex;flex-direction:column;gap:4px;color:#c9d4e6;font-size:.9em}
   input,select,button{font:inherit;color:inherit;border:1px solid #4a5b74;border-radius:6px;background:#1d2a3d;padding:5px 8px}
@@ -214,7 +270,26 @@ local function markup()
       .. '<div class="track"><div class="fill" aria-hidden="true" data-mud-bind-style="width:' .. stat .. 'Width"></div>'
       .. '<div class="readout"><span class="values" data-mud-bind="' .. stat .. 'Values">? / ?</span><span class="percent" data-mud-bind="' .. stat .. 'Percent">--</span></div></div></section>')
   end
-  table.insert(html, '</div></main>')
+  table.insert(html, [[</div><div class="cards details-row">
+    <section class="card target" data-level="unknown" data-mud-bind-attr="data-level:targetLevel;aria-label:targetDescription">
+      <div class="heading"><span class="name">Target</span></div>
+      <div class="track"><div class="fill" aria-hidden="true" data-mud-bind-style="width:targetWidth"></div>
+        <div class="readout"><span class="target-name" data-mud-bind="targetName" data-mud-bind-attr="title:targetName">Target unknown</span>
+          <span class="percent" data-mud-bind="targetPercent">--</span></div></div>
+    </section>
+    <section class="card alignment" data-known="false" data-mud-bind-attr="data-known:alignmentKnown;aria-label:alignmentDescription;title:alignmentDescription">
+      <div class="heading"><span class="name">Alignment</span></div>
+      <div class="track"><div class="alignment-scale" aria-hidden="true"><span class="alignment-zone evil"></span><span class="alignment-zone neutral"></span><span class="alignment-zone good"></span></div>
+        <div class="alignment-marker" aria-hidden="true" data-mud-bind-style="left:alignmentPosition;opacity:alignmentMarkerOpacity"></div>
+        <div class="readout"><span class="values" data-mud-bind="alignmentText">?</span></div></div>
+    </section>
+  </div><dl class="character-status">
+]])
+  for _, field in ipairs({ { "level", "Level" }, { "tnl", "TNL" }, { "hunger", "Hunger" }, { "thirst", "Thirst" },
+    { "State", "State" }, { "Position", "Position" } }) do
+    table.insert(html, '<div><dt>' .. field[2] .. '</dt><dd data-mud-bind="character' .. field[1] .. '">?</dd></div>')
+  end
+  table.insert(html, '</dl></main>')
   return table.concat(html)
 end
 
@@ -308,7 +383,7 @@ function init()
   if updated then preferences = updated end
   local failure
   widget, failure = client.ui.create({ type = "html", name = "vitals", title = "Aardwolf Vitals",
-    position = { x = 80, y = 100 }, size = { width = 640, height = 90 } })
+    position = { x = 80, y = 100 }, size = { width = 640, height = 150 } })
   if type(widget) ~= "string" then
     echo("Aardwolf Vitals: " .. tostring(failure))
     client.stop(); client, apiLibrary, preferences = nil, nil, nil
@@ -318,7 +393,7 @@ function init()
   client.ui.content(widget, markup())
   applyTypography()
   if not updated then feedback("Using defaults: " .. tostring(reason or problem)) end
-  for _, topic in ipairs({ "session", "char.vitals", "char.maxstats" }) do
+  for _, topic in ipairs({ "session", "char.vitals", "char.maxstats", "char.status" }) do
     table.insert(unsubscribers, client.on(topic, render))
   end
   client.start()

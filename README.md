@@ -9,7 +9,7 @@ and widget helpers, a small reactive vitals example, and a configurable vitals H
 | `aardwolf-api` library | Data subscriptions, snapshots, refresh requests, local persistence and consumer-owned UI |
 | Aardwolf API Core | One GMCP negotiation owner and one authoritative state cache per session |
 | Aardwolf API Vitals Example | HP/mana/moves bindings, an explicit refresh button and saved font-size preferences |
-| Aardwolf Vitals | Compact HP/mana/moves bars, floating settings and independent low-vital alerts |
+| Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
 
 ## Installation
 
@@ -44,13 +44,13 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Vitals
 
-Aardwolf Vitals **0.1.2** shows **HP, mana and moves** side by side, with labels
+Aardwolf Vitals **0.1.3** shows **HP, mana and moves** side by side, with labels
 to the left and current/max values plus percentages over each bar. The compact
 header places the connection/data status beside the Vitals title. Bars are
 24 px tall at the default font size and grow for larger fonts or wrapped values.
 The panel stacks the bars below 480 px width; larger fonts also wrap the bars
 as needed. MudForge owns saved placement,
-size and visibility; existing geometry is preserved. Initial size is 640 × 90 px.
+size and visibility; existing geometry is preserved. Initial size is 640 × 150 px.
 
 Current values come from `char.vitals`; maxima come from `char.maxstats`
 (`maxhp`, `maxmana`, `maxmoves`), as documented in the
@@ -58,6 +58,49 @@ Current values come from `char.vitals`; maxima come from `char.maxstats`
 Missing or invalid values display `?`, and missing/nonpositive maxima suppress
 percentage alerts. Bars clamp to 0–100% without changing the displayed server
 numbers. Disconnect or Core unavailability clears the display.
+
+A second row shows **Target** and **Alignment**, side by side above 480 px and
+stacked at narrower widths. A wrapping summary below it shows **Level, TNL,
+Hunger, Thirst, State and Position**. These values come from `char.status`;
+hunger and thirst are displayed as numbers without assumed units.
+
+Target displays `enemy` over a red HP bar and `enemypct` alongside it. This is
+a reported percentage, not an invented current/max HP pair. Only the fill is
+clamped to 0–100%; the reported number is preserved. Player low-vital alerts do
+not apply to target HP. Long names truncate visually and remain available in
+hover text and the accessible description. An explicitly empty/whitespace enemy
+shows **No target** with an empty bar; missing/invalid enemy data shows
+**Target unknown**. A supplied enemy is shown regardless of character state.
+Missing/invalid target HP displays `--` with an empty fill.
+
+Alignment uses an Evil (red), Neutral (gray), Good (green) scale. Its marker
+maps −2500 to the left edge and +2500 to the right edge; the signed number and
+category appear over the scale. **Evil** is ≤−875, **Neutral** is −874 through
+874, and **Good** is ≥875. Out-of-range values retain their reported number
+while the marker stays within the scale. Unknown alignment displays `?` with
+no marker. The hover/accessibility description includes the category ranges.
+
+Character state uses the following labels; unrecognized codes display `State N`,
+and missing/invalid fields display `?`. Position preserves the supplied text.
+
+| Code | State |
+| --- | --- |
+| 1 | Login |
+| 2 | MOTD/login |
+| 3 | Active |
+| 4 | AFK |
+| 5 | Note |
+| 6 | Building/edit |
+| 7 | Pager |
+| 8 | Combat |
+| 9 | Sleeping |
+| 11 | Resting/sitting |
+| 12 | Running |
+
+Character fields follow the shared API's partial-update rules: omitted fields
+retain their previous values, while explicitly invalid fields become unknown.
+Target, alignment and summary values clear when the connection, Core or
+negotiation is unavailable. No gameplay commands are sent by these displays.
 
 Click the **Settings** gear icon to open a separate floating **Aardwolf Vitals Settings**
 window (initially 420 × 520 px). Its controls scroll at smaller sizes.
