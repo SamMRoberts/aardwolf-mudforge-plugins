@@ -88,7 +88,7 @@ Access toggle, text-file handles, rename semantics or native timer delivery.
   and reopen persistence. Remove only disposable artifacts, restore the original
   selected world and record evidence separately from live Aardwolf acceptance.
 
-## Room Details — 0.2.1 acceptance pending
+## Room Details — 0.2.2 acceptance pending
 
 Offline fixtures exercise capture/suppression return values, ANSI state passed
 to a stubbed native formatter, bounded recovery, login sequencing, selection,
@@ -97,7 +97,7 @@ transpiler, ANSI parser, actual suppression or docking. Browser checks exercise
 the real panel markup with synthetic native messages, not live room transport.
 
 - In an independently authorized disposable world, install `aardwolf-api`, API
-  Core and Room Details 0.2.1. No helper, database or file permission is required.
+  Core and Room Details 0.2.2. No helper, database or file permission is required.
   Record the client version. Keep Core as the only GMCP negotiation owner.
 - Observe the initial 360 × 240 widget, drag-to-dock, resizing at 200/360/540/900 px,
   close/show, reload and world reopen. Confirm saved placement/visibility.
@@ -130,6 +130,7 @@ the real panel markup with synthetic native messages, not live room transport.
 - Verify the bottom-right Auto/Details/Refresh bar stays visible while lists
   scroll, without hiding the last row. Copy/Close must sit at the lower right
   inside Details and remain reachable with long descriptions and copy feedback.
+  Verify a 24 px buffer after the controls in both bars, clear of the corner grip.
 - Open Details with the toolbar icon, double-click and Enter on a selected row.
   Check native dialog focus containment, Close/Escape focus restoration, narrow
   layout, scrolling and preserved original ANSI formatting. Copy must use original
@@ -161,7 +162,7 @@ an unknown commit outcome, reloads persisted data and separates characters.
 These tests do not execute MudForge's transpiler, real file adapters, command
 hooks, provisional output, pager or connected Aardwolf transport.
 
-- With separate authorization, install library 0.3.0, API Core and Spells 0.2.5
+- With separate authorization, install library 0.3.0, API Core and Spells 0.2.6
   in a disposable world. Start the helper manually and record client/helper
   versions. Confirm both provider/consumer load orders and the actual installed IDs.
 - With the helper absent or File System Access off, complete simulated login.
@@ -188,7 +189,7 @@ hooks, provisional output, pager or connected Aardwolf transport.
   compare stored rows with the visible output. Record live acceptance separately.
   Restore the original selected world and remove only disposable test artifacts.
 
-### Damage panel — 0.2.5 acceptance pending
+### Damage panel — 0.2.6 acceptance pending
 
 Offline fixtures cover the supplied tables and mixed-type continuation rows,
 empty bulk lists, two sequential requests, selection, command overrides, cancellation, malformed data and
@@ -203,7 +204,8 @@ and establish only rendered HTML behavior.
   rows, vertical scrolling and one panel through character/client rebuilds.
 - Confirm Edit, Refresh all and Cancel remain at the lower right before/after
   scrolling and while editing or collecting. The final ability row must remain
-  reachable, and hidden rows must not move the bar away from the bottom.
+  reachable, and hidden rows must not move the bar away from the bottom. Verify
+  a 24 px buffer after Cancel, clear of the corner grip.
 - Check the icon-only Edit, Refresh all and Cancel collection toolbar labels,
   tooltips and keyboard focus. Enter Edit: all 20 types and 40 slots must be
   visible with checked-means-visible checkboxes, and ability execution disabled.
@@ -262,7 +264,7 @@ layout/editing. These use the plugin's generated HTML with synthetic bindings;
 they do not test native iframe sanitization or widget message delivery.
 This checklist requires separate authorization for disposable native or live testing.
 
-- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.4 in a
+- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.5 in a
   disposable world. Verify one compact horizontal strip with left labels and
   overlaid numeric readouts, status beside the title, and no message area below
   the bars. The new Target/Alignment row and character summary should fit at
@@ -291,6 +293,8 @@ This checklist requires separate authorization for disposable native or live tes
   reduced motion and verify the pulse stops.
 - Verify Settings/Refresh sit at the lower right of Vitals, and Save/Reset/Close
   at the lower right of Settings, including 200 px width and short windows.
+  Both bars must reserve 26 px after the buttons, clear of the corner grip; all
+  settings fields must remain visible when tabbing with wrapped controls.
   Scroll through all content; bars must remain visible and the last field/row
   reachable. Preserve saved native geometry and unfinished form edits.
 - Navigate and operate Refresh, Settings, Close, Save and Reset using the keyboard.

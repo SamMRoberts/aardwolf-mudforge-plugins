@@ -40,7 +40,7 @@
     {
       "id": "aardwolf-vitals",
       "name": "Aardwolf Vitals",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": "Sam Roberts",
       "description": "Compact vitals, target HP, alignment and character status with configurable typography and low-vital alerts.",
       "category": "widgets",
@@ -50,14 +50,14 @@
         "vitals"
       ],
       "downloadUrl": "dist/plugins/aardwolf-vitals.lua",
-      "sha256": "d6eb25b916c0686f21b67f6af07910909fb92ca99387b9952022bcb24ee3fa3d",
-      "size": 24265,
+      "sha256": "2633c1b7617f9f960f8d97286a9627a07bf57182751e8fd50a7b6dc6811572ca",
+      "size": 24346,
       "format": "lua"
     },
     {
       "id": "aardwolf-spells",
       "name": "Aardwolf Spells",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "author": "Sam Roberts",
       "description": "Character-specific skills, spells and damage ability buttons backed by SQLite.",
       "category": "widgets",
@@ -69,14 +69,14 @@
         "sqlite"
       ],
       "downloadUrl": "dist/plugins/aardwolf-spells.lua",
-      "sha256": "2183723e8185605ddf54bae21a8d83499218e8a975f86da20e66afa832b9ccb2",
-      "size": 63247,
+      "sha256": "3bfa5439cd06436baa29c85e1f1dfdbc297bd0e2ca15764a0fbfb3f06f9ba2ba",
+      "size": 63271,
       "format": "lua"
     },
     {
       "id": "aardwolf-room-details",
       "name": "Aardwolf Room Details",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "author": "Sam Roberts",
       "description": "Formatted, selectable room characters and objects in a compact dockable panel.",
       "category": "widgets",
@@ -87,8 +87,8 @@
         "objects"
       ],
       "downloadUrl": "dist/plugins/aardwolf-room-details.lua",
-      "sha256": "04e1f07f0b43867c77fccb1972b619cc7420340fda26684687eadf6c2ad4f485",
-      "size": 37366,
+      "sha256": "5a8fdd0ca9f47c80c8e834162deae87d58c2168ea3052222c881eea0c961d221",
+      "size": 37414,
       "format": "lua"
     }
   ],

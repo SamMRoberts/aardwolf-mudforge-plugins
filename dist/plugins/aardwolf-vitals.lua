@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.4",
+  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.5",
   author = "Sam Roberts", description = "Compact vitals, target HP, alignment and character status with configurable typography and low-vital alerts."
 }
 
@@ -245,13 +245,13 @@ local function styles()
   label{display:flex;flex-direction:column;gap:4px;color:#c9d4e6;font-size:.9em}
   input,select,button{font:inherit;color:inherit;border:1px solid #4a5b74;border-radius:6px;background:#1d2a3d;padding:5px 8px}
   input,select{width:100%;min-width:0}button{cursor:pointer}button:hover{background:#293b55}
-  .toolbar{display:flex;flex-wrap:wrap;justify-content:flex-end;max-width:100%;gap:5px;margin-top:auto;padding-top:4px;position:sticky;bottom:0;z-index:2;background:#101722}
+  .toolbar{display:flex;flex-wrap:wrap;justify-content:flex-end;max-width:100%;gap:5px;margin-top:auto;padding-top:4px;padding-inline-end:26px;position:sticky;bottom:0;z-index:2;background:#101722}
   .toolbar button{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;flex:none;line-height:1}
   .toolbar .icon{font:18px system-ui}
   :focus-visible{outline:2px solid #8bb8ff;outline-offset:2px}fieldset{min-width:0;border:1px solid #354359;border-radius:8px;margin:10px 0;padding:8px}
   legend{color:#c9d4e6;font-size:.9em}.thresholds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px;position:sticky;bottom:0;z-index:2;background:#101722}.feedback{font-size:.85em;color:#c9d4e6;margin:8px 0 0;overflow-wrap:anywhere}
-  .feedback:empty{display:none}@media(max-width:260px){.font-settings,.thresholds{grid-template-columns:1fr}}
+  .actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px;padding-inline-end:26px;position:sticky;bottom:0;z-index:2;background:#101722}.feedback{font-size:.85em;color:#c9d4e6;margin:8px 0 0;overflow-wrap:anywhere}
+  .feedback:empty{display:none}@media(max-width:260px){html{scroll-padding-bottom:130px}.font-settings,.thresholds{grid-template-columns:1fr}}
 </style>
 ]]
 end
