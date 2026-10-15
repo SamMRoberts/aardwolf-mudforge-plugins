@@ -1,6 +1,6 @@
 # Andolor: Three Moons
 
-A separate Aardwolf map pack, version **1.1.0**, with all **114 terrain styles**.
+A separate Aardwolf map pack, version **1.2.0**, with all **114 terrain styles**.
 It combines Aardwolf's world with the requested colorful, ethereal fantasy look:
 moonlit slate, warm gold, pale jade, opal blue, copper sand and violet magic.
 
@@ -45,36 +45,40 @@ color, an ethereal mood, a modern game feel, and rooms that connect visually.
 The user's established preference for compact, readable tooling also favors
 clear terrain shapes and quiet room centers beneath player markers and flags.
 
-The pack therefore uses richer effects on landmarks, with calmer streets and
-floors between them. Shop interiors, portals, classrooms, crystals and the three
-moons have distinct arrangements. Roads retain directional junction shapes, and
-numbered terrain variants retain distinct scenery. Gold guides the eye
-without placing an emblem or bright frame on every room. No preferred class,
-alignment or clan is assumed.
+The pack uses connected floor materials, with sparse terrain cues and clearer
+landmarks where needed. Roads retain directional junction shapes, and numbered
+variants retain distinct scenery. Gold guides the eye without placing a bright
+frame on every room. No preferred class, alignment or clan is assumed.
 
-## Location interiors in 1.1.0
+## Connected surfaces in 1.2.0
 
-Twenty indoor location types now depict the space occupied by the player from
-above, replacing roof/exterior symbols and isolated landmark icons:
+The supplied dense-grid screenshot exposed a weakness in 1.1.0: a complete
+furnished interior repeated in every room looked like a grid of small dioramas.
+Even identical plain border pixels could not make the furniture and framed rugs
+flow together. This revision replaces that approach with repeating surfaces.
 
-- `castle`: slate hall, royal runner, columns, masonry and hanging banners.
-- `shop` and `lottery`: counters, merchandise, shelves and clerk furnishings.
-- `temple`: altar, candles, pews and a three-moon floor mosaic.
-- `mudschool`: chalkboard, lectern and student desks.
-- `office`, `archive`, `bookshelves` and `bookshelves_ns`: desks, documents and
-  book stacks, with the named shelf orientations preserved.
-- `inside`, `hallway`, `palace_room` and `redcarpet`: furnished rooms, corridors
-  and decorated interior floors.
-- `hut` and `cabin`: timber floors, sleeping areas and hearths. The hut has a
-  bedroll and clay firepit; the cabin has a bed, bookcase and dining table.
-- `crypt` and `dungeon`: sarcophagus, ironwork, shackles and interior masonry.
-- `insideice`, `hellinside` and `hellhall`: furnished chambers using ice or
-  infernal materials.
+- Castle and hallway runners extend through the north/south boundaries, with
+  quieter inlay and no repeated columns, banners or separate rug end caps.
+- Shops and lotteries use thin counter runs and small merchandise accents.
+  Library shelving extends across east/west or north/south boundaries.
+- Ice chambers and ruins use continuous material, carving and fracture patterns
+  without repeated benches, braziers or large ruin-shaped objects.
+- Wells have a small water-ring inset; offices, cabins and huts keep compact
+  furnishing cues. Palace marble and crimson carpet have dedicated surfaces.
+- All 114 terrain backgrounds now paint to the full tile boundary. Periodic
+  stone polygons extend across the seam, and wrapped texture geometry replaces
+  the inset flat-color strip. The older Terrain Icons pack is unchanged.
 
-The palette and open space between furnishings keep room overlays legible.
-These are terrain-based interior illustrations, not surveyed room furniture or
-actual exit/wall positions. Natural and outdoor terrain designs are unchanged.
-The connected preview includes a castle/palace cluster and six interior samples.
+The preview reproduces the screenshot's **5 × 5 terrain arrangement**: shops,
+castle, ice chambers, wells and ruins. Every contact-sheet card also includes a
+**3 × 3 repeat at 32 pixels per room**, in addition to its 16/24/32 px samples.
+
+A terrain pack supplies one static image per terrain. It cannot choose different
+furniture based on adjacent rooms or place one counter across an entire area.
+These patterns reduce the visual repetition; repeated terrain cues still exist.
+They remain interior-themed, without claiming actual furniture or wall positions.
+Different materials have visible transitions, and client-drawn walls, symbols
+and player markers remain separate from this artwork.
 
 ## Import, compare and restore
 
@@ -92,8 +96,9 @@ the same structure. It has not been installed into the active map by this task.
 Native import, rendering and persistence of Three Moons remain unverified.
 
 Per-room colors can hide artwork; symbols, flags, walls and player markers are
-client overlays. A pack cannot restyle them. Matching edge colors apply within
-material families; different materials still have visible boundaries.
+client overlays. A pack cannot restyle them. Three Moons uses repeating surfaces that continue across tile edges; different
+materials still have visible boundaries. The fallback terrain color is not a
+guarantee that every painted border pixel has that same color.
 
 ## Sources, builds and verification
 
@@ -117,17 +122,22 @@ git diff --check
 
 Both packs participate in deterministic builds. Tests cover registry coverage,
 normalized unique keys, valid colors, unique image and geometry hashes, PNG
-sizes, fully opaque pixels, matching material edges, embedded previews and
-byte-identical rebuilds. A cross-pack check confirms that every Three Moons
+sizes, fully opaque pixels, varied painted edge pixels, join contrast, repeated
+contact-sheet previews and byte-identical rebuilds. A cross-pack check confirms that every Three Moons
 image differs from the previous pack while retaining the same terrain keys.
 The importable JSON still contains only `name`, `description` and `terrainStyles`.
 
-Visual review uses all 114 tiles at 16, 24 and 32 pixels on both light and dark
-backgrounds, together with the connected-layout PNG. These are offline renders;
-no new native-client acceptance or browser import evidence is claimed.
+Visual review covers all 114 designs both individually and in 3 × 3 repeats,
+plus the dense screenshot arrangement. These are offline renders; native
+acceptance of 1.2.0 remains pending. No active map was modified.
 
-Validation for this revision passed: **19 focused pack/distribution checks**,
-**184 JavaScript tests and 21 Python tests** in the full suite, the deterministic
-check of **241 generated files**, and `git diff --check`. The 20 revised interiors
-were visually inspected at 128 pixels and at 16, 24 and 32 pixels on both
-backgrounds; automated coverage checks all 114 designs.
+The source test for Three Moons now checks painted surfaces at the perimeter,
+not a uniform flat border. A join-contrast test checks the screenshot terrains
+and the main floor/shelving patterns against their interior texture contrast.
+These checks help detect seams; they do not replace visual review.
+
+Validation passed for 1.2.0: **20 focused pack/distribution checks**, **185
+JavaScript tests and 21 Python tests**, `build:check` across **241 generated
+files**, and `git diff --check`. All terrains were visually reviewed in 3 × 3
+repeats and small-size samples; the six road variants received a further tiled
+review after their boundary geometry was refined.

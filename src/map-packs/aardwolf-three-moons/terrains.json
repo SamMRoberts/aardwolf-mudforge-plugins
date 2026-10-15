@@ -1,7 +1,7 @@
 {
   "name": "Andolor: Three Moons",
-  "version": "1.1.0",
-  "description": "An Aardwolf-inspired explorer atlas with location interiors: castle halls, shop counters, temple altars, library stacks and furnished rooms. Moonlit slate, emerald groves, opal seas, copper dunes and glacial blue. 114 SVG terrain designs rendered at 128 pixels with matching material edges. Version 1.1.0.",
+  "version": "1.2.0",
+  "description": "Aardwolf terrain surfaces designed for connected map grids: continuous moonlit stone, flowing carpet runners, timber aisles, carved ice and opal water. Sparse interior cues replace repeated furnished-room scenes. 114 original SVG designs rendered at 128 pixels. Version 1.2.0.",
   "source": {
     "url": "https://raw.githubusercontent.com/fiendish/aardwolfclientpackage/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db",
     "revision": "ac6e40ff5596e285cfcef6739d1dfdc257cfa162",
@@ -15,7 +15,7 @@
       "name": "inside",
       "family": "wood",
       "color": "#594051",
-      "motif": "Room interior: timber floor, woven rug, seat and glowing hearth"
+      "motif": "Continuous interior timber with sparse woven-floor accents"
     },
     {
       "id": 1,
@@ -162,7 +162,7 @@
       "name": "dungeon",
       "family": "cavern",
       "color": "#30354f",
-      "motif": "Dungeon interior: iron bars, wall shackles and fractured slate"
+      "motif": "Continuous dungeon slate with fine iron joints and worn stone"
     },
     {
       "id": 22,
@@ -176,7 +176,7 @@
       "name": "Mudschool",
       "family": "stone",
       "color": "#304856",
-      "motif": "Academy classroom interior: chalkboard, lectern and student desks"
+      "motif": "Continuous academy floor with fine chalk geometry and a small open book"
     },
     {
       "id": 24,
@@ -190,7 +190,7 @@
       "name": "hellinside",
       "family": "lava",
       "color": "#34283e",
-      "motif": "Infernal chamber interior: obsidian altar, ember bowl and scorched benches"
+      "motif": "Continuous obsidian chamber floor with subdued ember inlay"
     },
     {
       "id": 26,
@@ -225,14 +225,14 @@
       "name": "insideice",
       "family": "ice",
       "color": "#4985a4",
-      "motif": "Ice chamber interior: carved frost bench, ice pillars and a blue brazier"
+      "motif": "Continuous carved ice floor with a faint chamber-mosaic pattern"
     },
     {
       "id": 31,
       "name": "hellhall",
       "family": "lava",
       "color": "#34283e",
-      "motif": "Infernal hall interior: black stone pillars, ember braziers and a garnet runner"
+      "motif": "Continuous infernal hallway floor and an open-ended garnet runner"
     },
     {
       "id": 32,
@@ -407,7 +407,7 @@
       "name": "castle",
       "family": "stone",
       "color": "#304856",
-      "motif": "Castle interior: flagstones, royal runner, masonry columns and hanging banners"
+      "motif": "Continuous castle flagstones with a subdued woven runner joining north and south"
     },
     {
       "id": 57,
@@ -463,14 +463,14 @@
       "name": "temple",
       "family": "stone",
       "color": "#304856",
-      "motif": "Temple interior: altar, candles, pews and a three-moon floor mosaic"
+      "motif": "Continuous temple mosaic with small three-moon inlays"
     },
     {
       "id": 65,
       "name": "shop",
       "family": "stone",
       "color": "#304856",
-      "motif": "Shop interior: L-shaped counter, potion shelves and merchandise"
+      "motif": "Continuous shop floor with a low counter run and small potion accents"
     },
     {
       "id": 66,
@@ -498,7 +498,7 @@
       "name": "lottery",
       "family": "stone",
       "color": "#304856",
-      "motif": "Lottery office interior: ticket counter, gold tokens and clerk desk"
+      "motif": "Continuous lottery-office floor with a narrow ticket counter and gold token"
     },
     {
       "id": 70,
@@ -519,28 +519,28 @@
       "name": "archive",
       "family": "wood",
       "color": "#594051",
-      "motif": "Archive interior: catalog shelves, reading table and scroll storage"
+      "motif": "Continuous archive timber and a connected document-shelf run"
     },
     {
       "id": 73,
       "name": "bookshelves",
       "family": "wood",
       "color": "#594051",
-      "motif": "Library interior: east-west book stacks and a reading chair"
+      "motif": "Continuous east-west library shelves over a timber aisle"
     },
     {
       "id": 74,
       "name": "bookshelves_ns",
       "family": "wood",
       "color": "#594051",
-      "motif": "Library interior: north-south book stacks and a reading stand"
+      "motif": "Continuous north-south library shelves over a timber aisle"
     },
     {
       "id": 75,
       "name": "office",
       "family": "wood",
       "color": "#594051",
-      "motif": "Office interior: writing desk, chair, books and document shelves"
+      "motif": "Continuous office timber with a small writing surface and parchment"
     },
     {
       "id": 76,
@@ -554,7 +554,7 @@
       "name": "well",
       "family": "stone",
       "color": "#304856",
-      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+      "motif": "Continuous well-house flagstones with a small water-ring inset"
     },
     {
       "id": 78,
@@ -594,16 +594,16 @@
     {
       "id": 83,
       "name": "palace_room",
-      "family": "stone",
-      "color": "#304856",
-      "motif": "Palace interior: pale marble inlay, violet carpet and gilded columns"
+      "family": "marble",
+      "color": "#879799",
+      "motif": "Continuous pale palace marble with fine gold and violet inlay"
     },
     {
       "id": 84,
       "name": "crypt",
       "family": "cavern",
       "color": "#30354f",
-      "motif": "Crypt interior: carved sarcophagus, stone bench and ghostly candles"
+      "motif": "Continuous crypt stone with restrained sarcophagus-lid inlays"
     },
     {
       "id": 85,
@@ -631,14 +631,14 @@
       "name": "hut",
       "family": "wood",
       "color": "#594051",
-      "motif": "Hut interior: rough timber, woven mat, bedroll and a clay firepit"
+      "motif": "Continuous rough timber with reed fibers and a small woven bedroll"
     },
     {
       "id": 89,
       "name": "redcarpet",
-      "family": "wood",
-      "color": "#594051",
-      "motif": "Interior crimson carpet runner with gold edging and tassels"
+      "family": "carpet",
+      "color": "#6a4055",
+      "motif": "Continuous crimson carpet weave with fine gold lattice"
     },
     {
       "id": 90,
@@ -666,14 +666,14 @@
       "name": "cabin",
       "family": "wood",
       "color": "#594051",
-      "motif": "Cabin interior: timber planks, quilted bed, hearth and a dining table"
+      "motif": "Continuous cabin planks with a compact quilt and warm hearth accent"
     },
     {
       "id": 94,
       "name": "hallway",
       "family": "wood",
       "color": "#594051",
-      "motif": "Hallway interior: a narrow runner between carved pilasters"
+      "motif": "Continuous hallway timber and an open-ended muted runner"
     },
     {
       "id": 95,
@@ -715,7 +715,7 @@
       "name": "ruins",
       "family": "cavern",
       "color": "#30354f",
-      "motif": "Abend-inspired violet stone · Aged dungeon flagstones"
+      "motif": "Continuous ruined flagstones with fractured purple seams and tiny crystal chips"
     },
     {
       "id": 101,

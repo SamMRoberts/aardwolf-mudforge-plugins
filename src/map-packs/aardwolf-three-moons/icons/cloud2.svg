@@ -1,173 +1,987 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 32 32">
   <title>cloud2: Sapphire atmosphere and pearl · Soft atmospheric terrain</title>
   <defs>
-  <linearGradient id="stone0" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#7795b3"/>
-  <stop offset=".3" stop-color="#5d80a5"/>
-  <stop offset="1" stop-color="#4d6b8d"/>
-  </linearGradient>
-  <linearGradient id="stone1" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#7693b1"/>
-  <stop offset=".3" stop-color="#5b7da2"/>
-  <stop offset="1" stop-color="#4c698b"/>
-  </linearGradient>
-  <linearGradient id="stone2" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#7491af"/>
-  <stop offset=".3" stop-color="#587a9f"/>
-  <stop offset="1" stop-color="#4a6789"/>
-  </linearGradient>
-  <linearGradient id="stone3" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#718fac"/>
-  <stop offset=".3" stop-color="#55779c"/>
-  <stop offset="1" stop-color="#486586"/>
-  </linearGradient>
-  <linearGradient id="stone4" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#6f8dab"/>
-  <stop offset=".3" stop-color="#52759a"/>
-  <stop offset="1" stop-color="#456385"/>
-  </linearGradient>
-  <linearGradient id="stone5" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#6e8ba9"/>
-  <stop offset=".3" stop-color="#507297"/>
-  <stop offset="1" stop-color="#446183"/>
-  </linearGradient>
-  <linearGradient id="stone6" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#6b88a6"/>
-  <stop offset=".3" stop-color="#4d6f94"/>
-  <stop offset="1" stop-color="#425f81"/>
-  </linearGradient>
-  <linearGradient id="stone7" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#6986a4"/>
-  <stop offset=".3" stop-color="#4a6c91"/>
-  <stop offset="1" stop-color="#405d7f"/>
-  </linearGradient>
-  <linearGradient id="stone8" x1=".15" y1="0" x2=".7" y2="1">
-  <stop stop-color="#6784a2"/>
-  <stop offset=".3" stop-color="#48698e"/>
-  <stop offset="1" stop-color="#3e5a7c"/>
-  </linearGradient>
-  <linearGradient id="plank" x1="0" y1="0" x2="1" y2=".15">
-  <stop stop-color="#88a4bf"/>
-  <stop offset=".18" stop-color="#688bb0"/>
-  <stop offset=".85" stop-color="#5e7ea1"/>
-  <stop offset="1" stop-color="#25354f"/>
-  </linearGradient>
-  <radialGradient id="waterlight">
-  <stop stop-color="#cbd9e0" stop-opacity=".45"/>
-  <stop offset="1" stop-color="#688bb0" stop-opacity="0"/>
-  </radialGradient>
-  <filter id="soft" x="-.5" y="-.5" width="2" height="2">
-  <feGaussianBlur stdDeviation=".55"/>
-  </filter>
-  <linearGradient id="basalt" x1="0" y1="0" x2=".7" y2="1">
-  <stop stop-color="#45424c"/>
-  <stop offset=".45" stop-color="#2c2d3b"/>
-  <stop offset="1" stop-color="#171d2a"/>
-  </linearGradient>
-  <linearGradient id="roof" x1="0" y1="0" x2=".6" y2="1">
-  <stop stop-color="#cf9b77"/>
-  <stop offset=".45" stop-color="#aa594f"/>
-  <stop offset=".5" stop-color="#e1af80"/>
-  <stop offset=".53" stop-color="#8d414b"/>
-  <stop offset="1" stop-color="#513242"/>
-  </linearGradient>
-  <linearGradient id="rockTop" x1="0" y1="0" x2=".8" y2="1">
-  <stop stop-color="#c6d6bb"/>
-  <stop offset=".6" stop-color="#8ca99d"/>
-  <stop offset="1" stop-color="#608087"/>
-  </linearGradient>
-  <linearGradient id="rockFace" x1="0" y1="0" x2=".5" y2="1">
-  <stop stop-color="#6b8d94"/>
-  <stop offset="1" stop-color="#304959"/>
-  </linearGradient>
-  <radialGradient id="glow">
-  <stop stop-color="#fff3bc" stop-opacity=".8"/>
-  <stop offset=".25" stop-color="#ffc174" stop-opacity=".3"/>
-  <stop offset="1" stop-color="#ffbc73" stop-opacity="0"/>
-  </radialGradient>
-  <radialGradient id="spring" cx=".3" cy=".25">
-  <stop stop-color="#a3f6db"/>
-  <stop offset=".4" stop-color="#42c5c1"/>
-  <stop offset="1" stop-color="#1e708e"/>
-  </radialGradient>
-  <linearGradient id="canvas" x1="0" y1="0" x2="0" y2="1">
-  <stop stop-color="#fff1ca"/>
-  <stop offset=".6" stop-color="#d8bf8f"/>
-  <stop offset="1" stop-color="#9c8068"/>
-  </linearGradient>
-  <clipPath id="interior">
-  <rect x=".26" y=".26" width="31.48" height="31.48"/>
-  </clipPath>
-  <pattern id="ground" width="32" height="32" patternUnits="userSpaceOnUse">
-  <rect x="0" y="0" width="32" height="32" rx="0" fill="#37587d" />
-  <ellipse cx="5.76" cy="19.98" rx="13.83" ry="2.94" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="-7.66" cy="16.67" rx="9.1" ry="3.18" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="1.89" cy="5.2" rx="6.17" ry="3.14" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="-7.12" cy="6.14" rx="10.76" ry="4.96" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="25.72" cy="8.95" rx="11.45" ry="2.23" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="8.6" cy="28.05" rx="7.92" ry="1.75" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="22.19" cy="21.22" rx="6.43" ry="4.95" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="15.88" cy="20.67" rx="12.09" ry="2.49" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="-0.93" cy="-2.22" rx="9.89" ry="4.57" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="20.39" cy="31.78" rx="9.11" ry="2.65" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="-1.99" cy="3.29" rx="8.07" ry="2.97" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="-5.64" cy="3.12" rx="8.7" ry="1.52" fill="url(#waterlight)" opacity="0.65"/>
-  <ellipse cx="18.02" cy="17.07" rx="13.2" ry="3.06" fill="url(#waterlight)" opacity="0.65"/>
-  <circle cx="11.47" cy="20.29" r="0.12157121116295458" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="21.33" cy="15.6" r="0.11240187035407871" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="3.73" cy="3.27" r="0.19013045846484602" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="12.44" cy="26.21" r="0.21079746449831877" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="0.6" cy="31.62" r="0.11191083993762732" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="0.89" cy="27.38" r="0.1396742385206744" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="30.84" cy="3.57" r="0.1745854409132153" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="14.65" cy="16.65" r="0.21780316908378156" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="2.99" cy="1.61" r="0.21376910297200086" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="6.67" cy="9.58" r="0.11661040996666999" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="12.73" cy="29.63" r="0.15513897600583731" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="13.05" cy="26.42" r="0.17725283070001752" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="9.39" cy="1.19" r="0.1945686811208725" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="15.31" cy="1.26" r="0.14656532033812256" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="7.52" cy="6.02" r="0.16187422891147435" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="30.61" cy="0.72" r="0.1372533915238455" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="12.47" cy="19.47" r="0.1650784313865006" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="6.64" cy="12.82" r="0.19268508875276896" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="18.38" cy="5.1" r="0.114190389579162" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="20.86" cy="18.56" r="0.21802292349282654" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="27.38" cy="19.96" r="0.18011773262172937" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="14.16" cy="27.82" r="0.16597952756565065" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="24.27" cy="11.15" r="0.12923162781633438" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="29.33" cy="0.93" r="0.20592993494588885" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="22.4" cy="28.92" r="0.191038174983114" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="20.86" cy="25.35" r="0.1382188708847389" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="13.51" cy="26.29" r="0.17912464211694898" fill="#cbd9e0" opacity=".5"/>
-  <circle cx="4.11" cy="24.4" r="0.1900131460139528" fill="#cbd9e0" opacity=".5"/>
-  <path d="M-3 27Q14 26 19 15T35 5" fill="none" stroke="#688bb0" stroke-width="5" opacity=".2" filter="url(#soft)"/>
-  </pattern>
+    <filter id="soft" x="-.5" y="-.5" width="2" height="2">
+      <feGaussianBlur stdDeviation=".55"/>
+    </filter>
+    <pattern id="ground" width="32" height="32" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="32" height="32" rx="0" fill="#37587d"/>
+      <g transform="translate(-32 -32) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <path d="M-1 -2q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <path d="M-1 3q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <path d="M-1 8q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <path d="M-1 13q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <path d="M-1 18q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <path d="M-1 23q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <path d="M-1 28q8-2 16 0t16 0t16 0" fill="none" stroke="#537293" stroke-width="0.18" opacity=".6"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="22.69" cy="1.07" r="0.10436054479330778" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="11.77" cy="0.59" r="0.10362581423483788" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="28.47" cy="9.41" r="0.1439847498945892" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="11.77" cy="14.5" r="0.16188771680928765" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="5.37" cy="19.72" r="0.08585602134466172" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="11.27" cy="5.64" r="0.10298946763388812" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="3.18" cy="20.71" r="0.13090549932792783" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="17.23" cy="18.53" r="0.12321795125491916" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="7.64" cy="9.2" r="0.1406940447166562" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="27.5" cy="13.05" r="0.16914839564822615" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="11.09" cy="17.95" r="0.09977986907586456" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="19.97" cy="9.13" r="0.09655405544675887" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="7.33" cy="2.77" r="0.1470503980666399" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="3.25" cy="7.57" r="0.11342417153529823" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="9.99" cy="20.88" r="0.09637481356039643" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="30.63" cy="21.76" r="0.19270055857487023" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="12.16" cy="29.54" r="0.08501965727657079" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="3.56" cy="31.43" r="0.11514785951934756" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="21.12" cy="26.07" r="0.1741683162562549" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="27.99" cy="4.73" r="0.08163969368673861" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="15.86" cy="5.14" r="0.13709614798426628" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="9.08" cy="10.75" r="0.16457261244766413" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="14.95" cy="30.87" r="0.12457644047215581" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="28.77" cy="31.5" r="0.17761196409352123" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="27.43" cy="13.28" r="0.11142834011465311" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="1.64" cy="5.48" r="0.17902845694683492" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="2.83" cy="30.08" r="0.10026631763204932" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 -32) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 -32) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 -32) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 0) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 0) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 0) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(-32 32) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(0 32) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+      <g transform="translate(32 32) scale(1)">
+        <circle cx="5.52" cy="25.28" r="0.11400139727629721" fill="#adc6d7" opacity=".45"/>
+      </g>
+    </pattern>
+    <pattern id="terrain-surface" width="32" height="32" patternUnits="userSpaceOnUse">
+      <rect width="32" height="32" fill="url(#ground)"/>
+      <g stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(.137 .137)">
+          <path d="M16.95 6.89l1.11 0.1" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
+          <path d="M14.64 5.92l1.17 0.39" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
+          <path d="M19.01 6.13l1.31 0.39" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
+          <path d="M7.28 3.82l1.5 0.2" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
+          <path d="M19.12 14.2l1.48 0.48" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
+          <path d="M21.16 27.64l1.2 0.18" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
+          <path d="M20.19 15.83l0.63 0.37" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
+          <path d="M9.81 19.5l1.39 0.27" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
+          <path d="M17.08 17.22l0.55 0.68" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
+          <path d="M28.84 9.57l0.77 0.7" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
+          <g transform="translate(10 12) rotate(0) scale(0.9)">
+            <ellipse cx="1" cy="3" rx="7.5" ry="3" fill="#708ca7" opacity=".35" filter="url(#soft)"/>
+            <path d="M-8 1Q-9-2-5-3Q-4-7 0-6Q4-8 5-3Q10-2 8 2Q1 5-8 1Z" fill="#708ca7" stroke="none" stroke-width="0" filter="url(#soft)"/>
+            <path d="M-7 0Q-7-2-4-2Q-4-5-1-5Q3-7 4-2Q7-2 8 0Q2 2-1 1T-7 0Z" fill="#a2bbce" stroke="none" stroke-width="0" opacity=".8" filter="url(#soft)"/>
+            <path d="M-4-2Q-3-5-1-4M0-4q2-1 3 1" fill="none" stroke="#fff3d7" stroke-width="0.7" opacity=".45" filter="url(#soft)"/>
+          </g>
+          <g transform="translate(25 24) rotate(0) scale(0.8)">
+            <ellipse cx="1" cy="3" rx="7.5" ry="3" fill="#708ca7" opacity=".35" filter="url(#soft)"/>
+            <path d="M-8 1Q-9-2-5-3Q-4-7 0-6Q4-8 5-3Q10-2 8 2Q1 5-8 1Z" fill="#708ca7" stroke="none" stroke-width="0" filter="url(#soft)"/>
+            <path d="M-7 0Q-7-2-4-2Q-4-5-1-5Q3-7 4-2Q7-2 8 0Q2 2-1 1T-7 0Z" fill="#a2bbce" stroke="none" stroke-width="0" opacity=".8" filter="url(#soft)"/>
+            <path d="M-4-2Q-3-5-1-4M0-4q2-1 3 1" fill="none" stroke="#fff3d7" stroke-width="0.7" opacity=".45" filter="url(#soft)"/>
+          </g>
+        </g>
+      </g>
+    </pattern>
   </defs>
   <rect width="32" height="32" fill="#37587d"/>
-  <rect x=".26" y=".26" width="31.48" height="31.48" fill="url(#ground)"/>
-  <g clip-path="url(#interior)" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M16.95 6.89l1.11 0.1" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
-  <path d="M14.64 5.92l1.17 0.39" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
-  <path d="M19.01 6.13l1.31 0.39" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
-  <path d="M7.28 3.82l1.5 0.2" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
-  <path d="M19.12 14.2l1.48 0.48" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
-  <path d="M21.16 27.64l1.2 0.18" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
-  <path d="M20.19 15.83l0.63 0.37" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
-  <path d="M9.81 19.5l1.39 0.27" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
-  <path d="M17.08 17.22l0.55 0.68" fill="none" stroke="#25354f" stroke-width="0.35" opacity=".45"/>
-  <path d="M28.84 9.57l0.77 0.7" fill="none" stroke="#cbd9e0" stroke-width="0.35" opacity=".45"/>
-  <g transform="translate(10 12) rotate(0) scale(0.9)">
-  <ellipse cx="1" cy="3" rx="7.5" ry="3" fill="#708ca7" opacity=".35" filter="url(#soft)"/>
-  <path d="M-8 1Q-9-2-5-3Q-4-7 0-6Q4-8 5-3Q10-2 8 2Q1 5-8 1Z" fill="#708ca7" stroke="none" stroke-width="0" filter="url(#soft)"/>
-  <path d="M-7 0Q-7-2-4-2Q-4-5-1-5Q3-7 4-2Q7-2 8 0Q2 2-1 1T-7 0Z" fill="#a2bbce" stroke="none" stroke-width="0" opacity=".8" filter="url(#soft)"/>
-  <path d="M-4-2Q-3-5-1-4M0-4q2-1 3 1" fill="none" stroke="#fff3d7" stroke-width="0.7" opacity=".45" filter="url(#soft)"/>
-  </g>
-  <g transform="translate(25 24) rotate(0) scale(0.8)">
-  <ellipse cx="1" cy="3" rx="7.5" ry="3" fill="#708ca7" opacity=".35" filter="url(#soft)"/>
-  <path d="M-8 1Q-9-2-5-3Q-4-7 0-6Q4-8 5-3Q10-2 8 2Q1 5-8 1Z" fill="#708ca7" stroke="none" stroke-width="0" filter="url(#soft)"/>
-  <path d="M-7 0Q-7-2-4-2Q-4-5-1-5Q3-7 4-2Q7-2 8 0Q2 2-1 1T-7 0Z" fill="#a2bbce" stroke="none" stroke-width="0" opacity=".8" filter="url(#soft)"/>
-  <path d="M-4-2Q-3-5-1-4M0-4q2-1 3 1" fill="none" stroke="#fff3d7" stroke-width="0.7" opacity=".45" filter="url(#soft)"/>
-  </g>
-  </g>
+  <rect width="32" height="32" fill="url(#terrain-surface)"/>
 </svg>

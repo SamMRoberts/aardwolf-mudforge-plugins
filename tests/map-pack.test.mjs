@@ -79,9 +79,14 @@ for (const packName of mapPackNames) {
     assert.doesNotMatch(html, /<script\b|src="https?:/i);
     assert(html.includes('class="map-study"'));
     assert(html.includes('not a native-client capture'));
+    if (packName === 'aardwolf-three-moons') {
+      assert.equal((html.match(/class="repeat-grid"/g) || []).length, 114);
+      assert(html.includes('3 × 3 tiled'));
+      assert(html.includes('Dense 5 × 5 tiling study'));
+    }
   });
 
-  test(`${packName}: fantasy tiles are opaque and keep matching material pixels along every shared edge`, async () => {
+  test(`${packName}: terrain pixels are opaque and preserve the pack edge contract`, async () => {
     for (const terrain of registry.terrains) {
       const name = terrain.name.toLowerCase();
       const svg = await readFile(resolve(root, packDirectory, 'icons', `${name}.svg`), 'utf8');
@@ -90,16 +95,23 @@ for (const packName of mapPackNames) {
       assert.equal(rendered.height, 128);
       const pixels = rendered.pixels;
       const expected = Buffer.from([...terrain.color.slice(1).match(/../g).map(part => parseInt(part, 16)), 255]);
+      const edgeColors = new Set();
       for (let index = 0; index < rendered.width; index++) {
         for (const [x, y] of [[index, 0], [index, 127], [0, index], [127, index]]) {
           const offset = (y * rendered.width + x) * 4;
-          assert.deepEqual(pixels.subarray(offset, offset + 4), expected, `${name}: material seam at ${x},${y}`);
+          const pixel = pixels.subarray(offset, offset + 4);
+          if (packName === 'aardwolf-three-moons') edgeColors.add(pixel.toString('hex'));
+          else assert.deepEqual(pixel, expected, `${name}: material seam at ${x},${y}`);
         }
+      }
+      if (packName === 'aardwolf-three-moons') {
+        assert(edgeColors.size > 1, `${name}: a flat-color perimeter reintroduces a room frame`);
+        assert(svg.includes('id="terrain-surface"'), `${name}: missing repeating surface`);
       }
       for (let offset = 3; offset < pixels.length; offset += 4) assert.equal(pixels[offset], 255, `${name}: transparent pixel`);
     }
     const urbanNames = packName === 'aardwolf-three-moons'
-      ? ['city', 'shop', 'castle', 'alley', 'temple', 'palace_room']
+      ? ['city', 'shop', 'castle', 'alley', 'temple']
       : ['city', 'shop', 'castle', 'alley'];
     const urban = registry.terrains.filter(terrain => urbanNames.includes(terrain.name));
     assert.equal(new Set(urban.map(terrain => terrain.color)).size, 1, 'adjoining urban terrain shares its stone edge color');
@@ -136,4 +148,24 @@ test('Three Moons is a separate complete design rather than an alias of the orig
     assert.notEqual(themedPack.terrainStyles[index].image, originalPack.terrainStyles[index].image);
   }
   await assert.rejects(buildMapPackOutputs(root, '../unknown'), /Unknown map pack/);
+});
+
+test('Three Moons floor joins stay within the normal texture contrast', async () => {
+  // Uniform border pixels alone hid the framed-room problem. Compare actual
+  // joins against interior texture contrast, alongside the dense visual preview.
+  for (const name of ['castle', 'shop', 'insideice', 'well', 'ruins', 'hallway', 'palace_room', 'redcarpet', 'bookshelves', 'bookshelves_ns']) {
+    const svg = await readFile(resolve(root, 'src/map-packs/aardwolf-three-moons/icons', `${name}.svg`));
+    const { pixels } = new Resvg(svg, { font: { loadSystemFonts: false } }).render();
+    const difference = (x, y, otherX, otherY) => [0, 1, 2].reduce((sum, channel) =>
+      sum + Math.abs(pixels[(y * 128 + x) * 4 + channel] - pixels[(otherY * 128 + otherX) * 4 + channel]), 0) / 3;
+    let joins = 0;
+    let interior = 0;
+    for (let index = 0; index < 128; index++) joins += difference(0, index, 127, index) + difference(index, 0, index, 127);
+    for (let x = 1; x < 128; x++) {
+      for (let y = 0; y < 128; y++) interior += difference(x, y, x - 1, y) + difference(y, x, y, x - 1);
+    }
+    const meanJoin = joins / 256;
+    const meanInterior = interior / (127 * 256);
+    assert(meanJoin <= meanInterior * 1.35 + 0.5, `${name}: tile boundaries contrast more strongly than the floor texture`);
+  }
 });
