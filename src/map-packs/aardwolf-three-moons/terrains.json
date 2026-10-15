@@ -1,0 +1,812 @@
+{
+  "name": "Andolor: Three Moons",
+  "version": "1.0.0",
+  "description": "An Aardwolf-inspired explorer atlas: moonlit slate and gold, emerald groves, iridescent seas, Alagh-inspired copper dunes, Gelidus-inspired frost, and the violet twilight of Abend. 114 original SVG terrain designs rendered at 128 pixels with matching material edges. Version 1.0.0.",
+  "source": {
+    "url": "https://raw.githubusercontent.com/fiendish/aardwolfclientpackage/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db",
+    "revision": "ac6e40ff5596e285cfcef6739d1dfdc257cfa162",
+    "sha256": "d1dd86e532eb9903dc96fe64ae73c179e51894cd3060bccce786559c5645c4a4",
+    "table": "environments",
+    "count": 112
+  },
+  "terrains": [
+    {
+      "id": 0,
+      "name": "inside",
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Candlelit rosewood and a woven jewel rug"
+    },
+    {
+      "id": 1,
+      "name": "city",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate street and warm gold inlay"
+    },
+    {
+      "id": 2,
+      "name": "field",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald and pale jade · Mossy grass and natural groundcover"
+    },
+    {
+      "id": 3,
+      "name": "forest",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald grove, pale jade leaves and an arcane wisp"
+    },
+    {
+      "id": 4,
+      "name": "hills",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald and pale jade · Mossy grass and natural groundcover"
+    },
+    {
+      "id": 5,
+      "name": "mountain",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Moonlit crystalline mountain ridge"
+    },
+    {
+      "id": 6,
+      "name": "waterswim",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 7,
+      "name": "waternoswim",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 8,
+      "name": "unused",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Abend-inspired violet stone · Aged dungeon flagstones"
+    },
+    {
+      "id": 9,
+      "name": "air",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 10,
+      "name": "desert",
+      "family": "sand",
+      "color": "#ad7655",
+      "motif": "Eastern Desert-inspired rose gold · Warm sand and wind-shaped dunes"
+    },
+    {
+      "id": 11,
+      "name": "ocean",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 12,
+      "name": "quicksand",
+      "family": "sand",
+      "color": "#ad7655",
+      "motif": "Eastern Desert-inspired rose gold · Warm sand and wind-shaped dunes"
+    },
+    {
+      "id": 13,
+      "name": "underwater",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 14,
+      "name": "ice",
+      "family": "ice",
+      "color": "#4985a4",
+      "motif": "Gelidus-inspired fractured glacial sheet"
+    },
+    {
+      "id": 15,
+      "name": "underground",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Abend-inspired violet stone · Aged dungeon flagstones"
+    },
+    {
+      "id": 16,
+      "name": "road_eastwest",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Worn cobblestone route"
+    },
+    {
+      "id": 17,
+      "name": "road",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Worn cobblestone route"
+    },
+    {
+      "id": 18,
+      "name": "river",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 19,
+      "name": "volcano",
+      "family": "lava",
+      "color": "#34283e",
+      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 20,
+      "name": "cave",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Amethyst outcrop in twilight stone"
+    },
+    {
+      "id": 21,
+      "name": "dungeon",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Fractured slate and a violet ghost light"
+    },
+    {
+      "id": 22,
+      "name": "road_crossroads",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Worn cobblestone route"
+    },
+    {
+      "id": 23,
+      "name": "Mudschool",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Aylorian Academy-inspired levitating spellbook"
+    },
+    {
+      "id": 24,
+      "name": "areaexit",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Astral arch and luminous portal"
+    },
+    {
+      "id": 25,
+      "name": "hellinside",
+      "family": "lava",
+      "color": "#34283e",
+      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 26,
+      "name": "hellfountain",
+      "family": "lava",
+      "color": "#34283e",
+      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 27,
+      "name": "hell1",
+      "family": "lava",
+      "color": "#34283e",
+      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 28,
+      "name": "hell2",
+      "family": "lava",
+      "color": "#34283e",
+      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 29,
+      "name": "hell3",
+      "family": "lava",
+      "color": "#34283e",
+      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 30,
+      "name": "insideice",
+      "family": "ice",
+      "color": "#4985a4",
+      "motif": "Gelidus-inspired glacial blue · Glacial stone and snow"
+    },
+    {
+      "id": 31,
+      "name": "hellhall",
+      "family": "lava",
+      "color": "#34283e",
+      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 32,
+      "name": "hell4",
+      "family": "lava",
+      "color": "#34283e",
+      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 33,
+      "name": "smallroad",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 34,
+      "name": "smallroad_ew",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 35,
+      "name": "trail_ew",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 36,
+      "name": "beach",
+      "family": "sand",
+      "color": "#ad7655",
+      "motif": "Eastern Desert-inspired rose gold · Warm sand and wind-shaped dunes"
+    },
+    {
+      "id": 37,
+      "name": "shore",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 38,
+      "name": "jungle",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Alagh-inspired deep jade jungle and orchids"
+    },
+    {
+      "id": 39,
+      "name": "swamp",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald and pale jade · Mossy grass and natural groundcover"
+    },
+    {
+      "id": 40,
+      "name": "bridge",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+    },
+    {
+      "id": 41,
+      "name": "plain",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 42,
+      "name": "ocean2",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 43,
+      "name": "ocean3",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 44,
+      "name": "ocean4",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 45,
+      "name": "field3",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald and pale jade · Mossy grass and natural groundcover"
+    },
+    {
+      "id": 46,
+      "name": "field2",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald and pale jade · Mossy grass and natural groundcover"
+    },
+    {
+      "id": 47,
+      "name": "field4",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald and pale jade · Mossy grass and natural groundcover"
+    },
+    {
+      "id": 48,
+      "name": "rocks",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 49,
+      "name": "snow",
+      "family": "ice",
+      "color": "#4985a4",
+      "motif": "Gelidus-inspired glacial blue · Glacial stone and snow"
+    },
+    {
+      "id": 50,
+      "name": "icemount",
+      "family": "ice",
+      "color": "#4985a4",
+      "motif": "Gelidus-inspired glacial blue · Glacial stone and snow"
+    },
+    {
+      "id": 51,
+      "name": "icehills",
+      "family": "ice",
+      "color": "#4985a4",
+      "motif": "Gelidus-inspired glacial blue · Glacial stone and snow"
+    },
+    {
+      "id": 52,
+      "name": "space1",
+      "family": "ether",
+      "color": "#292541",
+      "motif": "Astral violet and moonlight · Muted astral stone and starlight"
+    },
+    {
+      "id": 53,
+      "name": "space2",
+      "family": "ether",
+      "color": "#292541",
+      "motif": "Astral violet and moonlight · Muted astral stone and starlight"
+    },
+    {
+      "id": 54,
+      "name": "space3",
+      "family": "ether",
+      "color": "#292541",
+      "motif": "Astral violet and moonlight · Muted astral stone and starlight"
+    },
+    {
+      "id": 55,
+      "name": "space4",
+      "family": "ether",
+      "color": "#292541",
+      "motif": "Astral violet and moonlight · Muted astral stone and starlight"
+    },
+    {
+      "id": 56,
+      "name": "castle",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+    },
+    {
+      "id": 57,
+      "name": "pillar",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Carved stone and fantasy detail"
+    },
+    {
+      "id": 58,
+      "name": "dark",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Abend-inspired violet stone · Aged dungeon flagstones"
+    },
+    {
+      "id": 59,
+      "name": "crossroad_nw",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Worn cobblestone route"
+    },
+    {
+      "id": 60,
+      "name": "crossroad_se",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Worn cobblestone route"
+    },
+    {
+      "id": 61,
+      "name": "crossroad_ews",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Worn cobblestone route"
+    },
+    {
+      "id": 62,
+      "name": "mountain_cyan",
+      "family": "ice",
+      "color": "#4985a4",
+      "motif": "Gelidus-inspired glacial blue · Glacial stone and snow"
+    },
+    {
+      "id": 63,
+      "name": "moon",
+      "family": "ether",
+      "color": "#292541",
+      "motif": "Andolor white, grey and black moons"
+    },
+    {
+      "id": 64,
+      "name": "temple",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Three-moon sanctuary inlaid in slate"
+    },
+    {
+      "id": 65,
+      "name": "shop",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Aylor-inspired alchemy stall and amber lantern"
+    },
+    {
+      "id": 66,
+      "name": "clanexit",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Guild arch with an unclaimed banner"
+    },
+    {
+      "id": 67,
+      "name": "chessblack",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Carved stone and fantasy detail"
+    },
+    {
+      "id": 68,
+      "name": "chesswhite",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Carved stone and fantasy detail"
+    },
+    {
+      "id": 69,
+      "name": "lottery",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Carved stone and fantasy detail"
+    },
+    {
+      "id": 70,
+      "name": "alley",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+    },
+    {
+      "id": 71,
+      "name": "fountain",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+    },
+    {
+      "id": 72,
+      "name": "archive",
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Rosewood and candlelight · Warm timber floor"
+    },
+    {
+      "id": 73,
+      "name": "bookshelves",
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Rosewood and candlelight · Warm timber floor"
+    },
+    {
+      "id": 74,
+      "name": "bookshelves_ns",
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Rosewood and candlelight · Warm timber floor"
+    },
+    {
+      "id": 75,
+      "name": "office",
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Rosewood and candlelight · Warm timber floor"
+    },
+    {
+      "id": 76,
+      "name": "electric",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 77,
+      "name": "well",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+    },
+    {
+      "id": 78,
+      "name": "bloodyhall",
+      "family": "blood",
+      "color": "#633444",
+      "motif": "Garnet and old stone · Worn stone stained with dark blood"
+    },
+    {
+      "id": 79,
+      "name": "bloodyroom",
+      "family": "blood",
+      "color": "#633444",
+      "motif": "Garnet and old stone · Worn stone stained with dark blood"
+    },
+    {
+      "id": 80,
+      "name": "dead_forest",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 81,
+      "name": "dead_field",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 82,
+      "name": "graveyard",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Abend-inspired violet stone · Aged dungeon flagstones"
+    },
+    {
+      "id": 83,
+      "name": "palace_room",
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Rosewood and candlelight · Warm timber floor"
+    },
+    {
+      "id": 84,
+      "name": "crypt",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Abend-inspired violet stone · Aged dungeon flagstones"
+    },
+    {
+      "id": 85,
+      "name": "dead_jungle",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 86,
+      "name": "ship",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 87,
+      "name": "chaos_sea",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal water · Rippling water and submerged detail"
+    },
+    {
+      "id": 88,
+      "name": "hut",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 89,
+      "name": "redcarpet",
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Rosewood and candlelight · Warm timber floor"
+    },
+    {
+      "id": 90,
+      "name": "city_underground",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+    },
+    {
+      "id": 91,
+      "name": "mist",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 92,
+      "name": "ashen_field",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 93,
+      "name": "cabin",
+      "family": "earth",
+      "color": "#73534f",
+      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+    },
+    {
+      "id": 94,
+      "name": "hallway",
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Rosewood and candlelight · Warm timber floor"
+    },
+    {
+      "id": 95,
+      "name": "afountain",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+    },
+    {
+      "id": 96,
+      "name": "flowers1",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald and pale jade · Mossy grass and natural groundcover"
+    },
+    {
+      "id": 97,
+      "name": "flowers2",
+      "family": "grass",
+      "color": "#183f3f",
+      "motif": "Emerald and pale jade · Mossy grass and natural groundcover"
+    },
+    {
+      "id": 98,
+      "name": "stairs",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+    },
+    {
+      "id": 99,
+      "name": "aylorcity",
+      "family": "stone",
+      "color": "#304856",
+      "motif": "White, grey and black moon mosaic"
+    },
+    {
+      "id": 100,
+      "name": "ruins",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Abend-inspired violet stone · Aged dungeon flagstones"
+    },
+    {
+      "id": 101,
+      "name": "tornado",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 102,
+      "name": "dustdevil",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 103,
+      "name": "wind1",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 104,
+      "name": "wind2",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 105,
+      "name": "lightning",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 106,
+      "name": "rain",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 107,
+      "name": "sun",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 108,
+      "name": "cloud1",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 109,
+      "name": "cloud2",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 110,
+      "name": "cloud3",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": 111,
+      "name": "rainbow",
+      "family": "sky",
+      "color": "#37587d",
+      "motif": "Sapphire atmosphere and pearl · Soft atmospheric terrain"
+    },
+    {
+      "id": null,
+      "name": "default",
+      "family": "cavern",
+      "color": "#30354f",
+      "motif": "Explorer waystone in violet slate"
+    },
+    {
+      "id": null,
+      "name": "water",
+      "family": "water",
+      "color": "#154b70",
+      "motif": "Iridian-inspired opal ripples"
+    }
+  ]
+}

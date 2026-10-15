@@ -1,14 +1,19 @@
 # Aardwolf Terrain Icons
 
-Version **1.0.0** contains **114 original pictograms** with a coordinated palette:
+Version **3.0.0** contains **114 richly illustrated fantasy terrain tiles**:
 all 112 environments in the published Aardwolf client database, plus MudForge's
-`default` and `water`. Every terrain has distinct geometry, including numbered
-variants and directional roads. Icons use a 32-unit SVG grid and ship as 64 × 64
-PNGs embedded directly in the pack. No image hosting, fonts, Lua plugin, API Core,
+`default` and `water`. Stone, timber, grass, sand, water, ice and lava surfaces
+replace the 1.0.0 white pictograms. Irregular beveled flagstones, individually layered foliage, flowing water
+highlights and detailed miniature scenery give each terrain distinct geometry, including numbered variants and directional
+roads. Related tiles have identical material pixels at every outer edge, so
+adjoining streets and floors read continuously. Artwork uses a 32-unit SVG grid
+and ships as 128 × 128 PNGs embedded directly in the pack. No image hosting,
+fonts, Lua plugin, API Core,
 SQLite helper, or live connection is needed to use the images.
 
 - [Importable JSON pack](../dist/map-packs/aardwolf-terrain-icons.json)
 - [Contact sheet](../dist/map-packs/aardwolf-terrain-icons.html): open the downloaded HTML in a browser for labeled 16, 24 and 32 px samples on dark and light backgrounds
+- [Connected map preview](../dist/map-packs/aardwolf-terrain-icons-map-preview.png): town, woodland/river and dungeon studies, plus six biome swatches, with simulated client walls
 - [Individual PNGs](../dist/map-packs/aardwolf-terrain-icons/)
 - [Editable SVGs](../src/map-packs/aardwolf-terrain-icons/icons/)
 - [Registry, palette and provenance](../src/map-packs/aardwolf-terrain-icons/terrains.json)
@@ -30,14 +35,21 @@ SQLite helper, or live connection is needed to use the images.
 terrain name. Custom styles absent from this pack are removed. Matching terrain
 colors and images are replaced by this pack's palette and icons. Keep your export
 if you want to restore those customizations. This replacement behavior was
-verified in the browser client v2.0.3702; native v2.0.3701 acceptance is pending.
+verified with the 1.0.0 pack in the browser client v2.0.3702. The 3.0.0 pack keeps
+the same terrain keys and import format. Native acceptance of the new artwork
+is pending; this task does not install it into the active map.
 
 Terrain keys are lowercase, matching MudForge's protocol terrain normalization;
 the registry's `Mudschool` entry is emitted as `mudschool`. Unknown future terrain
 names have no dedicated icon until the registry/artwork is extended. Per-room
 color overrides can hide terrain artwork, and symbols and flags can cover parts
-of an icon. Tiny map zoom levels necessarily lose detail; the contact sheet shows
-the intended small-size appearance.
+of a tile. MudForge draws its walls, room outlines, player markers and other
+overlays above the terrain image. A terrain pack cannot remove or restyle those
+client overlays. Different materials such as grass and water still have visible
+transitions; matching edges apply within a material family, not across every
+terrain. Tiny map zoom levels necessarily lose scenery detail; the material
+surface remains visible. The contact sheet shows both individual tiles and
+connected room layouts rather than judging the art only in isolation.
 
 ## Source and build
 
@@ -50,8 +62,12 @@ independently verified current live-server sector list. The artwork is original;
 no upstream artwork or implementation code is included.
 
 Edit an individual SVG and its registry color/motif together. Each SVG has an
-opaque background matching its `color`, simple paths/shapes, and no text glyphs,
-external resources or scripts. Keep numbered variants geometrically distinct.
+opaque background matching its `color`, paths, gradients and repeating material
+patterns, and no text glyphs, external resources or scripts. Keep numbered
+variants geometrically distinct.
+Keep the outermost rendered pixel the shared material color and all decoration
+inside the existing clip; this prevents tiny per-tile frames or gaps. City, shop,
+castle and alley use the same stone perimeter. Grassland and forest share grass.
 `@resvg/resvg-js` is pinned to **2.6.2** as a development-only renderer; system
 fonts are disabled. Consumers need only the generated JSON file.
 
@@ -65,12 +81,45 @@ git diff --check
 ```
 
 The existing repository build now includes the PNGs, pack, and self-contained HTML
-preview. Its plugin/library catalog and distributed Lua remain unchanged.
+preview, including the connected-layout PNG. Its plugin/library catalog and
+distributed Lua remain unchanged.
 Tests check pinned registry coverage, normalized keys, invalid registry entries,
-unique geometric designs and PNG hashes, dimensions, preview coverage, and
+unique geometric designs and PNG hashes, dimensions, preview coverage,
+opaque pixels, matching material edges, the connected-layout preview, and
 byte-identical rebuilds. These checks do not prove native import or persistence.
 
 ## Acceptance evidence
+
+### 3.0.0 artwork
+
+This revision overhauls the shapes and materials as well as the palette. Large,
+irregular flagstones replace the small brick grid. Forests use overlapping leaf
+shapes, layered shadows and directional highlights instead of rounded tree
+symbols. Timber has grain and knots; water has depth patches and fine flowing
+highlights. Shingled roofs, scalloped market canvas, segmented fountain rims,
+faceted rocks, luminous lava and arcane details extend that treatment to scenery.
+Directional roads now have visible paving and distinct junction geometry.
+
+The full fantasy palette combines silver limestone, emerald foliage, turquoise
+water, golden sand, warm timber, violet magic and orange lava. A narrower plain
+perimeter reduces the visible room grid while keeping exact shared edge colors.
+The 128-pixel PNG resolution and import format are unchanged from 2.3.0.
+
+The new tiles replace all 114 sources and generated PNGs. Repository checks cover
+the same import structure plus fully opaque pixels, exact material-color edges,
+and an embedded connected-layout preview. The town study follows the connected
+city/shop arrangement from the supplied screenshot. The contact sheet and PNG
+study are illustrative renders with simulated walls; they are not evidence of
+native-client installation or rendering. Native 3.0.0 acceptance remains pending.
+All 114 redesigned tiles were inspected in labeled overviews at 16, 24 and
+32 pixels on light and dark backgrounds, together with the rendered connected-map
+study. Automated checks cover all **685 preview images** and their embedded PNGs.
+A fresh browser check of this revision could not run because the browser tool
+blocked the local-file URL; the image-loading and overflow observations from
+2.3.0 are not new 3.0.0 browser evidence. **176 JavaScript tests and 21 Python
+tests**, the deterministic build check, and diff whitespace checks passed.
+
+### Historical 1.0.0 browser acceptance
 
 Repository checks passed: 174 JavaScript tests, 21 Python tests, the deterministic
 build check, and diff whitespace checks. All 114 designs were visually inspected
@@ -89,7 +138,7 @@ connection attempt failed, and the reload restored it disconnected. On the first
 fixture reload the client normalized zoom from 1 to 2; the full preservation
 comparison passed on a repeated import/reload at the restored zoom of 2.
 
-**Native acceptance remains pending.** UI automation of the installed
+**Native 1.0.0 acceptance remained pending.** UI automation of the installed
 **v2.0.3701** was interrupted twice by activity outside this chat. The icon pack
 was not installed into the active Aardwolf map by this task, and no native test
 world was created. Browser evidence does not establish macOS WebKit/native

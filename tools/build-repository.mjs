@@ -3,7 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseMudForgeLua } from './lua-compatibility.mjs';
-import { buildMapPackOutputs } from './build-map-pack.mjs';
+import { buildMapPackOutputs, mapPackNames } from './build-map-pack.mjs';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const entries = [
@@ -53,7 +53,9 @@ export async function buildOutputs() {
     catalog[entry.kind === 'plugin' ? 'plugins' : 'libraries'].push(listing);
   }
   outputs.set('plugins.json', Buffer.from(`${JSON.stringify(catalog, null, 2)}\n`));
-  for (const [path, bytes] of await buildMapPackOutputs(root)) outputs.set(path, bytes);
+  for (const packName of mapPackNames) {
+    for (const [path, bytes] of await buildMapPackOutputs(root, packName)) outputs.set(path, bytes);
+  }
   return outputs;
 }
 

@@ -1,7 +1,144 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 32 32">
-  <title>insideice: Frozen doorway</title>
-  <rect width="32" height="32" fill="#254c60"/>
-  <g color="#eff6f4" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="8" y="5" width="16" height="22" rx="0" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 6l4 10 4-10 4 10 4-10M13 27V18h6v9" fill="none" stroke="currentColor" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 32 32">
+  <title>insideice: Glacial stone and snow</title>
+  <defs>
+    <linearGradient id="stone0" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#aed9dd"/>
+      <stop offset=".3" stop-color="#9bcfd8"/>
+      <stop offset="1" stop-color="#80b7c5"/>
+    </linearGradient>
+    <linearGradient id="stone1" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#abd7dc"/>
+      <stop offset=".3" stop-color="#98cdd6"/>
+      <stop offset="1" stop-color="#7db6c4"/>
+    </linearGradient>
+    <linearGradient id="stone2" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#aad5da"/>
+      <stop offset=".3" stop-color="#96cad4"/>
+      <stop offset="1" stop-color="#7cb4c2"/>
+    </linearGradient>
+    <linearGradient id="stone3" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#a8d4d9"/>
+      <stop offset=".3" stop-color="#93c8d3"/>
+      <stop offset="1" stop-color="#7ab2c1"/>
+    </linearGradient>
+    <linearGradient id="stone4" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#a5d2d8"/>
+      <stop offset=".3" stop-color="#90c6d1"/>
+      <stop offset="1" stop-color="#78b1c0"/>
+    </linearGradient>
+    <linearGradient id="stone5" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#a3d0d6"/>
+      <stop offset=".3" stop-color="#8dc3cf"/>
+      <stop offset="1" stop-color="#75afbe"/>
+    </linearGradient>
+    <linearGradient id="stone6" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#a1ced5"/>
+      <stop offset=".3" stop-color="#8ac1cd"/>
+      <stop offset="1" stop-color="#73adbd"/>
+    </linearGradient>
+    <linearGradient id="stone7" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#9fccd4"/>
+      <stop offset=".3" stop-color="#87becc"/>
+      <stop offset="1" stop-color="#71abbc"/>
+    </linearGradient>
+    <linearGradient id="stone8" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#9ccad2"/>
+      <stop offset=".3" stop-color="#84bcca"/>
+      <stop offset="1" stop-color="#6faabb"/>
+    </linearGradient>
+    <linearGradient id="plank" x1="0" y1="0" x2="1" y2=".15">
+      <stop stop-color="#bce3e3"/>
+      <stop offset=".18" stop-color="#a7d9df"/>
+      <stop offset=".85" stop-color="#97cbd4"/>
+      <stop offset="1" stop-color="#397a94"/>
+    </linearGradient>
+    <radialGradient id="waterlight">
+      <stop stop-color="#e9f8ed" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#a7d9df" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-.5" y="-.5" width="2" height="2">
+      <feGaussianBlur stdDeviation=".55"/>
+    </filter>
+    <linearGradient id="basalt" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#45424c"/>
+      <stop offset=".45" stop-color="#2c2d3b"/>
+      <stop offset="1" stop-color="#171d2a"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2=".6" y2="1">
+      <stop stop-color="#cf9b77"/>
+      <stop offset=".45" stop-color="#aa594f"/>
+      <stop offset=".5" stop-color="#e1af80"/>
+      <stop offset=".53" stop-color="#8d414b"/>
+      <stop offset="1" stop-color="#513242"/>
+    </linearGradient>
+    <linearGradient id="rockTop" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#c6d6bb"/>
+      <stop offset=".6" stop-color="#8ca99d"/>
+      <stop offset="1" stop-color="#608087"/>
+    </linearGradient>
+    <linearGradient id="rockFace" x1="0" y1="0" x2=".5" y2="1">
+      <stop stop-color="#6b8d94"/>
+      <stop offset="1" stop-color="#304959"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop stop-color="#fff3bc" stop-opacity=".8"/>
+      <stop offset=".25" stop-color="#ffc174" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#ffbc73" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="spring" cx=".3" cy=".25">
+      <stop stop-color="#a3f6db"/>
+      <stop offset=".4" stop-color="#42c5c1"/>
+      <stop offset="1" stop-color="#1e708e"/>
+    </radialGradient>
+    <linearGradient id="canvas" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff1ca"/>
+      <stop offset=".6" stop-color="#d8bf8f"/>
+      <stop offset="1" stop-color="#9c8068"/>
+    </linearGradient>
+    <clipPath id="interior">
+      <rect x=".26" y=".26" width="31.48" height="31.48"/>
+    </clipPath>
+    <pattern id="ground" width="32" height="32" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="32" height="32" rx="0" fill="#72adbf"/>
+      <path d="M0 0L14 2L7 15L0 21Z" fill="url(#stone0)" stroke="none" stroke-width="0.5"/>
+      <path d="M0 0L14 2L7 15L0 21Z" fill="none" stroke="#e9f8ed" stroke-width="0.17" opacity=".5"/>
+      <path d="M14 2L32 0L25 13L7 15Z" fill="url(#stone1)" stroke="none" stroke-width="0.5"/>
+      <path d="M14 2L32 0L25 13L7 15Z" fill="none" stroke="#e9f8ed" stroke-width="0.17" opacity=".5"/>
+      <path d="M7 15L25 13L32 28L16 25Z" fill="url(#stone2)" stroke="none" stroke-width="0.5"/>
+      <path d="M7 15L25 13L32 28L16 25Z" fill="none" stroke="#e9f8ed" stroke-width="0.17" opacity=".5"/>
+      <path d="M0 21L7 15L16 25L10 32L0 32Z" fill="url(#stone3)" stroke="none" stroke-width="0.5"/>
+      <path d="M0 21L7 15L16 25L10 32L0 32Z" fill="none" stroke="#e9f8ed" stroke-width="0.17" opacity=".5"/>
+      <path d="M16 25L32 28L32 32L10 32Z" fill="url(#stone4)" stroke="none" stroke-width="0.5"/>
+      <path d="M16 25L32 28L32 32L10 32Z" fill="none" stroke="#e9f8ed" stroke-width="0.17" opacity=".5"/>
+      <path d="M7 15l2 4-1 3m17-9-7 1-3-2M16 25l-4-1" fill="none" stroke="#e5ffec" stroke-width="0.2" opacity=".8"/>
+    </pattern>
+  </defs>
+  <rect width="32" height="32" fill="#72adbf"/>
+  <rect x=".26" y=".26" width="31.48" height="31.48" fill="url(#ground)"/>
+  <g clip-path="url(#interior)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.53 3.85l1.51 0.12" fill="none" stroke="#397a94" stroke-width="0.35" opacity=".45"/>
+    <path d="M24.23 5.24l0.64 0.6" fill="none" stroke="#e9f8ed" stroke-width="0.35" opacity=".45"/>
+    <path d="M5.5 23.88l1.06 0.61" fill="none" stroke="#397a94" stroke-width="0.35" opacity=".45"/>
+    <path d="M4.92 15.28l0.68 0.6" fill="none" stroke="#e9f8ed" stroke-width="0.35" opacity=".45"/>
+    <path d="M6.97 19.26l1.56 0.41" fill="none" stroke="#397a94" stroke-width="0.35" opacity=".45"/>
+    <path d="M24.02 19.5l1.9 0.15" fill="none" stroke="#e9f8ed" stroke-width="0.35" opacity=".45"/>
+    <path d="M21.89 5.3l1.77 0.65" fill="none" stroke="#397a94" stroke-width="0.35" opacity=".45"/>
+    <path d="M9.33 19.51l1.86 0.3" fill="none" stroke="#e9f8ed" stroke-width="0.35" opacity=".45"/>
+    <path d="M25.44 9.62l0.63 0.48" fill="none" stroke="#397a94" stroke-width="0.35" opacity=".45"/>
+    <path d="M25.2 7.22l0.71 0.04" fill="none" stroke="#e9f8ed" stroke-width="0.35" opacity=".45"/>
+    <g transform="translate(21 10) rotate(0) scale(0.75)">
+      <rect x="-5" y="-6" width="10" height="12" rx="0" fill="#323d38"/>
+      <rect x="-5" y="-6" width="10" height="2" rx="0" fill="#9d9c87"/>
+      <path d="M-5 -6h10" fill="none" stroke="#b8b39c" stroke-width="0.35"/>
+      <rect x="-5" y="-3.6" width="10" height="2" rx="0" fill="#91917e"/>
+      <path d="M-5 -3.6h10" fill="none" stroke="#b8b39c" stroke-width="0.35"/>
+      <rect x="-5" y="-1.2000000000000002" width="10" height="2" rx="0" fill="#818675"/>
+      <path d="M-5 -1.2000000000000002h10" fill="none" stroke="#b8b39c" stroke-width="0.35"/>
+      <rect x="-5" y="1.1999999999999993" width="10" height="2" rx="0" fill="#717868"/>
+      <path d="M-5 1.1999999999999993h10" fill="none" stroke="#b8b39c" stroke-width="0.35"/>
+      <rect x="-5" y="3.5999999999999996" width="10" height="2" rx="0" fill="#606b5e"/>
+      <path d="M-5 3.5999999999999996h10" fill="none" stroke="#b8b39c" stroke-width="0.35"/>
+    </g>
+    <path d="M5 5l6 8-4 10" fill="none" stroke="#dae2d4" stroke-width="0.8"/>
   </g>
 </svg>

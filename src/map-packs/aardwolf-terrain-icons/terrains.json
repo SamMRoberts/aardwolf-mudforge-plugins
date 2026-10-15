@@ -1,7 +1,7 @@
 {
   "name": "Aardwolf Terrain Icons",
-  "version": "1.0.0",
-  "description": "114 original pictograms with a coordinated palette: all 112 published Aardwolf environments plus MudForge default and water. Version 1.0.0.",
+  "version": "3.0.0",
+  "description": "114 richly illustrated fantasy terrain tiles: irregular weathered flagstones, layered emerald foliage, flowing turquoise water, golden dunes, carved timber and luminous arcane details. Original textured SVG artwork with matching material edges and 128-pixel PNGs. All 112 published Aardwolf environments plus MudForge default and water. Version 3.0.0.",
   "source": {
     "url": "https://raw.githubusercontent.com/fiendish/aardwolfclientpackage/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db",
     "revision": "ac6e40ff5596e285cfcef6739d1dfdc257cfa162",
@@ -13,800 +13,800 @@
     {
       "id": 0,
       "name": "inside",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Open doorway"
+      "family": "wood",
+      "color": "#885735",
+      "motif": "Warm timber and a jewel-colored woven rug"
     },
     {
       "id": 1,
       "name": "city",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Three towers"
+      "color": "#72736a",
+      "motif": "Weathered silver limestone and living moss"
     },
     {
       "id": 2,
       "name": "field",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Three grass tufts"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Lush green meadow and sparse tufts"
     },
     {
       "id": 3,
       "name": "forest",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Two conifers"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Layered emerald leaves and soft woodland shadows"
     },
     {
       "id": 4,
       "name": "hills",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Rolling hills"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Mossy grass and natural groundcover"
     },
     {
       "id": 5,
       "name": "mountain",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Snow-capped peak"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 6,
       "name": "waterswim",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Swimmer above waves"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 7,
       "name": "waternoswim",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Deep water and barred swimmer"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 8,
       "name": "unused",
-      "family": "neutral",
-      "color": "#292d3b",
-      "motif": "Reserved empty diamond"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": 9,
       "name": "air",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Rising air streams"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 10,
       "name": "desert",
-      "family": "earth",
-      "color": "#59412a",
-      "motif": "Dunes and sun"
+      "family": "sand",
+      "color": "#be9552",
+      "motif": "Warm sand and wind-shaped dunes"
     },
     {
       "id": 11,
       "name": "ocean",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Three broad swells"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 12,
       "name": "quicksand",
-      "family": "earth",
-      "color": "#59412a",
-      "motif": "Sinking boot and sand ripples"
+      "family": "sand",
+      "color": "#be9552",
+      "motif": "Warm sand and wind-shaped dunes"
     },
     {
       "id": 13,
       "name": "underwater",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Fish and bubbles"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 14,
       "name": "ice",
       "family": "ice",
-      "color": "#254c60",
-      "motif": "Faceted ice crystal"
+      "color": "#72adbf",
+      "motif": "Glacial stone and snow"
     },
     {
       "id": 15,
       "name": "underground",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Buried passage"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": 16,
       "name": "road_eastwest",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Horizontal divided road"
+      "color": "#72736a",
+      "motif": "Worn cobblestone route"
     },
     {
       "id": 17,
       "name": "road",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Vertical divided road"
+      "color": "#72736a",
+      "motif": "Worn cobblestone route"
     },
     {
       "id": 18,
       "name": "river",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Winding river"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 19,
       "name": "volcano",
-      "family": "fire",
-      "color": "#612d28",
-      "motif": "Erupting volcano"
+      "family": "lava",
+      "color": "#3d292a",
+      "motif": "Dark volcanic crust and glowing fissures"
     },
     {
       "id": 20,
       "name": "cave",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Ragged cave mouth"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": 21,
       "name": "dungeon",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Barred cell"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": 22,
       "name": "road_crossroads",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Four-way road"
+      "color": "#72736a",
+      "motif": "Worn cobblestone route"
     },
     {
       "id": 23,
       "name": "Mudschool",
       "family": "stone",
-      "color": "#273749",
-      "motif": "School desk and mortarboard"
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 24,
       "name": "areaexit",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Exit through doorway"
+      "family": "stone",
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 25,
       "name": "hellinside",
-      "family": "fire",
-      "color": "#612d28",
-      "motif": "Horned doorway"
+      "family": "lava",
+      "color": "#3d292a",
+      "motif": "Dark volcanic crust and glowing fissures"
     },
     {
       "id": 26,
       "name": "hellfountain",
-      "family": "fire",
-      "color": "#612d28",
-      "motif": "Flaming fountain"
+      "family": "lava",
+      "color": "#3d292a",
+      "motif": "Dark volcanic crust and glowing fissures"
     },
     {
       "id": 27,
       "name": "hell1",
-      "family": "fire",
-      "color": "#612d28",
-      "motif": "Single flame"
+      "family": "lava",
+      "color": "#3d292a",
+      "motif": "Dark volcanic crust and glowing fissures"
     },
     {
       "id": 28,
       "name": "hell2",
-      "family": "fire",
-      "color": "#612d28",
-      "motif": "Flame over coals"
+      "family": "lava",
+      "color": "#3d292a",
+      "motif": "Dark volcanic crust and glowing fissures"
     },
     {
       "id": 29,
       "name": "hell3",
-      "family": "fire",
-      "color": "#612d28",
-      "motif": "Forked inferno"
+      "family": "lava",
+      "color": "#3d292a",
+      "motif": "Dark volcanic crust and glowing fissures"
     },
     {
       "id": 30,
       "name": "insideice",
       "family": "ice",
-      "color": "#254c60",
-      "motif": "Frozen doorway"
+      "color": "#72adbf",
+      "motif": "Glacial stone and snow"
     },
     {
       "id": 31,
       "name": "hellhall",
-      "family": "fire",
-      "color": "#612d28",
-      "motif": "Hall of flames"
+      "family": "lava",
+      "color": "#3d292a",
+      "motif": "Dark volcanic crust and glowing fissures"
     },
     {
       "id": 32,
       "name": "hell4",
-      "family": "fire",
-      "color": "#612d28",
-      "motif": "Flame in a ring"
+      "family": "lava",
+      "color": "#3d292a",
+      "motif": "Dark volcanic crust and glowing fissures"
     },
     {
       "id": 33,
       "name": "smallroad",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Narrow winding path"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 34,
       "name": "smallroad_ew",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Narrow horizontal path"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 35,
       "name": "trail_ew",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Footprints across trail"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 36,
       "name": "beach",
-      "family": "earth",
-      "color": "#59412a",
-      "motif": "Beach umbrella"
+      "family": "sand",
+      "color": "#be9552",
+      "motif": "Warm sand and wind-shaped dunes"
     },
     {
       "id": 37,
       "name": "shore",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Waves meet stones"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 38,
       "name": "jungle",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Palm and undergrowth"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Mossy grass and natural groundcover"
     },
     {
       "id": 39,
       "name": "swamp",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Reeds over standing water"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Mossy grass and natural groundcover"
     },
     {
       "id": 40,
       "name": "bridge",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Arched bridge"
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 41,
       "name": "plain",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Low horizon"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 42,
       "name": "ocean2",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Cresting breaker"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 43,
       "name": "ocean3",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Opposing waves"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 44,
       "name": "ocean4",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Ocean whirlpool"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 45,
       "name": "field3",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Tall seed heads"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Mossy grass and natural groundcover"
     },
     {
       "id": 46,
       "name": "field2",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Two leafy shoots"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Mossy grass and natural groundcover"
     },
     {
       "id": 47,
       "name": "field4",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Furrowed crop rows"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Mossy grass and natural groundcover"
     },
     {
       "id": 48,
       "name": "rocks",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Three boulders"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 49,
       "name": "snow",
       "family": "ice",
-      "color": "#254c60",
-      "motif": "Six-armed snowflake"
+      "color": "#72adbf",
+      "motif": "Glacial stone and snow"
     },
     {
       "id": 50,
       "name": "icemount",
       "family": "ice",
-      "color": "#254c60",
-      "motif": "Glacier mountain"
+      "color": "#72adbf",
+      "motif": "Glacial stone and snow"
     },
     {
       "id": 51,
       "name": "icehills",
       "family": "ice",
-      "color": "#254c60",
-      "motif": "Frozen rolling hills"
+      "color": "#72adbf",
+      "motif": "Glacial stone and snow"
     },
     {
       "id": 52,
       "name": "space1",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Ringed planet"
+      "family": "ether",
+      "color": "#45366d",
+      "motif": "Muted astral stone and starlight"
     },
     {
       "id": 53,
       "name": "space2",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Spiral galaxy"
+      "family": "ether",
+      "color": "#45366d",
+      "motif": "Muted astral stone and starlight"
     },
     {
       "id": 54,
       "name": "space3",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Constellation"
+      "family": "ether",
+      "color": "#45366d",
+      "motif": "Muted astral stone and starlight"
     },
     {
       "id": 55,
       "name": "space4",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Comet"
+      "family": "ether",
+      "color": "#45366d",
+      "motif": "Muted astral stone and starlight"
     },
     {
       "id": 56,
       "name": "castle",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Battlement castle"
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 57,
       "name": "pillar",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Fluted column"
+      "color": "#72736a",
+      "motif": "Carved stone and fantasy detail"
     },
     {
       "id": 58,
       "name": "dark",
-      "family": "neutral",
-      "color": "#292d3b",
-      "motif": "Eclipsed disc"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": 59,
       "name": "crossroad_nw",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Road turns northwest"
+      "color": "#72736a",
+      "motif": "Worn cobblestone route"
     },
     {
       "id": 60,
       "name": "crossroad_se",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Road turns southeast"
+      "color": "#72736a",
+      "motif": "Worn cobblestone route"
     },
     {
       "id": 61,
       "name": "crossroad_ews",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Road joins east west south"
+      "color": "#72736a",
+      "motif": "Worn cobblestone route"
     },
     {
       "id": 62,
       "name": "mountain_cyan",
       "family": "ice",
-      "color": "#254c60",
-      "motif": "Twin crystalline peaks"
+      "color": "#72adbf",
+      "motif": "Glacial stone and snow"
     },
     {
       "id": 63,
       "name": "moon",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Crescent moon"
+      "family": "ether",
+      "color": "#45366d",
+      "motif": "Muted astral stone and starlight"
     },
     {
       "id": 64,
       "name": "temple",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Pediment and columns"
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 65,
       "name": "shop",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Shop awning"
+      "color": "#72736a",
+      "motif": "Turquoise market awning and amber lantern"
     },
     {
       "id": 66,
       "name": "clanexit",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Shield and outgoing arrow"
+      "family": "stone",
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 67,
       "name": "chessblack",
-      "family": "neutral",
-      "color": "#292d3b",
-      "motif": "Chess knight"
+      "family": "stone",
+      "color": "#72736a",
+      "motif": "Carved stone and fantasy detail"
     },
     {
       "id": 68,
       "name": "chesswhite",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Chess rook"
+      "color": "#72736a",
+      "motif": "Carved stone and fantasy detail"
     },
     {
       "id": 69,
       "name": "lottery",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Ticket and star"
+      "family": "stone",
+      "color": "#72736a",
+      "motif": "Carved stone and fantasy detail"
     },
     {
       "id": 70,
       "name": "alley",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Narrow alley perspective"
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 71,
       "name": "fountain",
-      "family": "water",
-      "color": "#133d58",
-      "motif": "Water fountain"
+      "family": "stone",
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 72,
       "name": "archive",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Archive drawers"
+      "family": "wood",
+      "color": "#885735",
+      "motif": "Warm timber floor"
     },
     {
       "id": 73,
       "name": "bookshelves",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Horizontal bookcase"
+      "family": "wood",
+      "color": "#885735",
+      "motif": "Warm timber floor"
     },
     {
       "id": 74,
       "name": "bookshelves_ns",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Parallel library stacks"
+      "family": "wood",
+      "color": "#885735",
+      "motif": "Warm timber floor"
     },
     {
       "id": 75,
       "name": "office",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Desk and task lamp"
+      "family": "wood",
+      "color": "#885735",
+      "motif": "Warm timber floor"
     },
     {
       "id": 76,
       "name": "electric",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Electrical spark"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 77,
       "name": "well",
-      "family": "water",
-      "color": "#133d58",
-      "motif": "Roofed well"
+      "family": "stone",
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 78,
       "name": "bloodyhall",
       "family": "blood",
-      "color": "#572c3d",
-      "motif": "Hall with blood drop"
+      "color": "#713c47",
+      "motif": "Worn stone stained with dark blood"
     },
     {
       "id": 79,
       "name": "bloodyroom",
       "family": "blood",
-      "color": "#572c3d",
-      "motif": "Blood-stained room"
+      "color": "#713c47",
+      "motif": "Worn stone stained with dark blood"
     },
     {
       "id": 80,
       "name": "dead_forest",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Bare woodland"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 81,
       "name": "dead_field",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Broken stems"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 82,
       "name": "graveyard",
-      "family": "neutral",
-      "color": "#292d3b",
-      "motif": "Gravestones"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": 83,
       "name": "palace_room",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Crowned doorway"
+      "family": "wood",
+      "color": "#885735",
+      "motif": "Warm timber floor"
     },
     {
       "id": 84,
       "name": "crypt",
-      "family": "neutral",
-      "color": "#292d3b",
-      "motif": "Sarcophagus"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": 85,
       "name": "dead_jungle",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Withered palm"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 86,
       "name": "ship",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Sailing ship"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 87,
       "name": "chaos_sea",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Crossing turbulent currents"
+      "family": "water",
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     },
     {
       "id": 88,
       "name": "hut",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Thatched hut"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 89,
       "name": "redcarpet",
-      "family": "blood",
-      "color": "#572c3d",
-      "motif": "Unrolled carpet"
+      "family": "wood",
+      "color": "#885735",
+      "motif": "Warm timber floor"
     },
     {
       "id": 90,
       "name": "city_underground",
       "family": "stone",
-      "color": "#273749",
-      "motif": "City beneath stone arch"
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 91,
       "name": "mist",
-      "family": "neutral",
-      "color": "#292d3b",
-      "motif": "Layered fog"
+      "family": "sky",
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 92,
       "name": "ashen_field",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Burnt sprout and ash"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 93,
       "name": "cabin",
       "family": "earth",
-      "color": "#59412a",
-      "motif": "Log cabin"
+      "color": "#795943",
+      "motif": "Weathered earth and wilderness"
     },
     {
       "id": 94,
       "name": "hallway",
-      "family": "stone",
-      "color": "#273749",
-      "motif": "Receding hall"
+      "family": "wood",
+      "color": "#885735",
+      "motif": "Warm timber floor"
     },
     {
       "id": 95,
       "name": "afountain",
-      "family": "water",
-      "color": "#133d58",
-      "motif": "Tiered fountain"
+      "family": "stone",
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 96,
       "name": "flowers1",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Five-petal flower"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Mossy grass and natural groundcover"
     },
     {
       "id": 97,
       "name": "flowers2",
-      "family": "green",
-      "color": "#173f35",
-      "motif": "Pair of tulips"
+      "family": "grass",
+      "color": "#285444",
+      "motif": "Mossy grass and natural groundcover"
     },
     {
       "id": 98,
       "name": "stairs",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Ascending stairway"
+      "color": "#72736a",
+      "motif": "Stone street and small architectural details"
     },
     {
       "id": 99,
       "name": "aylorcity",
       "family": "stone",
-      "color": "#273749",
-      "motif": "Walled city and banner"
+      "color": "#72736a",
+      "motif": "Weathered cobblestone street"
     },
     {
       "id": 100,
       "name": "ruins",
-      "family": "earth",
-      "color": "#59412a",
-      "motif": "Broken stone arch"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": 101,
       "name": "tornado",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Funnel cloud"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 102,
       "name": "dustdevil",
-      "family": "earth",
-      "color": "#59412a",
-      "motif": "Dust spiral"
+      "family": "sky",
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 103,
       "name": "wind1",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Curling breeze"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 104,
       "name": "wind2",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Wind-blown leaf"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 105,
       "name": "lightning",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Single lightning bolt"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 106,
       "name": "rain",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Rain cloud"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 107,
       "name": "sun",
-      "family": "earth",
-      "color": "#59412a",
-      "motif": "Sun and eight rays"
+      "family": "sky",
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 108,
       "name": "cloud1",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Single cloud"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 109,
       "name": "cloud2",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Overlapping clouds"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 110,
       "name": "cloud3",
       "family": "sky",
-      "color": "#1b4556",
-      "motif": "Cloud with high wisps"
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": 111,
       "name": "rainbow",
-      "family": "violet",
-      "color": "#3b315c",
-      "motif": "Rainbow arch"
+      "family": "sky",
+      "color": "#5c87b2",
+      "motif": "Soft atmospheric terrain"
     },
     {
       "id": null,
       "name": "default",
-      "family": "neutral",
-      "color": "#292d3b",
-      "motif": "Compass diamond"
+      "family": "cavern",
+      "color": "#414a62",
+      "motif": "Aged dungeon flagstones"
     },
     {
       "id": null,
       "name": "water",
       "family": "water",
-      "color": "#133d58",
-      "motif": "Water droplet"
+      "color": "#1b667c",
+      "motif": "Rippling water and submerged detail"
     }
   ]
 }

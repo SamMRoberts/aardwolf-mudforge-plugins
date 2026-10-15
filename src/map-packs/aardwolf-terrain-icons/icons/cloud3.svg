@@ -1,7 +1,179 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 32 32">
-  <title>cloud3: Cloud with high wisps</title>
-  <rect width="32" height="32" fill="#1b4556"/>
-  <g color="#eff6f4" stroke-linecap="round" stroke-linejoin="round">
-    <g transform="translate(3 26) scale(1)"><path d="M2 0C-3 0-3-7 2-8C2-16 13-17 15-10C23-12 27 0 20 0Z" fill="currentColor" stroke="none" stroke-width="2"/></g><path d="M7 5h16M11 10h17" fill="none" stroke="currentColor" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 32 32">
+  <title>cloud3: Soft atmospheric terrain</title>
+  <defs>
+    <linearGradient id="stone0" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#9abfd6"/>
+      <stop offset=".3" stop-color="#84b0ce"/>
+      <stop offset="1" stop-color="#6f96b6"/>
+    </linearGradient>
+    <linearGradient id="stone1" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#98bdd5"/>
+      <stop offset=".3" stop-color="#81adcc"/>
+      <stop offset="1" stop-color="#6d94b4"/>
+    </linearGradient>
+    <linearGradient id="stone2" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#96bbd3"/>
+      <stop offset=".3" stop-color="#7eaaca"/>
+      <stop offset="1" stop-color="#6a91b3"/>
+    </linearGradient>
+    <linearGradient id="stone3" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#93b8d2"/>
+      <stop offset=".3" stop-color="#7ba7c8"/>
+      <stop offset="1" stop-color="#688fb2"/>
+    </linearGradient>
+    <linearGradient id="stone4" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#92b6d0"/>
+      <stop offset=".3" stop-color="#79a4c6"/>
+      <stop offset="1" stop-color="#678db0"/>
+    </linearGradient>
+    <linearGradient id="stone5" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#90b4cf"/>
+      <stop offset=".3" stop-color="#76a1c4"/>
+      <stop offset="1" stop-color="#658baf"/>
+    </linearGradient>
+    <linearGradient id="stone6" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#8db1cd"/>
+      <stop offset=".3" stop-color="#739ec2"/>
+      <stop offset="1" stop-color="#6289ad"/>
+    </linearGradient>
+    <linearGradient id="stone7" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#8bb0cc"/>
+      <stop offset=".3" stop-color="#709cc0"/>
+      <stop offset="1" stop-color="#6087ac"/>
+    </linearGradient>
+    <linearGradient id="stone8" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#89aeca"/>
+      <stop offset=".3" stop-color="#6d99be"/>
+      <stop offset="1" stop-color="#5e85aa"/>
+    </linearGradient>
+    <linearGradient id="plank" x1="0" y1="0" x2="1" y2=".15">
+      <stop stop-color="#a9ccde"/>
+      <stop offset=".18" stop-color="#8fbbd6"/>
+      <stop offset=".85" stop-color="#82abc8"/>
+      <stop offset="1" stop-color="#385278"/>
+    </linearGradient>
+    <radialGradient id="waterlight">
+      <stop stop-color="#e1eff0" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#8fbbd6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-.5" y="-.5" width="2" height="2">
+      <feGaussianBlur stdDeviation=".55"/>
+    </filter>
+    <linearGradient id="basalt" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#45424c"/>
+      <stop offset=".45" stop-color="#2c2d3b"/>
+      <stop offset="1" stop-color="#171d2a"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2=".6" y2="1">
+      <stop stop-color="#cf9b77"/>
+      <stop offset=".45" stop-color="#aa594f"/>
+      <stop offset=".5" stop-color="#e1af80"/>
+      <stop offset=".53" stop-color="#8d414b"/>
+      <stop offset="1" stop-color="#513242"/>
+    </linearGradient>
+    <linearGradient id="rockTop" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#c6d6bb"/>
+      <stop offset=".6" stop-color="#8ca99d"/>
+      <stop offset="1" stop-color="#608087"/>
+    </linearGradient>
+    <linearGradient id="rockFace" x1="0" y1="0" x2=".5" y2="1">
+      <stop stop-color="#6b8d94"/>
+      <stop offset="1" stop-color="#304959"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop stop-color="#fff3bc" stop-opacity=".8"/>
+      <stop offset=".25" stop-color="#ffc174" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#ffbc73" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="spring" cx=".3" cy=".25">
+      <stop stop-color="#a3f6db"/>
+      <stop offset=".4" stop-color="#42c5c1"/>
+      <stop offset="1" stop-color="#1e708e"/>
+    </radialGradient>
+    <linearGradient id="canvas" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff1ca"/>
+      <stop offset=".6" stop-color="#d8bf8f"/>
+      <stop offset="1" stop-color="#9c8068"/>
+    </linearGradient>
+    <clipPath id="interior">
+      <rect x=".26" y=".26" width="31.48" height="31.48"/>
+    </clipPath>
+    <pattern id="ground" width="32" height="32" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="32" height="32" rx="0" fill="#5c87b2"/>
+      <ellipse cx="0.82" cy="22.6" rx="9.61" ry="3.7" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="8.23" cy="-4.12" rx="4.09" ry="2.17" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="30.68" cy="-7.84" rx="8.78" ry="1.32" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="8.13" cy="20.95" rx="12.4" ry="2.22" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="31.47" cy="14.99" rx="8.97" ry="2.7" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="30.33" cy="6.36" rx="9.88" ry="2.25" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="4.19" cy="23.71" rx="4.58" ry="2.17" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="2.15" cy="23.77" rx="7.63" ry="4.55" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="27.21" cy="20.21" rx="12.26" ry="3.14" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="10.5" cy="23.04" rx="13.07" ry="3.7" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="11.3" cy="11.63" rx="12.99" ry="4.79" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="8.18" cy="14.49" rx="12.31" ry="2.79" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="17.24" cy="18.92" rx="9.7" ry="1.92" fill="url(#waterlight)" opacity="0.65"/>
+      <circle cx="8.58" cy="9.34" r="0.1376991745410487" fill="#e1eff0" opacity=".5"/>
+      <circle cx="16.35" cy="19.13" r="0.10025040135718882" fill="#e1eff0" opacity=".5"/>
+      <circle cx="21.11" cy="9.57" r="0.13505991805810483" fill="#e1eff0" opacity=".5"/>
+      <circle cx="5.29" cy="30.68" r="0.1332591056637466" fill="#e1eff0" opacity=".5"/>
+      <circle cx="15.06" cy="0.23" r="0.13762535815592855" fill="#e1eff0" opacity=".5"/>
+      <circle cx="27.96" cy="3.73" r="0.14168440195731818" fill="#e1eff0" opacity=".5"/>
+      <circle cx="23.36" cy="25.74" r="0.11937813951168211" fill="#e1eff0" opacity=".5"/>
+      <circle cx="7.02" cy="30.17" r="0.13642478317022325" fill="#e1eff0" opacity=".5"/>
+      <circle cx="21.77" cy="7.61" r="0.13953092827927321" fill="#e1eff0" opacity=".5"/>
+      <circle cx="2.62" cy="6.2" r="0.0886944227386266" fill="#e1eff0" opacity=".5"/>
+      <circle cx="8.47" cy="9.24" r="0.1084123755292967" fill="#e1eff0" opacity=".5"/>
+      <circle cx="5.13" cy="7.38" r="0.1775981334038079" fill="#e1eff0" opacity=".5"/>
+      <circle cx="24.24" cy="13.18" r="0.2005305098881945" fill="#e1eff0" opacity=".5"/>
+      <circle cx="13.72" cy="22.78" r="0.18136202669702473" fill="#e1eff0" opacity=".5"/>
+      <circle cx="13.84" cy="8.59" r="0.11092928203288466" fill="#e1eff0" opacity=".5"/>
+      <circle cx="26.57" cy="26.61" r="0.08971254888921976" fill="#e1eff0" opacity=".5"/>
+      <circle cx="7.65" cy="19.33" r="0.16249695244710893" fill="#e1eff0" opacity=".5"/>
+      <circle cx="25.79" cy="29.08" r="0.1447989129368216" fill="#e1eff0" opacity=".5"/>
+      <circle cx="19.11" cy="31.11" r="0.2173342325957492" fill="#e1eff0" opacity=".5"/>
+      <circle cx="22.07" cy="8.62" r="0.11998753970488907" fill="#e1eff0" opacity=".5"/>
+      <circle cx="21.16" cy="24.12" r="0.10339555842336268" fill="#e1eff0" opacity=".5"/>
+      <circle cx="28.56" cy="16.53" r="0.21357196549884977" fill="#e1eff0" opacity=".5"/>
+      <circle cx="11.18" cy="17.06" r="0.12712859383318575" fill="#e1eff0" opacity=".5"/>
+      <circle cx="31.02" cy="31.01" r="0.1316877666860819" fill="#e1eff0" opacity=".5"/>
+      <circle cx="2.95" cy="4.34" r="0.20250503055285662" fill="#e1eff0" opacity=".5"/>
+      <circle cx="13.49" cy="12" r="0.15524939593859016" fill="#e1eff0" opacity=".5"/>
+      <circle cx="7.73" cy="26.57" r="0.21540996954310687" fill="#e1eff0" opacity=".5"/>
+      <circle cx="7.45" cy="15.54" r="0.1332844183780253" fill="#e1eff0" opacity=".5"/>
+      <path d="M-3 27Q14 26 19 15T35 5" fill="none" stroke="#8fbbd6" stroke-width="5" opacity=".2" filter="url(#soft)"/>
+    </pattern>
+  </defs>
+  <rect width="32" height="32" fill="#5c87b2"/>
+  <rect x=".26" y=".26" width="31.48" height="31.48" fill="url(#ground)"/>
+  <g clip-path="url(#interior)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16.96 9.25l0.6 0.12" fill="none" stroke="#385278" stroke-width="0.35" opacity=".45"/>
+    <path d="M5.97 25.36l1.86 0.33" fill="none" stroke="#e1eff0" stroke-width="0.35" opacity=".45"/>
+    <path d="M6.24 7.63l0.44 0.17" fill="none" stroke="#385278" stroke-width="0.35" opacity=".45"/>
+    <path d="M6.67 28.56l1.87 0.52" fill="none" stroke="#e1eff0" stroke-width="0.35" opacity=".45"/>
+    <path d="M23.11 14.6l0.35 0.4" fill="none" stroke="#385278" stroke-width="0.35" opacity=".45"/>
+    <path d="M13.13 16.27l0.67 0.23" fill="none" stroke="#e1eff0" stroke-width="0.35" opacity=".45"/>
+    <path d="M23.25 27.31l1.59 0.21" fill="none" stroke="#385278" stroke-width="0.35" opacity=".45"/>
+    <path d="M4.87 9.55l0.73 0.38" fill="none" stroke="#e1eff0" stroke-width="0.35" opacity=".45"/>
+    <path d="M16.12 6.98l1.18 0.63" fill="none" stroke="#385278" stroke-width="0.35" opacity=".45"/>
+    <path d="M25.11 4.94l0.61 0.1" fill="none" stroke="#e1eff0" stroke-width="0.35" opacity=".45"/>
+    <g transform="translate(10 12) rotate(0) scale(0.9)">
+      <ellipse cx="1" cy="3" rx="7.5" ry="3" fill="#aecbd3" opacity=".35" filter="url(#soft)"/>
+      <path d="M-8 1Q-9-2-5-3Q-4-7 0-6Q4-8 5-3Q10-2 8 2Q1 5-8 1Z" fill="#aecbd3" stroke="none" stroke-width="0" filter="url(#soft)"/>
+      <path d="M-7 0Q-7-2-4-2Q-4-5-1-5Q3-7 4-2Q7-2 8 0Q2 2-1 1T-7 0Z" fill="#d9e6df" stroke="none" stroke-width="0" opacity=".8" filter="url(#soft)"/>
+      <path d="M-4-2Q-3-5-1-4M0-4q2-1 3 1" fill="none" stroke="#fff3d7" stroke-width="0.7" opacity=".45" filter="url(#soft)"/>
+    </g>
+    <g transform="translate(25 24) rotate(0) scale(0.8)">
+      <ellipse cx="1" cy="3" rx="7.5" ry="3" fill="#aecbd3" opacity=".35" filter="url(#soft)"/>
+      <path d="M-8 1Q-9-2-5-3Q-4-7 0-6Q4-8 5-3Q10-2 8 2Q1 5-8 1Z" fill="#aecbd3" stroke="none" stroke-width="0" filter="url(#soft)"/>
+      <path d="M-7 0Q-7-2-4-2Q-4-5-1-5Q3-7 4-2Q7-2 8 0Q2 2-1 1T-7 0Z" fill="#d9e6df" stroke="none" stroke-width="0" opacity=".8" filter="url(#soft)"/>
+      <path d="M-4-2Q-3-5-1-4M0-4q2-1 3 1" fill="none" stroke="#fff3d7" stroke-width="0.7" opacity=".45" filter="url(#soft)"/>
+    </g>
+    <g transform="translate(24 7) rotate(0) scale(0.6)">
+      <ellipse cx="1" cy="3" rx="7.5" ry="3" fill="#aecbd3" opacity=".35" filter="url(#soft)"/>
+      <path d="M-8 1Q-9-2-5-3Q-4-7 0-6Q4-8 5-3Q10-2 8 2Q1 5-8 1Z" fill="#aecbd3" stroke="none" stroke-width="0" filter="url(#soft)"/>
+      <path d="M-7 0Q-7-2-4-2Q-4-5-1-5Q3-7 4-2Q7-2 8 0Q2 2-1 1T-7 0Z" fill="#d9e6df" stroke="none" stroke-width="0" opacity=".8" filter="url(#soft)"/>
+      <path d="M-4-2Q-3-5-1-4M0-4q2-1 3 1" fill="none" stroke="#fff3d7" stroke-width="0.7" opacity=".45" filter="url(#soft)"/>
+    </g>
   </g>
 </svg>

@@ -16,18 +16,33 @@ a connected session.
 | Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
 | Aardwolf Spells | SQLite skill/spell snapshots and a dockable panel of learned damage abilities |
 | Aardwolf Room Details | Formatted tagged room characters/objects, selection, and automatic room refreshes |
-| Aardwolf Terrain Icons | Importable map pack with 114 distinct terrain pictograms and a coordinated palette |
+| Aardwolf Terrain Icons | Importable pack of 114 fantasy terrain tiles with matching material edges |
 
-## Terrain icon pack
+## Terrain icon packs
 
-[Aardwolf Terrain Icons](docs/TERRAIN-ICONS.md) gives every published Aardwolf
-terrain its own icon, including numbered and directional variants. Download the
+[Andolor: Three Moons 1.0.0](docs/THREE-MOONS.md) is the new Aardwolf-inspired
+alternative: moonlit slate and gold, jade forests, opal water, copper dunes,
+glacial crystals and violet astral light. Its 114 styles include three-moon
+mosaics, an Academy spellbook and an alchemy market. The
+[research and design notes](docs/THREE-MOONS.md#research-and-interpretation) explain
+the lore and the visual interpretation. Download the
+[Three Moons JSON](dist/map-packs/aardwolf-three-moons.json) or open its
+[contact sheet](dist/map-packs/aardwolf-three-moons.html).
+
+The previous design remains available:
+
+[Aardwolf Terrain Icons 3.0.0](docs/TERRAIN-ICONS.md) gives every published Aardwolf
+terrain its own fantasy tile, including numbered and directional variants.
+Irregular flagstones, layered emerald foliage, flowing turquoise water,
+shingled roofs and luminous magic create a textured fantasy palette with
+128-pixel artwork. Download the
 [JSON pack](dist/map-packs/aardwolf-terrain-icons.json) and import it through
 **Map settings → General → Map Pack Management → Choose File...**. Export your
 existing pack first: importing replaces the terrain-style list. The
-[contact sheet](dist/map-packs/aardwolf-terrain-icons.html) previews all 114 icons
-at 16, 24 and 32 px. This asset pack needs no Lua plugin or shared API. Browser
-import/persistence is verified; native desktop acceptance remains pending.
+[contact sheet](dist/map-packs/aardwolf-terrain-icons.html) includes connected-map
+studies and all 114 tiles at 16, 24 and 32 px. MudForge draws walls and player
+markers above the artwork. This asset pack needs no Lua plugin or shared API.
+The format was browser-tested with 1.0.0; native acceptance of 3.0.0 is pending.
 
 ## Installation
 

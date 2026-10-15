@@ -48,5 +48,5 @@ test('build check resolves paths from an unrelated working directory', () => {
   const output = execFileSync(process.execPath, [resolve(root, 'tools/build-repository.mjs'), '--check'], {
     cwd: '/tmp', encoding: 'utf8',
   });
-  assert.match(output, /Checked 123 repository files/);
+  assert.match(output, /Checked 241 repository files/);
 });
