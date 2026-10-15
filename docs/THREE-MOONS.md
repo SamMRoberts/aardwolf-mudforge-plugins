@@ -1,6 +1,6 @@
 # Andolor: Three Moons
 
-A separate Aardwolf map pack, version **1.0.0**, with all **114 terrain styles**.
+A separate Aardwolf map pack, version **1.1.0**, with all **114 terrain styles**.
 It combines Aardwolf's world with the requested colorful, ethereal fantasy look:
 moonlit slate, warm gold, pale jade, opal blue, copper sand and violet magic.
 
@@ -22,8 +22,8 @@ not official assets or exact depictions of particular rooms.
 | Evidence | Art direction |
 | --- | --- |
 | [World lore](https://aardwolf.com/wiki/index.php/Help/World) describes Mesolar's cities, Abend's twilight, and the southern Iridian sea. | Slate-and-gold streets, violet cave stone, and blue water with opal highlights. |
-| [Aylor](https://aardwolf.com/wiki/index.php/Area/TheGrandCityOfAylor) is a home and travel hub with shops, guilds, an alchemist and a library. | Purple market canvas, potion bottles, amber lanterns and a welcoming urban palette. |
-| The [Aardwolf introduction](https://www.aardwolf.com/) identifies the Aylorian Academy as the starting adventure. | The `mudschool` terrain gets an open spellbook with a suspended spark. |
+| [Aylor](https://aardwolf.com/wiki/index.php/Area/TheGrandCityOfAylor) is a home and travel hub with shops, guilds, an alchemist and a library. | Shop counters, potion shelves, amber lanterns and a welcoming urban palette. |
+| The [Aardwolf introduction](https://www.aardwolf.com/) identifies the Aylorian Academy as the starting adventure. | The `mudschool` terrain gets a classroom with a chalkboard, lectern and student desks. |
 | [Moons](https://aardwolf.com/wiki/index.php/Mechanics/Moons) identifies white, grey and black moons associated with magic and alignment. | Those three actual colors appear in the moon tile and sanctuary/city mosaics. Cyan and gold are accent light, not additional moon colors. |
 | [Alagh](https://aardwolf.com/wiki/index.php/Area/AlaghTheBloodLands) includes old battlefields, the Eastern Desert and southern jungles. | Copper earth, rose-gold dunes and deep jade vegetation. |
 | [Gelidus](https://aardwolf.com/wiki/index.php/Area/Gelidus) has frozen terrain and icy mountains. | Fractured blue ice, pale crystal ridges and silver highlights. |
@@ -46,11 +46,35 @@ The user's established preference for compact, readable tooling also favors
 clear terrain shapes and quiet room centers beneath player markers and flags.
 
 The pack therefore uses richer effects on landmarks, with calmer streets and
-floors between them. Markets, portals, the Academy book, crystals and the three
-moons have different silhouettes. Roads retain directional junction shapes;
-numbered terrain variants retain distinct arrangements. Gold guides the eye
+floors between them. Shop interiors, portals, classrooms, crystals and the three
+moons have distinct arrangements. Roads retain directional junction shapes, and
+numbered terrain variants retain distinct scenery. Gold guides the eye
 without placing an emblem or bright frame on every room. No preferred class,
 alignment or clan is assumed.
+
+## Location interiors in 1.1.0
+
+Twenty indoor location types now depict the space occupied by the player from
+above, replacing roof/exterior symbols and isolated landmark icons:
+
+- `castle`: slate hall, royal runner, columns, masonry and hanging banners.
+- `shop` and `lottery`: counters, merchandise, shelves and clerk furnishings.
+- `temple`: altar, candles, pews and a three-moon floor mosaic.
+- `mudschool`: chalkboard, lectern and student desks.
+- `office`, `archive`, `bookshelves` and `bookshelves_ns`: desks, documents and
+  book stacks, with the named shelf orientations preserved.
+- `inside`, `hallway`, `palace_room` and `redcarpet`: furnished rooms, corridors
+  and decorated interior floors.
+- `hut` and `cabin`: timber floors, sleeping areas and hearths. The hut has a
+  bedroll and clay firepit; the cabin has a bed, bookcase and dining table.
+- `crypt` and `dungeon`: sarcophagus, ironwork, shackles and interior masonry.
+- `insideice`, `hellinside` and `hellhall`: furnished chambers using ice or
+  infernal materials.
+
+The palette and open space between furnishings keep room overlays legible.
+These are terrain-based interior illustrations, not surveyed room furniture or
+actual exit/wall positions. Natural and outdoor terrain designs are unchanged.
+The connected preview includes a castle/palace cluster and six interior samples.
 
 ## Import, compare and restore
 
@@ -104,5 +128,6 @@ no new native-client acceptance or browser import evidence is claimed.
 
 Validation for this revision passed: **19 focused pack/distribution checks**,
 **184 JavaScript tests and 21 Python tests** in the full suite, the deterministic
-check of **241 generated files**, and `git diff --check`. All 114 designs were
-visually inspected at each small size on both backgrounds.
+check of **241 generated files**, and `git diff --check`. The 20 revised interiors
+were visually inspected at 128 pixels and at 16, 24 and 32 pixels on both
+backgrounds; automated coverage checks all 114 designs.

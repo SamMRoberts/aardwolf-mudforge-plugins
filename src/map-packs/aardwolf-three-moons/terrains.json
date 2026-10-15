@@ -1,7 +1,7 @@
 {
   "name": "Andolor: Three Moons",
-  "version": "1.0.0",
-  "description": "An Aardwolf-inspired explorer atlas: moonlit slate and gold, emerald groves, iridescent seas, Alagh-inspired copper dunes, Gelidus-inspired frost, and the violet twilight of Abend. 114 original SVG terrain designs rendered at 128 pixels with matching material edges. Version 1.0.0.",
+  "version": "1.1.0",
+  "description": "An Aardwolf-inspired explorer atlas with location interiors: castle halls, shop counters, temple altars, library stacks and furnished rooms. Moonlit slate, emerald groves, opal seas, copper dunes and glacial blue. 114 SVG terrain designs rendered at 128 pixels with matching material edges. Version 1.1.0.",
   "source": {
     "url": "https://raw.githubusercontent.com/fiendish/aardwolfclientpackage/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db",
     "revision": "ac6e40ff5596e285cfcef6739d1dfdc257cfa162",
@@ -15,7 +15,7 @@
       "name": "inside",
       "family": "wood",
       "color": "#594051",
-      "motif": "Candlelit rosewood and a woven jewel rug"
+      "motif": "Room interior: timber floor, woven rug, seat and glowing hearth"
     },
     {
       "id": 1,
@@ -162,7 +162,7 @@
       "name": "dungeon",
       "family": "cavern",
       "color": "#30354f",
-      "motif": "Fractured slate and a violet ghost light"
+      "motif": "Dungeon interior: iron bars, wall shackles and fractured slate"
     },
     {
       "id": 22,
@@ -176,7 +176,7 @@
       "name": "Mudschool",
       "family": "stone",
       "color": "#304856",
-      "motif": "Aylorian Academy-inspired levitating spellbook"
+      "motif": "Academy classroom interior: chalkboard, lectern and student desks"
     },
     {
       "id": 24,
@@ -190,7 +190,7 @@
       "name": "hellinside",
       "family": "lava",
       "color": "#34283e",
-      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+      "motif": "Infernal chamber interior: obsidian altar, ember bowl and scorched benches"
     },
     {
       "id": 26,
@@ -225,14 +225,14 @@
       "name": "insideice",
       "family": "ice",
       "color": "#4985a4",
-      "motif": "Gelidus-inspired glacial blue · Glacial stone and snow"
+      "motif": "Ice chamber interior: carved frost bench, ice pillars and a blue brazier"
     },
     {
       "id": 31,
       "name": "hellhall",
       "family": "lava",
       "color": "#34283e",
-      "motif": "Charcoal amethyst and ember gold · Dark volcanic crust and glowing fissures"
+      "motif": "Infernal hall interior: black stone pillars, ember braziers and a garnet runner"
     },
     {
       "id": 32,
@@ -407,7 +407,7 @@
       "name": "castle",
       "family": "stone",
       "color": "#304856",
-      "motif": "Moonlit slate and aged gold · Stone street and small architectural details"
+      "motif": "Castle interior: flagstones, royal runner, masonry columns and hanging banners"
     },
     {
       "id": 57,
@@ -463,14 +463,14 @@
       "name": "temple",
       "family": "stone",
       "color": "#304856",
-      "motif": "Three-moon sanctuary inlaid in slate"
+      "motif": "Temple interior: altar, candles, pews and a three-moon floor mosaic"
     },
     {
       "id": 65,
       "name": "shop",
       "family": "stone",
       "color": "#304856",
-      "motif": "Aylor-inspired alchemy stall and amber lantern"
+      "motif": "Shop interior: L-shaped counter, potion shelves and merchandise"
     },
     {
       "id": 66,
@@ -498,7 +498,7 @@
       "name": "lottery",
       "family": "stone",
       "color": "#304856",
-      "motif": "Moonlit slate and aged gold · Carved stone and fantasy detail"
+      "motif": "Lottery office interior: ticket counter, gold tokens and clerk desk"
     },
     {
       "id": 70,
@@ -519,28 +519,28 @@
       "name": "archive",
       "family": "wood",
       "color": "#594051",
-      "motif": "Rosewood and candlelight · Warm timber floor"
+      "motif": "Archive interior: catalog shelves, reading table and scroll storage"
     },
     {
       "id": 73,
       "name": "bookshelves",
       "family": "wood",
       "color": "#594051",
-      "motif": "Rosewood and candlelight · Warm timber floor"
+      "motif": "Library interior: east-west book stacks and a reading chair"
     },
     {
       "id": 74,
       "name": "bookshelves_ns",
       "family": "wood",
       "color": "#594051",
-      "motif": "Rosewood and candlelight · Warm timber floor"
+      "motif": "Library interior: north-south book stacks and a reading stand"
     },
     {
       "id": 75,
       "name": "office",
       "family": "wood",
       "color": "#594051",
-      "motif": "Rosewood and candlelight · Warm timber floor"
+      "motif": "Office interior: writing desk, chair, books and document shelves"
     },
     {
       "id": 76,
@@ -594,16 +594,16 @@
     {
       "id": 83,
       "name": "palace_room",
-      "family": "wood",
-      "color": "#594051",
-      "motif": "Rosewood and candlelight · Warm timber floor"
+      "family": "stone",
+      "color": "#304856",
+      "motif": "Palace interior: pale marble inlay, violet carpet and gilded columns"
     },
     {
       "id": 84,
       "name": "crypt",
       "family": "cavern",
       "color": "#30354f",
-      "motif": "Abend-inspired violet stone · Aged dungeon flagstones"
+      "motif": "Crypt interior: carved sarcophagus, stone bench and ghostly candles"
     },
     {
       "id": 85,
@@ -629,16 +629,16 @@
     {
       "id": 88,
       "name": "hut",
-      "family": "earth",
-      "color": "#73534f",
-      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Hut interior: rough timber, woven mat, bedroll and a clay firepit"
     },
     {
       "id": 89,
       "name": "redcarpet",
       "family": "wood",
       "color": "#594051",
-      "motif": "Rosewood and candlelight · Warm timber floor"
+      "motif": "Interior crimson carpet runner with gold edging and tassels"
     },
     {
       "id": 90,
@@ -664,16 +664,16 @@
     {
       "id": 93,
       "name": "cabin",
-      "family": "earth",
-      "color": "#73534f",
-      "motif": "Alagh-inspired copper earth · Weathered earth and wilderness"
+      "family": "wood",
+      "color": "#594051",
+      "motif": "Cabin interior: timber planks, quilted bed, hearth and a dining table"
     },
     {
       "id": 94,
       "name": "hallway",
       "family": "wood",
       "color": "#594051",
-      "motif": "Rosewood and candlelight · Warm timber floor"
+      "motif": "Hallway interior: a narrow runner between carved pilasters"
     },
     {
       "id": 95,
