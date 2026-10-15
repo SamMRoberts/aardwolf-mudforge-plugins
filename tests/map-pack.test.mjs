@@ -98,8 +98,16 @@ for (const packName of mapPackNames) {
       }
       for (let offset = 3; offset < pixels.length; offset += 4) assert.equal(pixels[offset], 255, `${name}: transparent pixel`);
     }
-    const urban = registry.terrains.filter(terrain => ['city', 'shop', 'castle', 'alley'].includes(terrain.name));
+    const urbanNames = packName === 'aardwolf-three-moons'
+      ? ['city', 'shop', 'castle', 'alley', 'temple', 'palace_room']
+      : ['city', 'shop', 'castle', 'alley'];
+    const urban = registry.terrains.filter(terrain => urbanNames.includes(terrain.name));
     assert.equal(new Set(urban.map(terrain => terrain.color)).size, 1, 'adjoining urban terrain shares its stone edge color');
+    if (packName === 'aardwolf-three-moons') {
+      const timberRooms = registry.terrains.filter(terrain => ['inside', 'hut', 'cabin', 'office', 'archive'].includes(terrain.name));
+      assert.equal(new Set(timberRooms.map(terrain => terrain.color)).size, 1, 'timber interiors share their floor edge color');
+      assert(timberRooms.every(terrain => terrain.family === 'wood'));
+    }
   });
 
   test(`${packName}: pack includes a portable connected-layout preview with room-sized scenery`, () => {

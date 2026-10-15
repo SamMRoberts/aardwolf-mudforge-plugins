@@ -57,10 +57,10 @@ function connectedMapPreview(styles, themed = false) {
     return `${tiles}<path d="${walls}" fill="none" stroke="#e1dfcf" stroke-width="2" opacity=".85"/>`;
   }
   const town = scene(themed ? [
-    ' A    ', 'CCCSSS', '    M ', '   CTC', '   CFC', '   CC ', '    E ',
+    ' A    ', 'CCCSSS', '    M ', '   KTK', '   KFK', '   KP ', '    E ',
   ] : [
     ' C    ', 'CCCSSS', '    S ', '   CCC', '   CCC', '   CC ', '    C ',
-  ], { C: 'city', S: 'shop', A: 'aylorcity', M: 'mudschool', T: 'temple', F: 'fountain', E: 'areaexit' }, 40, 64, 64);
+  ], { C: 'city', S: 'shop', A: 'aylorcity', M: 'mudschool', T: 'temple', F: 'fountain', E: 'areaexit', K: 'castle', P: 'palace_room' }, 40, 64, 64);
   const woodland = scene([
     'FFFFFFFF', 'FFFGWWFF', 'FGGGWWGF', 'FGGGWWGG', 'FFFFWWFF',
   ], { F: 'forest', G: 'field', W: 'river' }, 544, 40, 48);
@@ -69,7 +69,9 @@ function connectedMapPreview(styles, themed = false) {
   ] : [
     ' DD   DD', ' DDDDDDD', ' D D  DD', ' DDDDDDD', '    DD  ',
   ], { D: 'dungeon', C: 'cave', R: 'ruins' }, 544, 336, 48);
-  const biomes = scene(['DWILSF'], {
+  const biomes = scene(themed ? ['KSPTHL'] : ['DWILSF'], themed ? {
+    K: 'castle', S: 'shop', P: 'palace_room', T: 'temple', H: 'cabin', L: 'archive',
+  } : {
     D: 'desert', W: 'inside', I: 'ice', L: 'hell2', S: 'space2', F: 'flowers2',
   }, 40, 528, 64);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="608" viewBox="0 0 1024 608">
@@ -103,7 +105,7 @@ img{display:block}figcaption{font-size:10px}@media(max-width:540px){body{padding
 </style></head><body><header><h1>${escapeHtml(registry.name)}</h1>
 <p>${escapeHtml(registry.description)} Related rooms share quiet material edges. Shaded scenery stays within the tile so streets, floors and ground can read continuously. MudForge draws walls, room borders, symbols and player markers above these tiles.</p>
 <p>Editable SVG sources · ${escapeHtml(registry.version)} · ${styles.length} terrain tiles</p></header>
-<figure class="map-study"><img src="data:image/png;base64,${mapPreview.toString('base64')}" width="1024" height="608" alt="${themed ? 'Aardwolf-inspired connected studies: moonlit city, alchemy market, Academy spellbook, three-moon sanctuary and astral arch; jade woodland and opal river; violet caves and ruins' : 'Connected fantasy tile studies: limestone town and market at left, emerald woodland and turquoise river at upper right, slate dungeon at lower right; gold sand, timber, cyan ice, orange lava, violet magic and flowers along the bottom left'}"><figcaption>${themed ? 'Andolor-inspired layout study: Mesolar and Aylor motifs (left), jade wilderness and Iridian-inspired water (upper right), Abend-inspired twilight caves (lower right). These are art-direction references, not surveyed locations or continent detection. ' : 'Connected layout study: town (left), woodland and river (upper right), dungeon (lower right). '}Biome palette along the bottom left: desert, timber, ice, lava, astral terrain and flowers. Walls and player outline are simulated to show how tiles sit beneath client overlays; this is an illustrative preview, not a native-client capture. Individual tiles appear below at 16, 24 and 32 pixels.</figcaption></figure>
+<figure class="map-study"><img src="data:image/png;base64,${mapPreview.toString('base64')}" width="1024" height="608" alt="${themed ? 'Aardwolf-inspired connected studies: moonlit city, shop counters, castle halls, Academy classroom, temple interior and astral arch; jade woodland and opal river; violet caves and ruins' : 'Connected fantasy tile studies: limestone town and market at left, emerald woodland and turquoise river at upper right, slate dungeon at lower right; gold sand, timber, cyan ice, orange lava, violet magic and flowers along the bottom left'}"><figcaption>${themed ? 'Andolor-inspired layout study: Mesolar and Aylor motifs (left), jade wilderness and Iridian-inspired water (upper right), Abend-inspired twilight caves (lower right). These are art-direction references, not surveyed locations or continent detection. ' : 'Connected layout study: town (left), woodland and river (upper right), dungeon (lower right). '}${themed ? 'Interior samples along the bottom left: castle, shop, palace, temple, cabin and archive.' : 'Biome palette along the bottom left: desert, timber, ice, lava, astral terrain and flowers.'} Walls and player outline are simulated to show how tiles sit beneath client overlays; this is an illustrative preview, not a native-client capture. Individual tiles appear below at 16, 24 and 32 pixels.</figcaption></figure>
 <main>${cards}</main></body></html>
 `;
 }
