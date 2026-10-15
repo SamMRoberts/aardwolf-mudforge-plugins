@@ -271,10 +271,10 @@ layout/editing. These use the plugin's generated HTML with synthetic bindings;
 they do not test native iframe sanitization or widget message delivery.
 This checklist requires separate authorization for disposable native or live testing.
 
-- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.5 in a
+- Install the `aardwolf-api` library, API Core and Aardwolf Vitals 0.1.6 in a
   disposable world. Verify one compact horizontal strip with left labels and
   overlaid numeric readouts, status beside the title, and no message area below
-  the bars. The new Target/Alignment row and character summary should fit at
+  the bars. The Target/TNL/Alignment row and character summary should fit at
   640 × 150 px with default typography.
 - Resize above/below 480 px, open the floating Settings window and try large
   fonts. Expect readable wrapping, accessible controls, vertical scrolling and
@@ -284,6 +284,12 @@ This checklist requires separate authorization for disposable native or live tes
   preserve numeric readouts while bars remain bounded.
 - Feed the supplied `char.status` sample. Verify an owl at 93%, alignment
   +1867 Good, Level 210, TNL 1000, Hunger/Thirst 70, Active and Standing.
+- Send `char.base.perlevel = 2000` and TNL 2000, 1000 and 0: expect 0%, 50%
+  and 100% teal fill between Target and Alignment, with remaining XP in the bar
+  and no duplicate summary entry. Verify tooltip/accessibility text, updates in
+  either packet order, changed perlevel and level rollover. Missing/invalid TNL
+  or missing/nonpositive perlevel must be neutral with an unknown percentage;
+  out-of-range TNL preserves its number while the fill stays within 0–100%.
 - Send partial status packets, all documented state codes, unknown codes and
   invalid fields. Confirm ordinary updates preserve settings edits and focus.
 - Replace and clear the enemy; distinguish No target from Target unknown.

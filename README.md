@@ -70,10 +70,19 @@ Missing or invalid values display `?`, and missing/nonpositive maxima suppress
 percentage alerts. Bars clamp to 0–100% without changing the displayed server
 numbers. Disconnect or Core unavailability clears the display.
 
-A second row shows **Target** and **Alignment**, side by side above 480 px and
-stacked at narrower widths. A wrapping summary below it shows **Level, TNL,
-Hunger, Thirst, State and Position**. These values come from `char.status`;
+A second row shows **Target**, **TNL** and **Alignment**, wrapping in that order
+as the panel narrows. A wrapping summary below it shows **Level, Hunger,
+Thirst, State and Position**. These values come from `char.status`;
 hunger and thirst are displayed as numbers without assumed units.
+
+TNL uses a teal progress bar that fills toward the next level, with remaining
+XP and completion percentage overlaid. Completion is
+`(char.base.perlevel - char.status.tnl) / char.base.perlevel × 100`, clamped to
+0–100%. The reported remaining XP stays unchanged, including out-of-range
+values. Missing/invalid TNL or missing/nonpositive XP per level shows a neutral
+empty bar with an unknown percentage (`--`). The tooltip and accessible
+description include remaining XP, XP per level and completion. TNL has no
+low-vital alerts.
 
 Target displays `enemy` over a red HP bar and `enemypct` alongside it. This is
 a reported percentage, not an invented current/max HP pair. Only the fill is

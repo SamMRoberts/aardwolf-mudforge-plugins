@@ -1,6 +1,6 @@
 plugin = {
-  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.5",
-  author = "Sam Roberts", description = "Compact vitals, target HP, alignment and character status with configurable typography and low-vital alerts."
+  id = "aardwolf-vitals", name = "Aardwolf Vitals", version = "0.1.6",
+  author = "Sam Roberts", description = "Compact vitals, target HP, TNL progress, alignment and character status with configurable typography and low-vital alerts."
 }
 
 local client, widget, settingsWidget, apiLibrary = nil, nil, nil, nil
@@ -93,7 +93,7 @@ local function displayNumber(value)
   return type(value) == "number" and string.format("%.15g", value) or "?"
 end
 
-local function renderCharacter(character)
+local function renderCharacter(character, base)
   local enemy, percent = character.enemy, character.enemypct
   local hasTarget = type(enemy) == "string" and string.match(enemy, "^%s*$") == nil
   local targetName = "Target unknown"
@@ -105,6 +105,19 @@ local function renderCharacter(character)
   client.ui.bind(widget, "targetWidth", string.format("%g%%", hasTarget and (apiLibrary.percent(percent, 100) or 0) or 0))
   client.ui.bind(widget, "targetLevel", hasTarget and type(percent) == "number" and "normal" or "unknown")
   client.ui.bind(widget, "targetDescription", "Target: " .. targetName .. ". HP " .. targetPercent)
+
+  local remaining, required = character.tnl, base.perlevel
+  local progress = nil
+  if type(remaining) == "number" and type(required) == "number" and required > 0 then
+    progress = apiLibrary.percent(required - remaining, required)
+  end
+  local progressText = progress and string.format("%.0f%%", progress) or "--"
+  client.ui.bind(widget, "tnlWidth", string.format("%g%%", progress or 0))
+  client.ui.bind(widget, "tnlPercent", progressText)
+  client.ui.bind(widget, "tnlLevel", progress and "normal" or "unknown")
+  client.ui.bind(widget, "tnlDescription", "To next level: " .. displayNumber(remaining) .. " XP remaining. "
+    .. "XP per level: " .. displayNumber(required) .. ". "
+    .. (progress and progressText .. " complete." or "Progress unknown."))
 
   local alignment = character.align
   local known = type(alignment) == "number"
@@ -132,7 +145,7 @@ end
 
 local function render()
   local status = client.status()
-  local vitals, maxima, character = {}, {}, {}
+  local vitals, maxima, character, base = {}, {}, {}, {}
   local message = "Waiting for character data"
   if not status.available then message = "Aardwolf API Core unavailable"
   elseif not status.connected then message = "Disconnected"
@@ -140,6 +153,7 @@ local function render()
   else
     vitals, maxima = client.get("char.vitals") or {}, client.get("char.maxstats") or {}
     character = client.get("char.status") or {}
+    base = client.get("char.base") or {}
     local complete, any = true, false
     for _, stat in ipairs(stats) do
       if type(vitals[stat]) == "number" then any = true end
@@ -167,7 +181,7 @@ local function render()
     client.ui.bind(widget, stat .. "Description", labels[stat] .. ": " .. displayNumber(value) .. " of "
       .. displayNumber(maximum) .. ". " .. label)
   end
-  renderCharacter(character)
+  renderCharacter(character, base)
 end
 
 local function persist(candidate, message)
@@ -227,6 +241,8 @@ local function styles()
   .card[data-level="critical"]{--accent:var(--critical)}.card[data-level="critical"] .track{border-color:var(--accent);animation:critical-pulse 2.4s ease-in-out infinite}
   .card[data-level="unknown"]{--accent:#b5c1d6}
   .details-row{margin-top:6px}.details-row .card{flex-basis:calc(13em + 6px);grid-template-columns:minmax(0,min(5.8em,32%)) minmax(0,1fr)}
+  .details-row .alignment{grid-template-columns:minmax(0,min(5.8em,40%)) minmax(0,1fr)}
+  .tnl{--accent:#2dd4bf}
   .target .readout{flex-wrap:nowrap;justify-content:space-between}
   .target-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
   .target .percent{max-width:50%;flex-shrink:0;white-space:normal;overflow-wrap:anywhere}
@@ -275,6 +291,12 @@ local function markup()
         <div class="readout"><span class="target-name" data-mud-bind="targetName" data-mud-bind-attr="title:targetName">Target unknown</span>
           <span class="percent" data-mud-bind="targetPercent">--</span></div></div>
     </section>
+    <section class="card tnl" data-level="unknown" data-mud-bind-attr="data-level:tnlLevel;aria-label:tnlDescription;title:tnlDescription">
+      <div class="heading"><span class="name">TNL</span></div>
+      <div class="track"><div class="fill" aria-hidden="true" data-mud-bind-style="width:tnlWidth"></div>
+        <div class="readout"><span class="values"><span data-mud-bind="charactertnl">?</span> XP left</span>
+          <span class="percent" data-mud-bind="tnlPercent">--</span></div></div>
+    </section>
     <section class="card alignment" data-known="false" data-mud-bind-attr="data-known:alignmentKnown;aria-label:alignmentDescription;title:alignmentDescription">
       <div class="heading"><span class="name">Alignment</span></div>
       <div class="track"><div class="alignment-scale" aria-hidden="true"><span class="alignment-zone evil"></span><span class="alignment-zone neutral"></span><span class="alignment-zone good"></span></div>
@@ -283,7 +305,7 @@ local function markup()
     </section>
   </div><dl class="character-status">
 ]])
-  for _, field in ipairs({ { "level", "Level" }, { "tnl", "TNL" }, { "hunger", "Hunger" }, { "thirst", "Thirst" },
+  for _, field in ipairs({ { "level", "Level" }, { "hunger", "Hunger" }, { "thirst", "Thirst" },
     { "State", "State" }, { "Position", "Position" } }) do
     table.insert(html, '<div><dt>' .. field[2] .. '</dt><dd data-mud-bind="character' .. field[1] .. '">?</dd></div>')
   end
@@ -393,7 +415,7 @@ function init()
   client.ui.content(widget, markup())
   applyTypography()
   if not updated then feedback("Using defaults: " .. tostring(reason or problem)) end
-  for _, topic in ipairs({ "session", "char.vitals", "char.maxstats", "char.status" }) do
+  for _, topic in ipairs({ "session", "char.vitals", "char.maxstats", "char.status", "char.base" }) do
     table.insert(unsubscribers, client.on(topic, render))
   end
   client.start()
