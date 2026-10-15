@@ -152,7 +152,7 @@ does not automatically send refresh requests.
 
 ## Aardwolf Room Details
 
-**0.2.2** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
+**0.2.3** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
 **Room Details** panel with Characters above Objects. Initial size is 360 × 240;
 drag it to an edge of another widget to dock it. MudForge restores saved placement,
 size and visibility. Each completed tagged block replaces its own section;
@@ -165,7 +165,12 @@ markers: `(Golden Aura) (White Aura)` displays as `(G)(W)`. Objects remove leadi
 indentation for display and abbreviate only consecutive leading markers:
 `    (Magic) (Hum) A bag (open).` displays as `(M)(H) A bag (open).`
 
-The panel follows the terminal font and uses MudForge's native `parseAnsiText`
+The **Font settings** gear opens separate controls for **Room text** (6–32 px,
+or **Terminal** to follow the console) and **Interface text** (8–20 px). Sizes
+save automatically and survive reloads. **Reset** restores terminal-sized room
+text and a 12 px interface. Try 10 px room text and a 10 px interface for a
+denser panel. The panel keeps the terminal font family and weight and uses
+MudForge's native `parseAnsiText`
 segments for foreground/background colors, italic, underline and native bright
 color handling for intensity. SGR state carries across lines, including styles
 set before the opening tag. Text is rendered as text nodes, never as server HTML.
@@ -183,7 +188,7 @@ text and accessible name. Actionable waiting reasons (including sleeping, pager,
 Spells collection or missing connection) and unresolved errors appear below the
 title when needed. Recovered operations clear only their corresponding errors.
 Unchanged view states are not sent to the widget, and unchanged lists are not
-rebuilt. The compact bottom-right toolbar keeps **Auto**, **Details** and
+rebuilt. The compact bottom-right toolbar keeps **Font settings**, **Auto**, **Details** and
 **Refresh** visible while the lists scroll. Copy and Close sit at the lower right
 of the Details dialog. Both action bars reserve 24 px of space after the controls
 to keep the corner clear. To reclaim unused space below the lists, resize the native
@@ -209,6 +214,8 @@ death messages or mutate descriptions. Tag snapshots remain authoritative.
 - `awroomdetails refresh` (or **Refresh**) requests one look; failed setup can
   be retried explicitly here. Failed sends and response timeouts do not retry.
 - `awroomdetails auto on` / `auto off` changes the saved Auto preference.
+- `awroomdetails font 10` / `font terminal` sets room text size or restores terminal following.
+- `awroomdetails ui-font 10` sets interface text size.
 - `awroomdetails status` reports availability, pending work, or the last error.
 
 Tag markers and their contents are hidden from the console only when the panel
@@ -218,10 +225,10 @@ Each block is bounded to 500 lines, 128 KiB and five seconds. Malformed boundari
 missing closing tags or overflow surface buffered content as incomplete and
 release console suppression. Missing/failed formatting leaves output visible.
 Room/character changes and disconnects clear stale selection and room data;
-only the Auto preference persists.
+Auto and font-size preferences persist.
 
 Offline and browser checks do not establish native formatting, gagging, docking,
-or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--022-acceptance-pending).
+or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--023-acceptance-pending).
 
 ## Aardwolf Spells
 

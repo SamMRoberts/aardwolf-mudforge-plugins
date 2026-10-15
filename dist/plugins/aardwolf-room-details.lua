@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.2.2",
+  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.2.3",
   author = "Sam Roberts", description = "Formatted, selectable room characters and objects in a compact dockable panel."
 }
 
@@ -21,6 +21,13 @@ local ITEM_COMMANDS = { get = true, take = true, drop = true, put = true, give =
   sacrifice = true, sac = true, donate = true, buy = true, sell = true }
 local FONT_FIELDS = { "family", "size", "weight" }
 local font = nil
+local fontPreferences = { size = 0, uiSize = 12 }
+
+local function validFontPreferences(value)
+  return type(value) == "table" and type(value.size) == "number" and type(value.uiSize) == "number"
+    and (value.size == 0 or (value.size >= 6 and value.size <= 32 and value.size == math.floor(value.size)))
+    and value.uiSize >= 8 and value.uiSize <= 20 and value.uiSize == math.floor(value.uiSize)
+end
 
 local function stopTimer(id)
   if type(id) == "string" and id ~= "" then removeTimer(id) end
@@ -75,7 +82,7 @@ local function waitingReason()
 end
 
 local function statusText()
-  for _, key in ipairs({ "panel", "setup", "send", "timer", "preference", "response" }) do
+  for _, key in ipairs({ "panel", "setup", "send", "timer", "preference", "fontPreference", "response" }) do
     if faults[key] then return faults[key] end
   end
   for _, kind in ipairs({ "chars", "objs" }) do
@@ -100,13 +107,15 @@ publish = function()
     local signature = { snapshots.chars and snapshots.chars.revision or 0, snapshots.objs and snapshots.objs.revision or 0,
       selection and selection.kind or "", selection and selection.revision or 0, selection and selection.index or 0,
       automatic, status, statusVisible, disabled, inFlight, pending, hint, roomNumber or 0, character or "",
-      font and font.family or "", font and font.size or 0, font and font.weight or "" }
+      font and font.family or "", font and font.size or 0, font and font.weight or "",
+      fontPreferences.size, fontPreferences.uiSize, faults.fontPreference or "" }
     local changed = lastPublished == nil
     for index, value in ipairs(signature) do if not lastPublished or lastPublished[index] ~= value then changed = true end end
     if not changed then return end
     local ok = pcall(setWidgetProperty, widget, "roomDetails", json.encode({
       chars = snapshots.chars, objs = snapshots.objs, selection = selection,
-      automatic = automatic, status = status, font = font, statusVisible = statusVisible,
+      automatic = automatic, status = status, font = font, fontPreferences = fontPreferences, statusVisible = statusVisible,
+      fontError = faults.fontPreference,
       refreshDisabled = disabled, refreshBusy = inFlight, refreshPending = pending, refreshHint = hint
     }))
     if ok then lastPublished = signature
@@ -116,11 +125,27 @@ end
 
 local function updateFont()
   local current, changed = terminalFont(), false
+  if current and fontPreferences.size ~= 0 then current.size = fontPreferences.size end
   for _, key in ipairs(FONT_FIELDS) do
     if (current and current[key]) ~= (font and font[key]) then changed = true end
   end
   font = current
   if changed then publish() end
+end
+
+local function saveFonts(value)
+  if not validFontPreferences(value) then return "Room text size must be 6-32 px (or terminal); interface size must be 8-20 px." end
+  local preferences = { size = value.size, uiSize = value.uiSize }
+  local saved, reason = client.storage.set("room-details:fonts", preferences)
+  if not saved then
+    faults.fontPreference = reason or "Could not save font sizes"
+    lastPublished = nil; publish()
+    return faults.fontPreference
+  end
+  faults.fontPreference = nil
+  fontPreferences = preferences
+  updateFont(); publish()
+  return "Room Details font sizes saved."
 end
 
 -- Keep a bounded SGR state, including attributes set before the opening tag.
@@ -437,6 +462,10 @@ end
 
 local function command(argument)
   local text = type(argument) == "string" and string.lower(argument) or ""
+  local size = string.match(text, "^font%s+(%S+)$")
+  if size then return saveFonts({ size = size == "terminal" and 0 or tonumber(size), uiSize = fontPreferences.uiSize }) end
+  local uiSize = string.match(text, "^ui%-font%s+(%S+)$")
+  if uiSize then return saveFonts({ size = fontPreferences.size, uiSize = tonumber(uiSize) }) end
   if text == "show" then showWidget(widget, true); updateFont(); publish(); return "Room Details shown." end
   if text == "hide" then hideWidget(widget); return "Room Details hidden; room output stays in console." end
   if text == "refresh" then
@@ -454,36 +483,44 @@ local function command(argument)
     publish(); return automatic and "Automatic room refresh enabled." or "Automatic room refresh disabled."
   end
   if text == "" or text == "status" then return "Room Details: " .. (statusText() ~= "" and statusText() or "Ready") end
-  return "Usage: awroomdetails show|hide|refresh|status|auto on|auto off"
+  return "Usage: awroomdetails show|hide|refresh|status|auto on|auto off|font <6-32|terminal>|ui-font <8-20>"
 end
 
 local function markup()
   return [=[<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Room Details</title><style>
 :root{color-scheme:dark;color:#e6edf5;background:#131b27;font:12px system-ui,sans-serif}*{box-sizing:border-box}
-html{scroll-padding-bottom:36px}body{margin:0;padding:4px;min-height:100vh;display:flex;flex-direction:column}body>*{flex-shrink:0}header{display:flex;align-items:center;gap:5px;margin-bottom:2px;font:12px system-ui,sans-serif}
+html{scroll-padding-bottom:36px}body{margin:0;padding:4px;min-height:100vh;display:flex;flex-direction:column}body>*{flex-shrink:0}header{display:flex;align-items:center;gap:5px;margin-bottom:2px;font:1rem system-ui,sans-serif}
 header strong{margin-right:auto}button{color:inherit;background:#233247;border:1px solid #43546b;border-radius:4px;font:inherit;cursor:pointer}
 .panel-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:auto;padding-top:4px;padding-inline-end:24px;position:sticky;bottom:0;z-index:2;background:#131b27}
 .panel-actions button{width:24px;height:24px;padding:1px;font-size:17px;line-height:1}button:disabled{opacity:.5;cursor:default}
-button:focus-visible,input:focus-visible{outline:2px solid #c7e2ff;outline-offset:1px}
-label{display:flex;align-items:center;gap:3px;white-space:nowrap}input{margin:0}h2{font:600 11px system-ui,sans-serif;color:#b9c7d8;margin:3px 0 1px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #c7e2ff;outline-offset:1px}
+label{display:flex;align-items:center;gap:3px;white-space:nowrap}input{margin:0}h2{font:600 .916667rem system-ui,sans-serif;color:#b9c7d8;margin:3px 0 1px}
 .entry{display:block;width:100%;text-align:left;color:inherit;background:transparent;border:0;border-radius:3px;padding:0 2px;margin:0;
 font:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;user-select:text;cursor:pointer;line-height:1.2}
 .entry[aria-pressed="true"]{outline:1px solid #8bc3ff;outline-offset:-1px}.entry:focus-visible{outline:2px solid #c7e2ff;outline-offset:-2px}
-.blank{display:none}.empty,#status,#copy-status{color:#aebdcc;font:11px system-ui,sans-serif}[hidden]{display:none!important}
-#status{margin:3px 0}.empty{padding:1px 2px}.incomplete{color:#ffd18b;font:11px system-ui,sans-serif}
+.blank{display:none}.empty,#status,#copy-status{color:#aebdcc;font:.916667rem system-ui,sans-serif}[hidden]{display:none!important}
+#status{margin:3px 0}.empty{padding:1px 2px}.incomplete{color:#ffd18b;font:.916667rem system-ui,sans-serif}
 dialog{scroll-padding-bottom:36px;color:inherit;background:#131b27;border:1px solid #71859e;border-radius:6px;padding:8px;width:calc(100% - 12px);max-width:620px;max-height:calc(100% - 12px);overflow:auto}
-dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:flex-end;gap:6px;padding-top:4px;padding-inline-end:24px;position:sticky;bottom:0;z-index:2;background:#131b27}.dialog-actions button{font:12px system-ui,sans-serif;width:auto;height:24px;padding:2px 6px}
+dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:flex-end;gap:6px;padding-top:4px;padding-inline-end:24px;position:sticky;bottom:0;z-index:2;background:#131b27}.dialog-actions button{font:1rem system-ui,sans-serif;width:auto;min-height:24px;padding:2px 6px}
 #detail-text{white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;line-height:1.2;margin:6px 0;max-height:60vh;overflow:auto}
 #copy-status:empty{display:none}
+#font-dialog{max-width:300px}#font-dialog label{justify-content:space-between;flex-wrap:wrap;gap:4px 8px;margin:8px 0;white-space:normal}select{color:inherit;background:#233247;border:1px solid #43546b;border-radius:4px;font:inherit;padding:2px}#font-dialog p{color:#aebdcc;margin:6px 0;white-space:normal}
 </style></head><body><header><strong>Room Details</strong></header>
 <div id="status" role="status" hidden></div><main class="terminal"><section aria-labelledby="chars-title"><h2 id="chars-title">Characters <span id="chars-count">0</span></h2><div id="chars"></div></section>
 <section aria-labelledby="objs-title"><h2 id="objs-title">Objects <span id="objs-count">0</span></h2><div id="objs"></div></section></main>
-<footer class="panel-actions" aria-label="Room details controls"><label><input id="auto" type="checkbox" checked>Auto</label><button id="details" type="button" aria-label="Show selected entry details" title="Show selected entry details" disabled>&#9432;</button><button id="refresh" type="button" aria-label="Refresh room" title="Refresh room">&#8635;</button></footer>
-<dialog id="detail-dialog" aria-labelledby="detail-title"><header><strong id="detail-title">Entry details</strong></header><div id="detail-text" class="terminal" tabindex="0"></div><div id="copy-status" role="status"></div><footer class="dialog-actions" aria-label="Entry details controls"><button id="copy" type="button">Copy</button><button id="close" type="button">Close</button></footer></dialog><script>
+<footer class="panel-actions" aria-label="Room details controls"><button id="settings" type="button" aria-label="Font settings" title="Font settings">&#9881;</button><label><input id="auto" type="checkbox" checked>Auto</label><button id="details" type="button" aria-label="Show selected entry details" title="Show selected entry details" disabled>&#9432;</button><button id="refresh" type="button" aria-label="Refresh room" title="Refresh room">&#8635;</button></footer>
+<dialog id="detail-dialog" aria-labelledby="detail-title"><header><strong id="detail-title">Entry details</strong></header><div id="detail-text" class="terminal" tabindex="0"></div><div id="copy-status" role="status"></div><footer class="dialog-actions" aria-label="Entry details controls"><button id="copy" type="button">Copy</button><button id="close" type="button">Close</button></footer></dialog>
+<dialog id="font-dialog" aria-labelledby="font-title"><header><strong id="font-title">Font sizes</strong></header><label for="font-size">Room text<select id="font-size"></select></label><label for="ui-font-size">Interface text<select id="ui-font-size"></select></label><p>Smaller text fits more in the panel. Changes save automatically.</p><div id="font-status" role="status" hidden></div><footer class="dialog-actions"><button id="font-reset" type="button">Reset</button><button id="font-close" type="button">Close</button></footer></dialog><script>
 (function(){
   var current={chars:null,objs:null}, snapshots={}, selected=null, selectedKey='', detailsKey='', pendingDetails='', opener=null, copyGeneration=0;
   var dialog=document.getElementById('detail-dialog'), detailText=document.getElementById('detail-text');
+  var fontDialog=document.getElementById('font-dialog'), fontSize=document.getElementById('font-size'), uiFontSize=document.getElementById('ui-font-size');
+  function sizes(target,min,max,terminal){
+    if(terminal){var option=document.createElement('option');option.value='0';option.textContent='Terminal';target.appendChild(option);}
+    for(var size=min;size<=max;size++){var option=document.createElement('option');option.value=String(size);option.textContent=size+' px';target.appendChild(option);}
+  }
+  sizes(fontSize,6,32,true);sizes(uiFontSize,8,20,false);
   function array(value){return Array.isArray(value)?value:[];}
   function key(value){return value?value.kind+':'+value.revision+':'+value.index:'';}
   function select(kind,revision,index){mudforge.send('select',{kind:kind,revision:revision,index:index});}
@@ -604,8 +641,21 @@ dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:f
     if(value.font) document.querySelectorAll('.terminal').forEach(function(element){
       property(element.style,'fontFamily',value.font.family);property(element.style,'fontSize',value.font.size+'px');property(element.style,'fontWeight',value.font.weight);
     });
+    if(value.fontPreferences){
+      property(document.documentElement.style,'fontSize',value.fontPreferences.uiSize+'px');
+      property(fontSize,'value',String(value.fontPreferences.size));property(uiFontSize,'value',String(value.fontPreferences.uiSize));
+    }
+    var fontStatus=document.getElementById('font-status');property(fontStatus,'textContent',value.fontError||'');property(fontStatus,'hidden',!value.fontError);
     document.scrollingElement.scrollTop=scroll;
   });
+  document.getElementById('settings').addEventListener('click',function(){fontDialog.showModal();fontSize.focus();});
+  function closeFonts(){fontDialog.close();}
+  document.getElementById('font-close').addEventListener('click',closeFonts);
+  fontDialog.addEventListener('cancel',function(event){event.preventDefault();closeFonts();});
+  fontDialog.addEventListener('close',function(){document.getElementById('settings').focus({preventScroll:true});});
+  function saveFonts(){mudforge.send('fonts',{size:Number(fontSize.value),uiSize:Number(uiFontSize.value)});}
+  fontSize.addEventListener('change',saveFonts);uiFontSize.addEventListener('change',saveFonts);
+  document.getElementById('font-reset').addEventListener('click',function(){mudforge.send('fonts',{size:0,uiSize:12});});
   document.getElementById('auto').addEventListener('change',function(e){mudforge.send('auto',{enabled:e.target.checked});});
   document.getElementById('refresh').addEventListener('click',function(){mudforge.send('refresh',{});});
   document.getElementById('details').addEventListener('click',function(){openDetails(document.activeElement);});
@@ -637,6 +687,7 @@ local function widgetMessage(event)
   elseif event.event == "refresh" then command("refresh")
   elseif event.event == "auto" and type(event.data) == "table" and type(event.data.enabled) == "boolean" then
     command(event.data.enabled and "auto on" or "auto off")
+  elseif event.event == "fonts" then saveFonts(event.data)
   elseif event.event == "select" and type(event.data) == "table" then
     local data = event.data
     if data.kind ~= "chars" and data.kind ~= "objs" then return end
@@ -658,6 +709,9 @@ function init()
   }, { packages = { "Char", "Room" }, spells = true })
   local saved = client.storage.get("room-details:automatic", true)
   automatic = type(saved) ~= "boolean" or saved
+  local savedFonts = client.storage.get("room-details:fonts")
+  fontPreferences = validFontPreferences(savedFonts) and { size = savedFonts.size, uiSize = savedFonts.uiSize }
+    or { size = 0, uiSize = 12 }
   widget = createWidget({ type = "html", name = "room-details", title = "Room Details",
     position = { x = 50, y = 150 }, size = { width = 360, height = 240 } })
   if type(widget) ~= "string" or widget == "" then
