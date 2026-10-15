@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 32 32">
+  <title>space4: Muted astral stone and starlight</title>
+  <defs>
+    <linearGradient id="stone0" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#8865b1"/>
+      <stop offset=".3" stop-color="#6f51a0"/>
+      <stop offset="1" stop-color="#5b4586"/>
+    </linearGradient>
+    <linearGradient id="stone1" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#8663af"/>
+      <stop offset=".3" stop-color="#6c4f9d"/>
+      <stop offset="1" stop-color="#594384"/>
+    </linearGradient>
+    <linearGradient id="stone2" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#8462ac"/>
+      <stop offset=".3" stop-color="#694d99"/>
+      <stop offset="1" stop-color="#574281"/>
+    </linearGradient>
+    <linearGradient id="stone3" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#8261a9"/>
+      <stop offset=".3" stop-color="#664c96"/>
+      <stop offset="1" stop-color="#55417f"/>
+    </linearGradient>
+    <linearGradient id="stone4" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#7f60a6"/>
+      <stop offset=".3" stop-color="#634a92"/>
+      <stop offset="1" stop-color="#53407c"/>
+    </linearGradient>
+    <linearGradient id="stone5" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#7d5ea3"/>
+      <stop offset=".3" stop-color="#60488e"/>
+      <stop offset="1" stop-color="#513e79"/>
+    </linearGradient>
+    <linearGradient id="stone6" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#7b5da1"/>
+      <stop offset=".3" stop-color="#5d468b"/>
+      <stop offset="1" stop-color="#4e3d77"/>
+    </linearGradient>
+    <linearGradient id="stone7" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#785b9e"/>
+      <stop offset=".3" stop-color="#5a4487"/>
+      <stop offset="1" stop-color="#4c3b74"/>
+    </linearGradient>
+    <linearGradient id="stone8" x1=".15" y1="0" x2=".7" y2="1">
+      <stop stop-color="#765a9b"/>
+      <stop offset=".3" stop-color="#574283"/>
+      <stop offset="1" stop-color="#4a3a71"/>
+    </linearGradient>
+    <linearGradient id="plank" x1="0" y1="0" x2="1" y2=".15">
+      <stop stop-color="#9971c1"/>
+      <stop offset=".18" stop-color="#7b59af"/>
+      <stop offset=".85" stop-color="#6f519f"/>
+      <stop offset="1" stop-color="#292544"/>
+    </linearGradient>
+    <radialGradient id="waterlight">
+      <stop stop-color="#d9a4e7" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#7b59af" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-.5" y="-.5" width="2" height="2">
+      <feGaussianBlur stdDeviation=".55"/>
+    </filter>
+    <linearGradient id="basalt" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#45424c"/>
+      <stop offset=".45" stop-color="#2c2d3b"/>
+      <stop offset="1" stop-color="#171d2a"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2=".6" y2="1">
+      <stop stop-color="#cf9b77"/>
+      <stop offset=".45" stop-color="#aa594f"/>
+      <stop offset=".5" stop-color="#e1af80"/>
+      <stop offset=".53" stop-color="#8d414b"/>
+      <stop offset="1" stop-color="#513242"/>
+    </linearGradient>
+    <linearGradient id="rockTop" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#c6d6bb"/>
+      <stop offset=".6" stop-color="#8ca99d"/>
+      <stop offset="1" stop-color="#608087"/>
+    </linearGradient>
+    <linearGradient id="rockFace" x1="0" y1="0" x2=".5" y2="1">
+      <stop stop-color="#6b8d94"/>
+      <stop offset="1" stop-color="#304959"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop stop-color="#fff3bc" stop-opacity=".8"/>
+      <stop offset=".25" stop-color="#ffc174" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#ffbc73" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="spring" cx=".3" cy=".25">
+      <stop stop-color="#a3f6db"/>
+      <stop offset=".4" stop-color="#42c5c1"/>
+      <stop offset="1" stop-color="#1e708e"/>
+    </radialGradient>
+    <linearGradient id="canvas" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff1ca"/>
+      <stop offset=".6" stop-color="#d8bf8f"/>
+      <stop offset="1" stop-color="#9c8068"/>
+    </linearGradient>
+    <clipPath id="interior">
+      <rect x=".26" y=".26" width="31.48" height="31.48"/>
+    </clipPath>
+    <pattern id="ground" width="32" height="32" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="32" height="32" rx="0" fill="#45366d"/>
+      <ellipse cx="4.76" cy="27.89" rx="6.81" ry="1.56" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="31.19" cy="-1.75" rx="9.21" ry="1.25" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="8.61" cy="24.88" rx="13.1" ry="2.64" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="0.34" cy="-2.67" rx="8.24" ry="2.53" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="8.3" cy="4.33" rx="13.48" ry="1.33" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="-4.81" cy="30.93" rx="10.69" ry="3.61" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="27.48" cy="6.24" rx="13.48" ry="4.97" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="7.39" cy="7.48" rx="8.71" ry="4.16" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="31.85" cy="-4.06" rx="11.84" ry="4.5" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="26.77" cy="30.47" rx="9.25" ry="1.8" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="-5.45" cy="-5.84" rx="13.28" ry="4.71" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="23.01" cy="-0.25" rx="8.42" ry="2.56" fill="url(#waterlight)" opacity="0.65"/>
+      <ellipse cx="14.03" cy="9.57" rx="9.33" ry="4.88" fill="url(#waterlight)" opacity="0.65"/>
+      <circle cx="22.16" cy="18.69" r="0.2187801720481366" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="4.33" cy="9.98" r="0.15669236241374165" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="10.88" cy="4.63" r="0.18173860922455787" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="25.5" cy="4.96" r="0.11119938134681434" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="5.32" cy="6.05" r="0.1340708920825273" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="5.64" cy="31.24" r="0.2032971250312403" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="0.02" cy="23.95" r="0.18974976854398848" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="6.07" cy="17.03" r="0.10973002651240676" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="10.38" cy="17.62" r="0.13042092106305064" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="31.24" cy="28.2" r="0.21415966647211465" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="25.57" cy="6.73" r="0.1559704791381955" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="17.11" cy="10.42" r="0.18705616879742593" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="23.41" cy="3.62" r="0.15281561532057825" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="28.6" cy="22.59" r="0.21742278706748042" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="17.76" cy="17.64" r="0.21830933799967173" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="5.46" cy="9.66" r="0.11787956086453051" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="29.51" cy="29.83" r="0.13486543799750508" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="28.85" cy="26.14" r="0.1216436395654455" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="25.65" cy="22.77" r="0.13215563975274564" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="27.27" cy="25.5" r="0.1671118400199339" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="11.1" cy="4.02" r="0.12375835162587465" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="19.04" cy="21.3" r="0.11182522327173502" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="2.93" cy="13.84" r="0.13969700360670687" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="20.11" cy="5.36" r="0.15132594422902912" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="16.08" cy="7.12" r="0.15214580445550382" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="6.45" cy="22.34" r="0.08855334694031626" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="30.37" cy="0.75" r="0.17195184405893088" fill="#d9a4e7" opacity=".5"/>
+      <circle cx="12.86" cy="19.03" r="0.184719246882014" fill="#d9a4e7" opacity=".5"/>
+      <path d="M-3 27Q14 26 19 15T35 5" fill="none" stroke="#7b59af" stroke-width="5" opacity=".2" filter="url(#soft)"/>
+    </pattern>
+  </defs>
+  <rect width="32" height="32" fill="#45366d"/>
+  <rect x=".26" y=".26" width="31.48" height="31.48" fill="url(#ground)"/>
+  <g clip-path="url(#interior)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18.86 26.93l0.6 0.08" fill="none" stroke="#292544" stroke-width="0.35" opacity=".45"/>
+    <path d="M18.07 28.05l1.73 0.21" fill="none" stroke="#d9a4e7" stroke-width="0.35" opacity=".45"/>
+    <path d="M7.08 5.73l0.51 0.58" fill="none" stroke="#292544" stroke-width="0.35" opacity=".45"/>
+    <path d="M24.31 25.27l0.67 0.52" fill="none" stroke="#d9a4e7" stroke-width="0.35" opacity=".45"/>
+    <path d="M13.76 23.92l0.86 0.37" fill="none" stroke="#292544" stroke-width="0.35" opacity=".45"/>
+    <path d="M7.21 21.49l0.87 0.23" fill="none" stroke="#d9a4e7" stroke-width="0.35" opacity=".45"/>
+    <path d="M20.51 4.92l0.61 0.26" fill="none" stroke="#292544" stroke-width="0.35" opacity=".45"/>
+    <path d="M10.1 13.84l0.74 0.15" fill="none" stroke="#d9a4e7" stroke-width="0.35" opacity=".45"/>
+    <path d="M9.24 24.38l1.05 0.11" fill="none" stroke="#292544" stroke-width="0.35" opacity=".45"/>
+    <path d="M23.09 15.25l1.47 0.07" fill="none" stroke="#d9a4e7" stroke-width="0.35" opacity=".45"/>
+    <circle cx="16" cy="4" r="0.35" fill="#b7b8aa"/>
+    <circle cx="23" cy="15" r="0.6" fill="#b7b8aa"/>
+    <circle cx="6" cy="26" r="0.35" fill="#b7b8aa"/>
+    <circle cx="13" cy="13" r="0.6" fill="#b7b8aa"/>
+    <circle cx="20" cy="24" r="0.35" fill="#b7b8aa"/>
+    <circle cx="27" cy="11" r="0.6" fill="#b7b8aa"/>
+    <circle cx="10" cy="22" r="0.35" fill="#b7b8aa"/>
+    <path d="M9 24L24 8m-10 13 12-10" fill="none" stroke="#a4afa6" stroke-width="0.8"/>
+    <circle cx="9" cy="24" r="1.3" fill="#eee6f1"/>
+  </g>
+</svg>

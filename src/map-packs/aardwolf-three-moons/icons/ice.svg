@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 32 32">
+  <title>ice: Gelidus-inspired fractured glacial sheet</title>
+  <defs>
+  <linearGradient id="stone0" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#8bc0c9"/>
+  <stop offset=".3" stop-color="#70afc1"/>
+  <stop offset="1" stop-color="#5c94ad"/>
+  </linearGradient>
+  <linearGradient id="stone1" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#89bec8"/>
+  <stop offset=".3" stop-color="#6dacbf"/>
+  <stop offset="1" stop-color="#5a92ab"/>
+  </linearGradient>
+  <linearGradient id="stone2" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#88bbc6"/>
+  <stop offset=".3" stop-color="#6ba9bd"/>
+  <stop offset="1" stop-color="#5990aa"/>
+  </linearGradient>
+  <linearGradient id="stone3" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#85b9c5"/>
+  <stop offset=".3" stop-color="#68a6bb"/>
+  <stop offset="1" stop-color="#568ea8"/>
+  </linearGradient>
+  <linearGradient id="stone4" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#83b7c3"/>
+  <stop offset=".3" stop-color="#65a3b9"/>
+  <stop offset="1" stop-color="#548ba7"/>
+  </linearGradient>
+  <linearGradient id="stone5" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#81b4c2"/>
+  <stop offset=".3" stop-color="#62a0b7"/>
+  <stop offset="1" stop-color="#5289a5"/>
+  </linearGradient>
+  <linearGradient id="stone6" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#7fb2c0"/>
+  <stop offset=".3" stop-color="#609db5"/>
+  <stop offset="1" stop-color="#5187a4"/>
+  </linearGradient>
+  <linearGradient id="stone7" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#7db0bf"/>
+  <stop offset=".3" stop-color="#5d9ab3"/>
+  <stop offset="1" stop-color="#4e85a2"/>
+  </linearGradient>
+  <linearGradient id="stone8" x1=".15" y1="0" x2=".7" y2="1">
+  <stop stop-color="#7baebd"/>
+  <stop offset=".3" stop-color="#5a97b1"/>
+  <stop offset="1" stop-color="#4c83a1"/>
+  </linearGradient>
+  <linearGradient id="plank" x1="0" y1="0" x2="1" y2=".15">
+  <stop stop-color="#9cced2"/>
+  <stop offset=".18" stop-color="#7bbbc9"/>
+  <stop offset=".85" stop-color="#6fabbd"/>
+  <stop offset="1" stop-color="#294f78"/>
+  </linearGradient>
+  <radialGradient id="waterlight">
+  <stop stop-color="#e2f5e4" stop-opacity=".45"/>
+  <stop offset="1" stop-color="#7bbbc9" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="soft" x="-.5" y="-.5" width="2" height="2">
+  <feGaussianBlur stdDeviation=".55"/>
+  </filter>
+  <linearGradient id="basalt" x1="0" y1="0" x2=".7" y2="1">
+  <stop stop-color="#45424c"/>
+  <stop offset=".45" stop-color="#2c2d3b"/>
+  <stop offset="1" stop-color="#171d2a"/>
+  </linearGradient>
+  <linearGradient id="roof" x1="0" y1="0" x2=".6" y2="1">
+  <stop stop-color="#cf9b77"/>
+  <stop offset=".45" stop-color="#aa594f"/>
+  <stop offset=".5" stop-color="#e1af80"/>
+  <stop offset=".53" stop-color="#8d414b"/>
+  <stop offset="1" stop-color="#513242"/>
+  </linearGradient>
+  <linearGradient id="rockTop" x1="0" y1="0" x2=".8" y2="1">
+  <stop stop-color="#c6d6bb"/>
+  <stop offset=".6" stop-color="#8ca99d"/>
+  <stop offset="1" stop-color="#608087"/>
+  </linearGradient>
+  <linearGradient id="rockFace" x1="0" y1="0" x2=".5" y2="1">
+  <stop stop-color="#6b8d94"/>
+  <stop offset="1" stop-color="#304959"/>
+  </linearGradient>
+  <radialGradient id="glow">
+  <stop stop-color="#fff3bc" stop-opacity=".8"/>
+  <stop offset=".25" stop-color="#ffc174" stop-opacity=".3"/>
+  <stop offset="1" stop-color="#ffbc73" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="spring" cx=".3" cy=".25">
+  <stop stop-color="#a3f6db"/>
+  <stop offset=".4" stop-color="#42c5c1"/>
+  <stop offset="1" stop-color="#1e708e"/>
+  </radialGradient>
+  <linearGradient id="canvas" x1="0" y1="0" x2="0" y2="1">
+  <stop stop-color="#fff1ca"/>
+  <stop offset=".6" stop-color="#d8bf8f"/>
+  <stop offset="1" stop-color="#9c8068"/>
+  </linearGradient>
+  <clipPath id="interior">
+  <rect x=".26" y=".26" width="31.48" height="31.48"/>
+  </clipPath>
+  <pattern id="ground" width="32" height="32" patternUnits="userSpaceOnUse">
+  <rect x="0" y="0" width="32" height="32" rx="0" fill="#4985a4" />
+  <path d="M0 0L14 2L7 15L0 21Z" fill="url(#stone0)" stroke="none" stroke-width="0.5" />
+  <path d="M0 0L14 2L7 15L0 21Z" fill="none" stroke="#e2f5e4" stroke-width="0.17" opacity=".5"/>
+  <path d="M14 2L32 0L25 13L7 15Z" fill="url(#stone1)" stroke="none" stroke-width="0.5" />
+  <path d="M14 2L32 0L25 13L7 15Z" fill="none" stroke="#e2f5e4" stroke-width="0.17" opacity=".5"/>
+  <path d="M7 15L25 13L32 28L16 25Z" fill="url(#stone2)" stroke="none" stroke-width="0.5" />
+  <path d="M7 15L25 13L32 28L16 25Z" fill="none" stroke="#e2f5e4" stroke-width="0.17" opacity=".5"/>
+  <path d="M0 21L7 15L16 25L10 32L0 32Z" fill="url(#stone3)" stroke="none" stroke-width="0.5" />
+  <path d="M0 21L7 15L16 25L10 32L0 32Z" fill="none" stroke="#e2f5e4" stroke-width="0.17" opacity=".5"/>
+  <path d="M16 25L32 28L32 32L10 32Z" fill="url(#stone4)" stroke="none" stroke-width="0.5" />
+  <path d="M16 25L32 28L32 32L10 32Z" fill="none" stroke="#e2f5e4" stroke-width="0.17" opacity=".5"/>
+  <path d="M7 15l2 4-1 3m17-9-7 1-3-2M16 25l-4-1" fill="none" stroke="#e5ffec" stroke-width="0.2" opacity=".8"/>
+  </pattern>
+  </defs>
+  <rect width="32" height="32" fill="#4985a4"/>
+  <rect x=".26" y=".26" width="31.48" height="31.48" fill="url(#ground)"/>
+  <g clip-path="url(#interior)" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M13.2 23.62l0.32 0.02" fill="none" stroke="#294f78" stroke-width="0.35" opacity=".45"/>
+  <path d="M4.36 8.44l0.66 0.37" fill="none" stroke="#e2f5e4" stroke-width="0.35" opacity=".45"/>
+  <path d="M25.85 16.72l1.22 0.35" fill="none" stroke="#294f78" stroke-width="0.35" opacity=".45"/>
+  <path d="M28.17 20.4l0.99 0.15" fill="none" stroke="#e2f5e4" stroke-width="0.35" opacity=".45"/>
+  <path d="M6.36 14.08l0.43 0.56" fill="none" stroke="#294f78" stroke-width="0.35" opacity=".45"/>
+  <path d="M13.43 22.13l0.35 0.68" fill="none" stroke="#e2f5e4" stroke-width="0.35" opacity=".45"/>
+  <path d="M19.9 18.15l1.75 0.09" fill="none" stroke="#294f78" stroke-width="0.35" opacity=".45"/>
+  <path d="M16.66 28.59l0.32 0.41" fill="none" stroke="#e2f5e4" stroke-width="0.35" opacity=".45"/>
+  <path d="M10.28 22.78l1.21 0.43" fill="none" stroke="#294f78" stroke-width="0.35" opacity=".45"/>
+  <path d="M8.84 4.2l0.38 0.26" fill="none" stroke="#e2f5e4" stroke-width="0.35" opacity=".45"/>
+  <path d="M-1 8l8 4 6-3 5 7 15-5M7 12l-2 8 6 5-1 8m8-17 3 8 12 4" fill="none" stroke="#4b9fc0" stroke-width="1.4" />
+  <path d="M-1 8l8 4 6-3 5 7 15-5M7 12l-2 8 6 5-1 8m8-17 3 8 12 4" fill="none" stroke="#d6fff0" stroke-width="0.3" />
+  <g transform="translate(25 7) rotate(0) scale(0.5)">
+  <ellipse cx="1" cy="4" rx="5" ry="2.5" fill="#164663" opacity=".65" filter="url(#soft)"/>
+  <path d="M0-7L4-2 3 4 0 6-3 3-4-2Z" fill="#309dbd" stroke="none" stroke-width="0.5" />
+  <path d="M0-7L1-1 0 6-3 3-4-2Z" fill="#91e3e4" stroke="none" stroke-width="0.5" />
+  <path d="M0-7L4-2 1-1Z" fill="#efffe9" stroke="none" stroke-width="0.5" />
+  <path d="M1-1L3 4 0 6Z" fill="#164663" stroke="none" stroke-width="0.5" />
+  <path d="M0-7L1-1 0 6M-4-2L1-1 4-2" fill="none" stroke="#efffe9" stroke-width="0.18" opacity=".8"/>
+  <circle cx="-1" cy="-3" r="0.3" fill="#efffe9" />
+  </g>
+  </g>
+</svg>
