@@ -7,6 +7,77 @@ import { root } from '../tools/build-repository.mjs';
 const fixture = readFileSync(resolve(root, 'tests/fixtures/room-details.lua'), 'utf8');
 const setup = `local world, context, env = roomWorld(); world.ready(); world.active(); world.tick(300); world.prompt()`;
 const cases = {
+  'font sizes are independent, durable and terminal following can be restored': `
+    ${setup}
+    assert(world.state().fontPreferences.size == 0 and world.state().fontPreferences.uiSize == 12)
+    world.block("chars", { "A man." })
+    local revision, count = world.state().chars.revision, #world.sends
+    world.message("select", { kind = "chars", revision = revision, index = 1 })
+    world.message("fonts", { size = 9, uiSize = 10 })
+    assert(world.state().font.size == 9 and world.state().fontPreferences.uiSize == 10)
+    assert(world.state().chars.revision == revision and world.state().selection.index == 1)
+    world.font = { family = "Fira Code, monospace", size = 18 }
+    world.line("Ordinary output.")
+    assert(world.state().font.size == 9 and world.state().font.family == "Fira Code, monospace")
+    assert(#world.sends == count and world.panel().contentWrites == 1)
+    env.cleanup(); env.init(); world.ready()
+    assert(world.state().font.size == 9 and world.state().fontPreferences.uiSize == 10)
+    world.commands.awroomdetails("font terminal")
+    assert(world.state().font.size == 18)
+    world.commands.awroomdetails("ui-font 8")
+    assert(world.state().fontPreferences.uiSize == 8 and world.state().font.size == 18)
+    world.font.size = 15; world.line("Ordinary output."); assert(world.state().font.size == 15)
+  `,
+  'invalid font sizes and cross-session settings cannot change or save preferences': `
+    ${setup}
+    local writes = context.writes
+    for _, value in ipairs({ false, {}, { size = "9", uiSize = 10 }, { size = 5, uiSize = 10 },
+      { size = 33, uiSize = 10 }, { size = 9.5, uiSize = 10 }, { size = 9, uiSize = 7 },
+      { size = 9, uiSize = 21 }, { size = 9, uiSize = 10.5 }, { size = 0/0, uiSize = 10 },
+      { size = math.huge, uiSize = 10 } }) do world.message("fonts", value) end
+    world.message("fonts", { size = 9, uiSize = 10 }, "other-session")
+    world.commands.awroomdetails("font nope"); world.commands.awroomdetails("ui-font 7")
+    assert(context.writes == writes and world.state().fontPreferences.size == 0)
+    world.message("fonts", { size = 6, uiSize = 8 }); assert(world.state().font.size == 6)
+    world.message("fonts", { size = 32, uiSize = 20 }); assert(world.state().font.size == 32)
+  `,
+  'failed font saves restore controls, retain prior sizes and recover without clearing Auto errors': `
+    ${setup}
+    world.message("fonts", { size = 9, uiSize = 10 })
+    context.refuseWrites = true
+    world.commands.awroomdetails("auto off")
+    local autoError = world.state().status
+    local published, original = 0, env.setWidgetProperty
+    env.setWidgetProperty = function(id, key, value)
+      if key == "roomDetails" then published = published + 1 end
+      return original(id, key, value)
+    end
+    world.message("fonts", { size = 12, uiSize = 14 })
+    assert(world.state().fontError ~= nil)
+    assert(published == 1 and world.state().fontPreferences.size == 9 and world.state().fontPreferences.uiSize == 10)
+    context.refuseWrites = false
+    world.message("fonts", { size = 8, uiSize = 9 })
+    assert(world.state().font.size == 8 and world.state().status == autoError and world.state().fontError == nil)
+    world.commands.awroomdetails("auto off"); assert(world.state().status == "")
+    context.refuseWrites = true; world.message("fonts", { size = 10, uiSize = 11 })
+    assert(world.state().statusVisible and string.find(world.state().status, "write", 1, true))
+    context.refuseWrites = false; world.message("fonts", { size = 0, uiSize = 12 })
+    assert(world.state().status == "" and world.state().font.size == 13)
+  `,
+  'malformed stored font preferences safely fall back without writing during initialization': `
+    local world, context, env = roomWorld(); world.ready()
+    world.message("fonts", { size = 9, uiSize = 10 })
+    local stored
+    for key, value in pairs(context.storage) do
+      if string.find(key, "room-details:fonts", 1, true) then stored = value end
+    end
+    assert(stored)
+    stored.value = { size = 2, uiSize = 40 }
+    local writes = context.writes
+    env.cleanup(); env.init(); world.ready()
+    assert(world.state().fontPreferences.size == 0 and world.state().fontPreferences.uiSize == 12)
+    assert(context.writes == writes)
+  `,
   'unchanged snapshots preserve revisions, duplicate rows and selection, but styled changes invalidate them': `
     ${setup}
     world.block("chars", { "A man.", "A man." })

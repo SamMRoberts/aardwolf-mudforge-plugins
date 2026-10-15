@@ -35,11 +35,13 @@ function panel(clipboard) {
     close() { this.open = false; this.handlers.close(); }
   }
   const ids = Object.fromEntries(['chars', 'objs', 'chars-count', 'objs-count', 'auto', 'refresh', 'details',
-    'status', 'main', 'detail-dialog', 'detail-title', 'detail-text', 'copy', 'close', 'copy-status']
+    'status', 'main', 'detail-dialog', 'detail-title', 'detail-text', 'copy', 'close', 'copy-status',
+    'settings', 'font-dialog', 'font-status', 'font-size', 'ui-font-size', 'font-reset', 'font-close']
     .map(id => [id, new Element()]));
   const selection = { toString: () => '', removeAllRanges() {}, addRange(range) { this.range = range; } };
   const document = {
     activeElement: null,
+    documentElement: new Element('html'),
     scrollingElement: { scrollTop: 0 },
     getElementById: id => ids[id],
     createElement: tag => new Element(tag),
@@ -205,4 +207,52 @@ test('late clipboard completion cannot update closed or replaced details', async
   view.update({ selection: null });
   complete(); await copying;
   assert.equal(view.ids['copy-status'].textContent, '');
+});
+
+test('font settings send independent sizes, reset to terminal, and restore keyboard focus', () => {
+  const view = panel();
+  view.update({ fontPreferences: { size: 0, uiSize: 12 } });
+  view.ids.settings.handlers.click();
+  assert.equal(view.ids['font-dialog'].open, true);
+  assert.equal(view.document.activeElement, view.ids['font-size']);
+  view.ids['font-size'].value = '9';
+  view.ids['font-size'].handlers.change();
+  assert.deepEqual(JSON.parse(JSON.stringify(view.messages.at(-1))), { event: 'fonts', data: { size: 9, uiSize: 12 } });
+  view.update({ fontPreferences: { size: 9, uiSize: 12 } });
+  view.ids['ui-font-size'].value = '10';
+  view.ids['ui-font-size'].handlers.change();
+  assert.deepEqual(JSON.parse(JSON.stringify(view.messages.at(-1))), { event: 'fonts', data: { size: 9, uiSize: 10 } });
+  view.ids['font-reset'].handlers.click();
+  assert.deepEqual(JSON.parse(JSON.stringify(view.messages.at(-1))), { event: 'fonts', data: { size: 0, uiSize: 12 } });
+  view.ids['font-dialog'].handlers.cancel({ preventDefault() {} });
+  assert.equal(view.ids['font-dialog'].open, false);
+  assert.equal(view.document.activeElement, view.ids.settings);
+});
+
+test('font updates keep rows, selection, details and focus while applying both sizes', () => {
+  const view = panel(), { character } = view.render([{ text: 'A man.' }]);
+  view.select(); character.focus(); view.ids.details.handlers.click();
+  view.update({ font: { family: 'monospace', size: 9, weight: 'normal' }, fontPreferences: { size: 9, uiSize: 10 } });
+  assert.equal(view.ids.main.style.fontSize, '9px');
+  assert.equal(view.ids['detail-text'].style.fontSize, '9px');
+  assert.equal(view.document.documentElement.style.fontSize, '10px');
+  assert.equal(view.ids.chars.children[0], character);
+  assert.equal(character.getAttribute('aria-pressed'), 'true');
+  assert.equal(view.ids['detail-dialog'].open, true);
+  assert.equal(view.document.activeElement, view.ids.close);
+});
+
+
+test('font save errors appear inside settings and accepted preferences restore the controls', () => {
+  const view = panel();
+  view.update({ fontPreferences: { size: 9, uiSize: 10 } });
+  view.ids.settings.handlers.click();
+  view.ids['font-size'].value = '12';
+  view.update({ fontError: 'Could not save font sizes' });
+  assert.equal(view.ids['font-status'].textContent, 'Could not save font sizes');
+  assert.equal(view.ids['font-status'].hidden, false);
+  assert.equal(view.ids['font-size'].value, '9');
+  view.update({ fontError: null });
+  assert.equal(view.ids['font-status'].hidden, true);
+  assert.equal(view.ids['font-dialog'].open, true);
 });
