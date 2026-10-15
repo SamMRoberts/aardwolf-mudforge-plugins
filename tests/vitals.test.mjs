@@ -31,6 +31,71 @@ const setup = `
 `;
 
 const cases = {
+  'TNL fills toward the next level using server perlevel in either packet order': `
+    for _, first in ipairs({ "base", "status" }) do
+      local world, panel, widget = panelWorld()
+      local settings = openPreferences(panel, widget)
+      local controls = settings.vitalsPreferences
+      assert(widget.bindings.tnlWidth == "0%" and widget.bindings.tnlPercent == "--")
+      if first == "base" then world.packet("char.base", { perlevel = "2000" })
+      else world.packet("char.status", { tnl = "2000" }) end
+      assert(widget.bindings.tnlLevel == "unknown")
+      world.packet("char.base", { perlevel = "2000" })
+      for _, sample in ipairs({ {2000, "0%"}, {1000, "50%"}, {0, "100%"}, {-100, "100%"}, {2500, "0%"} }) do
+        world.packet("char.status", { tnl = tostring(sample[1]) })
+        assert(widget.bindings.charactertnl == tostring(sample[1]))
+        assert(widget.bindings.tnlWidth == sample[2] and widget.bindings.tnlPercent == sample[2])
+        assert(widget.bindings.tnlLevel == "normal")
+        assert(string.find(widget.bindings.tnlDescription, tostring(sample[1]) .. " XP remaining", 1, true))
+      end
+      world.packet("char.status", { tnl = 1000 })
+      world.packet("char.base", { perlevel = 4000 })
+      assert(widget.bindings.tnlWidth == "75%")
+      world.packet("char.status", { hunger = 60 })
+      world.packet("char.base", { tier = 2 })
+      assert(widget.bindings.tnlWidth == "75%")
+      world.packet("char.status", { level = 43, tnl = 4000 })
+      assert(widget.bindings.tnlWidth == "0%")
+      assert(widget.contentWrites == 1 and settings.contentWrites == 1 and settings.vitalsPreferences == controls)
+      local target = string.find(widget.content, 'class="card target"', 1, true)
+      local tnl = string.find(widget.content, 'class="card tnl"', 1, true)
+      local alignment = string.find(widget.content, 'class="card alignment"', 1, true)
+      assert(target < tnl and tnl < alignment)
+      assert(not string.find(widget.content, '<dt>TNL</dt>', 1, true))
+    end
+  `,
+  'TNL stays neutral for invalid data and clears across session and Core changes': `
+    local a, pa, wa, core = panelWorld("a")
+    local b, pb, wb = panelWorld("b")
+    b.packet("char.base", { perlevel = 1000 }); b.packet("char.status", { tnl = 250 })
+    a.packet("char.status", { tnl = 500 })
+    for _, invalid in ipairs({ 0, -1, "bad", "", " ", false, {} }) do
+      a.packet("char.base", { perlevel = invalid })
+      assert(wa.bindings.charactertnl == "500" and wa.bindings.tnlWidth == "0%")
+      assert(wa.bindings.tnlPercent == "--" and wa.bindings.tnlLevel == "unknown")
+    end
+    a.packet("char.base", { perlevel = 1000 })
+    for _, invalid in ipairs({ "bad", "", " ", false, {} }) do
+      a.packet("char.status", { tnl = invalid })
+      assert(wa.bindings.charactertnl == "?" and wa.bindings.tnlWidth == "0%")
+      assert(wa.bindings.tnlPercent == "--" and wa.bindings.tnlLevel == "unknown")
+    end
+    a.packet("char.status", { tnl = 500 }); assert(wa.bindings.tnlWidth == "50%")
+    a.disconnect()
+    assert(wa.bindings.charactertnl == "?" and wa.bindings.tnlPercent == "--" and wa.bindings.tnlWidth == "0%")
+    assert(wb.bindings.tnlWidth == "75%")
+    a.connect(); a.packet("char.status", { tnl = 500 })
+    assert(wa.bindings.tnlLevel == "unknown")
+    a.packet("char.base", { name = "Fixture", perlevel = 2000 })
+    assert(wa.bindings.tnlWidth == "75%")
+    a.unload(core)
+    assert(wa.bindings.tnlLevel == "unknown" and wa.bindings.tnlWidth == "0%")
+    core = a.core("reloaded"); a.tick(1000)
+    a.packet("char.base", { name = "Fixture", perlevel = 4000 }); a.packet("char.status", { tnl = 2000 })
+    assert(wa.bindings.tnlWidth == "50%")
+    pa.env.cleanup(); pa.env.init(); wa = pa.widgets["vitals-file-id:vitals"]
+    assert(wa.bindings.tnlWidth == "50%" and wa.contentWrites == 1 and wb.bindings.tnlWidth == "75%")
+  `,
   'vitals starts before Core and synchronizes settings only after their iframe is ready': `
     local world = newWorld()
     local panel = world.loadPlugin("vitals", "vitals-file-id", "Aardwolf Vitals")
