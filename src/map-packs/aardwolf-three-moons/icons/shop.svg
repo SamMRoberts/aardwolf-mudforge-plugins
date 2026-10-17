@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 32 32">
-  <title>shop: Continuous shop floor with a low counter run and small potion accents</title>
+  <title>shop: Continuous merchant counter with colorful potion bottles and a gold coin tray</title>
   <defs>
     <linearGradient id="flow-slab0" x1="0" y1="0" x2=".65" y2="1">
       <stop stop-color="#39515e"/>
@@ -440,101 +440,42 @@
         <path d="M11.93 6.89l1.1-1 1.2 .6" fill="none" stroke="#4e6671" stroke-width="0.12"/>
       </g>
     </pattern>
+    <linearGradient id="shop-counter" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#c29d7c"/>
+      <stop offset=".18" stop-color="#aa8167"/>
+      <stop offset=".78" stop-color="#8d655a"/>
+      <stop offset="1" stop-color="#5b4350"/>
+    </linearGradient>
     <pattern id="terrain-surface" width="32" height="32" patternUnits="userSpaceOnUse">
       <rect width="32" height="32" fill="url(#ground)"/>
-      <g stroke-linecap="round" stroke-linejoin="round">
-        <g transform="translate(.137 .137)">
-          <g transform="translate(-32 -32) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
-          <g transform="translate(0 -32) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
-          <g transform="translate(32 -32) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
-          <g transform="translate(-32 0) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
-          <g transform="translate(0 0) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
-          <g transform="translate(32 0) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
-          <g transform="translate(-32 32) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
-          <g transform="translate(0 32) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
-          <g transform="translate(32 32) scale(1)">
-            <rect x="-1" y="5" width="34" height="2.2" rx="0" fill="#85686a"/>
-            <path d="M-1 5.3h34" fill="none" stroke="#c1a483" stroke-width="0.2"/>
-            <circle cx="8" cy="6" r="0.65" fill="#9785b9"/>
-            <circle cx="9.9" cy="6" r="0.6" fill="#79b5a3"/>
-            <rect x="7.8" y="5.05" width="0.4" height="0.5" rx="0" fill="#d4c49d"/>
-            <rect x="9.7" y="5.1" width="0.4" height="0.45" rx="0" fill="#d4c49d"/>
-            <rect x="22" y="5.6" width="1.5" height="0.9" rx="0.1" fill="#c8b690"/>
-            <path d="M9 18h3m-1.5-1.5v3" fill="none" stroke="#829299" stroke-width="0.15" opacity=".45"/>
-          </g>
+      <g transform="translate(.137 .137)" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="-1" y="3.8" width="34" height="5.4" fill="url(#shop-counter)"/>
+        <path d="M-1 4.1h34M-1 8.2h34" fill="none" stroke="#e2bb8c" stroke-width=".25"/>
+        <path d="M-1 9.2h34" fill="none" stroke="#1f2e40" stroke-width=".35" opacity=".7"/>
+        <g transform="translate(6.5 6.5)">
+          <path d="M-.5-2.1h1v1l.85 1q.8 1.6-1.35 1.6T-1.35-.1l.85-1Z" fill="#476c78" stroke="#b6ddd4" stroke-width=".15"/>
+          <path d="M-1 .1h2q.4 1.1-1 1.1T-1 .1Z" fill="#68c8a6"/>
+          <rect x="-.55" y="-2.35" width="1.1" height=".65" rx=".12" fill="#dfba80"/>
+          <path d="M-.7-.1l-.2.65" fill="none" stroke="#d8fff0" stroke-width=".22"/>
         </g>
+        <g transform="translate(10.7 6.5)">
+          <path d="M-.55-2.3h1.1v1.1q1.15.6 1.15 1.4 0 1.5-1.7 1.5T-1.7.2q0-.8 1.15-1.4Z" fill="#8d70ad" stroke="#d5b9e4" stroke-width=".15"/>
+          <path d="M-1.35.1h2.7q0 1.2-1.35 1.2T-1.35.1Z" fill="#bd8ddb"/>
+          <rect x="-.6" y="-2.5" width="1.2" height=".65" rx=".12" fill="#dfba80"/>
+          <path d="M-1-.1l-.15.65" fill="none" stroke="#f8e1ff" stroke-width=".22"/>
+        </g>
+        <g transform="translate(15 6.4)">
+          <path d="M-.5-2h1v.9l.8.8v1.6H-1.3V-.3l.8-.8Z" fill="#ab6873" stroke="#edb1ae" stroke-width=".15"/>
+          <path d="M-1 .1h2v1H-1Z" fill="#e79187"/>
+          <rect x="-.55" y="-2.2" width="1.1" height=".6" rx=".1" fill="#dfba80"/>
+          <path d="M-.8.2v.6" fill="none" stroke="#ffe1bb" stroke-width=".2"/>
+        </g>
+        <rect x="21.3" y="4.8" width="6.4" height="3.2" rx=".4" fill="#5e4b50" stroke="#d0a46f" stroke-width=".2"/>
+        <ellipse cx="23" cy="6.6" rx="1" ry=".65" fill="#ba8948"/>
+        <ellipse cx="23" cy="6.3" rx="1" ry=".65" fill="#e8c171" stroke="#f6df9f" stroke-width=".18"/>
+        <ellipse cx="25.5" cy="6.5" rx="1.1" ry=".7" fill="#bd8d4d"/>
+        <ellipse cx="25.5" cy="6.1" rx="1.1" ry=".7" fill="#edc77a" stroke="#f6df9f" stroke-width=".18"/>
+        <path d="M22.65 6.2h.7m1.8-.2h.7" fill="none" stroke="#fff0ba" stroke-width=".18"/>
       </g>
     </pattern>
   </defs>

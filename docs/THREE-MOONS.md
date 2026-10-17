@@ -1,6 +1,6 @@
 # Andolor: Three Moons
 
-A separate Aardwolf map pack, version **1.2.0**, with all **114 terrain styles**.
+A separate Aardwolf map pack, version **1.2.1**, with all **114 terrain styles**.
 It combines Aardwolf's world with the requested colorful, ethereal fantasy look:
 moonlit slate, warm gold, pale jade, opal blue, copper sand and violet magic.
 
@@ -49,6 +49,13 @@ The pack uses connected floor materials, with sparse terrain cues and clearer
 landmarks where needed. Roads retain directional junction shapes, and numbered
 variants retain distinct scenery. Gold guides the eye without placing a bright
 frame on every room. No preferred class, alignment or clan is assumed.
+
+## Shop recognition in 1.2.1
+
+The shop counter is deeper and warmer, with three distinct glass potion bottles
+and a gold coin tray. These stronger merchandise cues occupy the counter band,
+leaving the walking floor clear and the counter continuous across adjacent shops.
+The other 113 terrain images are unchanged from 1.2.0.
 
 ## Connected surfaces in 1.2.0
 

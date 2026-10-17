@@ -20,7 +20,7 @@ a connected session.
 
 ## Terrain icon packs
 
-[Andolor: Three Moons 1.2.0](docs/THREE-MOONS.md) is the new Aardwolf-inspired
+[Andolor: Three Moons 1.2.1](docs/THREE-MOONS.md) is the new Aardwolf-inspired
 alternative: moonlit slate and gold, jade forests, opal water, copper dunes,
 glacial crystals and violet astral light. Its 114 styles include three-moon
 mosaics, flowing castle runners, shop counter runs and continuous interior floors. The
