@@ -1,6 +1,6 @@
 # Andolor: Three Moons
 
-A separate Aardwolf map pack, version **1.3.0**, with all **114 terrain styles**.
+A separate Aardwolf map pack, version **1.3.1**, with all **114 terrain styles**.
 It combines Aardwolf's world with the requested colorful, ethereal fantasy look:
 moonlit slate, warm gold, pale jade, opal blue, copper sand and violet magic.
 
@@ -49,6 +49,13 @@ The pack uses connected floor materials, with sparse terrain cues and clearer
 landmarks where needed. Roads retain directional junction shapes, and numbered
 variants retain distinct scenery. Gold guides the eye without placing a bright
 frame on every room. No preferred class, alignment or clan is assumed.
+
+## Clear shop exits in 1.3.1
+
+The shop now has a compact, freestanding counter in the center of the tile.
+Potion bottles, the coin tray and cast shadows remain, with uninterrupted stone
+floor around all four sides so no potential exit appears blocked. The other
+113 terrain images are unchanged from 1.3.0.
 
 ## Material depth in 1.3.0
 
@@ -149,7 +156,7 @@ The importable JSON still contains only `name`, `description` and `terrainStyles
 
 Visual review covers all 114 designs both individually and in 3 × 3 repeats,
 plus the dense screenshot arrangement. These are offline renders; native
-acceptance of 1.3.0 remains pending. No active map was modified.
+acceptance of 1.3.1 remains pending. No active map was modified.
 
 The source test for Three Moons now checks painted surfaces at the perimeter,
 not a uniform flat border. A join-contrast test checks the screenshot terrains
@@ -162,3 +169,9 @@ files**, and `git diff --check`. All 114 PNGs differ from 1.2.1. Every terrain
 was visually reviewed in 3 × 3 repeats and at 16/24/32 pixels on light and dark
 backgrounds, along with the connected map study. Native import and persistence
 were not exercised for this artwork revision.
+
+The same automated checks passed for 1.3.1. The centered shop was reviewed in
+the connected map study, in repeats and at small sizes. A pixel comparison
+against the bare floor confirms that the counter and its shadows leave a clear
+floor margin at every edge. Only the shop PNG changed; native acceptance remains
+pending.

@@ -1,7 +1,7 @@
 {
   "name": "Andolor: Three Moons",
-  "version": "1.3.0",
-  "description": "An Aardwolf explorer atlas with sculpted stone, soft cast shadows, wood grain, woven carpet, rippled water and terrain-specific vector texture. Directional light adds depth while continuous floors and counter runs preserve connected map grids. 114 distinct SVG designs rendered at 128 pixels. Version 1.3.0.",
+  "version": "1.3.1",
+  "description": "An Aardwolf explorer atlas with sculpted stone, soft cast shadows, wood grain, woven carpet, rippled water and terrain-specific vector texture. Continuous floors connect map grids; the central shop counter leaves all four room edges clear. 114 distinct SVG designs rendered at 128 pixels. Version 1.3.1.",
   "source": {
     "url": "https://raw.githubusercontent.com/fiendish/aardwolfclientpackage/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db",
     "revision": "ac6e40ff5596e285cfcef6739d1dfdc257cfa162",
@@ -470,7 +470,7 @@
       "name": "shop",
       "family": "stone",
       "color": "#304856",
-      "motif": "Continuous merchant counter with colorful potion bottles and a gold coin tray"
+      "motif": "Central merchant counter with potion bottles, a gold coin tray and clear floor on all four sides"
     },
     {
       "id": 66,
