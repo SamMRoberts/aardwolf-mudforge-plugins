@@ -5,446 +5,1177 @@
       <feGaussianBlur stdDeviation=".55"/>
     </filter>
     <linearGradient id="flow-slab0" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#373b56"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#535371"/>
+      <stop offset=".25" stop-color="#3e415c"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab1" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#3a3d58"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#585775"/>
+      <stop offset=".25" stop-color="#41445f"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab2" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#3c3f5a"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#5d5b7a"/>
+      <stop offset=".25" stop-color="#444662"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab3" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#3f425d"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#615f7e"/>
+      <stop offset=".25" stop-color="#3e415c"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab4" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#373b56"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#535371"/>
+      <stop offset=".25" stop-color="#41445f"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab5" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#3a3d58"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#585775"/>
+      <stop offset=".25" stop-color="#444662"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab6" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#3c3f5a"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#5d5b7a"/>
+      <stop offset=".25" stop-color="#3e415c"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab7" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#3f425d"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#615f7e"/>
+      <stop offset=".25" stop-color="#41445f"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab8" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#373b56"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#535371"/>
+      <stop offset=".25" stop-color="#444662"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <linearGradient id="flow-slab9" x1="0" y1="0" x2=".65" y2="1">
-      <stop stop-color="#3a3d58"/>
-      <stop offset="1" stop-color="#2e334d"/>
+      <stop offset="0" stop-color="#585775"/>
+      <stop offset=".25" stop-color="#3e415c"/>
+      <stop offset="1" stop-color="#282e48"/>
     </linearGradient>
     <pattern id="ground" width="32" height="32" patternUnits="userSpaceOnUse">
       <rect x="0" y="0" width="32" height="32" rx="0" fill="#30354f"/>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="url(#flow-slab0)" stroke="none" stroke-width="0"/>
         <path d="M11.42 17.66L21.36 14.84L22.48 15.97L24.28 25.51L22.43 26.88L9.6 23.18Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M18.4 22.16l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M11.614 17.741L21.285 14.998" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.285 14.998L22.375 16.097" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.375 16.097L24.127 25.379" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.127 25.379L22.326 26.712" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.326 26.712L9.843 23.112" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.843 23.112L11.614 17.741" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="url(#flow-slab1)" stroke="none" stroke-width="0"/>
         <path d="M22.61 15.84L21.49 14.71L22.39 11.53L24.75 8.84L32.74 11.21L30 16.97Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.692 15.768L21.603 14.669" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M21.603 14.669L22.478 11.575" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.478 11.575L24.775 8.957" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.775 8.957L32.549 11.263" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M32.549 11.263L29.883 16.868" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M29.883 16.868L22.692 15.768" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="url(#flow-slab2)" stroke="none" stroke-width="0"/>
         <path d="M22.21 11.48L21.31 14.66L11.37 17.49L10.47 15.43L14.2 4.32Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.04 11.512L21.164 14.606" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.164 14.606L11.493 17.36" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M11.493 17.36L10.617 15.356" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.617 15.356L14.246 4.546" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.246 4.546L22.04 11.512" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="url(#flow-slab3)" stroke="none" stroke-width="0"/>
         <path d="M-1.91 17.02L0.83 11.25L3.56 10.01L10.26 15.52L11.15 17.58L9.34 23.09L5.77 26.94L3.78 25.98Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M0.81 16.38l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M-1.714 17.058L0.952 11.444" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M0.952 11.444L3.608 10.237" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.608 10.237L10.127 15.598" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M10.127 15.598L10.993 17.603" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.993 17.603L9.232 22.964" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M9.232 22.964L5.759 26.71" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M5.759 26.71L3.822 25.776" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.822 25.776L-1.714 17.058" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="url(#flow-slab4)" stroke="none" stroke-width="0"/>
         <path d="M14.1 4.28L10.37 15.39L3.67 9.88L3.87 0.06L5.93 -3.59L13.97 3.41Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M13.953 4.297L10.324 15.107" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M10.324 15.107L3.805 9.746" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M3.805 9.746L3.999 0.191" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M3.999 0.191L6.003 -3.361" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.003 -3.361L13.826 3.45" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M13.826 3.45L13.953 4.297" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="url(#flow-slab5)" stroke="none" stroke-width="0"/>
         <path d="M22.53 27.02L24.39 25.65L35.67 26.21L37.66 27.17L37.72 28.29L35.66 31.94L25.27 36.42L21.8 32.8Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M22.734 27.085L24.544 25.752" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M24.544 25.752L35.519 26.297" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M35.519 26.297L37.456 27.231" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M37.456 27.231L37.514 28.321" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M37.514 28.321L35.51 31.872" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.51 31.872L25.4 36.231" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.4 36.231L22.024 32.709" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.024 32.709L22.734 27.085" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="url(#flow-slab6)" stroke="none" stroke-width="0"/>
         <path d="M9.57 23.3L22.39 27L21.65 32.79L14.09 35.27L6.06 28.27L6 27.16Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M16.01 30.47l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M9.671 23.453L22.144 27.053" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.144 27.053L21.424 32.687" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M21.424 32.687L14.068 35.1" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.068 35.1L6.255 28.289" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M6.255 28.289L6.197 27.209" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M6.197 27.209L9.671 23.453" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="url(#flow-slab7)" stroke="none" stroke-width="0"/>
         <path d="M24.39 25.49L22.59 15.95L29.99 17.08L35.68 26.05Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M24.492 25.373L22.74 16.09" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M22.74 16.09L29.941 17.19" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M29.941 17.19L35.477 25.917" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.477 25.917L24.492 25.373" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="url(#flow-slab8)" stroke="none" stroke-width="0"/>
         <path d="M21.69 0.9L25.17 4.52L24.62 8.73L22.27 11.42L14.26 4.26L14.13 3.39Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
+        <path d="M21.654 1.025L25.04 4.547" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M25.04 4.547L24.505 8.644" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.505 8.644L22.218 11.261" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M22.218 11.261L14.425 4.294" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M14.425 4.294L14.298 3.448" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M14.298 3.448L21.654 1.025" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 -32) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 -32) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 -32) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 0) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 0) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 0) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(-32 32) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(0 32) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
       <g transform="translate(32 32) scale(1)">
+        <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="#172136" transform="translate(.12 .23)" fill-opacity=".62" stroke-opacity=".62"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="url(#flow-slab9)" stroke="none" stroke-width="0"/>
         <path d="M35.71 0.06L35.5 9.88L32.77 11.12L24.77 8.75L25.32 4.54Z" fill="none" stroke="#282d46" stroke-width="0.09" opacity="0.6"/>
         <path d="M28.83 7.6l1.1-1 1.2 .6" fill="none" stroke="#4a4b67" stroke-width="0.12"/>
+        <path d="M35.578 0.244L35.373 9.799" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M35.373 9.799L32.717 11.005" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M32.717 11.005L24.933 8.699" fill="none" stroke="#172136" stroke-width=".27" fill-opacity=".5" stroke-opacity=".5"/>
+        <path d="M24.933 8.699L25.468 4.603" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
+        <path d="M25.468 4.603L35.578 0.244" fill="none" stroke="#8a83a5" stroke-width=".16" fill-opacity=".62" stroke-opacity=".62"/>
       </g>
     </pattern>
     <pattern id="terrain-surface" width="32" height="32" patternUnits="userSpaceOnUse">
       <rect width="32" height="32" fill="url(#ground)"/>
+      <rect width="32" height="32" fill="url(#material-grain)"/>
+      <g stroke-linecap="round" stroke-linejoin="round" transform="translate(0.65 0.85) ">
+        <g transform="translate(.137 .137)">
+          <path d="M23.86 12.78l0.76 0.56" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M17.61 23.49l1.79 0.11" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M4.18 17.33l1.27 0.27" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M26.43 9.08l0.78 0.66" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M14.42 9.04l1.6 0.02" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M3.26 20.48l0.34 0.58" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M3.95 10.74l1.21 0.46" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M16.75 6.21l1.73 0.25" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M7.11 25.32l1.72 0.34" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <path d="M8.63 12.69l1.08 0.25" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.03150000000000001"/>
+          <ellipse cx="17" cy="16" rx="12" ry="11" fill="#09182b" fill-opacity="0.049"/>
+          <g transform="translate(7 8) rotate(0) scale(0.5)">
+            <ellipse cx="0" cy="0" rx="2.5" ry="1.6" fill="#09182b" fill-opacity="0.0126"/>
+            <path d="M-2 0q1-3 3-.8Q3 .5 0 1q1-1-2-1Z" fill="#09182b" stroke="none" stroke-width="0" fill-opacity="0.045500000000000006"/>
+            <circle cx="0.4" cy="-0.3" r="0.32" fill="#09182b" fill-opacity="0.07"/>
+          </g>
+          <path d="M22 20l3-5" fill="none" stroke="#09182b" stroke-width="0.4" stroke-opacity="0.07"/>
+          <g transform="translate(26.15 10.76) rotate(0) scale(0.25)">
+            <ellipse cx="1" cy="4" rx="5" ry="2.5" fill="#09182b" fill-opacity="0.045500000000000006"/>
+            <path d="M0-7L4-2 3 4 0 6-3 3-4-2Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.07"/>
+            <path d="M0-7L1-1 0 6-3 3-4-2Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.07"/>
+            <path d="M0-7L4-2 1-1Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.07"/>
+            <path d="M1-1L3 4 0 6Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.07"/>
+            <path d="M0-7L1-1 0 6M-4-2L1-1 4-2" fill="none" stroke="#09182b" stroke-width="0.18" stroke-opacity="0.05600000000000001"/>
+            <circle cx="-1" cy="-3" r="0.3" fill="#09182b" fill-opacity="0.07"/>
+          </g>
+        </g>
+      </g>
+      <g stroke-linecap="round" stroke-linejoin="round" transform="translate(0.43 0.58) ">
+        <g transform="translate(.137 .137)">
+          <path d="M23.86 12.78l0.76 0.56" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M17.61 23.49l1.79 0.11" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M4.18 17.33l1.27 0.27" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M26.43 9.08l0.78 0.66" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M14.42 9.04l1.6 0.02" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M3.26 20.48l0.34 0.58" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M3.95 10.74l1.21 0.46" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M16.75 6.21l1.73 0.25" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M7.11 25.32l1.72 0.34" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <path d="M8.63 12.69l1.08 0.25" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.054"/>
+          <ellipse cx="17" cy="16" rx="12" ry="11" fill="#09182b" fill-opacity="0.08399999999999999"/>
+          <g transform="translate(7 8) rotate(0) scale(0.5)">
+            <ellipse cx="0" cy="0" rx="2.5" ry="1.6" fill="#09182b" fill-opacity="0.021599999999999998"/>
+            <path d="M-2 0q1-3 3-.8Q3 .5 0 1q1-1-2-1Z" fill="#09182b" stroke="none" stroke-width="0" fill-opacity="0.078"/>
+            <circle cx="0.4" cy="-0.3" r="0.32" fill="#09182b" fill-opacity="0.12"/>
+          </g>
+          <path d="M22 20l3-5" fill="none" stroke="#09182b" stroke-width="0.4" stroke-opacity="0.12"/>
+          <g transform="translate(26.15 10.76) rotate(0) scale(0.25)">
+            <ellipse cx="1" cy="4" rx="5" ry="2.5" fill="#09182b" fill-opacity="0.078"/>
+            <path d="M0-7L4-2 3 4 0 6-3 3-4-2Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.12"/>
+            <path d="M0-7L1-1 0 6-3 3-4-2Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.12"/>
+            <path d="M0-7L4-2 1-1Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.12"/>
+            <path d="M1-1L3 4 0 6Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.12"/>
+            <path d="M0-7L1-1 0 6M-4-2L1-1 4-2" fill="none" stroke="#09182b" stroke-width="0.18" stroke-opacity="0.096"/>
+            <circle cx="-1" cy="-3" r="0.3" fill="#09182b" fill-opacity="0.12"/>
+          </g>
+        </g>
+      </g>
+      <g stroke-linecap="round" stroke-linejoin="round" transform="translate(0.2 0.3) ">
+        <g transform="translate(.137 .137)">
+          <path d="M23.86 12.78l0.76 0.56" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M17.61 23.49l1.79 0.11" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M4.18 17.33l1.27 0.27" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M26.43 9.08l0.78 0.66" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M14.42 9.04l1.6 0.02" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M3.26 20.48l0.34 0.58" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M3.95 10.74l1.21 0.46" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M16.75 6.21l1.73 0.25" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M7.11 25.32l1.72 0.34" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <path d="M8.63 12.69l1.08 0.25" fill="none" stroke="#09182b" stroke-width="0.35" stroke-opacity="0.10350000000000001"/>
+          <ellipse cx="17" cy="16" rx="12" ry="11" fill="#09182b" fill-opacity="0.161"/>
+          <g transform="translate(7 8) rotate(0) scale(0.5)">
+            <ellipse cx="0" cy="0" rx="2.5" ry="1.6" fill="#09182b" fill-opacity="0.0414"/>
+            <path d="M-2 0q1-3 3-.8Q3 .5 0 1q1-1-2-1Z" fill="#09182b" stroke="none" stroke-width="0" fill-opacity="0.14950000000000002"/>
+            <circle cx="0.4" cy="-0.3" r="0.32" fill="#09182b" fill-opacity="0.23"/>
+          </g>
+          <path d="M22 20l3-5" fill="none" stroke="#09182b" stroke-width="0.4" stroke-opacity="0.23"/>
+          <g transform="translate(26.15 10.76) rotate(0) scale(0.25)">
+            <ellipse cx="1" cy="4" rx="5" ry="2.5" fill="#09182b" fill-opacity="0.14950000000000002"/>
+            <path d="M0-7L4-2 3 4 0 6-3 3-4-2Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.23"/>
+            <path d="M0-7L1-1 0 6-3 3-4-2Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.23"/>
+            <path d="M0-7L4-2 1-1Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.23"/>
+            <path d="M1-1L3 4 0 6Z" fill="#09182b" stroke="none" stroke-width="0.5" fill-opacity="0.23"/>
+            <path d="M0-7L1-1 0 6M-4-2L1-1 4-2" fill="none" stroke="#09182b" stroke-width="0.18" stroke-opacity="0.18400000000000002"/>
+            <circle cx="-1" cy="-3" r="0.3" fill="#09182b" fill-opacity="0.23"/>
+          </g>
+        </g>
+      </g>
       <g stroke-linecap="round" stroke-linejoin="round">
         <g transform="translate(.137 .137)">
           <path d="M23.86 12.78l0.76 0.56" fill="none" stroke="#191f36" stroke-width="0.35" opacity=".45"/>
@@ -457,25 +1188,352 @@
           <path d="M16.75 6.21l1.73 0.25" fill="none" stroke="#a69fc1" stroke-width="0.35" opacity=".45"/>
           <path d="M7.11 25.32l1.72 0.34" fill="none" stroke="#191f36" stroke-width="0.35" opacity=".45"/>
           <path d="M8.63 12.69l1.08 0.25" fill="none" stroke="#a69fc1" stroke-width="0.35" opacity=".45"/>
-          <ellipse cx="17" cy="16" rx="12" ry="11" fill="#111a2e" opacity=".7" filter="url(#soft)"/>
+          <ellipse cx="17" cy="16" rx="12" ry="11" fill="url(#relief-fill-111a2e)" opacity=".7" filter="url(#soft)"/>
           <g transform="translate(7 8) rotate(0) scale(0.5)">
-            <ellipse cx="0" cy="0" rx="2.5" ry="1.6" fill="#b797e5" opacity=".18" filter="url(#soft)"/>
-            <path d="M-2 0q1-3 3-.8Q3 .5 0 1q1-1-2-1Z" fill="#b797e5" stroke="none" stroke-width="0" opacity=".65"/>
-            <circle cx="0.4" cy="-0.3" r="0.32" fill="#effff2"/>
+            <ellipse cx="0" cy="0" rx="2.5" ry="1.6" fill="url(#relief-fill-b797e5)" opacity=".18" filter="url(#soft)"/>
+            <path d="M-2 0q1-3 3-.8Q3 .5 0 1q1-1-2-1Z" fill="url(#relief-fill-b797e5)" stroke="none" stroke-width="0" opacity=".65"/>
+            <circle cx="0.4" cy="-0.3" r="0.32" fill="url(#relief-fill-effff2)"/>
           </g>
           <path d="M22 20l3-5" fill="none" stroke="#5c537e" stroke-width="0.4"/>
           <g transform="translate(26.15 10.76) rotate(0) scale(0.25)">
-            <ellipse cx="1" cy="4" rx="5" ry="2.5" fill="#34294e" opacity=".65" filter="url(#soft)"/>
-            <path d="M0-7L4-2 3 4 0 6-3 3-4-2Z" fill="#7057b0" stroke="none" stroke-width="0.5"/>
-            <path d="M0-7L1-1 0 6-3 3-4-2Z" fill="#ba8bdf" stroke="none" stroke-width="0.5"/>
-            <path d="M0-7L4-2 1-1Z" fill="#f1cbff" stroke="none" stroke-width="0.5"/>
-            <path d="M1-1L3 4 0 6Z" fill="#34294e" stroke="none" stroke-width="0.5"/>
+            <ellipse cx="1" cy="4" rx="5" ry="2.5" fill="url(#relief-fill-34294e)" opacity=".65" filter="url(#soft)"/>
+            <path d="M0-7L4-2 3 4 0 6-3 3-4-2Z" fill="url(#relief-fill-7057b0)" stroke="none" stroke-width="0.5"/>
+            <path d="M0-7L1-1 0 6-3 3-4-2Z" fill="url(#relief-fill-ba8bdf)" stroke="none" stroke-width="0.5"/>
+            <path d="M0-7L4-2 1-1Z" fill="url(#relief-fill-f1cbff)" stroke="none" stroke-width="0.5"/>
+            <path d="M1-1L3 4 0 6Z" fill="url(#relief-fill-34294e)" stroke="none" stroke-width="0.5"/>
             <path d="M0-7L1-1 0 6M-4-2L1-1 4-2" fill="none" stroke="#f1cbff" stroke-width="0.18" opacity=".8"/>
-            <circle cx="-1" cy="-3" r="0.3" fill="#f1cbff"/>
+            <circle cx="-1" cy="-3" r="0.3" fill="url(#relief-fill-f1cbff)"/>
           </g>
         </g>
       </g>
     </pattern>
+    <pattern id="material-grain" width="32" height="32" patternUnits="userSpaceOnUse">
+      <g transform="translate(.173 .241)" stroke-linecap="round">
+        <g transform="translate(0 0)">
+          <path d="M22.685 4.41l0.383 -0.115" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M19.341 20.069l0.269 -0.081" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M1.686 5.216l0.632 -0.19" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M1.107 4.771l0.676 -0.203" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M1.107 4.771l0.676 -0.203" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M24.426 23.601l0.528 -0.158" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M20.335 23.01l0.504 -0.151" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M15.181 21.627l0.554 -0.166" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M8.966 1.075l0.335 -0.1" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M8.966 1.075l0.335 -0.1" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M22.421 4.632l0.456 -0.137" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M18.465 4.922l0.682 -0.205" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M21.948 0.049l0.582 -0.175" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M21.948 0.049l0.582 -0.175" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 -32)">
+          <path d="M30.682 31.16l0.695 -0.208" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M30.682 31.16l0.695 -0.208" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M30.682 31.16l0.695 -0.208" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M30.682 31.16l0.695 -0.208" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M15.792 3.724l0.306 -0.092" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M8.188 29.39l0.391 -0.117" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M8.188 29.39l0.391 -0.117" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M26.028 27.226l0.448 -0.134" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M9.216 16.126l0.612 -0.184" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M29.827 21.677l0.614 -0.184" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M29.827 21.677l0.614 -0.184" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M18.214 27.733l0.676 -0.203" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M30.635 23.796l0.348 -0.104" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M30.635 23.796l0.348 -0.104" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M29.775 2.836l0.457 -0.137" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M29.775 2.836l0.457 -0.137" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M25.445 27.762l0.586 -0.176" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M13.911 24.152l0.275 -0.083" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M23.988 7.28l0.323 -0.097" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M5.053 3.104l0.577 -0.173" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M1.842 29.993l0.727 -0.218" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M1.842 29.993l0.727 -0.218" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M13.15 5.113l0.191 -0.057" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M29.747 26.116l0.599 -0.18" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M29.747 26.116l0.599 -0.18" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M19.824 29.827l0.672 -0.202" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M19.824 29.827l0.672 -0.202" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M6.048 5.344l0.74 -0.222" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M28.35 19.693l0.762 -0.229" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M1.362 20.388l0.266 -0.08" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M16.396 0.513l0.697 -0.209" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M16.396 0.513l0.697 -0.209" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M12.283 9.066l0.67 -0.201" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M4.021 15.586l0.569 -0.171" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M23.648 16.409l0.437 -0.131" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M1.187 31.475l0.158 -0.047" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(32 -32)">
+          <path d="M1.187 31.475l0.158 -0.047" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M1.187 31.475l0.158 -0.047" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M1.187 31.475l0.158 -0.047" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M17.743 11.052l0.731 -0.219" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M4.454 7.372l0.616 -0.185" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M30.737 0.171l0.712 -0.214" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M30.737 0.171l0.712 -0.214" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 32)">
+          <path d="M30.737 0.171l0.712 -0.214" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M30.737 0.171l0.712 -0.214" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M13.26 24.949l0.395 -0.118" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M1.609 2.121l0.59 -0.177" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M1.609 2.121l0.59 -0.177" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M4.661 1.999l0.249 -0.075" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M4.661 1.999l0.249 -0.075" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M22.336 17.523l0.351 -0.105" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M27.991 20.039l0.31 -0.093" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M11.806 12.859l0.517 -0.155" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M18.145 26.584l0.776 -0.233" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M11.256 17.577l0.768 -0.23" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M13.257 27.855l0.321 -0.096" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M20.467 29.928l0.607 -0.182" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M20.467 29.928l0.607 -0.182" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M2.955 2.869l0.519 -0.156" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M2.761 7.709l0.46 -0.138" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M14.284 4.498l0.292 -0.087" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M17.227 19.84l0.445 -0.133" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M2.359 4.439l0.798 -0.239" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M24.417 31.96l0.296 -0.089" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M24.417 31.96l0.296 -0.089" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M1.827 8.299l0.353 -0.106" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M28.35 14.986l0.717 -0.215" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M10.88 25.467l0.588 -0.176" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M10.319 5.015l0.46 -0.138" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M25.095 6.675l0.173 -0.052" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M22.674 17.276l0.706 -0.212" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M9.339 28.371l0.505 -0.152" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M22.151 16.846l0.252 -0.076" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M17.8 7.564l0.565 -0.169" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M4.662 22.312l0.786 -0.236" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M21.684 26.64l0.441 -0.132" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 -32)">
+          <path d="M30.041 29.153l0.772 -0.231" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M30.041 29.153l0.772 -0.231" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M30.041 29.153l0.772 -0.231" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M30.041 29.153l0.772 -0.231" fill="none" stroke="#172136" stroke-width=".16" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M17.393 2.275l0.519 -0.156" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M17.393 2.275l0.519 -0.156" fill="none" stroke="#7a7596" stroke-width=".16" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+      </g>
+    </pattern>
+    <linearGradient id="relief-fill-111a2e" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#41454e"/>
+      <stop offset=".3" stop-color="#111a2e"/>
+      <stop offset="1" stop-color="#121c31"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-b797e5" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#c5a9e0"/>
+      <stop offset=".3" stop-color="#b797e5"/>
+      <stop offset="1" stop-color="#8674b1"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-effff2" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#f2fceb"/>
+      <stop offset=".3" stop-color="#effff2"/>
+      <stop offset="1" stop-color="#adbdba"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-34294e" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#5d5168"/>
+      <stop offset=".3" stop-color="#34294e"/>
+      <stop offset="1" stop-color="#2a2747"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-7057b0" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#8d76b6"/>
+      <stop offset=".3" stop-color="#7057b0"/>
+      <stop offset="1" stop-color="#54478c"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-ba8bdf" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#c89fdc"/>
+      <stop offset=".3" stop-color="#ba8bdf"/>
+      <stop offset="1" stop-color="#886cad"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-f1cbff" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#f4d2f5"/>
+      <stop offset=".3" stop-color="#f1cbff"/>
+      <stop offset="1" stop-color="#af98c3"/>
+    </linearGradient>
   </defs>
   <rect width="32" height="32" fill="#30354f"/>
   <rect width="32" height="32" fill="url(#terrain-surface)"/>
