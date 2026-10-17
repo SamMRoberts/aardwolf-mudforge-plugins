@@ -1,6 +1,6 @@
 # Andolor: Three Moons
 
-A separate Aardwolf map pack, version **1.2.1**, with all **114 terrain styles**.
+A separate Aardwolf map pack, version **1.3.0**, with all **114 terrain styles**.
 It combines Aardwolf's world with the requested colorful, ethereal fantasy look:
 moonlit slate, warm gold, pale jade, opal blue, copper sand and violet magic.
 
@@ -50,12 +50,25 @@ landmarks where needed. Roads retain directional junction shapes, and numbered
 variants retain distinct scenery. Gold guides the eye without placing a bright
 frame on every room. No preferred class, alignment or clan is assumed.
 
+## Material depth in 1.3.0
+
+All 114 tiles now have additional material detail. Stone, cavern and ice slabs
+have directional gradients, recessed joints and lit bevels. Raised scenery has
+layered cast shadows and shaded surfaces; gold accents have brighter reflections.
+Wood grain, carpet fibers, mineral scratches, grass blades and paired ripple
+highlights give each surface its own texture. Texture placement varies by terrain.
+
+Lighting follows the individual surfaces rather than framing each square room.
+The periodic floor geometry, connected runners, counters and shelf runs are
+preserved, as are the distinct road junctions and numbered terrain variants.
+These are static illustrated light and shadow, independent of game lighting.
+
 ## Shop recognition in 1.2.1
 
 The shop counter is deeper and warmer, with three distinct glass potion bottles
 and a gold coin tray. These stronger merchandise cues occupy the counter band,
 leaving the walking floor clear and the counter continuous across adjacent shops.
-The other 113 terrain images are unchanged from 1.2.0.
+That revision changed only the shop; 1.3.0 adds material depth across the pack.
 
 ## Connected surfaces in 1.2.0
 
@@ -136,15 +149,16 @@ The importable JSON still contains only `name`, `description` and `terrainStyles
 
 Visual review covers all 114 designs both individually and in 3 × 3 repeats,
 plus the dense screenshot arrangement. These are offline renders; native
-acceptance of 1.2.0 remains pending. No active map was modified.
+acceptance of 1.3.0 remains pending. No active map was modified.
 
 The source test for Three Moons now checks painted surfaces at the perimeter,
 not a uniform flat border. A join-contrast test checks the screenshot terrains
 and the main floor/shelving patterns against their interior texture contrast.
 These checks help detect seams; they do not replace visual review.
 
-Validation passed for 1.2.0: **20 focused pack/distribution checks**, **185
+Validation passed for 1.3.0: **20 focused pack/distribution checks**, **185
 JavaScript tests and 21 Python tests**, `build:check` across **241 generated
-files**, and `git diff --check`. All terrains were visually reviewed in 3 × 3
-repeats and small-size samples; the six road variants received a further tiled
-review after their boundary geometry was refined.
+files**, and `git diff --check`. All 114 PNGs differ from 1.2.1. Every terrain
+was visually reviewed in 3 × 3 repeats and at 16/24/32 pixels on light and dark
+backgrounds, along with the connected map study. Native import and persistence
+were not exercised for this artwork revision.

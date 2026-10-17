@@ -954,6 +954,7 @@
     </pattern>
     <pattern id="terrain-surface" width="32" height="32" patternUnits="userSpaceOnUse">
       <rect width="32" height="32" fill="url(#ground)"/>
+      <rect width="32" height="32" fill="url(#material-grain)"/>
       <g stroke-linecap="round" stroke-linejoin="round">
         <g transform="translate(.137 .137)">
           <path d="M26.19 27.54l0.35 0.2" fill="none" stroke="#151a30" stroke-width="0.35" opacity=".45"/>
@@ -966,17 +967,383 @@
           <path d="M13.13 3.34l0.89 0.45" fill="none" stroke="#b48cc6" stroke-width="0.35" opacity=".45"/>
           <path d="M8.93 3.66l1.75 0.45" fill="none" stroke="#151a30" stroke-width="0.35" opacity=".45"/>
           <path d="M9.07 23.69l1.88 0.34" fill="none" stroke="#b48cc6" stroke-width="0.35" opacity=".45"/>
-          <circle cx="16" cy="16" r="11" fill="#a7baf0" opacity=".12" filter="url(#soft)"/>
-          <circle cx="10" cy="12" r="5" fill="#e6e8db"/>
-          <circle cx="9" cy="11" r="1.5" fill="#b6c9c9"/>
-          <circle cx="20" cy="9" r="3.5" fill="#8d9fb0"/>
-          <circle cx="19" cy="8" r="0.8" fill="#bec6cb"/>
-          <circle cx="23" cy="22" r="5" fill="#131e35" stroke="#afb6ce" stroke-width=".35"/>
+          <circle cx="16" cy="16" r="11" fill="url(#relief-fill-a7baf0)" opacity=".12" filter="url(#soft)"/>
+          <circle cx="10" cy="12" r="5" fill="url(#relief-fill-e6e8db)"/>
+          <circle cx="9" cy="11" r="1.5" fill="url(#relief-fill-b6c9c9)"/>
+          <circle cx="20" cy="9" r="3.5" fill="url(#relief-fill-8d9fb0)"/>
+          <circle cx="19" cy="8" r="0.8" fill="url(#relief-fill-bec6cb)"/>
+          <circle cx="23" cy="22" r="5" fill="url(#relief-fill-131e35)" stroke="#afb6ce" stroke-width=".35"/>
           <path d="M19 18a5 5 0 018 4" fill="none" stroke="#a89fbe" stroke-width="0.25"/>
-          <circle cx="8" cy="26" r="0.25" fill="#d9cae8"/>
+          <circle cx="8" cy="26" r="0.25" fill="url(#relief-fill-d9cae8)"/>
         </g>
       </g>
     </pattern>
+    <pattern id="material-grain" width="32" height="32" patternUnits="userSpaceOnUse">
+      <g transform="translate(.173 .241)" stroke-linecap="round">
+        <g transform="translate(0 0)">
+          <path d="M14.732 16.618q0.295-.15 0.589 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M23.741 12.129q0.35-.15 0.701 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M7.48 17.408q0.08-.15 0.16 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M25.074 29.728q0.132-.15 0.265 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M25.074 29.728q0.132-.15 0.265 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M5.777 4.245q0.129-.15 0.258 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M6.624 20.167q0.262-.15 0.524 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M3.876 1.498q0.359-.15 0.719 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M3.876 1.498q0.359-.15 0.719 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M23.759 28.049q0.246-.15 0.492 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M14.238 5.354q0.382-.15 0.763 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M29.649 22.998q0.242-.15 0.483 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M6.362 23.469q0.328-.15 0.655 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M29.135 9.625q0.275-.15 0.551 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M27.189 8.63q0.354-.15 0.708 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M14.023 23.235q0.184-.15 0.368 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M17.735 19.374q0.16-.15 0.321 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M6.092 23.546q0.286-.15 0.572 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M3.851 6.032q0.285-.15 0.571 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M18.486 29.533q0.399-.15 0.798 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M18.486 29.533q0.399-.15 0.798 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M13.594 19.073q0.174-.15 0.348 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M22.556 3.424q0.346-.15 0.692 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M19.728 22.178q0.338-.15 0.676 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M28.732 9.348q0.167-.15 0.334 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M1.776 6.562q0.159-.15 0.318 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M12.23 6.511q0.183-.15 0.366 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M6.92 27.338q0.187-.15 0.375 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M22.402 15.626q0.377-.15 0.754 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M6.264 3.099q0.396-.15 0.792 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M16.273 3.403q0.137-.15 0.274 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M16.286 11.771q0.28-.15 0.56 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M16.555 4.535q0.109-.15 0.218 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M14.937 30.207q0.133-.15 0.266 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M14.937 30.207q0.133-.15 0.266 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M27.123 16.754q0.106-.15 0.211 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M12.45 11.189q0.188-.15 0.376 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M28.046 14.147q0.333-.15 0.666 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M30.626 10.526q0.308-.15 0.615 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M30.626 10.526q0.308-.15 0.615 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M23.711 28.737q0.164-.15 0.328 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M23.711 28.737q0.164-.15 0.328 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M13.283 26.741q0.316-.15 0.633 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M15.777 14.762q0.224-.15 0.448 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M16.639 11.727q0.334-.15 0.669 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M18.715 27.437q0.262-.15 0.525 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M10.534 31.815q0.36-.15 0.721 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M10.534 31.815q0.36-.15 0.721 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M13.211 28.165q0.167-.15 0.335 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M14.238 30.764q0.236-.15 0.472 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M14.238 30.764q0.236-.15 0.472 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M27.394 3.036q0.224-.15 0.447 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M3.399 21.105q0.144-.15 0.288 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M7.321 13.213q0.179-.15 0.358 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M13.994 23.913q0.261-.15 0.522 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M17.304 1.27q0.162-.15 0.325 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M17.304 1.27q0.162-.15 0.325 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M29.457 5.233q0.26-.15 0.52 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M10.038 9.365q0.096-.15 0.193 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M15.88 26.239q0.129-.15 0.259 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M10.444 23.202q0.193-.15 0.386 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M12.565 0.658q0.253-.15 0.506 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M12.565 0.658q0.253-.15 0.506 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M2.947 1.494q0.211-.15 0.421 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M2.947 1.494q0.211-.15 0.421 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M4.419 1.672q0.221-.15 0.443 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M4.419 1.672q0.221-.15 0.443 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 -32)">
+          <path d="M16.359 29.937q0.181-.15 0.362 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M16.359 29.937q0.181-.15 0.362 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M21.568 26.104q0.292-.15 0.583 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M12.281 1.133q0.294-.15 0.588 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M12.281 1.133q0.294-.15 0.588 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M15.277 2.499q0.266-.15 0.531 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M31.771 8.445q0.302-.15 0.605 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M31.771 8.445q0.302-.15 0.605 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M0.562 22.744q0.091-.15 0.181 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M0.562 22.744q0.091-.15 0.181 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M26.719 3.413q0.114-.15 0.228 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M20.735 1.789q0.151-.15 0.301 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 32)">
+          <path d="M20.735 1.789q0.151-.15 0.301 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M16.947 5.543q0.319-.15 0.638 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M15.518 6.187q0.177-.15 0.354 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M15.499 12.842q0.225-.15 0.45 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M4.765 23.49q0.282-.15 0.565 0" fill="none" stroke="#151a31" stroke-width=".13" fill-opacity=".3" stroke-opacity=".3"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M25.479 15.939q0.292-.15 0.584 0" fill="none" stroke="#90799d" stroke-width=".13" fill-opacity=".22" stroke-opacity=".22"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M-4.766 27.757q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M-4.766 27.757q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M-4.766 27.757q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M-4.766 27.757q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M-4.766 27.757q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M-4.766 27.757q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M-7.931 24.965q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M-7.931 24.965q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M-7.931 24.965q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M-7.931 24.965q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M-7.931 24.965q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M-7.931 24.965q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M-3.066 6.872q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M-3.066 6.872q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M-3.066 6.872q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M-3.066 6.872q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M-3.066 6.872q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M-3.066 6.872q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M-4.765 7.95q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M-4.765 7.95q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M-4.765 7.95q8-1.8 16 0t16 0t16 0" fill="none" stroke="#151a31" stroke-width="0.9" transform="translate(0 0.35)" fill-opacity="0.18" stroke-opacity="0.18"/>
+        </g>
+        <g transform="translate(-32 0)">
+          <path d="M-4.765 7.95q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(0 0)">
+          <path d="M-4.765 7.95q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+        <g transform="translate(32 0)">
+          <path d="M-4.765 7.95q8-1.8 16 0t16 0t16 0" fill="none" stroke="#e4bde8" stroke-width="0.22" transform="translate(0 0)" fill-opacity="0.23" stroke-opacity="0.23"/>
+        </g>
+      </g>
+    </pattern>
+    <linearGradient id="relief-fill-a7baf0" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#b9c5e9"/>
+      <stop offset=".3" stop-color="#a7baf0"/>
+      <stop offset="1" stop-color="#7b8cb9"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-e6e8db" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#ebead8"/>
+      <stop offset=".3" stop-color="#e6e8db"/>
+      <stop offset="1" stop-color="#a7adaa"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-b6c9c9" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#c5d1ca"/>
+      <stop offset=".3" stop-color="#b6c9c9"/>
+      <stop offset="1" stop-color="#85979e"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-8d9fb0" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#a4afb6"/>
+      <stop offset=".3" stop-color="#8d9fb0"/>
+      <stop offset="1" stop-color="#697a8c"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-bec6cb" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#cbcecc"/>
+      <stop offset=".3" stop-color="#bec6cb"/>
+      <stop offset="1" stop-color="#8b959f"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-131e35" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#424854"/>
+      <stop offset=".3" stop-color="#131e35"/>
+      <stop offset="1" stop-color="#131f36"/>
+    </linearGradient>
+    <linearGradient id="relief-fill-d9cae8" x1="0" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#e1d2e3"/>
+      <stop offset=".3" stop-color="#d9cae8"/>
+      <stop offset="1" stop-color="#9e98b3"/>
+    </linearGradient>
   </defs>
   <rect width="32" height="32" fill="#292541"/>
   <rect width="32" height="32" fill="url(#terrain-surface)"/>
