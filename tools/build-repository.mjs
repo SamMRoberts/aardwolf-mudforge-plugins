@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseMudForgeLua } from './lua-compatibility.mjs';
 import { buildMapPackOutputs, mapPackNames } from './build-map-pack.mjs';
+import { buildAtlasOutputs } from './build-atlas.mjs';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const entries = [
@@ -12,6 +13,7 @@ const entries = [
   { kind: 'plugin', file: 'aardwolf-vitals.lua', category: 'widgets', tags: ['aardwolf', 'gmcp', 'vitals'] },
   { kind: 'plugin', file: 'aardwolf-spells.lua', category: 'widgets', tags: ['aardwolf', 'spells', 'skills', 'damage', 'sqlite'] },
   { kind: 'plugin', file: 'aardwolf-room-details.lua', category: 'widgets', tags: ['aardwolf', 'room', 'characters', 'objects'] },
+  { kind: 'plugin', file: 'aardwolf-atlas.lua', category: 'widgets', tags: ['aardwolf', 'mapper', 'terrain', '3d'] },
   { kind: 'library', file: 'aardwolf-api.lua', tags: ['aardwolf', 'gmcp', 'api'] },
 ];
 
@@ -38,7 +40,12 @@ export async function buildOutputs() {
   const identities = new Set();
   for (const entry of entries) {
     const folder = entry.kind === 'plugin' ? 'plugins' : 'libs';
-    const bytes = await readFile(resolve(root, 'src', folder, entry.file));
+    let bytes = await readFile(resolve(root, 'src', folder, entry.file));
+    if (entry.file === 'aardwolf-atlas.lua') {
+      const atlas = await buildAtlasOutputs(root, bytes.toString('utf8'));
+      for (const [path, content] of atlas) outputs.set(path, content);
+      bytes = atlas.get('dist/plugins/aardwolf-atlas.lua');
+    }
     const fields = metadata(bytes.toString('utf8'), entry.kind, `src/${folder}/${entry.file}`);
     const identity = entry.kind === 'plugin' ? fields.id : fields.name;
     if (identities.has(identity)) throw new Error(`Duplicate identity: ${identity}`);
