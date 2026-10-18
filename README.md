@@ -20,7 +20,23 @@ a connected session.
 
 ## Terrain icon packs
 
-[Andolor: Three Moons 1.3.1](docs/THREE-MOONS.md) is the new Aardwolf-inspired
+The separate [Aylor cohesion pilot](docs/AYLOR-COHESION-PILOT.md) compares 16
+urban terrains at a finer overhead scale, with smaller landmarks, shared ground
+and restored material depth. Version 0.3.0 adds a modest color and contrast lift,
+with a frozen 0.2.0 reference for comparison.
+[Open the current/pilot comparison](dist/map-pilots/aylor-cohesion.html).
+This visual study is not importable; the existing packs remain unchanged.
+
+[Andolor: Three Moons Atlas 1.0.0](docs/THREE-MOONS-ATLAS.md) extends the approved
+Aylor 0.3.0 style to all **114 terrains**: finer continuous materials, compact
+overhead scenery, richer fantasy accents and local depth. The original 16 pilot
+tiles are preserved exactly. Download the [Atlas JSON](dist/map-packs/aardwolf-three-moons-atlas.json)
+or open its [contact sheet and tiled studies](dist/map-packs/aardwolf-three-moons-atlas.html)
+at 16/24/32/60 px. Export your current styles before importing; import replaces
+the terrain-style list. Existing packs and the pilot remain unchanged. Atlas
+native acceptance is pending; it has not been installed into the active map.
+
+[Andolor: Three Moons 1.3.1](docs/THREE-MOONS.md) remains an Aardwolf-inspired
 alternative: moonlit slate and gold, jade forests, opal water, copper dunes,
 glacial crystals and violet astral light. Its 114 styles include three-moon
 mosaics, flowing castle runners, central shop counters and continuous interior floors.

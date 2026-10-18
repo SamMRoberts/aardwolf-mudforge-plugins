@@ -1,0 +1,114 @@
+{
+  "name": "Aylor Map Cohesion Pilot",
+  "version": "0.3.0",
+  "description": "Fine-scale overhead materials with a modest color lift, stronger local contrast, reflective water and compact detailed landmarks. A visual comparison only; not an importable map pack.",
+  "terrains": [
+    {
+      "name": "city",
+      "material": "slate",
+      "motif": "Fine slate with a small brass paving repair"
+    },
+    {
+      "name": "aylorcity",
+      "material": "slate",
+      "motif": "Slate with a tiny three-moon civic inlay"
+    },
+    {
+      "name": "alley",
+      "material": "slate",
+      "motif": "Slate with sparse moss in the joints"
+    },
+    {
+      "name": "road",
+      "material": "slate",
+      "motif": "Narrow north-south worn paving",
+      "ports": [
+        "N",
+        "S"
+      ]
+    },
+    {
+      "name": "road_eastwest",
+      "material": "slate",
+      "motif": "Narrow east-west worn paving",
+      "ports": [
+        "E",
+        "W"
+      ]
+    },
+    {
+      "name": "road_crossroads",
+      "material": "slate",
+      "motif": "Narrow four-way crossing",
+      "ports": [
+        "N",
+        "E",
+        "S",
+        "W"
+      ]
+    },
+    {
+      "name": "crossroad_nw",
+      "material": "slate",
+      "motif": "Narrow northwest corner",
+      "ports": [
+        "N",
+        "W"
+      ]
+    },
+    {
+      "name": "crossroad_se",
+      "material": "slate",
+      "motif": "Narrow southeast corner",
+      "ports": [
+        "S",
+        "E"
+      ]
+    },
+    {
+      "name": "crossroad_ews",
+      "material": "slate",
+      "motif": "Narrow east-west-south junction",
+      "ports": [
+        "E",
+        "S",
+        "W"
+      ]
+    },
+    {
+      "name": "inside",
+      "material": "timber",
+      "motif": "Fine warm timber boards"
+    },
+    {
+      "name": "shop",
+      "material": "slate",
+      "motif": "Compact central merchant counter with jade and violet goods"
+    },
+    {
+      "name": "temple",
+      "material": "slate",
+      "motif": "Small three-moon floor mosaic"
+    },
+    {
+      "name": "palace_room",
+      "material": "limestone",
+      "motif": "Quiet limestone with a subtle geometric inlay"
+    },
+    {
+      "name": "fountain",
+      "material": "slate",
+      "motif": "Small inset water basin"
+    },
+    {
+      "name": "afountain",
+      "material": "slate",
+      "motif": "Inset arcane basin with jade reflections"
+    },
+    {
+      "name": "hellfountain",
+      "material": "slate",
+      "motif": "Violet inset basin with a single ember accent"
+    }
+  ]
+}

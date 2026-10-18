@@ -1,0 +1,859 @@
+{
+  "name": "Andolor: Three Moons Atlas",
+  "version": "1.0.0",
+  "description": "The approved Aylor 0.3.0 style across all 114 Aardwolf terrains: fine continuous materials, compact overhead scenery, richer fantasy accents and local sculpted depth. Shared slate and timber keep room layouts readable. Version 1.0.0.",
+  "source": {
+    "url": "https://raw.githubusercontent.com/fiendish/aardwolfclientpackage/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db",
+    "revision": "ac6e40ff5596e285cfcef6739d1dfdc257cfa162",
+    "sha256": "d1dd86e532eb9903dc96fe64ae73c179e51894cd3060bccce786559c5645c4a4",
+    "table": "environments",
+    "count": 112
+  },
+  "terrains": [
+    {
+      "id": 0,
+      "name": "inside",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Fine warm timber boards"
+    },
+    {
+      "id": 1,
+      "name": "city",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Fine slate with a small brass paving repair"
+    },
+    {
+      "id": 2,
+      "name": "field",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald and pale jade \u00b7 Mossy grass and natural groundcover"
+    },
+    {
+      "id": 3,
+      "name": "forest",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald grove, pale jade leaves and an arcane wisp"
+    },
+    {
+      "id": 4,
+      "name": "hills",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald and pale jade \u00b7 Mossy grass and natural groundcover"
+    },
+    {
+      "id": 5,
+      "name": "mountain",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Compact overhead mountain detail on shared earth ground"
+    },
+    {
+      "id": 6,
+      "name": "waterswim",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 7,
+      "name": "waternoswim",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 8,
+      "name": "unused",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Fine-scale abend-inspired violet stone \u00b7 Aged dungeon flagstones"
+    },
+    {
+      "id": 9,
+      "name": "air",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 10,
+      "name": "desert",
+      "family": "sand",
+      "color": "#8e7355",
+      "motif": "Fine-scale eastern Desert-inspired rose gold \u00b7 Warm sand and wind-shaped dunes"
+    },
+    {
+      "id": 11,
+      "name": "ocean",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 12,
+      "name": "quicksand",
+      "family": "sand",
+      "color": "#8e7355",
+      "motif": "Fine-scale eastern Desert-inspired rose gold \u00b7 Warm sand and wind-shaped dunes"
+    },
+    {
+      "id": 13,
+      "name": "underwater",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 14,
+      "name": "ice",
+      "family": "ice",
+      "color": "#547078",
+      "motif": "Fine-scale gelidus-inspired fractured glacial sheet"
+    },
+    {
+      "id": 15,
+      "name": "underground",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Fine-scale abend-inspired violet stone \u00b7 Aged dungeon flagstones"
+    },
+    {
+      "id": 16,
+      "name": "road_eastwest",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Narrow east-west worn paving",
+      "ports": [
+        "E",
+        "W"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "road",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Narrow north-south worn paving",
+      "ports": [
+        "N",
+        "S"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "river",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 19,
+      "name": "volcano",
+      "family": "lava",
+      "color": "#494051",
+      "motif": "Compact overhead volcano detail on shared lava ground"
+    },
+    {
+      "id": 20,
+      "name": "cave",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Fine-scale amethyst outcrop in twilight stone"
+    },
+    {
+      "id": 21,
+      "name": "dungeon",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Compact overhead dungeon detail on shared cavern ground"
+    },
+    {
+      "id": 22,
+      "name": "road_crossroads",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Narrow four-way crossing",
+      "ports": [
+        "N",
+        "E",
+        "S",
+        "W"
+      ]
+    },
+    {
+      "id": 23,
+      "name": "mudschool",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead mudschool detail on shared stone ground"
+    },
+    {
+      "id": 24,
+      "name": "areaexit",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead areaexit detail on shared stone ground"
+    },
+    {
+      "id": 25,
+      "name": "hellinside",
+      "family": "lava",
+      "color": "#494051",
+      "motif": "Compact overhead hellinside detail on shared lava ground"
+    },
+    {
+      "id": 26,
+      "name": "hellfountain",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Violet inset basin with a single ember accent"
+    },
+    {
+      "id": 27,
+      "name": "hell1",
+      "family": "lava",
+      "color": "#494051",
+      "motif": "Fine-scale charcoal amethyst and ember gold \u00b7 Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 28,
+      "name": "hell2",
+      "family": "lava",
+      "color": "#494051",
+      "motif": "Fine-scale charcoal amethyst and ember gold \u00b7 Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 29,
+      "name": "hell3",
+      "family": "lava",
+      "color": "#494051",
+      "motif": "Fine-scale charcoal amethyst and ember gold \u00b7 Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 30,
+      "name": "insideice",
+      "family": "ice",
+      "color": "#547078",
+      "motif": "Compact overhead insideice detail on shared ice ground"
+    },
+    {
+      "id": 31,
+      "name": "hellhall",
+      "family": "lava",
+      "color": "#494051",
+      "motif": "Compact overhead hellhall detail on shared lava ground",
+      "ports": [
+        "N",
+        "S"
+      ]
+    },
+    {
+      "id": 32,
+      "name": "hell4",
+      "family": "lava",
+      "color": "#494051",
+      "motif": "Fine-scale charcoal amethyst and ember gold \u00b7 Dark volcanic crust and glowing fissures"
+    },
+    {
+      "id": 33,
+      "name": "smallroad",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness",
+      "ports": [
+        "N",
+        "S"
+      ]
+    },
+    {
+      "id": 34,
+      "name": "smallroad_ew",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness",
+      "ports": [
+        "E",
+        "W"
+      ]
+    },
+    {
+      "id": 35,
+      "name": "trail_ew",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness",
+      "ports": [
+        "E",
+        "W"
+      ]
+    },
+    {
+      "id": 36,
+      "name": "beach",
+      "family": "sand",
+      "color": "#8e7355",
+      "motif": "Fine-scale eastern Desert-inspired rose gold \u00b7 Warm sand and wind-shaped dunes"
+    },
+    {
+      "id": 37,
+      "name": "shore",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 38,
+      "name": "jungle",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale alagh-inspired deep jade jungle and orchids"
+    },
+    {
+      "id": 39,
+      "name": "swamp",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald and pale jade \u00b7 Mossy grass and natural groundcover"
+    },
+    {
+      "id": 40,
+      "name": "bridge",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Narrow overhead timber span with shaded cross-planks"
+    },
+    {
+      "id": 41,
+      "name": "plain",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness"
+    },
+    {
+      "id": 42,
+      "name": "ocean2",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 43,
+      "name": "ocean3",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 44,
+      "name": "ocean4",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 45,
+      "name": "field3",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald and pale jade \u00b7 Mossy grass and natural groundcover"
+    },
+    {
+      "id": 46,
+      "name": "field2",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald and pale jade \u00b7 Mossy grass and natural groundcover"
+    },
+    {
+      "id": 47,
+      "name": "field4",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald and pale jade \u00b7 Mossy grass and natural groundcover"
+    },
+    {
+      "id": 48,
+      "name": "rocks",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness"
+    },
+    {
+      "id": 49,
+      "name": "snow",
+      "family": "ice",
+      "color": "#547078",
+      "motif": "Fine-scale gelidus-inspired glacial blue \u00b7 Glacial stone and snow"
+    },
+    {
+      "id": 50,
+      "name": "icemount",
+      "family": "ice",
+      "color": "#547078",
+      "motif": "Compact overhead icemount detail on shared ice ground"
+    },
+    {
+      "id": 51,
+      "name": "icehills",
+      "family": "ice",
+      "color": "#547078",
+      "motif": "Fine-scale gelidus-inspired glacial blue \u00b7 Glacial stone and snow"
+    },
+    {
+      "id": 52,
+      "name": "space1",
+      "family": "ether",
+      "color": "#413b61",
+      "motif": "Fine-scale astral violet and moonlight \u00b7 Muted astral stone and starlight"
+    },
+    {
+      "id": 53,
+      "name": "space2",
+      "family": "ether",
+      "color": "#413b61",
+      "motif": "Fine-scale astral violet and moonlight \u00b7 Muted astral stone and starlight"
+    },
+    {
+      "id": 54,
+      "name": "space3",
+      "family": "ether",
+      "color": "#413b61",
+      "motif": "Fine-scale astral violet and moonlight \u00b7 Muted astral stone and starlight"
+    },
+    {
+      "id": 55,
+      "name": "space4",
+      "family": "ether",
+      "color": "#413b61",
+      "motif": "Fine-scale astral violet and moonlight \u00b7 Muted astral stone and starlight"
+    },
+    {
+      "id": 56,
+      "name": "castle",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Small heraldic stone inlay on the common castle floor"
+    },
+    {
+      "id": 57,
+      "name": "pillar",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead pillar detail on shared stone ground"
+    },
+    {
+      "id": 58,
+      "name": "dark",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Compact overhead dark detail on shared cavern ground"
+    },
+    {
+      "id": 59,
+      "name": "crossroad_nw",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Narrow northwest corner",
+      "ports": [
+        "N",
+        "W"
+      ]
+    },
+    {
+      "id": 60,
+      "name": "crossroad_se",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Narrow southeast corner",
+      "ports": [
+        "S",
+        "E"
+      ]
+    },
+    {
+      "id": 61,
+      "name": "crossroad_ews",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Narrow east-west-south junction",
+      "ports": [
+        "E",
+        "S",
+        "W"
+      ]
+    },
+    {
+      "id": 62,
+      "name": "mountain_cyan",
+      "family": "ice",
+      "color": "#547078",
+      "motif": "Compact overhead mountain cyan detail on shared ice ground"
+    },
+    {
+      "id": 63,
+      "name": "moon",
+      "family": "ether",
+      "color": "#413b61",
+      "motif": "Fine-scale andolor white, grey and black moons"
+    },
+    {
+      "id": 64,
+      "name": "temple",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Small three-moon floor mosaic"
+    },
+    {
+      "id": 65,
+      "name": "shop",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact central merchant counter with jade and violet goods"
+    },
+    {
+      "id": 66,
+      "name": "clanexit",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead clanexit detail on shared stone ground"
+    },
+    {
+      "id": 67,
+      "name": "chessblack",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead chessblack detail on shared stone ground"
+    },
+    {
+      "id": 68,
+      "name": "chesswhite",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead chesswhite detail on shared stone ground"
+    },
+    {
+      "id": 69,
+      "name": "lottery",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead lottery detail on shared stone ground"
+    },
+    {
+      "id": 70,
+      "name": "alley",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Slate with sparse moss in the joints"
+    },
+    {
+      "id": 71,
+      "name": "fountain",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Small inset water basin"
+    },
+    {
+      "id": 72,
+      "name": "archive",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Compact overhead archive detail on shared wood ground"
+    },
+    {
+      "id": 73,
+      "name": "bookshelves",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Two compact east-west bookcases over shared timber"
+    },
+    {
+      "id": 74,
+      "name": "bookshelves_ns",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Two compact north-south bookcases over shared timber"
+    },
+    {
+      "id": 75,
+      "name": "office",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Compact overhead office detail on shared wood ground"
+    },
+    {
+      "id": 76,
+      "name": "electric",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 77,
+      "name": "well",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead well detail on shared stone ground"
+    },
+    {
+      "id": 78,
+      "name": "bloodyhall",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead bloodyhall detail on shared stone ground"
+    },
+    {
+      "id": 79,
+      "name": "bloodyroom",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead bloodyroom detail on shared stone ground"
+    },
+    {
+      "id": 80,
+      "name": "dead_forest",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness"
+    },
+    {
+      "id": 81,
+      "name": "dead_field",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness"
+    },
+    {
+      "id": 82,
+      "name": "graveyard",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Three small carved grave markers on weathered slate"
+    },
+    {
+      "id": 83,
+      "name": "palace_room",
+      "family": "marble",
+      "color": "#55655b",
+      "motif": "Quiet limestone with a subtle geometric inlay"
+    },
+    {
+      "id": 84,
+      "name": "crypt",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Compact overhead crypt detail on shared cavern ground"
+    },
+    {
+      "id": 85,
+      "name": "dead_jungle",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness"
+    },
+    {
+      "id": 86,
+      "name": "ship",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Timber deck, plank joints and a small capstan"
+    },
+    {
+      "id": 87,
+      "name": "chaos_sea",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal water \u00b7 Rippling water and submerged detail"
+    },
+    {
+      "id": 88,
+      "name": "hut",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Compact overhead hut detail on shared wood ground"
+    },
+    {
+      "id": 89,
+      "name": "redcarpet",
+      "family": "carpet",
+      "color": "#684153",
+      "motif": "Compact overhead redcarpet detail on shared carpet ground"
+    },
+    {
+      "id": 90,
+      "name": "city_underground",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead city underground detail on shared stone ground"
+    },
+    {
+      "id": 91,
+      "name": "mist",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 92,
+      "name": "ashen_field",
+      "family": "earth",
+      "color": "#695144",
+      "motif": "Fine-scale alagh-inspired copper earth \u00b7 Weathered earth and wilderness"
+    },
+    {
+      "id": 93,
+      "name": "cabin",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Compact overhead cabin detail on shared wood ground"
+    },
+    {
+      "id": 94,
+      "name": "hallway",
+      "family": "wood",
+      "color": "#534c45",
+      "motif": "Compact overhead hallway detail on shared wood ground",
+      "ports": [
+        "N",
+        "S"
+      ]
+    },
+    {
+      "id": 95,
+      "name": "afountain",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Inset arcane basin with jade reflections"
+    },
+    {
+      "id": 96,
+      "name": "flowers1",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald and pale jade \u00b7 Mossy grass and natural groundcover"
+    },
+    {
+      "id": 97,
+      "name": "flowers2",
+      "family": "grass",
+      "color": "#32554b",
+      "motif": "Fine-scale emerald and pale jade \u00b7 Mossy grass and natural groundcover"
+    },
+    {
+      "id": 98,
+      "name": "stairs",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Compact overhead staircase with seven shaded treads"
+    },
+    {
+      "id": 99,
+      "name": "aylorcity",
+      "family": "stone",
+      "color": "#3c5257",
+      "motif": "Slate with a tiny three-moon civic inlay"
+    },
+    {
+      "id": 100,
+      "name": "ruins",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Compact overhead ruins detail on shared cavern ground"
+    },
+    {
+      "id": 101,
+      "name": "tornado",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 102,
+      "name": "dustdevil",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 103,
+      "name": "wind1",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 104,
+      "name": "wind2",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 105,
+      "name": "lightning",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 106,
+      "name": "rain",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 107,
+      "name": "sun",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 108,
+      "name": "cloud1",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 109,
+      "name": "cloud2",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 110,
+      "name": "cloud3",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": 111,
+      "name": "rainbow",
+      "family": "sky",
+      "color": "#425a74",
+      "motif": "Fine-scale sapphire atmosphere and pearl \u00b7 Soft atmospheric terrain"
+    },
+    {
+      "id": null,
+      "name": "default",
+      "family": "cavern",
+      "color": "#3c5257",
+      "motif": "Compact overhead default detail on shared cavern ground"
+    },
+    {
+      "id": null,
+      "name": "water",
+      "family": "water",
+      "color": "#255d6c",
+      "motif": "Fine-scale iridian-inspired opal ripples"
+    }
+  ]
+}

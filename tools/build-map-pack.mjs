@@ -1,12 +1,14 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { Resvg } from '@resvg/resvg-js';
+import { atlasStudies, atlasStudyHtml } from './build-map-atlas.mjs';
+import { scenePng } from './build-map-pilot.mjs';
 
 export const packDirectory = 'src/map-packs/aardwolf-terrain-icons';
 export const packOutput = 'dist/map-packs/aardwolf-terrain-icons.json';
 export const previewOutput = 'dist/map-packs/aardwolf-terrain-icons.html';
 export const mapPreviewOutput = 'dist/map-packs/aardwolf-terrain-icons-map-preview.png';
-export const mapPackNames = ['aardwolf-terrain-icons', 'aardwolf-three-moons'];
+export const mapPackNames = ['aardwolf-terrain-icons', 'aardwolf-three-moons', 'aardwolf-three-moons-atlas'];
 const tilePixels = 128;
 
 export function validateTerrainRegistry(registry) {
@@ -81,10 +83,11 @@ function connectedMapPreview(styles, themed = false) {
   return Buffer.from(new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng());
 }
 
-function contactSheet(registry, styles, mapPreview, themed = false) {
+function contactSheet(registry, styles, mapPreview, themed = false, studies = '') {
+  const atlas = Boolean(studies);
   const cards = styles.map((style, index) => {
     const terrain = registry.terrains[index];
-    const samples = ['dark', 'light'].map(theme => `<div class="samples ${theme}" aria-label="${theme} background">${[16, 24, 32].map(size =>
+    const samples = ['dark', 'light'].map(theme => `<div class="samples ${theme}" aria-label="${theme} background">${(atlas ? [16, 24, 32, 60] : [16, 24, 32]).map(size =>
       `<figure><img src="${style.image}" width="${size}" height="${size}" alt="${escapeHtml(terrain.motif)}"><figcaption>${size} px</figcaption></figure>`).join('')}</div>`).join('');
     const repeated = themed ? `<figure class="repeat-study"><div class="repeat-grid" role="img" aria-label="${escapeHtml(style.name)} repeated in a 3 by 3 map grid" style="background-image:url('${style.image}')"></div><figcaption>3 × 3 tiled · 32 px rooms</figcaption></figure>` : '';
     return `<article><h2>${escapeHtml(style.name)}</h2><p>${escapeHtml(terrain.motif)}</p>${samples}${repeated}</article>`;
@@ -104,10 +107,10 @@ h2{font:600 15px ui-monospace,monospace;overflow-wrap:anywhere;margin:0 0 6px}ar
 ${themed ? '.repeat-study{margin-top:12px}.repeat-grid{width:96px;height:96px;background-size:32px 32px;background-repeat:repeat}\n' : ''}.dark{background:#0b1117;color:#d0ded8}.light{background:#f3f5f0;color:#273749}figure{margin:0;display:grid;justify-items:center;align-content:end;gap:6px}
 img{display:block}figcaption{font-size:10px}@media(max-width:540px){body{padding:16px}}
 </style></head><body><header><h1>${escapeHtml(registry.name)}</h1>
-<p>${escapeHtml(registry.description)} ${themed ? 'Surfaces repeat across room boundaries. Continuous runners and narrow shelf or counter runs replace full furnished-room scenes. Each terrain also appears below in a 3 × 3 repeat test.' : 'Related rooms share quiet material edges. Shaded scenery stays within the tile so streets, floors and ground can read continuously.'} MudForge draws walls, room borders, symbols and player markers above these tiles.</p>
+<p>${escapeHtml(registry.description)} ${atlas ? 'The Aylor 0.3.0 pilot is preserved exactly. Fine ground and compact landmarks extend its style to the whole registry. Every terrain appears at four sizes and in a 3 × 3 repeat test.' : themed ? 'Surfaces repeat across room boundaries. Continuous runners and narrow shelf or counter runs replace full furnished-room scenes. Each terrain also appears below in a 3 × 3 repeat test.' : 'Related rooms share quiet material edges. Shaded scenery stays within the tile so streets, floors and ground can read continuously.'} MudForge draws walls, room borders, symbols and player markers above these tiles.</p>
 <p>Editable SVG sources · ${escapeHtml(registry.version)} · ${styles.length} terrain tiles</p></header>
-<figure class="map-study"><img src="data:image/png;base64,${mapPreview.toString('base64')}" width="1024" height="608" alt="${themed ? 'Dense terrain tiling: shops, castle runners, ice chambers, wells and ruins in the supplied screenshot arrangement; woodland and river; dungeon slate' : 'Connected fantasy tile studies: limestone town and market at left, emerald woodland and turquoise river at upper right, slate dungeon at lower right; gold sand, timber, cyan ice, orange lava, violet magic and flowers along the bottom left'}"><figcaption>${themed ? 'Dense 5 × 5 tiling study based on the supplied screenshot (left): shop, castle, ice chamber, well and ruins. Woodland and river appear at upper right; dungeon slate appears below. ' : 'Connected layout study: town (left), woodland and river (upper right), dungeon (lower right). '}${themed ? 'Interior samples along the bottom left: castle, shop, palace, temple, cabin and archive.' : 'Biome palette along the bottom left: desert, timber, ice, lava, astral terrain and flowers.'} Walls and player outline are simulated to show how tiles sit beneath client overlays; this is an illustrative preview, not a native-client capture. Individual tiles appear below at 16, 24 and 32 pixels.</figcaption></figure>
-<main>${cards}</main></body></html>
+<figure class="map-study"><img src="data:image/png;base64,${mapPreview.toString('base64')}" width="1024" height="608" alt="${atlas ? 'Dense terrain tiling: compact shop counters, castle inlays, ice chambers, wells and ruins; woodland and river; dungeon slate' : themed ? 'Dense terrain tiling: shops, castle runners, ice chambers, wells and ruins in the supplied screenshot arrangement; woodland and river; dungeon slate' : 'Connected fantasy tile studies: limestone town and market at left, emerald woodland and turquoise river at upper right, slate dungeon at lower right; gold sand, timber, cyan ice, orange lava, violet magic and flowers along the bottom left'}"><figcaption>${themed ? 'Dense 5 × 5 tiling study based on the supplied screenshot (left): shop, castle, ice chamber, well and ruins. Woodland and river appear at upper right; dungeon slate appears below. ' : 'Connected layout study: town (left), woodland and river (upper right), dungeon (lower right). '}${themed ? 'Interior samples along the bottom left: castle, shop, palace, temple, cabin and archive.' : 'Biome palette along the bottom left: desert, timber, ice, lava, astral terrain and flowers.'} Walls and player outline are simulated to show how tiles sit beneath client overlays; this is an illustrative preview, not a native-client capture. Individual tiles appear below at ${atlas ? '16, 24, 32 and 60' : '16, 24 and 32'} pixels.</figcaption></figure>
+${studies}<main>${cards}</main></body></html>
 `;
 }
 
@@ -132,9 +135,17 @@ export async function buildMapPackOutputs(root, packName = mapPackNames[0]) {
     styles.push({ name, color: terrain.color, image: `data:image/png;base64,${png.toString('base64')}` });
   }
   outputs.set(`${outputStem}.json`, Buffer.from(`${JSON.stringify({ name: registry.name, description: registry.description, terrainStyles: styles }, null, 2)}\n`));
-  const themed = packName === 'aardwolf-three-moons';
+  const atlas = packName === 'aardwolf-three-moons-atlas';
+  const themed = packName === 'aardwolf-three-moons' || atlas;
   const mapPreview = connectedMapPreview(styles, themed);
   outputs.set(`${outputStem}-map-preview.png`, mapPreview);
-  outputs.set(`${outputStem}.html`, Buffer.from(contactSheet(registry, styles, mapPreview, themed)));
+  let studyHtml = '';
+  if (atlas) {
+    const images = new Map(styles.map(style => [style.name, style.image]));
+    const studies = atlasStudies().map(study => ({ ...study, png: scenePng(study, images) }));
+    for (const study of studies) outputs.set(`${outputStem}-${study.id}.png`, study.png);
+    studyHtml = atlasStudyHtml(studies);
+  }
+  outputs.set(`${outputStem}.html`, Buffer.from(contactSheet(registry, styles, mapPreview, themed, studyHtml)));
   return outputs;
 }

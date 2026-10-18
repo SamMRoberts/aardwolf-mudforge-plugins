@@ -44,9 +44,10 @@ test('build output is deterministic and generated artifacts are current', async 
   }
 });
 
-test('build check resolves paths from an unrelated working directory', () => {
+test('build check resolves paths from an unrelated working directory', async () => {
+  const expected = (await buildOutputs()).size;
   const output = execFileSync(process.execPath, [resolve(root, 'tools/build-repository.mjs'), '--check'], {
     cwd: '/tmp', encoding: 'utf8',
   });
-  assert.match(output, /Checked 241 repository files/);
+  assert(output.includes(`Checked ${expected} repository files`));
 });

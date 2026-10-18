@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseMudForgeLua } from './lua-compatibility.mjs';
 import { buildMapPackOutputs, mapPackNames } from './build-map-pack.mjs';
+import { buildMapPilotOutputs } from './build-map-pilot.mjs';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const entries = [
@@ -56,6 +57,7 @@ export async function buildOutputs() {
   for (const packName of mapPackNames) {
     for (const [path, bytes] of await buildMapPackOutputs(root, packName)) outputs.set(path, bytes);
   }
+  for (const [path, bytes] of await buildMapPilotOutputs(root, outputs.get('dist/map-packs/aardwolf-three-moons.json'))) outputs.set(path, bytes);
   return outputs;
 }
 

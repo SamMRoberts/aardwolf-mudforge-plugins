@@ -1,0 +1,105 @@
+{
+  "version": "0.2.0",
+  "urbanSha256": "4a85e60be34cb50e4b7cde993e09de118002fbc1c25598c1d0443a74442d4fc2",
+  "urbanStudySha256": "043c40bd27f649e2129d7465400a68c81b7a2ebeb71c7e0cad97becc9cbdb99a",
+  "width": 720,
+  "height": 780,
+  "terrains": {
+    "city": {
+      "geometrySha256": "f3e8d456824aa21710f3bba9220ac0df0aada669a32fd7085d1e9bbf7263074d",
+      "neutralMoonStops": {}
+    },
+    "aylorcity": {
+      "geometrySha256": "5659ae19f30f66dcf334ef23595123de29b8c053edbeffdc7d810186325ac672",
+      "neutralMoonStops": {
+        "moon-white": [
+          "#f3efd3",
+          "#c7cdb4",
+          "#7c928d"
+        ],
+        "moon-grey": [
+          "#bac6b7",
+          "#8d9d97",
+          "#536d76"
+        ],
+        "moon-dark": [
+          "#71828a",
+          "#3e5360",
+          "#1d303d"
+        ]
+      }
+    },
+    "alley": {
+      "geometrySha256": "a89d4e316ee6c735ccc47721d08c1f9af203dd23569436edd270c194eb0086b9",
+      "neutralMoonStops": {}
+    },
+    "road": {
+      "geometrySha256": "369905c99aeb07c145bf3ccb8b6ce7dbeef4c2fabba374f87236b4cb23c899d9",
+      "neutralMoonStops": {}
+    },
+    "road_eastwest": {
+      "geometrySha256": "22c7409607bb0ea65e79df884d581232591d0815e202189830dcbbc40a1af8b9",
+      "neutralMoonStops": {}
+    },
+    "road_crossroads": {
+      "geometrySha256": "c7038299edf801292009d9ee642aecf46a686d2a47c3d749a6fe8ebfc8d10b15",
+      "neutralMoonStops": {}
+    },
+    "crossroad_nw": {
+      "geometrySha256": "bfab156578726bc2bffdc8dd411bd9ae16cbb7a3e3a024c566e84c3bd953098e",
+      "neutralMoonStops": {}
+    },
+    "crossroad_se": {
+      "geometrySha256": "9c5110e42c28080023bec90e0b96b6943199469278884c505fb34a03f5fe4648",
+      "neutralMoonStops": {}
+    },
+    "crossroad_ews": {
+      "geometrySha256": "92eb8f44948abda172e669679501e885bf9a69fc4f5f73c23b796be2dc899f37",
+      "neutralMoonStops": {}
+    },
+    "inside": {
+      "geometrySha256": "f4f8318cee3b52313ba9b2c06e3d9ec4a35a17ac179a749990b237af2aca326e",
+      "neutralMoonStops": {}
+    },
+    "shop": {
+      "geometrySha256": "9040107e5530a09ceba0673d80b60eae72692768a599ea295e0b4f796d3cf9ed",
+      "neutralMoonStops": {}
+    },
+    "temple": {
+      "geometrySha256": "7ba608a82373016d04e47ae8a1639043305baf23a513c0a203f95754f94ea6a7",
+      "neutralMoonStops": {
+        "moon-white": [
+          "#f3efd3",
+          "#c7cdb4",
+          "#7c928d"
+        ],
+        "moon-grey": [
+          "#bac6b7",
+          "#8d9d97",
+          "#536d76"
+        ],
+        "moon-dark": [
+          "#71828a",
+          "#3e5360",
+          "#1d303d"
+        ]
+      }
+    },
+    "palace_room": {
+      "geometrySha256": "97133ff3d725427ccde558a2c2d9c73df66164d08d7714e94e572f5103184e2c",
+      "neutralMoonStops": {}
+    },
+    "fountain": {
+      "geometrySha256": "2799b7f2429331e5f9393c1b25c6adc55116c76802c611f50790fd67b04d38f9",
+      "neutralMoonStops": {}
+    },
+    "afountain": {
+      "geometrySha256": "d7023070dd8523ff97f476a482a15ec7ba17be9d43d59129fb886f343a5eac47",
+      "neutralMoonStops": {}
+    },
+    "hellfountain": {
+      "geometrySha256": "3ccd3c3b8b7ac1a01ab11f102079c5c97368cfd8d9875cd57bb3f8160d61f81c",
+      "neutralMoonStops": {}
+    }
+  }
+}

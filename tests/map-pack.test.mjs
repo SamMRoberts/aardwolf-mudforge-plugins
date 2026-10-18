@@ -69,17 +69,18 @@ for (const packName of mapPackNames) {
     }
   });
 
-  test(`${packName}: contact sheet includes all terrains at three sizes on both backgrounds`, () => {
+  test(`${packName}: contact sheet includes all terrains at map sizes on both backgrounds`, () => {
     const html = outputs.get(previewOutput).toString();
     assert.equal((html.match(/<article>/g) || []).length, 114);
     assert.equal((html.match(/class="samples dark"/g) || []).length, 114);
     assert.equal((html.match(/class="samples light"/g) || []).length, 114);
     for (const size of [16, 24, 32]) assert.equal((html.match(new RegExp(`width="${size}" height="${size}"`, 'g')) || []).length, 228);
+    if (packName === 'aardwolf-three-moons-atlas') assert.equal((html.match(/width="60" height="60"/g) || []).length, 228);
     for (const style of pack.terrainStyles) assert(html.includes(`<h2>${style.name}</h2>`));
     assert.doesNotMatch(html, /<script\b|src="https?:/i);
     assert(html.includes('class="map-study"'));
     assert(html.includes('not a native-client capture'));
-    if (packName === 'aardwolf-three-moons') {
+    if (packName !== 'aardwolf-terrain-icons') {
       assert.equal((html.match(/class="repeat-grid"/g) || []).length, 114);
       assert(html.includes('3 × 3 tiled'));
       assert(html.includes('Dense 5 × 5 tiling study'));
@@ -100,22 +101,22 @@ for (const packName of mapPackNames) {
         for (const [x, y] of [[index, 0], [index, 127], [0, index], [127, index]]) {
           const offset = (y * rendered.width + x) * 4;
           const pixel = pixels.subarray(offset, offset + 4);
-          if (packName === 'aardwolf-three-moons') edgeColors.add(pixel.toString('hex'));
+          if (packName !== 'aardwolf-terrain-icons') edgeColors.add(pixel.toString('hex'));
           else assert.deepEqual(pixel, expected, `${name}: material seam at ${x},${y}`);
         }
       }
-      if (packName === 'aardwolf-three-moons') {
+      if (packName !== 'aardwolf-terrain-icons') {
         assert(edgeColors.size > 1, `${name}: a flat-color perimeter reintroduces a room frame`);
-        assert(svg.includes('id="terrain-surface"'), `${name}: missing repeating surface`);
+        assert(svg.includes(packName === 'aardwolf-three-moons-atlas' ? 'id="ground"' : 'id="terrain-surface"'), `${name}: missing repeating surface`);
       }
       for (let offset = 3; offset < pixels.length; offset += 4) assert.equal(pixels[offset], 255, `${name}: transparent pixel`);
     }
-    const urbanNames = packName === 'aardwolf-three-moons'
+    const urbanNames = packName !== 'aardwolf-terrain-icons'
       ? ['city', 'shop', 'castle', 'alley', 'temple']
       : ['city', 'shop', 'castle', 'alley'];
     const urban = registry.terrains.filter(terrain => urbanNames.includes(terrain.name));
     assert.equal(new Set(urban.map(terrain => terrain.color)).size, 1, 'adjoining urban terrain shares its stone edge color');
-    if (packName === 'aardwolf-three-moons') {
+    if (packName !== 'aardwolf-terrain-icons') {
       const timberRooms = registry.terrains.filter(terrain => ['inside', 'hut', 'cabin', 'office', 'archive'].includes(terrain.name));
       assert.equal(new Set(timberRooms.map(terrain => terrain.color)).size, 1, 'timber interiors share their floor edge color');
       assert(timberRooms.every(terrain => terrain.family === 'wood'));
