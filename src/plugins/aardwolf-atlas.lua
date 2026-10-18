@@ -1,10 +1,17 @@
 plugin = {
-  id = "aardwolf-atlas", name = "Aardwolf Atlas", version = "0.1.0", author = "Sam Roberts",
+  id = "aardwolf-atlas", name = "Aardwolf Atlas", version = "0.2.1", author = "Sam Roberts",
   description = "Read-only native map explorer with terrain artwork, overhead and orbitable 3D views, room details and route previews."
 }
 
 -- Build-time assembly keeps the renderer and its local assets out of this adapter.
 local HTML = [====[__ATLAS_HTML__]====]
+local SETTINGS_HTML = [====[__ATLAS_SETTINGS_HTML__]====]
+local DETAILS_HTML = [====[__ATLAS_DETAILS_HTML__]====]
+local surfaces = { settings = { ready = false }, details = { ready = false } }
+local detailSnapshot = nil
+local detailGeneration, invalidatedDetailGeneration = -1, -1
+local detailEpoch, closedDetailEpoch = -1, -1
+local panelVisible = true
 local alive, panelReady, mapReady = false, false, false
 local widget, companion, stream = nil, nil, nil
 local revision, lifetime = 0, 0
@@ -46,7 +53,7 @@ local function refreshFlags()
 end
 
 local function defaults()
-  return { view = "overhead", follow = true, exploded = false, collapsed = false }
+  return { view = "overhead", follow = true, exploded = false, collapsed = false, showVnums = true, northUp = false, floatingDetails = false }
 end
 
 local function validatePreferences(value)
@@ -55,7 +62,12 @@ local function validatePreferences(value)
   for _, key in ipairs({ "follow", "exploded", "collapsed" }) do
     if type(value[key]) ~= "boolean" then return nil end
   end
-  return { view = value.view, follow = value.follow, exploded = value.exploded, collapsed = value.collapsed }
+  local result = { view = value.view, follow = value.follow, exploded = value.exploded, collapsed = value.collapsed }
+  for _, key in ipairs({ "showVnums", "northUp", "floatingDetails" }) do
+    if value[key] ~= nil and type(value[key]) ~= "boolean" then return nil end
+    if value[key] == nil then result[key] = key == "showVnums" else result[key] = value[key] end
+  end
+  return result
 end
 
 local function readable()
@@ -263,6 +275,114 @@ local function fallback()
   if not companion then failure("The native map companion could not be opened.") end
 end
 
+local function surfacePublish(role, payload)
+  local surface = surfaces[role]
+  if not alive or not surface.id or not surface.ready then return end
+  payload.v = 1
+  sendWidgetMessage(surface.id, payload)
+end
+
+local function syncSurfaces()
+  surfacePublish("settings", { type = "preferences", preferences = preferences })
+  surfacePublish("details", { type = "details", snapshot = detailSnapshot })
+end
+
+local syncDetailsVisibility
+
+local function savePreferences(nextPreferences)
+  if saveTable("atlas-preferences", nextPreferences) == false then
+    failure("Atlas preferences could not be saved.", nil, "preferences")
+    surfacePublish("settings", { type = "error", error = "Atlas preferences could not be saved." })
+    surfacePublish("details", { type = "error", error = "Atlas preferences could not be saved." })
+    publish({ type = "preferences", preferences = preferences, error = "Atlas preferences could not be saved." })
+    syncSurfaces()
+    return false
+  end
+  preferences = nextPreferences
+  publish({ type = "preferences", preferences = preferences })
+  syncSurfaces()
+  syncDetailsVisibility()
+  return true
+end
+
+local function surfaceMessage(role, event)
+  if not alive or type(event) ~= "table" or (event.sessionId and event.sessionId ~= getSessionId()) then return end
+  local data = event.data
+  if event.event ~= "atlas" or type(data) ~= "table" or data.v ~= 1 then return end
+  if data.action == "ready" then
+    surfaces[role].ready = true
+    syncSurfaces()
+  elseif not surfaces[role].ready then return
+  elseif role == "settings" and data.action == "setting" then
+    if data.key ~= "showVnums" and data.key ~= "northUp" and data.key ~= "floatingDetails" then return end
+    if type(data.value) ~= "boolean" then return end
+    local nextPreferences = validatePreferences(preferences)
+    nextPreferences[data.key] = data.value
+    savePreferences(nextPreferences)
+  elseif role == "details" and data.action == "navigate" then
+    local index = integer(data.index, 0)
+    if not detailSnapshot or data.generation ~= detailSnapshot.generation or not index then return end
+    local step = detailSnapshot.steps[index + 1]
+    if type(step) == "table" and step.hidden ~= true then
+      publish({ type = "navigate", index = index, generation = data.generation })
+    end
+  elseif role == "details" and data.action == "dock" then
+    local nextPreferences = validatePreferences(preferences)
+    nextPreferences.floatingDetails = false
+    savePreferences(nextPreferences)
+  end
+end
+
+local function openSurface(role)
+  local surface = surfaces[role]
+  if surface.id then
+    showWidget(surface.id, true)
+    if role == "settings" then setWidgetZOrder(surface.id, 49) end
+    return true
+  end
+  local isSettings = role == "settings"
+  surface.id = createWidget({ type = "html", name = "atlas-" .. role,
+    title = isSettings and "Atlas Settings" or "Atlas Room Details",
+    position = { x = isSettings and 120 or 360, y = isSettings and 140 or 160 },
+    size = { width = isSettings and 340 or 320, height = isSettings and 240 or 520 }, resizable = true })
+  if not surface.id or surface.id == "" then
+    surface.id = nil; failure("Atlas could not open its " .. role .. " window."); return false
+  end
+  local currentLifetime = lifetime
+  registerWidgetEvent(surface.id, "luamsg", function(event)
+    if alive and lifetime == currentLifetime then surfaceMessage(role, event) end
+  end)
+  registerWidgetEvent(surface.id, "close", function(event)
+    if not alive or lifetime ~= currentLifetime or (event.sessionId and event.sessionId ~= getSessionId()) then return end
+    if role == "details" then
+      invalidatedDetailGeneration = detailGeneration
+      closedDetailEpoch = detailEpoch
+      detailSnapshot = nil
+      publish({ type = "deselect", selectionEpoch = detailEpoch })
+      syncSurfaces()
+    end
+  end)
+  setWidgetProperty(surface.id, "content", isSettings and SETTINGS_HTML or DETAILS_HTML)
+  showWidget(surface.id, true)
+  if role == "settings" then setWidgetZOrder(surface.id, 49) end
+  return true
+end
+
+syncDetailsVisibility = function()
+  local surface = surfaces.details
+  if panelVisible and preferences.floatingDetails and detailSnapshot and detailSnapshot.selected then
+    -- Only reopen on a new selection or explicit mode change, not every route update.
+    if not surface.id or getWidgetProperty(surface.id, "visible") == false then openSurface("details") end
+  elseif surface.id then hideWidget(surface.id) end
+end
+
+local function setPanelVisible(visible)
+  panelVisible = visible
+  if not visible then
+    for _, surface in pairs(surfaces) do if surface.id then hideWidget(surface.id) end end
+  else syncDetailsVisibility() end
+end
+
 local function widgetMessage(event)
   if not alive or type(event) ~= "table" or (event.sessionId and event.sessionId ~= getSessionId()) then return end
   local data = event.data
@@ -270,17 +390,45 @@ local function widgetMessage(event)
   if data.action == "ready" then
     panelReady, stream = true, nil
     generations = { area = -1, inspect = -1, route = -1 }
+    detailSnapshot = nil
+    detailGeneration, invalidatedDetailGeneration = -1, -1
+    detailEpoch, closedDetailEpoch = -1, -1
+    syncSurfaces()
+    syncDetailsVisibility()
     bootstrap("init", false)
   elseif not panelReady then return
   elseif data.action == "preferences" then
-    local nextPreferences = validatePreferences(data.preferences)
+    local nextPreferences = nil
+    if data.patch ~= nil then
+      if type(data.patch) ~= "table" then return end
+      nextPreferences = validatePreferences(preferences)
+      for key, value in pairs(data.patch) do
+        if type(key) ~= "string" or nextPreferences[key] == nil then return end
+        nextPreferences[key] = value
+      end
+      nextPreferences = validatePreferences(nextPreferences)
+    else nextPreferences = validatePreferences(data.preferences) end
     if not nextPreferences then failure("Invalid Atlas preferences.", data.generation, "preferences"); return end
-    if saveTable("atlas-preferences", nextPreferences) == false then
-      failure("Atlas preferences could not be saved.", data.generation, "preferences")
-      publish({ type = "preferences", preferences = preferences }); return
-    end
-    preferences = nextPreferences
-    publish({ type = "preferences", preferences = preferences })
+    savePreferences(nextPreferences)
+  elseif data.action == "settings" then openSurface("settings")
+  elseif data.action == "details" then
+    local snapshot = data.snapshot
+    if type(snapshot) ~= "table" or not integer(snapshot.generation, 0) then return end
+    if snapshot.selected ~= nil and not integer(snapshot.selected, 1) then return end
+    if type(snapshot.steps) ~= "table" or type(snapshot.summary) ~= "string" then return end
+    if snapshot.room ~= nil and (type(snapshot.room) ~= "table" or snapshot.room.id ~= snapshot.selected) then return end
+    if #json.encode(snapshot) > CHUNK_BYTES * 3 then return end
+    if data.revision ~= revision or snapshot.generation < detailGeneration then return end
+    -- Older renderer snapshots use generation as their selection identity.
+    local epoch = snapshot.selectionEpoch == nil and snapshot.generation or integer(snapshot.selectionEpoch, 0)
+    if not epoch then return end
+    if snapshot.selected and (snapshot.generation <= invalidatedDetailGeneration or epoch <= closedDetailEpoch) then return end
+    detailEpoch = epoch
+    detailGeneration = snapshot.generation
+    snapshot.steps = nativeList(snapshot.steps)
+    detailSnapshot = snapshot.selected and snapshot or nil
+    syncSurfaces()
+    syncDetailsVisibility()
   elseif data.action == "fallback" then fallback()
   elseif not readable() then failure("Waiting for the native map to finish loading.", data.generation, data.action)
   elseif data.revision ~= nil and data.revision ~= revision then return
@@ -293,10 +441,12 @@ end
 local function command(args)
   if not alive or not widget then return end
   if args == "hide" then
+    setPanelVisible(false)
     publish({ type = "visibility", visible = false }); hideWidget(widget, true)
   elseif args == "native" then fallback()
   elseif args == "" or args == "show" then
     showWidget(widget, true)
+    setPanelVisible(true)
     if readable() then refreshFlags() end
     bootstrap("update", true)
     publish({ type = "visibility", visible = true })
@@ -317,6 +467,7 @@ function init()
   end)
   registerWidgetEvent(widget, "close", function(event)
     if alive and lifetime == currentLifetime and (not event.sessionId or event.sessionId == getSessionId()) then
+      setPanelVisible(false)
       publish({ type = "visibility", visible = false })
     end
   end)
@@ -325,6 +476,7 @@ function init()
       publish({ type = "resize", width = finite(event.width), height = finite(event.height) })
     end
   end)
+  panelVisible = getWidgetProperty(widget, "visible") ~= false
   setWidgetProperty(widget, "content", HTML)
   registerCommand("awatlas", command, "Open Atlas, hide its panel, or open its read-only native companion.")
   onMapReady(function()
@@ -332,11 +484,22 @@ function init()
     mapReady = true; refreshFlags(); bootstrap("update", true)
   end)
   onRoomChange(function()
-    if alive and lifetime == currentLifetime and readable() then bootstrap("update", false) end
+    if alive and lifetime == currentLifetime and readable() then
+      if detailSnapshot then
+        invalidatedDetailGeneration = detailGeneration
+        detailSnapshot.steps = {}
+        detailSnapshot.summary = "Finding a native route..."
+        syncSurfaces()
+      end
+      bootstrap("update", false)
+    end
   end)
   onMapUpdate(function()
     if not alive or lifetime ~= currentLifetime then return end
     revision = revision + 1; stream = nil
+    detailSnapshot = nil
+    syncSurfaces()
+    syncDetailsVisibility()
     if readable() then refreshFlags() else flagDefinitions = {} end
     bootstrap("update", true)
   end)
@@ -348,6 +511,13 @@ function cleanup()
   stream, flagDefinitions = nil, {}
   if widget then destroyWidget(widget) end
   if companion then destroyWidget(companion) end
+  for _, surface in pairs(surfaces) do
+    if surface.id then destroyWidget(surface.id) end
+    surface.id, surface.ready = nil, false
+  end
+  detailSnapshot = nil
+  detailGeneration, invalidatedDetailGeneration = -1, -1
+  detailEpoch, closedDetailEpoch = -1, -1
   widget, companion = nil, nil
   generations = { area = -1, inspect = -1, route = -1 }
 end

@@ -205,11 +205,260 @@ const cases = {
     oldMessage({ event = "atlas", data = { v = 1, action = "ready" } }); assert(#world.messages == count)
     world.ready(); assert(world.last().mapReady)
   `,
+  'migrates legacy preferences without writes and rejects malformed display options': `
+    local world, env = atlasWorld({ storage = { ["atlas-preferences"] = {
+      view = "perspective", follow = false, exploded = true, collapsed = true
+    } } })
+    world.handshake()
+    local p = world.last().preferences
+    assert(p.view == "perspective" and not p.follow and p.exploded and p.collapsed)
+    assert(p.showVnums and not p.northUp and not p.floatingDetails and world.writes == 0)
+    for _, key in ipairs({ "showVnums", "northUp", "floatingDetails" }) do
+      local invalid = { view = "overhead", follow = true, exploded = false, collapsed = false }
+      invalid[key] = "true"
+      world.request("preferences", { preferences = invalid })
+      assert(world.last().type == "error" and world.writes == 0)
+    end
+    local bad = atlasWorld({ storage = { ["atlas-preferences"] = {
+      view = "perspective", follow = false, exploded = true, collapsed = true, northUp = 1
+    } } })
+    bad.handshake()
+    assert(bad.last().preferences.view == "overhead" and bad.last().preferences.showVnums)
+  `,
+  'settings is lazy, independently ready, reusable, world-local and accepts only allowed boolean patches': `
+    ${setup}
+    assert(world.surface("settings") == nil and world.surface("details") == nil)
+    world.request("settings")
+    local settings = world.surface("settings")
+    assert(settings and settings.visible and settings.config.name == "atlas-settings")
+    assert(settings.config.title == "Atlas Settings" and world.lastFor("settings") == nil)
+    world.surfaceRequest("settings", "setting", { key = "showVnums", value = false })
+    assert(world.writes == 0)
+    world.surfaceHandshake("settings")
+    local p = world.lastFor("settings").preferences
+    assert(p.showVnums and not p.northUp and not p.floatingDetails)
+    settings.position = { x = 777, y = 888 }
+    world.close("settings"); world.request("settings")
+    assert(world.surface("settings") == settings and settings.visible)
+    assert(settings.position.x == 777 and world.creations["atlas:atlas-settings"] == 1)
+    world.surfaceRequest("settings", "setting", { key = "showVnums", value = false })
+    world.surfaceRequest("settings", "setting", { key = "northUp", value = true })
+    p = world.lastFor("settings").preferences
+    assert(not p.showVnums and p.northUp and not p.floatingDetails and p.view == "overhead" and p.follow)
+    assert(world.writes == 2 and world.storage["atlas-preferences"].northUp)
+    local count = #world.messages
+    for _, patch in ipairs({ { key = "view", value = true }, { key = "showVnums", value = "false" }, { key = "unknown", value = true } }) do
+      world.surfaceRequest("settings", "setting", patch)
+    end
+    world.surfaceRequest("settings", "setting", { key = "showVnums", value = true }, "foreign-world")
+    world.surfaceRequest("settings", "preferences", { preferences = p })
+    world.surfaceRequest("settings", "inspect", { roomId = 2, generation = 99 })
+    assert(world.writes == 2 and #world.messages == count)
+    env.cleanup(); env.init(); world.handshake()
+    p = world.lastFor().preferences
+    assert(not p.showVnums and p.northUp and not p.floatingDetails)
+  `,
+  'map preference patches preserve independent settings and reject malformed patches atomically': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "showVnums", value = false })
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    world.request("preferences", { patch = { follow = false }, preferences = {
+      view = "overhead", follow = false, exploded = false, collapsed = false, showVnums = true,
+      northUp = false, floatingDetails = false
+    } })
+    local p = world.lastFor().preferences
+    assert(not p.follow and not p.showVnums and p.floatingDetails)
+    world.request("preferences", { patch = { view = "perspective", exploded = true, collapsed = true } })
+    p = world.lastFor("settings").preferences
+    assert(p.view == "perspective" and p.exploded and p.collapsed and p.floatingDetails and not p.showVnums)
+    local writes = world.writes
+    for _, patch in ipairs({ false, "bad", { follow = 1 }, { northUp = "false" }, { view = false },
+      { view = "invalid" }, { [1] = true }, { follow = true, unknown = false } }) do
+      world.request("preferences", { patch = patch })
+      assert(world.writes == writes)
+    end
+    world.request("settings")
+    p = world.lastFor("settings").preferences
+    assert(not p.follow and not p.showVnums and p.floatingDetails and p.view == "perspective")
+    world.refuseWrites = true
+    world.request("preferences", { patch = { follow = true, showVnums = true } })
+    p = world.lastFor().preferences
+    assert(not p.follow and not p.showVnums and p.floatingDetails)
+  `,
+  'failed setting patches restore every surface and keep prior durable preferences': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "showVnums", value = false })
+    world.refuseWrites = true
+    local count = #world.deliveries
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    local sawPanelError, sawSettingsError = false, false
+    for index = count + 1, #world.deliveries do
+      local message = world.deliveries[index]
+      if message.payload.type == "error" then
+        if message.id == "atlas:atlas" then sawPanelError = true end
+        if message.id == "atlas:atlas-settings" then sawSettingsError = true end
+      end
+    end
+    assert(sawPanelError and sawSettingsError)
+    assert(not world.lastFor().preferences.showVnums and not world.lastFor().preferences.floatingDetails)
+    assert(not world.lastFor("settings").preferences.showVnums and not world.lastFor("settings").preferences.floatingDetails)
+    assert(not world.storage["atlas-preferences"].showVnums and not world.storage["atlas-preferences"].floatingDetails)
+    assert(world.surface("details") == nil)
+    world.refuseWrites = false
+    world.surfaceRequest("settings", "setting", { key = "northUp", value = true })
+    assert(world.lastFor().preferences.northUp and not world.lastFor().preferences.showVnums)
+  `,
+  'details handshakes route navigation, docking and parent visibility preserve selection and placement': `
+    ${setup}
+    local snapshot = { selected = 2, generation = 5, room = { id = 2, name = "Destination" },
+      steps = { { roomId = 2, direction = "e" }, { roomId = 3, direction = "u", hidden = true } }, summary = "Route" }
+    world.request("details", { revision = 0, snapshot = snapshot })
+    assert(world.surface("details") == nil)
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    local details = world.surface("details")
+    assert(details and details.visible and details.config.position.x ~= world.surface("settings").config.position.x)
+    assert(world.surface("settings").zOrder == 49)
+    assert(world.lastFor("details") == nil)
+    world.surfaceRequest("details", "navigate", { index = 0, generation = 5 })
+    assert(world.lastFor().type == "preferences")
+    world.surfaceHandshake("details")
+    assert(world.lastFor("details").snapshot.selected == 2 and world.lastFor("details").snapshot.room.name == "Destination")
+    local count, writes = #world.messages, world.writes
+    world.surfaceRequest("details", "setting", { key = "showVnums", value = false })
+    world.surfaceRequest("settings", "navigate", { index = 0, generation = 5 })
+    world.surfaceRequest("details", "navigate", { index = 0, generation = 4 })
+    world.surfaceRequest("details", "navigate", { index = 1, generation = 5 })
+    world.surfaceRequest("details", "navigate", { index = 100, generation = 5 })
+    world.surfaceRequest("details", "navigate", { index = 0, generation = 5 }, "foreign-world")
+    assert(#world.messages == count and world.writes == writes)
+    world.surfaceRequest("details", "navigate", { index = 0, generation = 5 })
+    assert(world.lastFor().type == "navigate" and world.lastFor().index == 0)
+    details.position = { x = 999, y = 888 }
+    world.commands.awatlas("hide")
+    assert(not details.visible and not world.surface("settings").visible)
+    world.commands.awatlas("show")
+    assert(details.visible and not world.surface("settings").visible and details.position.x == 999)
+    world.surfaceRequest("details", "dock")
+    assert(not details.visible and not world.lastFor().preferences.floatingDetails)
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    assert(details.visible and world.creations["atlas:atlas-details"] == 1)
+    assert(world.lastFor("details").snapshot.selected == 2)
+  `,
+  'floating route navigation normalizes native zero-indexed widget arrays before checking steps': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    local snapshot = { selected = 2, generation = 5, room = { id = 2 },
+      steps = world.native({ { roomId = 2, direction = "e" } }), summary = "One step" }
+    world.request("details", { revision = 0, snapshot = snapshot }); world.surfaceHandshake("details")
+    assert(world.lastFor("details").snapshot.steps[1].roomId == 2)
+    world.surfaceRequest("details", "navigate", { index = 0, generation = 5 })
+    assert(world.lastFor().type == "navigate" and world.lastFor().index == 0)
+    snapshot.generation = 6
+    snapshot.steps = world.native({ { roomId = 2, hidden = true }, { roomId = 3 } })
+    world.request("details", { revision = 0, snapshot = snapshot })
+    local count = #world.messages
+    world.surfaceRequest("details", "navigate", { index = 0, generation = 6 })
+    assert(#world.messages == count)
+    world.surfaceRequest("details", "navigate", { index = 1, generation = 6 })
+    assert(world.lastFor().type == "navigate" and world.lastFor().index == 1)
+  `,
+  'closing or clearing floating details rejects cached snapshots and preserves floating preference': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    local snapshot = { selected = 2, generation = 5, room = { id = 2 }, steps = {}, summary = "Route" }
+    world.request("details", { revision = 0, snapshot = snapshot }); world.surfaceHandshake("details")
+    world.close("details")
+    assert(world.lastFor().type == "deselect" and world.lastFor("details").snapshot == nil)
+    world.request("details", { revision = 0, snapshot = snapshot })
+    assert(not world.surface("details").visible and world.lastFor("details").snapshot == nil)
+    snapshot.generation = 6
+    world.request("details", { revision = 0, snapshot = snapshot })
+    assert(world.surface("details").visible and world.lastFor("details").snapshot.selected == 2)
+    world.request("details", { revision = 0, snapshot = { generation = 7, steps = {}, summary = "Select a room" } })
+    assert(not world.surface("details").visible and world.lastFor("details").snapshot == nil)
+    world.request("details", { revision = 0, snapshot = snapshot })
+    assert(not world.surface("details").visible and world.lastFor("details").snapshot == nil)
+    world.request("settings")
+    assert(world.lastFor("settings").preferences.floatingDetails)
+  `,
+  'player movement invalidates queued route snapshots while retaining selection identity': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    local snapshot = { selected = 2, generation = 5, selectionEpoch = 2, room = { id = 2 }, steps = { { roomId = 2 } }, summary = "Route" }
+    world.request("details", { revision = 0, snapshot = snapshot }); world.surfaceHandshake("details")
+    world.emit("room")
+    assert(next(world.lastFor("details").snapshot.steps) == nil)
+    world.request("details", { revision = 0, snapshot = { selected = 2, generation = 5, selectionEpoch = 2,
+      room = { id = 2 }, steps = { { roomId = 2 } }, summary = "Stale route" } })
+    assert(next(world.lastFor("details").snapshot.steps) == nil)
+    world.request("details", { revision = 0, snapshot = { selected = 2, generation = 6, selectionEpoch = 2,
+      room = { id = 2 }, steps = { { roomId = 3 } }, summary = "New route" } })
+    assert(world.lastFor("details").snapshot.steps[1].roomId == 3)
+    world.close("details")
+    assert(world.lastFor().type == "deselect" and world.lastFor().selectionEpoch == 2)
+    world.request("details", { revision = 0, snapshot = { selected = 2, generation = 7, selectionEpoch = 2,
+      room = { id = 2 }, steps = {}, summary = "Late refresh" } })
+    assert(not world.surface("details").visible)
+    world.request("details", { revision = 0, snapshot = { selected = 2, generation = 8, selectionEpoch = 3,
+      room = { id = 2 }, steps = {}, summary = "New selection" } })
+    assert(world.surface("details").visible)
+  `,
+  'map invalidation clears floating details and rejects delayed old-revision snapshots': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    local snapshot = { selected = 2, generation = 5, room = { id = 2 }, steps = { { roomId = 2 } }, summary = "Route" }
+    world.request("details", { revision = 0, snapshot = snapshot }); world.surfaceHandshake("details")
+    world.emit("update")
+    assert(not world.surface("details").visible and world.lastFor("details").snapshot == nil)
+    snapshot.generation = 6
+    world.request("details", { revision = 0, snapshot = snapshot })
+    assert(not world.surface("details").visible and world.lastFor("details").snapshot == nil)
+    world.request("details", { revision = 1, snapshot = snapshot })
+    assert(world.surface("details").visible and world.lastFor("details").snapshot.generation == 6)
+    world.handshake()
+    assert(not world.surface("details").visible and world.lastFor("details").snapshot == nil)
+  `,
+  'auxiliary callbacks cannot cross sessions or survive cleanup and reinitialization': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    world.request("details", { revision = 0, snapshot = { selected = 2, generation = 1, room = { id = 2 }, steps = {}, summary = "Route" } })
+    world.surfaceHandshake("details")
+    local callbacks = { world.surface("settings").events.luamsg, world.surface("details").events.luamsg }
+    local close = world.surface("details").events.close
+    local other, otherEnv = atlasWorld({ id = "other-world" }); other.handshake(); other.ready()
+    local otherCount = #other.messages
+    local oldSettings = world.surface("settings")
+    env.cleanup(); assert(next(world.widgets) == nil)
+    local count, writes = #world.messages, world.writes
+    for _, callback in ipairs(callbacks) do callback({ event = "atlas", sessionId = world.id, data = { v = 1, action = "ready" } }) end
+    close({ sessionId = world.id })
+    assert(#world.messages == count and world.writes == writes)
+    env.init(); world.handshake()
+    assert(world.surface("settings") == nil and world.surface("details") == nil)
+    count = #world.messages
+    for _, callback in ipairs(callbacks) do callback({ event = "atlas", sessionId = world.id, data = { v = 1, action = "ready" } }) end
+    close({ sessionId = world.id })
+    assert(#world.messages == count and world.writes == writes and #other.messages == otherCount)
+    world.request("settings"); world.surfaceHandshake("settings")
+    assert(world.surface("settings") ~= oldSettings)
+    assert(world.lastFor("settings").preferences.floatingDetails)
+    assert(world.surface("details") == nil)
+  `,
 };
 for (const [name, body] of Object.entries(cases)) {
   test(`atlas adapter ${name}`, () => runLua(fixture + body, { atlas_source: () => source }));
 }
-test('atlas Lua template is MudForge-compatible with a single assembly marker', () => {
+test('atlas Lua template is MudForge-compatible with one assembly marker per surface', () => {
   parseMudForgeLua(source, 'atlas');
-  assert.equal(source.match(/__ATLAS_HTML__/g).length, 1);
+  for (const marker of ['__ATLAS_HTML__', '__ATLAS_SETTINGS_HTML__', '__ATLAS_DETAILS_HTML__']) {
+    assert.equal(source.split(marker).length - 1, 1);
+  }
 });

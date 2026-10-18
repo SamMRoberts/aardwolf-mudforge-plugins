@@ -1,4 +1,4 @@
-# Aardwolf Atlas 0.1.0
+# Aardwolf Atlas 0.2.1
 
 Atlas is a standalone, read-only explorer for MudForge's native map. It combines
 an overhead view, orbitable 3D terrain slabs, floor selection, an exploded floor
@@ -9,21 +9,24 @@ Install `dist/plugins/aardwolf-atlas.lua` through MudForge's Plugin Manager. The
 source Lua file is a build template and is not an installable renderer. Open the
 world's map first if MudForge has not loaded it; Atlas waits for native map
 readiness. The first panel is 900 × 640 pixels. MudForge preserves subsequent
-placement, docking, size, and closure. Below 600 pixels wide, inspection moves
-beneath the map.
+placement, docking, size, and closure. The compact header and toolbar use about
+66 pixels at the default panel width. Below 600 pixels wide, docked inspection
+moves beneath the map. No room details take map space until a room is selected.
 
 ## Controls
 
 | Control | Behavior |
 | --- | --- |
 | Overhead | North-up orthographic camera; drag to pan |
-| 3D | Perspective camera; drag to orbit; right-drag to pan |
+| 3D | Perspective camera; left-drag to pan; right-drag to orbit |
 | Wheel / pinch | Zoom |
 | Fit area | Frame the current floor/stack and pause following |
 | Reset / Isometric | Reset the camera to its default overhead/isometric placement |
 | Follow player | Resume centering on the player's native area and floor |
 | Area / Floor | Browse mapped rooms; manual browsing pauses following |
 | Explode floors | Separate all floors vertically in 3D |
+| Gear | Open or raise the floating Atlas Settings window |
+| Background click | Clear selection, room details, collision choices, and route preview |
 | Room search | Search the loaded area by room ID or name, including unpositioned rooms |
 | Room selection | Inspect native metadata and preview a route; never walk |
 | Arrow keys, + / − | Pan and zoom when the map canvas has keyboard focus |
@@ -32,6 +35,32 @@ Type `awatlas` or `awatlas show` to reopen a closed panel, `awatlas hide` to clo
 it, and `awatlas native` to open its read-only native mapper companion. The
 companion's `interactive=false` setting disables click-to-walk. If WebGL is
 unavailable, the panel offers this companion and explains the rendering failure.
+
+## Settings and room details
+
+The gear opens a separate **Atlas Settings** MudForge widget. Changes save
+immediately in this plugin's current world; a failed save restores the prior
+values and displays an error. Existing Atlas preferences migrate automatically.
+
+| Setting | Default | Behavior |
+| --- | --- | --- |
+| Show room vnums | On | Show numeric tile labels when space allows. Symbols remain visible when off; search, details, routes and status keep their room numbers. |
+| North always on top | Off | Lock 3D heading north-up while allowing tilt above the horizon, pan and zoom. Fit, reset, isometric and view changes retain the lock. Overhead is always north-up. |
+| Float room details | Off | Move selected-room details and route preview into a separate **Atlas Room Details** widget. |
+
+Search stays in the toolbar whether or not a room is selected. Select with a
+primary click, a search result, or an overlap choice. A primary background click
+clears selection and route output; dragging or right-clicking does not select or
+deselect rooms. Closing the floating details window also clears selection, while
+leaving floating mode enabled for the next selection. **Dock in Atlas** returns
+that window's content to the sidebar without losing the selected room or route.
+
+The settings and details widgets can be moved, resized, and docked using normal
+MudForge controls. Their placement is remembered independently. Closing Atlas
+hides both auxiliary windows; `awatlas show` restores floating details if a room
+remains selected. Settings reopens only from the gear. Reloading clears transient
+selection but preserves display preferences. Delayed room/route responses cannot
+reopen details after deselection.
 
 Room selection shows terrain artwork, original terrain value, identity, area,
 coordinates, notes, details, exits, doors, flags, locks, weights, and user data.
@@ -55,12 +84,14 @@ intermediate route rooms remain unnamed and cannot be selected from the route.
 
 The plugin owns its camera/preferences and display only. Native room IDs, exits,
 coordinates, player position, labels, terrain styles, and mapper settings remain
-in MudForge. View/follow/exploded/inspector preferences use world-local plugin
+in MudForge. View/follow/exploded/inspector and display preferences use world-local plugin
 `saveTable`; no map copy is persisted.
 
 The Lua adapter waits for `onMapReady`, reads native area lists and room metadata,
 and observes `onRoomChange`/`onMapUpdate`. A version-1 handshake precedes messages.
-The widget pulls chunks of at most 128 room IDs, with a serialized payload budget
+The map widget owns selection and route state; the adapter relays its snapshot
+to a lightweight details document. Separate role-bound handshakes initialize
+settings and details without creating additional WebGL renderers. The widget pulls chunks of at most 128 room IDs, with a serialized payload budget
 and explicit oversized-record failures. Request generations and map revisions
 reject obsolete responses. Inspection metadata and route output also use a
 128 KiB budget; oversized results show an explicit error and suggest the native
@@ -72,6 +103,11 @@ Three.js shares room geometry between orthographic and perspective cameras.
 Rooms are instanced, connections are batched, textures are cached, and labels
 reduce at distant/dense views. Rendering is event-driven and stops while hidden.
 Native text is inserted as text, never interpreted as HTML.
+
+The 0.2.1 terrain artwork lifts shadow detail and strengthens major material
+edges so rooms remain easier to distinguish at small map sizes. The original
+source sheets are retained alongside the enhanced masters. All 114 terrain
+identities, tile rectangles, and native color/symbol overrides remain unchanged.
 
 Terrain names normalize by trimming and lowercasing, while numeric environment
 values resolve through the repository's pinned registry. Numbered/directional
@@ -137,7 +173,7 @@ not own a reason to change one. A baseline exported after import avoids confusin
 native import normalization with plugin changes. Report any comparison failure;
 do not relax checks merely to obtain a pass.
 
-## Recorded verification — 2026-10-18
+## Recorded 0.1.0 verification — 2026-10-18
 
 Tested on installed MudForge **2.0.3701** in separate, disconnected worlds.
 The initial feasibility probe passed WebGL2 rendering, inline Three.js execution,
@@ -197,3 +233,56 @@ installation was performed. Native map-update and clearing races are covered by
 contract tests rather than destructive UI experiments. The final readiness-prompt
 wording correction was verified by its regression test and browser reload. The
 catalog has not been published, and no commits or pushes were made.
+
+## 0.2.0 verification — 2026-10-18
+
+The repository suite passes **246 JavaScript tests and 25 Python tests**. Build
+checks verify all 245 generated artifacts and catalog integrity; the standalone
+Lua plugin is approximately 3.2 MiB, below the 5 MiB limit. Browser checks at
+900 × 640 and 390 × 700 verified search and keyboard selection, actual primary
+room/background clicks, right-click retention, settings window reuse, vnum
+hiding with symbols retained, heading-lock controls, floating details with route
+output, docking, and close-to-deselect. Header plus toolbar measured 66 pixels at
+900 pixels wide; the narrow controls had no horizontal overflow. Screenshots
+were inspected and no application errors were observed; the preview server's
+unrelated favicon request returned 404.
+
+Focused tests additionally exercise real Three.js mouse controls and raycasts,
+heading constraints across camera operations, pointer cancellation, preference
+migration and rollback, native-array normalization, independent readiness,
+role/session fencing, selection-close and route-refresh races, cleanup and
+world isolation.
+
+New-version native acceptance is **pending**. Installed MudForge 2.0.3701 arm64
+was displaying an active connected play session. The computer-use guard refused
+two attempts to open the session selector because the user changed the app.
+No plugin was imported and no native settings, connections, or world files were
+changed. The earlier 0.1.0 native evidence above does not validate 0.2.0.
+
+Still required in disposable disconnected worlds: native floating-window
+creation/placement/docking, reload and saved preferences, hide/show, actual mouse
+controls, two-world isolation, and before/after native map-export comparisons.
+Contract fixtures verify these adapter paths but do not prove native persistence
+or rendering. Browser preview windows are browser popups, not MudForge widgets.
+
+## 0.2.1 artwork verification — 2026-10-18
+
+All six runtime terrain sheets were rebuilt from enhanced Imagegen masters.
+The edit preserves the original sheet order and terrain subjects while lifting
+shadow detail, strengthening feature boundaries, and reducing fine texture
+noise. Crops were visually reviewed before producing the same 128 × 128 runtime
+tiles. Original source PNGs remain unchanged. Prompt provenance and source paths
+are recorded in [the artwork README](../src/atlas/assets/README.md).
+
+Native acceptance for this artwork update has not been performed. Earlier
+0.1.0 native results and 0.2.0 contract/browser results do not establish native
+rendering of these new sheets.
+
+The full suite passed 246 JavaScript tests and 25 Python tests, including
+deterministic crop reproduction, all 114 terrain mappings, JPEG fidelity, and
+catalog integrity. `npm run build:check` checked 245 generated artifacts and
+`git diff --check` passed. The installable plugin is 3,883,301 bytes (about
+3.7 MiB), below the 5 MiB catalog limit. Browser review compared the same
+900 × 640 camera before/after, exercised all 114 enhanced terrains in overhead
+and perspective views, selected-room artwork, and a 390 × 700 layout. Original
+source PNGs, terrain IDs/rectangles, map packs, and renderer behavior are unchanged.

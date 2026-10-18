@@ -76,6 +76,7 @@ test("custom native exit directions are classified and deduplicated", () => {
   assert.equal(exits.length, 2);
   assert.equal(exits.find((exit) => exit.direction === "enter portal").custom, true);
 });
+import { createInspector } from "../src/atlas/inspector.js";
 import vm from "node:vm";
 import * as model from "../src/atlas/model.js";
 function widgetHarness() {
@@ -108,10 +109,13 @@ function widgetHarness() {
     return elements.get(id);
   };
   element("failure").hidden = true;
+  element("inspector").hidden = true;
+  element("results").hidden = true;
   let scene;
   class Scene {
-    constructor() {
+    constructor(canvas, assets, callbacks) {
       scene = this;
+      this.callbacks = callbacks;
       this.builds = 0;
       this.overlay = [];
     }
@@ -121,8 +125,8 @@ function widgetHarness() {
     overlays(player, selected, steps) {
       this.overlay = steps;
     }
-    setView() {
-    }
+    setDisplayOptions(options) { this.options = options; }
+    setView(view) { this.view = view; }
     setVisible() {
     }
     center() {
@@ -143,7 +147,7 @@ function widgetHarness() {
     this.receive = fn;
   } }, addEventListener() {
   } };
-  const context = { ...model, AtlasScene: Scene, createPreviewBridge() {
+  const context = { ...model, createInspector, AtlasScene: Scene, createPreviewBridge() {
     throw Error("Not a preview");
   }, window, document: { getElementById: element, createElement() {
     return new Element();
@@ -215,4 +219,77 @@ test("route prompt recovers when native readiness arrives after initialization",
   assert.equal(h.element("route-summary").textContent, "Select a destination to preview a native route.");
   h.receive({ type: "update", mapReady: true, areas: [] });
   assert.equal(h.element("route-summary").textContent, "No mapped rooms are available.");
+});
+
+test("details occupy space only after selection and move between surfaces without losing state", () => {
+  const h = widgetHarness();
+  assert.equal(h.element("inspector").hidden, true);
+  const generation = h.select();
+  assert.equal(h.element("inspector").hidden, false);
+  h.receive({ type: "route", generation, found: true, cost: 2, steps: [{ roomId: 2, areaId: "a", z: 0 }] });
+  h.receive({ type: "preferences", preferences: { floatingDetails: true, showVnums: false, northUp: true } });
+  assert.equal(h.element("inspector").hidden, true);
+  assert.equal(h.state().selected, 2);
+  assert.equal(h.state().routeCount, 1);
+  assert.equal(h.scene.options.showVnums, false);
+  assert.equal(h.scene.options.northUp, true);
+  const snapshot = h.sent.findLast((message) => message.action === "details").snapshot;
+  assert.equal(snapshot.selected, 2);
+  assert.equal(snapshot.steps.length, 1);
+  h.receive({ type: "preferences", preferences: { floatingDetails: false } });
+  assert.equal(h.element("inspector").hidden, false);
+});
+test("background deselection clears both surfaces, route and collision choices and rejects late replies", () => {
+  const h = widgetHarness();
+  const generation = h.select();
+  h.receive({ type: "route", generation, found: true, steps: [{ roomId: 2 }] });
+  h.scene.callbacks.select([]);
+  assert.equal(h.state().selected, null);
+  assert.equal(h.state().routeCount, 0);
+  assert.equal(h.element("inspector").hidden, true);
+  assert.equal(h.element("collision").hidden, true);
+  assert.equal(h.element("results").hidden, true);
+  assert.equal(h.sent.findLast((message) => message.action === "details").snapshot.selected, null);
+  h.receive({ type: "room", generation, room: { id: 2, name: "Late details" } });
+  h.receive({ type: "route", generation, found: true, steps: [{ roomId: 2 }] });
+  assert.equal(h.element("room-name").textContent, "Select a room");
+  assert.equal(h.state().routeCount, 0);
+});
+test("floating details close clears selection; map and overlap selections display the chosen room", () => {
+  const h = widgetHarness();
+  h.scene.callbacks.select([{ id: 1 }]);
+  assert.equal(h.state().selected, 1);
+  h.scene.callbacks.select([{ id: 1, name: "First" }, { id: 2, name: "Second" }]);
+  assert.equal(h.element("collision").hidden, false);
+  h.element("collision-items").children[1].handlers.click();
+  assert.equal(h.state().selected, 2);
+  h.receive({ type: "deselect", selectionEpoch: h.state().selectionEpoch });
+  assert.equal(h.state().selected, null);
+  assert.equal(h.element("inspector").hidden, true);
+  h.scene.callbacks.select([{ id: 1 }]);
+  assert.equal(h.element("inspector").hidden, false);
+});
+test("floating route navigation rejects obsolete generations and targets only current steps", () => {
+  const h = widgetHarness();
+  const generation = h.select();
+  h.receive({ type: "route", generation, found: true, steps: [{ roomId: 8, areaId: "other", z: 2 }] });
+  h.receive({ type: "navigate", generation: generation - 1, index: 0 });
+  assert.equal(h.state().area, "a");
+  h.receive({ type: "navigate", generation, index: 0 });
+  assert.equal(h.state().area, "other");
+  assert.equal(h.state().selected, 2);
+});
+
+test("a delayed floating close cannot clear a newer selection but still closes a refreshed selection", () => {
+  const h = widgetHarness();
+  h.select();
+  const oldEpoch = h.state().selectionEpoch;
+  h.scene.callbacks.select([{ id: 1 }]);
+  h.receive({ type: "deselect", selectionEpoch: oldEpoch });
+  assert.equal(h.state().selected, 1);
+  const epoch = h.state().selectionEpoch;
+  h.receive({ ...h.init, type: "update", playerRoomId: 2 });
+  assert.equal(h.state().selectionEpoch, epoch);
+  h.receive({ type: "deselect", selectionEpoch: epoch });
+  assert.equal(h.state().selected, null);
 });

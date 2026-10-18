@@ -2,8 +2,8 @@
 -- MudForge's documented ipairs bridge, not a native rendering acceptance test.
 function atlasWorld(options)
   local opts = options or {}
-  local world = { readyState = false, reads = 0, messages = {}, widgets = {}, commands = {},
-    events = { ready = {}, room = {}, update = {} }, storage = {}, writes = 0, pathCalls = 0,
+  local world = { readyState = false, reads = 0, messages = {}, deliveries = {}, widgets = {}, creations = {}, commands = {},
+    events = { ready = {}, room = {}, update = {} }, storage = opts.storage or {}, writes = 0, pathCalls = 0,
     player = 1, id = opts.id or "atlas-world", rooms = {}, metadata = {}, areaNames = { Alpha = 0, Beta = 0 } }
   world.flagReads = 0
   world.flagDefinitions = {
@@ -16,6 +16,7 @@ function atlasWorld(options)
     for index, value in ipairs(values) do result[index - 1] = value end
     return result
   end
+  world.native = native
   function env.ipairs(value)
     if not value.__native then return ipairs(value) end
     return function(items, index)
@@ -87,6 +88,7 @@ function atlasWorld(options)
   end
   function env.createWidget(config)
     local id = "atlas:" .. config.name
+    world.creations[id] = (world.creations[id] or 0) + 1
     world.widgets[id] = { config = config, events = {}, visible = opts.visible ~= false }
     return id
   end
@@ -95,11 +97,14 @@ function atlasWorld(options)
   function env.registerWidgetEvent(id, name, callback) world.widgets[id].events[name] = callback end
   function env.sendWidgetMessage(id, payload)
     assert(world.widgets[id], "message after destroy")
-    table.insert(world.messages, json.decode(json.encode(payload)))
+    local copy = json.decode(json.encode(payload))
+    table.insert(world.messages, copy)
+    table.insert(world.deliveries, { id = id, payload = copy })
   end
+  function env.setWidgetZOrder(id, order) world.widgets[id].zOrder = order end
   function env.destroyWidget(id) world.widgets[id] = nil end
   function env.showWidget(id, force) assert(force == true); world.widgets[id].visible = true end
-  function env.hideWidget(id, remember) assert(remember == true); world.widgets[id].visible = false end
+  function env.hideWidget(id, remember) assert(remember == nil or remember == true); world.widgets[id].visible = false end
   function env.createMapperWidget(name, config)
     assert(config.interactive == false)
     world.companionConfig = config
@@ -118,7 +123,27 @@ function atlasWorld(options)
     "setMapExit", "setRoomColor", "setRoomHidden", "highlightPath", "addTimer", "importMapJson", "setMapZoom" }) do
     env[name] = function() error("unexpected write/movement/timer: " .. name) end
   end
-  function world.panel() return world.widgets["atlas:atlas"] end
+  function world.surface(role) return world.widgets["atlas:atlas" .. (role and "-" .. role or "")] end
+  function world.panel() return world.surface() end
+  function world.surfaceMessage(role, data, sessionId)
+    world.surface(role).events.luamsg({ event = "atlas", data = data, sessionId = sessionId or world.id })
+  end
+  function world.surfaceRequest(role, action, fields, sessionId)
+    fields = fields or {}; fields.v, fields.action = 1, action
+    world.surfaceMessage(role, fields, sessionId)
+  end
+  function world.surfaceHandshake(role) world.surfaceRequest(role, "ready") end
+  function world.lastFor(role)
+    local id = "atlas:atlas" .. (role and "-" .. role or "")
+    for index = #world.deliveries, 1, -1 do
+      if world.deliveries[index].id == id then return world.deliveries[index].payload end
+    end
+  end
+  function world.close(role, sessionId)
+    local surface = world.surface(role)
+    surface.visible = false
+    surface.events.close({ sessionId = sessionId or world.id })
+  end
   function world.message(data, sessionId)
     world.panel().events.luamsg({ event = "atlas", data = data, sessionId = sessionId or world.id })
   end

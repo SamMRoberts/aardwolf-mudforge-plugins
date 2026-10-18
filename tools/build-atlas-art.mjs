@@ -1,4 +1,4 @@
-// Deterministic mechanical extraction of the reviewed Imagegen terrain sheets.
+// Deterministic mechanical extraction of the reviewed, enhanced Imagegen sheets.
 // Crops are explicit because generated sheets do not have perfectly equal cells.
 import {readFile, writeFile} from 'node:fs/promises';
 import {resolve, dirname} from 'node:path';
@@ -10,12 +10,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const directory = resolve(root, 'src/atlas/assets');
 const registry = JSON.parse(await readFile(resolve(root, 'src/map-packs/aardwolf-three-moons/terrains.json'), 'utf8'));
 const crops = [
-  {x: [0,265,560,844,1122], y: [0,274,553,820,1093,1402]},
-  {x: [0,294,560,834,1122], y: [0,263,533,797,1050,1402]},
-  {x: [0,281,561,841,1122], y: [0,280,561,841,1121,1402]},
-  {x: [0,281,560,841,1122], y: [0,280,558,834,1110,1402]},
-  {x: [0,282,560,841,1122], y: [0,265,535,797,1068,1402]},
-  {x: [0,282,561,841,1122], y: [0,279,558,836,1115,1402]},
+  {x: [0,281,561,841,1122], y: [0,281,561,841,1122,1402]},
+  {x: [0,281,561,841,1122], y: [0,281,561,841,1122,1402]},
+  {x: [0,281,561,841,1122], y: [0,281,561,841,1122,1402]},
+  {x: [0,281,561,841,1122], y: [0,281,561,841,1122,1402]},
+  {x: [0,281,561,841,1122], y: [0,281,561,841,1122,1402]},
+  {x: [0,281,561,841,1122], y: [0,281,561,841,1122,1402]},
 ];
 const manifest = {version: 1, sheets: [], terrains: []};
 const check = process.argv.includes('--check');
@@ -28,7 +28,12 @@ async function output(file, bytes) {
 }
 for (let sheetIndex = 0; sheetIndex < crops.length; sheetIndex++) {
   const id = `terrain-${sheetIndex + 1}`;
-  const source = await readFile(resolve(directory, 'source', `${id}.png`));
+  const source = await readFile(resolve(directory, 'source/enhanced', `${id}.png`));
+  if (source.length < 33 || source.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a'
+      || source.toString('ascii', 12, 16) !== 'IHDR'
+      || source.readUInt32BE(16) !== 1122 || source.readUInt32BE(20) !== 1402) {
+    throw new Error(`Enhanced source dimensions differ from the reviewed crops: ${id}`);
+  }
   const data = `data:image/png;base64,${source.toString('base64')}`;
   const crop = crops[sheetIndex];
   const images = [];

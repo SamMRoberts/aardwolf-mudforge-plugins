@@ -75,9 +75,16 @@ export function replaceMarker(source, marker, value) {
   return source.replace(marker, () => value);
 }
 
-export function assembleAtlasLua(source, html) {
+export function assembleAtlasLua(source, html, surfaces = {}) {
   if (html.includes(']====]')) throw new Error('Atlas HTML contains the Lua long-string delimiter');
-  const assembled = replaceMarker(source, '__ATLAS_HTML__', html);
+  let assembled = replaceMarker(source, '__ATLAS_HTML__', html);
+  for (const role of ['settings', 'details']) {
+    const marker = `__ATLAS_${role.toUpperCase()}_HTML__`;
+    if (assembled.includes(marker)) {
+      if (!surfaces[role] || surfaces[role].includes(']====]')) throw new Error(`Invalid Atlas ${role} document`);
+      assembled = replaceMarker(assembled, marker, surfaces[role]);
+    }
+  }
   parseMudForgeLua(assembled, 'assembled Aardwolf Atlas');
   return Buffer.from(assembled);
 }
@@ -102,10 +109,24 @@ export async function buildAtlasOutputs(root, source) {
   html = replaceMarker(html, '__ATLAS_ASSETS__', assetJson);
   html = replaceMarker(html, '__ATLAS_SCRIPT__', script);
   const preview = html.replace('<script>', '<script>window.ATLAS_PREVIEW=true;</script><script>');
-  const lua = assembleAtlasLua(source, html);
+  const surfaces = {};
+  const auxiliary = new Map();
+  const surfaceBundle = await build({ absWorkingDir: root, entryPoints: ['src/atlas/surface.js'], bundle: true, write: false,
+    format: 'iife', platform: 'browser', target: ['safari16'], minify: true, charset: 'ascii', logLevel: 'silent' });
+  for (const role of ['settings', 'details']) {
+    let document = (await readFile(resolve(root, `src/atlas/${role}.html`), 'utf8'))
+      .replace(/[^\x00-\x7f]/gu, character => `&#${character.codePointAt(0)};`);
+    document = replaceMarker(document, '__ATLAS_STYLE__', asciiCss.code);
+    if (role === 'details') document = replaceMarker(document, '__ATLAS_ASSETS__', assetJson);
+    document = replaceMarker(document, '__ATLAS_SCRIPT__', surfaceBundle.outputFiles[0].text.replace(/<\/script/gi, '<\\/script'));
+    surfaces[role] = document;
+    auxiliary.set(`dist/atlas/aardwolf-atlas-${role}.html`, Buffer.from(document.replace('<script>', '<script>window.ATLAS_PREVIEW=true;</script><script>')));
+  }
+  const lua = assembleAtlasLua(source, html, surfaces);
   if (lua.length > 5 * 1024 * 1024) throw new Error('Aardwolf Atlas exceeds MudForge\'s 5 MiB plugin catalog limit');
   return new Map([
     ['dist/plugins/aardwolf-atlas.lua', lua],
     ['dist/atlas/aardwolf-atlas.html', Buffer.from(preview)],
+    ...auxiliary,
   ]);
 }

@@ -1,10 +1,13 @@
-import { AreaTransfer, nativeList, normalizeRoom, terrainKey, visibleRooms, exitEntries } from "./model.js";
+import { AreaTransfer, nativeList, normalizeRoom, visibleRooms } from "./model.js";
+import { createInspector } from "./inspector.js";
 import { AtlasScene } from "./scene.js";
 import { createPreviewBridge } from "./fixture.js";
 const $ = (id) => document.getElementById(id);
 const assets = window.ATLAS_ASSETS || { terrains: [], images: {} };
 const bridge = window.mudforge || (window.ATLAS_PREVIEW ? createPreviewBridge(assets, new URLSearchParams(location.search).has("large")) : null);
-const state = { revision: 0, areas: [], rooms: [], player: null, playerArea: null, playerZ: 0, area: null, floor: 0, selected: null, selectionGeneration: 0, route: [], preferences: { view: "overhead", follow: true, exploded: false, collapsed: false }, mapReady: false };
+// Selection identity survives route refreshes so a late window-close event cannot clear a newer selection.
+const state = { revision: 0, areas: [], rooms: [], player: null, playerArea: null, playerZ: 0, area: null, floor: 0, selected: null, selectionGeneration: 0, selectionEpoch: 0, route: [], room: null, preferences: { view: "overhead", follow: true, exploded: false, collapsed: false, showVnums: true, northUp: false, floatingDetails: false }, mapReady: false };
+const inspector = createInspector(document, assets, navigateStep);
 const transfer = new AreaTransfer();
 let scene = null, loadedArea = null, routeGeneration = 0;
 let geometryCache = { source: null, floor: null, exploded: null, rooms: [] };
@@ -22,7 +25,8 @@ function fail(text) {
 }
 try {
   scene = new AtlasScene($("map"), assets, { select: (rooms) => {
-    if (rooms.length === 1) selectRoom(rooms[0].id);
+    if (rooms.length === 0) deselectRoom();
+    else if (rooms.length === 1) selectRoom(rooms[0].id);
     else {
       $("collision-items").replaceChildren(...rooms.map((room) => button(`${room.name} · #${room.id}`, () => selectRoom(room.id))));
       $("collision").hidden = false;
@@ -45,6 +49,7 @@ function clearRoute(message = "Finding a native route…") {
   state.route = [];
   $("route-steps").replaceChildren();
   $("route-summary").textContent = message;
+  syncDetails();
 }
 function applyPreferences(preferences) {
   state.preferences = { ...state.preferences, ...preferences };
@@ -58,7 +63,12 @@ function applyPreferences(preferences) {
   $("inspector").classList.toggle("collapsed", p.collapsed);
   $("collapse").setAttribute("aria-expanded", String(!p.collapsed));
   $("collapse").textContent = p.collapsed ? "Show details" : "Hide details";
-  $("view-caption").textContent = p.view === "perspective" ? "ORBIT · 3D PERSPECTIVE" : "N ↑ · OVERHEAD";
+  $("view-caption").textContent = p.view === "perspective" ? (p.northUp ? "N ↑ · 3D PERSPECTIVE" : "ORBIT · 3D PERSPECTIVE") : "N ↑ · OVERHEAD";
+  $("mouse-help").textContent = p.view === "perspective"
+    ? `Left-drag pan · Right-drag ${p.northUp ? "tilt" : "orbit"} · Scroll zoom`
+    : "Drag pan · Scroll zoom";
+  scene?.setDisplayOptions({ showVnums: p.showVnums, northUp: p.northUp });
+  syncDetails();
   if (scene && scene.view !== p.view) scene.setView(p.view);
   render(false);
   if (state.mapReady) status(followingStatus());
@@ -67,7 +77,7 @@ function setPreferences(patch) {
   const changed = Object.entries(patch).some(([key, value]) => state.preferences[key] !== value);
   if (!changed) return;
   applyPreferences(patch);
-  send("preferences", { preferences: state.preferences });
+  send("preferences", { patch });
 }
 function requestArea(area, options = {}) {
   if (area === null || area === void 0) return;
@@ -102,11 +112,13 @@ function floors() {
   $("floor").replaceChildren(...values.map((value) => new Option(`Z ${value}`, String(value))));
   $("floor").value = String(state.floor);
 }
-function search() {
+function search(forceOpen = false) {
   const term = $("search").value.toLowerCase().trim();
   const rooms = state.rooms.filter((room) => !room.hidden && (!term || `${room.id} ${room.name}`.toLowerCase().includes(term)));
   const show = term ? rooms.slice(0, 60) : [];
+  $("results").hidden = !term || (!forceOpen && $("results").hidden);
   $("results").replaceChildren(...show.map((room) => button(`${room.name} · #${room.id}${room.positioned ? "" : " · no coordinates"}`, () => selectRoom(room.id))));
+  if (term && !rooms.length) $("results").textContent = "No matching rooms.";
   if (term && rooms.length > 60) {
     const note = document.createElement("p");
     note.textContent = `Showing 60 of ${rooms.length} matches. Refine your search.`;
@@ -114,6 +126,8 @@ function search() {
   }
 }
 function selectRoom(id) {
+  state.room = null;
+  state.selectionEpoch++;
   state.selected = Number(id);
   state.selectionGeneration++;
   routeGeneration = state.selectionGeneration;
@@ -129,70 +143,54 @@ function selectRoom(id) {
     showRoom(local);
     scene?.center(local);
   }
+  $("results").hidden = true;
+  if (!local) clearInspector();
+  syncDetails();
   send("inspect", { roomId: state.selected, generation: state.selectionGeneration });
   send("route", { roomId: state.selected, generation: routeGeneration });
 }
-function previewTerrain(value) {
-  const key = terrainKey(value, assets.terrains);
-  const terrain = assets.terrains?.find((item) => item.name === key);
-  const sheet = assets.sheets?.find((item) => item.id === terrain?.sheet);
-  const image = assets.images?.[key] || assets.images?.default;
-  $("terrain-preview").style.backgroundImage = "none";
-  $("terrain-preview").style.backgroundSize = "cover";
-  $("terrain-preview").style.backgroundPosition = "center";
-  if (sheet && terrain) {
-    const { width: w, height: h, x, y } = terrain;
-    $("terrain-preview").style.backgroundImage = `url("${sheet.image}")`;
-    $("terrain-preview").style.backgroundSize = `${sheet.width / w * 100}% ${sheet.height / h * 100}%`;
-    $("terrain-preview").style.backgroundPosition = `${sheet.width === w ? 0 : x / (sheet.width - w) * 100}% ${sheet.height === h ? 0 : y / (sheet.height - h) * 100}%`;
-  } else if (image) $("terrain-preview").style.backgroundImage = `url("${image}")`;
-  $("terrain-name").textContent = `${String(value ?? "Unknown terrain")} · ILLUSTRATIVE TERRAIN`;
-}
-function describe(value) {
-  if (value === null || value === void 0 || value === "") return "—";
-  if (typeof value === "object") return JSON.stringify(value, null, 2);
-  return String(value);
-}
 function clearInspector() {
-  $("room-name").textContent = "Select a room";
-  $("room-summary").textContent = "Inspect a room in the current native map.";
-  $("room-fields").replaceChildren();
-  $("terrain-preview").style.backgroundImage = "none";
-  $("terrain-name").textContent = "SELECT A ROOM";
+  state.room = null;
+  inspector.clear();
+  syncDetails();
 }
 function showRoom(room) {
-  $("room-name").textContent = room.name;
-  previewTerrain(room.terrain);
-  $("room-summary").textContent = describe(room.details || room.description || "Native map room");
-  const fields = [["Room", `#${room.id}`], ["Area", room.area], ["Coordinates", room.positioned ? `${room.x}, ${room.y}, ${room.z}` : "Not available"], ["Notes", room.notes], ["Exits", exitEntries(room).map((e) => `${e.direction} → ${e.to}${e.custom ? " (custom)" : ""}`).join("\n")], ["Doors", room.doors], ["Flags", room.flags?.join(", ")], ["Routing", `${room.locked ? "Locked" : "Unlocked"} · weight ${room.weight ?? 1}`], ["Exit locks", room.exitLocks], ["User data", room.userData]];
-  $("room-fields").replaceChildren();
-  for (const [name, value] of fields) {
-    if ((value === void 0 || value === null || value === "") && !["Room", "Area", "Coordinates"].includes(name)) continue;
-    const dt = document.createElement("dt"), dd = document.createElement("dd");
-    dt.textContent = name;
-    dd.textContent = describe(value);
-    $("room-fields").append(dt, dd);
+  state.room = room;
+  inspector.showRoom(room);
+  syncDetails();
+}
+function syncDetails() {
+  $("inspector").hidden = state.selected === null || state.preferences.floatingDetails;
+  send("details", { snapshot: { selected: state.selected, generation: state.selectionGeneration, selectionEpoch: state.selectionEpoch,
+    room: state.room, steps: state.route, summary: $("route-summary").textContent } });
+}
+function deselectRoom() {
+  state.selectionEpoch++;
+  state.selected = null;
+  routeGeneration = ++state.selectionGeneration;
+  $("collision").hidden = true;
+  $("results").hidden = true;
+  clearRoute("Select a destination to preview a native route.");
+  clearInspector();
+  scene?.overlays(state.player, null, [{ roomId: state.player }]);
+}
+function navigateStep(index) {
+  const step = state.route[index];
+  if (!step || step.hidden) return;
+  setPreferences({ follow: false });
+  state.floor = Number(step.z) || 0;
+  if (String(step.areaId) !== state.area) requestArea(step.areaId);
+  else {
+    floors(); render();
+    scene?.center(state.rooms.find((r) => r.id === Number(step.roomId)));
   }
 }
 function route(message) {
-  if (message.generation !== routeGeneration) return;
+  if (state.selected === null || message.generation !== routeGeneration) return;
   state.route = nativeList(message.steps);
   $("route-summary").textContent = message.found ? `${message.stepCount ?? state.route.length} steps · weighted cost ${message.cost ?? "unknown"}` : message.error || "No route found. Native room and exit locks are respected.";
-  $("route-steps").replaceChildren(...state.route.map((step, index) => {
-    const item = document.createElement("li");
-    if (step.hidden) item.textContent = `${index + 1}. ${step.direction || "Move"} · hidden room`;
-    else item.append(button(`${step.direction || "Start"} · ${step.name || `#${step.roomId}`} · ${step.areaId || "Unassigned"} / Z ${step.z ?? "?"}`, () => {
-      setPreferences({ follow: false });
-      state.floor = Number(step.z) || 0;
-      if (String(step.areaId) !== state.area) requestArea(step.areaId);
-      else {
-        floors();
-        render();
-        scene?.center(state.rooms.find((r) => r.id === Number(step.roomId)));
-      }
-    }));
-    return item;
-  }));
+  inspector.showRoute(state.route, $("route-summary").textContent);
+  syncDetails();
   scene?.overlays(state.player, state.selected, [{ roomId: state.player }, ...state.route]);
 }
 function update(message) {
@@ -207,6 +205,7 @@ function update(message) {
   state.playerZ = Number.isFinite(message.playerZ) ? message.playerZ : 0;
   const refreshSelection = state.selected !== null && (message.invalidate || message.type === "update");
   if (refreshSelection) {
+    if (message.invalidate) { state.room = null; inspector.clear(); }
     routeGeneration = ++state.selectionGeneration;
     clearRoute();
   }
@@ -218,6 +217,7 @@ function update(message) {
     state.rooms = [];
     state.route = [];
     state.selected = null;
+    state.selectionEpoch++;
     routeGeneration = ++state.selectionGeneration;
     clearInspector();
     $("route-steps").replaceChildren();
@@ -266,37 +266,39 @@ function receive(message) {
       if (state.preferences.follow) scene?.center(state.rooms.find((r) => r.id === state.player));
       status(`${state.area || "Unassigned area"} · ${state.rooms.length.toLocaleString()} rooms loaded`);
     }
-  } else if (message.type === "room" && message.generation === state.selectionGeneration) {
+  } else if (message.type === "room" && state.selected !== null && message.generation === state.selectionGeneration) {
     const room = normalizeRoom(message.room);
-    if (room && !room.hidden) showRoom(room);
+    if (room && !room.hidden && room.id === state.selected) showRoom(room);
     else {
-      clearInspector();
-      state.selected = null;
-      routeGeneration = ++state.selectionGeneration;
-      clearRoute("Select a destination to preview a native route.");
+      deselectRoom();
     }
   } else if (message.type === "route") route(message);
-  else if (message.type === "preferences") applyPreferences(message.preferences || {});
+  else if (message.type === "preferences") {
+    applyPreferences(message.preferences || {});
+    if (message.error) status(message.error);
+  }
   else if (message.type === "error") {
     const expectedGeneration = message.requestAction === "area" ? transfer.generation : message.requestAction === "route" ? routeGeneration : state.selectionGeneration;
     if (message.generation != null && message.generation !== expectedGeneration) return;
     status(message.error || "Native mapper request failed");
     if (message.requestAction === "inspect") {
-      clearInspector();
-      state.selected = null;
-      routeGeneration = ++state.selectionGeneration;
-      clearRoute("Select a destination to preview a native route.");
-      scene?.overlays(state.player, null, []);
+      deselectRoom();
     }
     if (message.requestAction === "route") $("route-summary").textContent = message.error || "Route unavailable";
     if (message.requestAction === "area") {
       $("empty").hidden = false;
       $("empty").textContent = message.error || "Area unavailable";
     }
-  } else if (message.type === "visibility") {
+    syncDetails();
+  } else if (message.type === "deselect" && message.selectionEpoch === state.selectionEpoch) deselectRoom();
+  else if (message.type === "navigate" && message.generation === state.selectionGeneration) navigateStep(message.index);
+  else if (message.type === "visibility") {
     scene?.setVisible(message.visible !== false);
   } else if (message.type === "resize") scene?.resize();
 }
+$("settings").addEventListener("click", () => send("settings"));
+$("clear-selection").addEventListener("click", deselectRoom);
+$("search").addEventListener("keydown", (event) => { if (event.key === "Escape") $("results").hidden = true; });
 $("area").addEventListener("change", () => requestArea($("area").value, { manual: true }));
 $("floor").addEventListener("change", () => {
   setPreferences({ follow: false });
@@ -326,7 +328,8 @@ $("follow").addEventListener("click", () => {
   }
 });
 $("collapse").addEventListener("click", () => setPreferences({ collapsed: !state.preferences.collapsed }));
-$("search").addEventListener("input", search);
+$("search").addEventListener("input", () => search(true));
+$("search").addEventListener("focus", () => search(true));
 $("collision-close").addEventListener("click", () => {
   $("collision").hidden = true;
 });
@@ -336,4 +339,4 @@ if (bridge?.onMessage) {
   bridge.onMessage(receive);
   send("ready");
 } else status("Preview mode · native bridge is unavailable");
-window.atlasPreview = { receive, getState: () => ({ area: state.area, roomCount: state.rooms.length, view: state.preferences.view, generation: transfer.generation, selectionGeneration: state.selectionGeneration, routeCount: state.route.length, selected: state.selected }), dispose: () => scene?.dispose() };
+window.atlasPreview = { receive, getState: () => ({ area: state.area, roomCount: state.rooms.length, view: state.preferences.view, generation: transfer.generation, selectionGeneration: state.selectionGeneration, selectionEpoch: state.selectionEpoch, routeCount: state.route.length, selected: state.selected, preferences: { ...state.preferences } }), dispose: () => scene?.dispose() };
