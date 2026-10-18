@@ -1,5 +1,5 @@
 import { createInspector } from "./inspector.js";
-import { nativeList } from "./model.js";
+import { nativeList, indicatorSettings, indicatorOptions } from "./model.js";
 import { createSurfacePreviewBridge } from "./fixture.js";
 const role = document.body.dataset.surface;
 const bridge = window.mudforge || (window.ATLAS_PREVIEW ? createSurfacePreviewBridge() : null);
@@ -10,7 +10,26 @@ const inspector = role === "details" ? createInspector(document, window.ATLAS_AS
   if (snapshot) send("navigate", { index, generation: snapshot.generation });
 }) : null;
 if (role === "settings") {
-  for (const key of ["showVnums", "northUp", "floatingDetails"]) {
+  for (const setting of indicatorSettings) {
+    const row = document.createElement("div");
+    row.className = "indicator-setting";
+    const label = document.createElement("label");
+    const toggle = document.createElement("input");
+    toggle.id = setting.showKey;
+    toggle.type = "checkbox";
+    label.append(toggle, document.createTextNode(setting.label));
+    const color = document.createElement("input");
+    color.type = "color";
+    color.id = setting.colorKey;
+    color.setAttribute("aria-label", `${setting.label} color`);
+    row.append(label, color);
+    $("exit-indicators").append(row);
+    color.addEventListener("change", () => {
+      $("surface-status").textContent = "";
+      send("setting", { key: setting.colorKey, value: color.value });
+    });
+  }
+  for (const key of ["showVnums", "northUp", "floatingDetails", ...indicatorSettings.map(setting => setting.showKey)]) {
     $(key).addEventListener("change", () => {
       $("surface-status").textContent = "";
       send("setting", { key, value: $(key).checked });
@@ -24,6 +43,11 @@ function receive(message) {
   if (!message || message.v !== 1) return;
   if (role === "settings" && message.type === "preferences") {
     for (const key of ["showVnums", "northUp", "floatingDetails"]) $(key).checked = message.preferences?.[key] === true;
+    const options = indicatorOptions(message.preferences);
+    for (const { showKey, colorKey } of indicatorSettings) {
+      $(showKey).checked = options[showKey];
+      $(colorKey).value = options[colorKey];
+    }
   } else if (role === "details" && message.type === "details") {
     snapshot = message.snapshot || null;
     $("inspector-content").hidden = !snapshot?.selected;

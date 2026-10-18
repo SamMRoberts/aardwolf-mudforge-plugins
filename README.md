@@ -21,10 +21,13 @@ a connected session.
 
 ## Aardwolf Atlas
 
-[Aardwolf Atlas 0.2.2](docs/ATLAS.md) displays the native map in overhead or
+[Aardwolf Atlas 0.3.0](docs/ATLAS.md) displays the native map in overhead or
 orbitable 3D views, with terrain artwork, floors, area browsing, room inspection,
-and lock-aware route previews. Install `dist/plugins/aardwolf-atlas.lua` by itself;
-it needs no API Core, SQLite helper, connection, or runtime downloads. Type
+and lock-aware route previews. Settings includes independent visibility and color
+controls for doors, locked doors, up/down exits, and area exits, saved per world.
+Source indicators remain visible for exits to other floors and areas; routing
+locks keep their independent red markers. Install `dist/plugins/aardwolf-atlas.lua`
+by itself; it needs no API Core, SQLite helper, connection, or runtime downloads. Type
 `awatlas` to reopen its dockable panel. Atlas never walks or edits native map data.
 See the guide for controls, build details, and disposable acceptance checks.
 Native checks on MudForge 2.0.3701, map-preservation comparisons, and remaining

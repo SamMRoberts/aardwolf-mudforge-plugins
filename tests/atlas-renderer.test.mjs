@@ -129,6 +129,7 @@ function widgetHarness(initPatch = {}) {
       this.overlay = steps;
     }
     setDisplayOptions(options) { this.options = options; }
+    setIndicatorOptions(options) { this.indicators = options; }
     setView(view) { this.view = view; }
     setVisible() {
     }
@@ -360,4 +361,90 @@ test("the initial known character area resumes following even with a saved brows
   const h = widgetHarness({ preferences: { follow: false } });
   assert.equal(h.state().preferences.follow, true);
   assert.equal(h.scene.centers.at(-1), 1);
+});
+
+test("indicator updates synchronize the legend without rebuilding terrain or losing view and selection", () => {
+  const h = widgetHarness();
+  const generation = h.select();
+  h.receive({ type: "route", generation, found: true, steps: [{ roomId: 2 }] });
+  const state = h.state(), builds = h.scene.builds, fits = h.scene.fits, centers = h.scene.areaCenters;
+  h.receive({ type: "preferences", preferences: { showDoors: false, showUpExits: false, areaExitColor: "#ABCDEF" } });
+  assert.equal(h.element("key-doors").hidden, true);
+  assert.equal(h.element("key-upExits").hidden, true);
+  assert.equal(h.element("key-lockedDoors").hidden, false);
+  assert.equal(h.element("key-areaExits").style.color, "#abcdef");
+  assert.equal(h.scene.indicators.showDoors, false);
+  assert.equal(h.scene.builds, builds);
+  assert.equal(h.scene.fits, fits);
+  assert.equal(h.scene.areaCenters, centers);
+  assert.equal(h.state().selected, state.selected);
+  assert.equal(h.state().routeCount, state.routeCount);
+  assert.equal(h.state().preferences.follow, state.preferences.follow);
+  assert.equal(h.state().view, state.view);
+});
+
+test("settings controls send individual typed patches and restore authoritative values after save failure", () => {
+  const elements = new Map(), sent = [];
+  class Element {
+    constructor() { this.handlers = {}; this.children = []; }
+    set id(value) { this._id = value; elements.set(value, this); }
+    get id() { return this._id; }
+    append(...children) { this.children.push(...children); }
+    addEventListener(type, fn) { this.handlers[type] = fn; }
+    setAttribute(key, value) { this[key] = value; }
+  }
+  const element = id => { if (!elements.has(id)) { const node = new Element(); node.id = id; } return elements.get(id); };
+  const bridge = { onMessage(fn) { this.receive = fn; }, send(event, message) { sent.push(message); } };
+  const context = { ...model, createInspector, window: { mudforge: bridge }, document: {
+    body: { dataset: { surface: "settings" } }, getElementById: element,
+    createElement() { return new Element(); }, createTextNode(text) { return { textContent: text }; },
+  } };
+  vm.runInNewContext(readFileSync(new URL("../src/atlas/surface.js", import.meta.url), "utf8").replace(/^import .*?;\n/gm, ""), context);
+  assert.equal(sent[0].action, "ready");
+  bridge.receive({ v: 1, type: "preferences", preferences: {} });
+  assert.equal(element("exit-indicators").children.length, 5);
+  for (const { showKey, colorKey, color, label } of model.indicatorSettings) {
+    assert.equal(element(showKey).checked, true);
+    assert.equal(element(colorKey).value, color);
+    assert.equal(element(colorKey)["aria-label"], `${label} color`);
+    element(showKey).checked = false;
+    element(showKey).handlers.change();
+    assert.equal(sent.at(-1).key, showKey);
+    assert.equal(sent.at(-1).value, false);
+    element(colorKey).value = "#123456";
+    element(colorKey).handlers.change();
+    assert.equal(sent.at(-1).key, colorKey);
+    assert.equal(sent.at(-1).value, "#123456");
+  }
+  bridge.receive({ v: 1, type: "error", error: "Save failed" });
+  bridge.receive({ v: 1, type: "preferences", preferences: model.indicatorOptions() });
+  assert.equal(element("surface-status").textContent, "Save failed");
+  assert.equal(element("showDoors").checked, true);
+  assert.equal(element("doorColor").value, "#ffd166");
+});
+
+test("large preview room identities and destination metadata stay consistent across areas", async () => {
+  const context = { ...model, window: { addEventListener() {} }, crypto: { randomUUID: () => "fixture" }, queueMicrotask };
+  vm.createContext(context);
+  vm.runInContext(readFileSync(new URL("../src/atlas/fixture.js", import.meta.url), "utf8").replace(/^import .*?;\n/gm, "").replace(/^export /gm, "") + '\nthis.preview = createPreviewBridge({terrains:[]}, true);', context);
+  const messages = [];
+  context.preview.onMessage(message => messages.push(message));
+  for (let offset = 0; offset < 10000; offset += 128) context.preview.send("atlas", { action: "area", areaId: "The Emerald Expanse", offset, generation: 1 });
+  context.preview.send("atlas", { action: "area", areaId: "The Glass Archive", offset: 0, generation: 2 });
+  await new Promise(resolve => queueMicrotask(resolve));
+  const rooms = messages.flatMap(message => message.rooms);
+  assert.equal(rooms.length, 10002);
+  assert.equal(new Set(rooms.map(room => room.id)).size, rooms.length);
+  const byId = new Map(rooms.map(room => [room.id, room]));
+  for (const source of rooms) for (const exit of model.exitEntries(source)) {
+    assert.equal(source.exitTargets[exit.direction].areaId, byId.get(exit.to).areaId);
+  }
+  assert.equal(byId.get(799).exitTargets.e.areaId, "The Emerald Expanse");
+  assert.equal(byId.get(1).exitTargets["enter archive"].areaId, "The Glass Archive");
+});
+
+test("indicator display defaults reject malformed bridge colors and preserve explicit false", () => {
+  for (const invalid of [null, false, "bad", 123]) assert.deepEqual(model.indicatorOptions(invalid), model.indicatorOptions());
+  for (const color of ["red", "#abc", "#12345678", "#abcdef;display:none", {}, 1]) assert.equal(model.indicatorOptions({ doorColor: color }).doorColor, "#ffd166");
+  assert.equal(model.indicatorOptions({ showDoors: false }).showDoors, false);
 });

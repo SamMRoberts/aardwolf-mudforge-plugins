@@ -88,6 +88,45 @@ const cases = {
     assert(room.notes == nil and room.userData == nil)
     assert(world.pathCalls == 0 and world.writes == 0)
   `,
+  'exit target metadata resolves ordinary and custom exits without exposing hidden or missing rooms': `
+    ${setup}
+    world.add(4, { area = "Beta", hidden = true, exits = {} })
+    world.add(5); world.metadata[5] = { hidden = true }
+    world.add(6, { name = "No coordinates", exits = {} })
+    world.rooms[1].exits = { e = 2, up = 3, d = 4, w = 5, n = 999, s = 6, ["climb vines"] = 3 }
+    world.metadata[1] = { specialExits = { ["climb vines"] = 3, ["enter hidden"] = 5 } }
+    world.request("area", { areaId = "Alpha", generation = 0 })
+    local room = world.last().rooms[1]
+    assert(room.exitTargets.e.areaId == "Alpha" and room.exitTargets.up.areaId == "Beta")
+    assert(room.exitTargets.s.areaId == "" and room.exitTargets["climb vines"].areaId == "Beta")
+    assert(room.exitTargets.d == nil and room.exitTargets.w == nil and room.exitTargets.n == nil)
+    assert(room.exitTargets["enter hidden"] == nil)
+    assert(room.exits.d == 4 and room.exits.n == 999 and room.specialExits["enter hidden"] == 5)
+    assert(room.exits["climb vines"] == nil and room.specialExits["climb vines"] == 3)
+    world.request("inspect", { roomId = 1, generation = 0 })
+    assert(world.last().room.exitTargets.up.areaId == "Beta" and world.last().room.exitTargets.d == nil)
+    assert(world.pathCalls == 0 and world.writes == 0)
+  `,
+  'exit target lookups are cached across streamed chunks and invalidated with the map revision': `
+    ${setup}
+    for id = 4, 131 do world.add(id) end
+    world.metadata[4] = { hidden = true }
+    for id, room in pairs(world.rooms) do
+      if id ~= 3 then room.exits = { e = 3, w = 999, n = 4 } end
+    end
+    local calls, original = {}, env.getMapRoom
+    env.getMapRoom = function(id) calls[id] = (calls[id] or 0) + 1; return original(id) end
+    world.request("area", { areaId = "Alpha", generation = 0 })
+    assert(not world.last().done and world.last().nextOffset == 128)
+    world.request("area", { areaId = "Alpha", generation = 0, offset = 128 })
+    assert(world.last().done and world.last().nextOffset == 130)
+    assert(calls[3] == 1 and calls[999] == 1 and calls[4] == 1)
+    assert(world.last().rooms[1].exitTargets.e.areaId == "Beta" and world.last().rooms[1].exitTargets.n == nil)
+    world.metadata[3] = { hidden = true }
+    world.emit("update")
+    world.request("area", { areaId = "Alpha", generation = 1, revision = 1 })
+    assert(world.last().rooms[1].exitTargets.e == nil and calls[3] == 2)
+  `,
   'inspection preserves inert text and native metadata, and rejects stale selection': `
     ${setup}
     world.request("inspect", { roomId = 2, generation = 4 })
@@ -236,6 +275,72 @@ const cases = {
     } } })
     bad.handshake()
     assert(bad.last().preferences.view == "overhead" and bad.last().preferences.showVnums)
+  `,
+  'indicator defaults migrate older saves without writing and normalize saved colors': `
+    local world = atlasWorld({ storage = { ["atlas-preferences"] = {
+      view = "perspective", follow = false, exploded = true, collapsed = true,
+      showVnums = false, northUp = true, floatingDetails = false, doorColor = "#AB12CD", showDownExits = false
+    } } })
+    world.handshake()
+    local p = world.last().preferences
+    assert(p.view == "perspective" and not p.showVnums and p.northUp and not p.follow)
+    assert(p.showDoors and p.showLockedDoors and p.showUpExits and not p.showDownExits and p.showAreaExits)
+    assert(p.doorColor == "#ab12cd" and p.lockedDoorColor == "#ff997d" and p.upExitColor == "#87edbd")
+    assert(p.downExitColor == "#80bfff" and p.areaExitColor == "#c9a1ff" and world.writes == 0)
+    local fresh = atlasWorld(); fresh.handshake()
+    assert(fresh.last().preferences.doorColor == "#ffd166" and fresh.last().preferences.showDownExits)
+    assert(fresh.writes == 0)
+  `,
+  'all indicator fields validate atomically and synchronize durable per-world settings': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    assert(world.surface("settings").config.size.height == 520)
+    local other = atlasWorld({ id = "other-world" }); other.handshake(); other.ready()
+    world.request("preferences", { patch = { follow = false, northUp = true, showVnums = false } })
+    for _, key in ipairs({ "showDoors", "showLockedDoors", "showUpExits", "showDownExits", "showAreaExits" }) do
+      world.surfaceRequest("settings", "setting", { key = key, value = false })
+      assert(world.lastFor().preferences[key] == false and world.lastFor("settings").preferences[key] == false)
+      local writes = world.writes
+      world.request("preferences", { patch = { [key] = "false", follow = true } })
+      world.surfaceRequest("settings", "setting", { key = key, value = 0 })
+      assert(world.writes == writes and not world.lastFor("settings").preferences.follow)
+    end
+    for _, key in ipairs({ "doorColor", "lockedDoorColor", "upExitColor", "downExitColor", "areaExitColor" }) do
+      world.surfaceRequest("settings", "setting", { key = key, value = "#ABCDEF" })
+      assert(world.lastFor().preferences[key] == "#abcdef" and world.lastFor("settings").preferences[key] == "#abcdef")
+      local writes = world.writes
+      for _, invalid in ipairs({ "#fff", "abcdef", "#abcdefg", "#gggggg", " #abcdef", "#abcdef ", true, 1, {} }) do
+        world.request("preferences", { patch = { [key] = invalid, follow = true } })
+        world.surfaceRequest("settings", "setting", { key = key, value = invalid })
+        assert(world.writes == writes and world.lastFor("settings").preferences[key] == "#abcdef")
+      end
+    end
+    world.request("preferences", { patch = { areaExitColor = "#010203", showAreaExits = true } })
+    local p = world.lastFor("settings").preferences
+    assert(p.areaExitColor == "#010203" and p.showAreaExits and not p.showDoors)
+    assert(not p.follow and p.northUp and not p.showVnums and p.view == "overhead")
+    assert(other.last().preferences.showDoors and other.last().preferences.areaExitColor == "#c9a1ff" and other.writes == 0)
+    env.cleanup(); env.init(); world.handshake()
+    p = world.lastFor().preferences
+    assert(p.areaExitColor == "#010203" and p.showAreaExits and not p.showDoors and not p.follow)
+  `,
+  'failed indicator saves restore map and settings values while preserving floating details': `
+    ${setup}
+    world.request("settings"); world.surfaceHandshake("settings")
+    world.surfaceRequest("settings", "setting", { key = "floatingDetails", value = true })
+    world.request("details", { revision = 0, snapshot = { selected = 2, generation = 1,
+      room = { id = 2 }, steps = {}, summary = "Selected room" } })
+    world.surfaceHandshake("details")
+    world.request("preferences", { patch = { showDoors = false, doorColor = "#010203", follow = false } })
+    world.refuseWrites = true
+    world.surfaceRequest("settings", "setting", { key = "doorColor", value = "#ffffff" })
+    assert(world.lastFor().preferences.doorColor == "#010203" and world.lastFor("settings").preferences.doorColor == "#010203")
+    world.request("preferences", { patch = { showDoors = true, doorColor = "#abcdef", follow = true } })
+    local p = world.lastFor().preferences
+    assert(not p.showDoors and p.doorColor == "#010203" and not p.follow and p.floatingDetails)
+    assert(world.lastFor("settings").preferences.doorColor == "#010203")
+    assert(world.lastFor("details").snapshot.selected == 2 and world.surface("details").visible)
+    assert(world.storage["atlas-preferences"].doorColor == "#010203" and not world.storage["atlas-preferences"].showDoors)
   `,
   'settings is lazy, independently ready, reusable, world-local and accepts only allowed boolean patches': `
     ${setup}

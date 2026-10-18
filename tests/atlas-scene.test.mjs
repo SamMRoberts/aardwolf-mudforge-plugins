@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { AtlasScene } from "../src/atlas/scene.js";
-import { connectionSegments, connectionStyles } from "../src/atlas/connections.js";
+import { connectionSegments, connectionStyles, configuredConnectionStyles } from "../src/atlas/connections.js";
 import { normalizeRoom } from "../src/atlas/model.js";
 
 // Exercise the production camera and controls without a WebGL context.
@@ -277,7 +277,8 @@ test("reverse vertical connections use opposing lanes and finite direction/lock 
   assert.ok(batches.normal[18] < 0);
   assert.ok(batches.normal[1] < batches.normal[4]);
   assert.ok(batches.normal[19] > batches.normal[22]);
-  assert.equal(batches.exitLocks.length, 108);
+  assert.equal(batches.exitLocks.length, 54);
+  assert.equal(batches.lockedDoorLocks.length, 54);
   assert.ok(Object.values(batches).flat().every(Number.isFinite));
 });
 
@@ -290,9 +291,11 @@ test("open, closed, locked doors and independent room/exit locks have distinct b
   assert.equal(batches.openDoors.length, 18);
   assert.equal(batches.closedDoors.length, 6);
   assert.equal(batches.lockedDoors.length, 6);
-  assert.equal(batches.exitLocks.length, 108); // A closed door lock and an independent routing lock.
+  assert.equal(batches.exitLocks.length, 54); // Independent routing lock keeps its own color.
+  assert.equal(batches.lockedDoorLocks.length, 54);
   assert.equal(batches.roomLocks.length, 54);
-  assert.equal(new Set([connectionStyles.openDoors.color, connectionStyles.closedDoors.color, connectionStyles.lockedDoors.color]).size, 3);
+  assert.equal(connectionStyles.openDoors.color, connectionStyles.closedDoors.color);
+  assert.notEqual(connectionStyles.closedDoors.color, connectionStyles.lockedDoors.color);
   assert.notDeepEqual(batches.openDoors, batches.closedDoors);
   // Padlock bodies retain a visible interior at normal tile sizes, while the
   // room-corner marker stays within the slab's 0.74-unit half-width.
@@ -371,4 +374,116 @@ test("wide connection layers are batched, preserve room picking and keep route/p
   assert.equal(geometryDisposals, owned.length);
   assert.equal(materialDisposals, owned.filter(child => child.userData.ownMaterial).length);
   for (const material of scene.materials.values()) material.dispose();
+});
+
+test("source indicators survive off-floor, cross-area and unpositioned destinations without inventing links", () => {
+  const source = room(1, 0, 0, 0, { areaId: "A", exits: { u: 2, down: 3, e: 4 }, specialExits: { "enter portal": 5 },
+    doors: { u: 3, down: 1, e: 2 }, exitTargets: { u: { areaId: "B" }, down: { areaId: "A" }, e: { areaId: "B" }, "enter portal": { areaId: "B" } } });
+  const batches = connectionSegments([source]);
+  assert.equal(batches.normal.length + batches.custom.length, 0);
+  assert.equal(batches.upExits.length, 18);
+  assert.equal(batches.downExits.length, 18);
+  assert.equal(batches.areaExits.length, 3 * 30);
+  assert.equal(batches.openDoors.length, 18);
+  assert.equal(batches.closedDoors.length, 6);
+  assert.equal(batches.lockedDoors.length, 6);
+  assert.equal(batches.lockedDoorLocks.length, 54);
+  assert.ok(Object.values(batches).flat().every(Number.isFinite));
+  // The same floor arrow is retained when the destination is also visible.
+  const connected = connectionSegments([source, room(2, 0, 0, 1, { areaId: "B" })], true);
+  assert.equal(connected.upExits.length, 18);
+  assert.equal(connected.normal.length, 18);
+  assert.equal(connected.lockedDoors.length, 6); // No duplicate source door.
+});
+
+test("five indicator toggles and colors are independent of connections and routing locks", () => {
+  const rooms = [room(1, 0, 0, 0, { areaId: "A", exits: { up: 2, d: 3, e: 4 },
+    doors: { up: 3, d: 1, e: 2 }, exitLocks: { up: true }, locked: true }),
+    room(2, 0, 0, 1, { areaId: "B" }), room(3, 0, 0, -1, { areaId: "A" }), room(4, 1, 0, 0, { areaId: "A" })];
+  const defaults = connectionSegments(rooms, true);
+  for (const [toggle, batches] of [
+    ["showDoors", ["openDoors", "closedDoors"]], ["showLockedDoors", ["lockedDoors", "lockedDoorLocks"]],
+    ["showUpExits", ["upExits"]], ["showDownExits", ["downExits"]], ["showAreaExits", ["areaExits"]],
+  ]) {
+    const result = connectionSegments(rooms, true, { [toggle]: false });
+    for (const [key, vertices] of Object.entries(result)) {
+      if (batches.includes(key)) assert.equal(vertices.length, 0, key);
+      else assert.deepEqual(vertices, defaults[key], `${toggle} must preserve ${key}`);
+    }
+  }
+  const styles = configuredConnectionStyles({ doorColor: "#ABCDEF", lockedDoorColor: "#123456", upExitColor: "#456789", downExitColor: "#654321", areaExitColor: "#987654" });
+  assert.equal(styles.openDoors.color, "#abcdef");
+  assert.equal(styles.closedDoors.color, "#abcdef");
+  assert.equal(styles.lockedDoorLocks.color, "#123456");
+  assert.equal(styles.lockedDoors.color, "#123456");
+  assert.equal(styles.upExits.color, "#456789");
+  assert.equal(styles.downExits.color, "#654321");
+  assert.equal(styles.areaExits.color, "#987654");
+  assert.equal(styles.exitLocks.color, "#ff555f");
+  assert.equal(styles.roomLocks.color, "#ff555f");
+});
+
+test("unresolved or hidden targets and height differences do not invent source symbols", () => {
+  const batches = connectionSegments([
+    room(1, 0, 0, 0, { exits: { u: 999, d: 2, e: 3, toString: 998 }, doors: { u: 3, d: 3, toString: 3 } }),
+    room(2, 0, 0, -1, { hidden: true }), room(3, 1, 0, 1),
+  ], true);
+  assert.equal(batches.upExits.length + batches.downExits.length + batches.areaExits.length, 0);
+  assert.equal(batches.lockedDoors.length, 0);
+  assert.equal(batches.normal.length, 18); // e is not an up exit despite z increasing.
+  assert.ok(Object.values(batches).flat().every(Number.isFinite));
+  for (const direction of ["u", "up"]) assert.equal(connectionSegments([room(1, 0, 0, 0, { exits: { [direction]: 2 }, exitTargets: { [direction]: { areaId: "" } } })]).upExits.length, 18);
+  for (const direction of ["d", "down"]) assert.equal(connectionSegments([room(1, 0, 0, 0, { exits: { [direction]: 2 }, exitTargets: { [direction]: { areaId: "" } } })]).downExits.length, 18);
+});
+
+test("custom marker placement is stable across exit order and combined symbols remain distinct", () => {
+  const source = fields => room(1, 0, 0, 0, { areaId: "A", exitTargets: { up: { areaId: "B" }, gate: { areaId: "B" }, portal: { areaId: "B" } }, doors: { up: 3 }, ...fields });
+  const first = connectionSegments([source({ exits: { up: 2 }, specialExits: { portal: 4, gate: 3 } })]);
+  const second = connectionSegments([source({ specialExits: { gate: 3, portal: 4 }, exits: { up: 2 } })]);
+  assert.deepEqual(first, second);
+  const points = vertices => Array.from({ length: vertices.length / 3 }, (_, i) => vertices.slice(i * 3, i * 3 + 3).join(","));
+  assert.ok(!points(first.upExits).some(point => points(first.areaExits).includes(point)));
+  assert.ok(!points(first.upExits).some(point => points(first.lockedDoors).includes(point)));
+});
+
+test("changing indicator materials disposes old lines and preserves terrain, overlays and camera", () => {
+  const scene = geometryHarness();
+  scene.setRooms([room(1, 0, 0, 0, { exits: { e: 2 }, doors: { e: 3 } }), room(2, 1, 0)], false);
+  scene.overlays(1, 2, [{ roomId: 1 }, { roomId: 2 }]);
+  const terrain = [...scene.meshes], overlays = scene.content.children.filter(child => child.userData.overlay);
+  const before = scene.content.children.filter(child => child.userData.connection);
+  const camera = scene.camera.position.clone(), target = scene.controls.target.clone();
+  let geometryDisposals = 0, materialDisposals = 0;
+  before.forEach(child => {
+    child.geometry.addEventListener("dispose", () => geometryDisposals++);
+    child.material.addEventListener("dispose", () => materialDisposals++);
+  });
+  scene.setIndicatorOptions({ lockedDoorColor: "#123456" });
+  assert.equal(geometryDisposals, before.length);
+  assert.equal(materialDisposals, before.length);
+  assert.deepEqual(scene.meshes, terrain);
+  assert.ok(overlays.every(child => scene.content.children.includes(child)));
+  assert.ok(scene.camera.position.equals(camera));
+  assert.ok(scene.controls.target.equals(target));
+  const locks = scene.content.children.filter(child => child.userData.connection === "lockedDoorLocks");
+  assert.equal(locks[1].material.color.getHexString(), "123456");
+  const current = [...scene.content.children];
+  scene.setIndicatorOptions({ lockedDoorColor: "#123456" });
+  assert.deepEqual(scene.content.children, current); // Identical preferences do no work.
+  scene.clear();
+  for (const material of scene.materials.values()) material.dispose();
+});
+
+test("area and door source markers occupy disjoint projected lanes in every compass direction", () => {
+  for (const [direction, dx, dz] of [["e", 1, 0], ["w", -1, 0], ["n", 0, -1], ["s", 0, 1], ["ne", 1, -1], ["se", 1, 1], ["sw", -1, 1], ["nw", -1, -1], ["up", 0, -1], ["down", 0, -1], ["enter portal", 0, -1]]) {
+    for (const door of [1, 2, 3]) {
+      const source = room(1, 0, 0, 0, { areaId: "A", exits: { [direction]: 2 }, doors: { [direction]: door }, exitTargets: { [direction]: { areaId: "B" } } });
+      const batches = connectionSegments([source]);
+      const side = new THREE.Vector3(-dz, 0, dx).normalize();
+      const project = vertices => Array.from({ length: vertices.length / 3 }, (_, i) => new THREE.Vector3(...vertices.slice(i * 3, i * 3 + 3)).dot(side));
+      const area = project(batches.areaExits);
+      const doors = project([...batches.openDoors, ...batches.closedDoors, ...batches.lockedDoors, ...batches.lockedDoorLocks]);
+      assert.ok(Math.max(...area) < Math.min(...doors), `${direction} door ${door} must not cross area glyph in overhead`);
+    }
+  }
 });
