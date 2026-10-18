@@ -1,6 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { connections, coordinateGroups, roomPosition, terrainKey, perspectiveFitDistance } from "./model.js";
+import { coordinateGroups, roomPosition, terrainKey, perspectiveFitDistance } from "./model.js";
+import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
+import { LineMaterial } from "three/addons/lines/LineMaterial.js";
+import { connectionSegments, connectionStyles } from "./connections.js";
 export class AtlasScene {
   constructor(canvas, assets, { select, manual, failed }) {
     this.canvas = canvas;
@@ -176,6 +180,20 @@ export class AtlasScene {
     this.controls.update();
     this.request();
   }
+  centerArea() {
+    const rooms = this.rooms.filter(room => room.positioned && !room.hidden);
+    if (!rooms.length) return;
+    const bounds = new THREE.Box3().setFromPoints(rooms.map(room => new THREE.Vector3(...roomPosition(room, this.exploded))));
+    const center = bounds.getCenter(new THREE.Vector3());
+    const delta = center.clone().sub(this.controls.target);
+    // Area changes translate the camera; explicit zoom, fit, and reset controls
+    // remain responsible for choosing a new scale.
+    this.controls.target.copy(center);
+    this.camera.position.add(delta);
+    this.constrainCamera();
+    this.controls.update();
+    this.request();
+  }
   terrain(room) {
     const key = terrainKey(room.terrain, this.assets.terrains);
     return this.assets.terrains?.find((t) => t.name === key) || this.assets.terrains?.find((t) => t.name === "default");
@@ -239,6 +257,7 @@ export class AtlasScene {
   }
   setRooms(rooms, exploded) {
     this.clear();
+    rooms = rooms.filter(room => room.positioned && !room.hidden);
     this.rooms = rooms;
     this.exploded = exploded;
     this.groups = coordinateGroups(rooms);
@@ -272,41 +291,31 @@ export class AtlasScene {
       this.content.add(mesh);
       this.meshes.push(mesh);
     }
-    const vertices = [], doors = [], arrows = [], custom = [];
-    for (const edge of connections(rooms)) {
-      const a = roomPosition(edge.from, exploded), b = roomPosition(edge.toRoom, exploded);
-      a[1] -= 0.05;
-      b[1] -= 0.05;
-      (edge.custom ? custom : vertices).push(...a, ...b);
-      const direction = new THREE.Vector3(...b).sub(new THREE.Vector3(...a));
-      if (direction.length() > 0.01) {
-        const end = new THREE.Vector3(...a).lerp(new THREE.Vector3(...b), 0.73);
-        const axis = direction.normalize();
-        const side = new THREE.Vector3(-axis.z, 0, axis.x).multiplyScalar(0.14);
-        const back = end.clone().addScaledVector(axis, -0.3);
-        arrows.push(...back.clone().add(side).toArray(), ...end.toArray(), ...back.clone().sub(side).toArray(), ...end.toArray());
-      }
-      const state = edge.from.doors?.[edge.direction];
-      if (state) {
-        const center = new THREE.Vector3(...a).lerp(new THREE.Vector3(...b), 0.5);
-        const side = new THREE.Vector3(-(b[2] - a[2]), 0, b[0] - a[0]).normalize().multiplyScalar(0.22);
-        doors.push(...center.clone().add(side).toArray(), ...center.clone().sub(side).toArray());
-      }
+    const batches = connectionSegments(rooms, exploded);
+    for (const [kind, vertices] of Object.entries(batches)) {
+      const style = connectionStyles[kind];
+      const order = kind === "normal" || kind === "custom" ? 2 : 3;
+      for (const line of this.line(vertices, style.color, style.width, order)) line.userData.connection = kind;
     }
-    this.line(vertices, "#526c6c");
-    this.line(custom, "#8a78ae");
-    this.line(arrows, "#879a90");
-    this.line(doors, "#dbad74");
     this.request();
   }
-  line(vertices, color) {
-    if (!vertices.length) return;
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-    const line = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color }));
-    line.userData.ownMaterial = true;
-    this.content.add(line);
-    return line;
+  line(vertices, color, width = 3, order = 2, overlay = false) {
+    if (!vertices.length) return [];
+    const lines = [];
+    // LineBasicMaterial linewidth is ignored on common WebGL implementations.
+    // Wide segments use screen pixels and a separate contrast halo at all zooms.
+    for (const [tint, pixels, layer] of [["#091219", width + 2, order - 1], [color, width, order]]) {
+      const geometry = new LineSegmentsGeometry().setPositions(vertices);
+      const material = new LineMaterial({ color: tint, linewidth: pixels, depthTest: !overlay, depthWrite: false, alphaToCoverage: true });
+      material.resolution.set(Math.max(1, this.canvas.clientWidth), Math.max(1, this.canvas.clientHeight));
+      const line = new LineSegments2(geometry, material);
+      line.renderOrder = layer;
+      line.userData.ownMaterial = true;
+      line.userData.overlay = overlay;
+      this.content.add(line);
+      lines.push(line);
+    }
+    return lines;
   }
   overlays(player, selected, steps = []) {
     for (const child of [...this.content.children]) if (child.userData.overlay) {
@@ -339,12 +348,7 @@ export class AtlasScene {
         points.push(...ap, ...bp);
       }
     }
-    const line = this.line(points, "#f8c57b");
-    if (line) {
-      line.userData.overlay = true;
-      line.material.depthTest = false;
-      line.renderOrder = 4;
-    }
+    this.line(points, "#f8c57b", 4, 4, true);
     this.request();
   }
   beginPointer(event) {

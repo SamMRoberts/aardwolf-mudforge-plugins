@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-atlas", name = "Aardwolf Atlas", version = "0.2.1", author = "Sam Roberts",
+  id = "aardwolf-atlas", name = "Aardwolf Atlas", version = "0.2.2", author = "Sam Roberts",
   description = "Read-only native map explorer with terrain artwork, overhead and orbitable 3D views, room details and route previews."
 }
 
@@ -143,12 +143,13 @@ local function roomRecord(id, detailed)
       end
     end
   end
+  -- Exit locks are needed for map markers as well as selected-room inspection.
+  record.exitLocks = {}
+  for direction, _ in pairs(record.exits) do record.exitLocks[direction] = hasExitLock(id, direction) == true end
+  for direction, _ in pairs(record.specialExits) do record.exitLocks[direction] = hasExitLock(id, direction) == true end
   if detailed then
     record.notes, record.details = text(room.notes), details(room.details)
     record.userData = getAllRoomUserData(id)
-    record.exitLocks = {}
-    for direction, _ in pairs(record.exits) do record.exitLocks[direction] = hasExitLock(id, direction) end
-    for direction, _ in pairs(record.specialExits) do record.exitLocks[direction] = hasExitLock(id, direction) end
   end
   return record
 end

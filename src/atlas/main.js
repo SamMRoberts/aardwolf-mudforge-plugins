@@ -10,6 +10,7 @@ const state = { revision: 0, areas: [], rooms: [], player: null, playerArea: nul
 const inspector = createInspector(document, assets, navigateStep);
 const transfer = new AreaTransfer();
 let scene = null, loadedArea = null, routeGeneration = 0;
+let lastPlayerArea = null, hasFramedArea = false;
 let geometryCache = { source: null, floor: null, exploded: null, rooms: [] };
 function send(action, details = {}) {
   bridge?.send("atlas", { v: 1, action, revision: state.revision, ...details });
@@ -201,8 +202,12 @@ function update(message) {
   $("area").replaceChildren(...state.areas.map((area) => new Option(area.name || area.id || "Unassigned", area.id)));
   if (state.area !== null) $("area").value = state.area;
   state.player = Number.isSafeInteger(message.playerRoomId) ? message.playerRoomId : null;
-  state.playerArea = message.playerAreaId ?? null;
+  state.playerArea = state.player !== null && typeof message.playerAreaId === "string" ? message.playerAreaId : null;
   state.playerZ = Number.isFinite(message.playerZ) ? message.playerZ : 0;
+  // Compare character locations, not the area the user has chosen to browse.
+  // Keep the last known area across temporary missing-location updates.
+  const enteredArea = state.mapReady && state.playerArea !== null && state.playerArea !== lastPlayerArea;
+  if (enteredArea) lastPlayerArea = state.playerArea;
   const refreshSelection = state.selected !== null && (message.invalidate || message.type === "update");
   if (refreshSelection) {
     if (message.invalidate) { state.room = null; inspector.clear(); }
@@ -210,10 +215,13 @@ function update(message) {
     clearRoute();
   }
   if (message.preferences) applyPreferences(message.preferences);
+  if (enteredArea) setPreferences({ follow: true });
   if (!state.mapReady || state.areas.length === 0) {
     transfer.begin("");
     state.area = null;
     loadedArea = null;
+    lastPlayerArea = null;
+    hasFramedArea = false;
     state.rooms = [];
     state.route = [];
     state.selected = null;
@@ -261,7 +269,13 @@ function receive(message) {
     } else {
       state.rooms = accepted.rooms;
       floors();
-      render(loadedArea !== state.area);
+      render();
+      // Fit only the first positioned area. Later area changes translate the
+      // camera without changing orthographic scale or perspective distance.
+      if (!hasFramedArea && geometryCache.rooms.length) {
+        scene?.fit();
+        hasFramedArea = true;
+      } else if (loadedArea !== state.area) scene?.centerArea();
       loadedArea = state.area;
       if (state.preferences.follow) scene?.center(state.rooms.find((r) => r.id === state.player));
       status(`${state.area || "Unassigned area"} · ${state.rooms.length.toLocaleString()} rooms loaded`);

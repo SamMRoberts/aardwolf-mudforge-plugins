@@ -79,7 +79,7 @@ test("custom native exit directions are classified and deduplicated", () => {
 import { createInspector } from "../src/atlas/inspector.js";
 import vm from "node:vm";
 import * as model from "../src/atlas/model.js";
-function widgetHarness() {
+function widgetHarness(initPatch = {}) {
   const elements = /* @__PURE__ */ new Map();
   class Element {
     constructor() {
@@ -118,6 +118,9 @@ function widgetHarness() {
       this.callbacks = callbacks;
       this.builds = 0;
       this.overlay = [];
+      this.fits = 0;
+      this.areaCenters = 0;
+      this.centers = [];
     }
     setRooms() {
       this.builds++;
@@ -129,10 +132,9 @@ function widgetHarness() {
     setView(view) { this.view = view; }
     setVisible() {
     }
-    center() {
-    }
-    fit() {
-    }
+    center(room) { this.centers.push(room?.id); }
+    centerArea() { this.areaCenters++; }
+    fit() { this.fits++; }
     resetCamera() {
     }
     resize() {
@@ -160,7 +162,7 @@ function widgetHarness() {
   }, URLSearchParams, location: { search: "" } };
   vm.runInNewContext(readFileSync(new URL("../src/atlas/main.js", import.meta.url), "utf8").replace(/^import .*?;\n/gm, ""), context);
   const receive = (message) => window.mudforge.receive({ v: 1, revision: 1, ...message });
-  const init = { type: "init", mapReady: true, areas: [{ id: "a", name: "Area" }], playerRoomId: 1, playerAreaId: "a", playerZ: 0 };
+  const init = { type: "init", mapReady: true, areas: [{ id: "a", name: "Area" }], playerRoomId: 1, playerAreaId: "a", playerZ: 0, ...initPatch };
   receive(init);
   const generation = sent.findLast((message) => message.action === "area").generation;
   receive({ type: "area", areaId: "a", generation, offset: 0, nextOffset: 2, total: 2, done: true, rooms: [{ id: 1, areaId: "a", x: 0, y: 0, z: 0, name: "Start" }, { id: 2, areaId: "a", x: 1, y: 0, z: 0, name: "Destination" }] });
@@ -292,4 +294,70 @@ test("a delayed floating close cannot clear a newer selection but still closes a
   assert.equal(h.state().selectionEpoch, epoch);
   h.receive({ type: "deselect", selectionEpoch: epoch });
   assert.equal(h.state().selected, null);
+});
+
+function finishArea(h, area, rooms) {
+  const generation = h.sent.findLast(message => message.action === "area").generation;
+  h.receive({ type: "area", areaId: area, generation, offset: 0, nextOffset: rooms.length, total: rooms.length, done: true, rooms });
+}
+const areaB = { id: "b", name: "Second area" };
+const entryB = { id: 7, areaId: "b", name: "Entrance", x: 400, y: -30, z: 2 };
+test("entering a new character area always switches area, floor and resumes following without refitting", () => {
+  const h = widgetHarness();
+  h.element("fit").handlers.click();
+  assert.equal(h.state().preferences.follow, false);
+  const fits = h.scene.fits;
+  h.receive({ ...h.init, type: "update", areas: [...h.init.areas, areaB], playerRoomId: 7, playerAreaId: "b", playerZ: 2 });
+  assert.equal(h.state().area, "b");
+  assert.equal(h.state().preferences.follow, true);
+  finishArea(h, "b", [entryB]);
+  assert.equal(h.element("floor").value, "2");
+  assert.equal(h.scene.fits, fits);
+  assert.equal(h.scene.centers.at(-1), 7);
+});
+test("manual area browsing preserves camera scale and stays paused until the character changes area", () => {
+  const h = widgetHarness();
+  const fits = h.scene.fits;
+  h.element("area").value = "b";
+  h.element("area").handlers.change();
+  finishArea(h, "b", [entryB]);
+  assert.equal(h.scene.fits, fits);
+  assert.equal(h.scene.areaCenters, 1);
+  assert.equal(h.state().preferences.follow, false);
+  h.receive({ ...h.init, type: "update", playerRoomId: 2 });
+  assert.equal(h.state().area, "b");
+  assert.equal(h.state().preferences.follow, false);
+  h.receive({ ...h.init, type: "update", areas: [...h.init.areas, areaB], playerRoomId: 7, playerAreaId: "b", playerZ: 2 });
+  assert.equal(h.state().preferences.follow, true);
+  assert.equal(h.scene.centers.at(-1), 7);
+  assert.equal(h.scene.fits, fits);
+});
+test("unknown location updates cannot create a false area change; unassigned areas remain valid", () => {
+  const h = widgetHarness();
+  h.element("fit").handlers.click();
+  h.receive({ ...h.init, type: "update", playerRoomId: null, playerAreaId: null });
+  h.receive({ ...h.init, type: "update" });
+  assert.equal(h.state().preferences.follow, false);
+  h.receive({ ...h.init, type: "update", areas: [...h.init.areas, { id: "", name: "Unassigned" }], playerAreaId: "", playerRoomId: 5 });
+  assert.equal(h.state().area, "");
+  assert.equal(h.state().preferences.follow, true);
+});
+test("rapid area transitions reject obsolete chunks and do not reset zoom", () => {
+  const h = widgetHarness();
+  const fits = h.scene.fits;
+  h.receive({ ...h.init, type: "update", areas: [...h.init.areas, areaB], playerRoomId: 7, playerAreaId: "b", playerZ: 2 });
+  const oldGeneration = h.sent.findLast(message => message.action === "area").generation;
+  h.receive({ ...h.init, type: "update", playerRoomId: 2 });
+  h.receive({ type: "area", areaId: "b", generation: oldGeneration, offset: 0, nextOffset: 1, total: 1, done: true, rooms: [entryB] });
+  assert.equal(h.state().area, "a");
+  assert.equal(h.state().roomCount, 0);
+  finishArea(h, "a", [{ id: 2, areaId: "a", name: "Return", x: 1, y: 0, z: 0 }]);
+  assert.equal(h.state().roomCount, 1);
+  assert.equal(h.scene.centers.at(-1), 2);
+  assert.equal(h.scene.fits, fits);
+});
+test("the initial known character area resumes following even with a saved browsing preference", () => {
+  const h = widgetHarness({ preferences: { follow: false } });
+  assert.equal(h.state().preferences.follow, true);
+  assert.equal(h.scene.centers.at(-1), 1);
 });
