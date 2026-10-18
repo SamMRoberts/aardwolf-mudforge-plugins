@@ -1,13 +1,29 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import { Resvg } from '@resvg/resvg-js';
 import { root } from '../tools/build-repository.mjs';
 import { buildMapPackOutputs, mapPackNames, validateTerrainRegistry } from '../tools/build-map-pack.mjs';
 
+const atlasManifest = JSON.parse(await readFile(resolve(root, 'src/atlas/assets/manifest.json'), 'utf8'));
+
+function decodePng(png) {
+  const width = png.readUInt32BE(16);
+  const height = png.readUInt32BE(20);
+  // Decode at native resolution independently of the map-pack extraction path.
+  return new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><image href="data:image/png;base64,${png.toString('base64')}" width="${width}" height="${height}"/></svg>`, { font: { loadSystemFonts: false } }).render();
+}
+
+const atlasSheets = new Map(await Promise.all(atlasManifest.sheets.map(async sheet => {
+  const { width, pixels } = decodePng(await readFile(resolve(root, 'src/atlas/assets', `${sheet.id}.png`)));
+  return [sheet.id, { width, pixels }];
+})));
+
 for (const packName of mapPackNames) {
+  const themed = packName === 'aardwolf-three-moons';
   const packDirectory = `src/map-packs/${packName}`;
   const packOutput = `dist/map-packs/${packName}.json`;
   const previewOutput = `dist/map-packs/${packName}.html`;
@@ -30,6 +46,10 @@ for (const packName of mapPackNames) {
     assert.deepEqual(Object.keys(pack), ['name', 'description', 'terrainStyles']);
   });
 
+  if (themed) test('Three Moons retains its existing portable pack output', async () => {
+    assert.deepEqual(outputs.get(packOutput), await readFile(resolve(root, packOutput)));
+  });
+
   test(`${packName}: terrain registry rejects aliases, invalid colors and duplicate upstream IDs`, () => {
     for (const change of [
       copy => { copy.terrains[1].name = ' INSIDE '; },
@@ -44,20 +64,24 @@ for (const packName of mapPackNames) {
     }
   });
 
-  test(`${packName}: every terrain embeds a unique 128px PNG and a matching opaque background`, async () => {
+  test(`${packName}: every terrain embeds a unique opaque 128px PNG with its registry fallback color`, async () => {
     const images = new Set();
     const geometry = new Set();
     for (const style of pack.terrainStyles) {
       assert.deepEqual(Object.keys(style), ['name', 'color', 'image']);
       assert.match(style.color, /^#[a-f0-9]{6}$/);
+      assert.equal(style.color, registry.terrains.find(terrain => terrain.name.trim().toLowerCase() === style.name).color);
       assert.match(style.image, /^data:image\/png;base64,[A-Za-z0-9+/]+=*$/);
       const png = Buffer.from(style.image.split(',')[1], 'base64');
       assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
       assert.equal(png.readUInt32BE(16), 128);
       assert.equal(png.readUInt32BE(20), 128);
       assert.deepEqual(png, outputs.get(`dist/map-packs/${packName}/${style.name}.png`));
-      assert(!images.has(digest(png)), `${style.name}: duplicate image`);
-      images.add(digest(png));
+      const { pixels } = decodePng(png);
+      assert(!images.has(digest(pixels)), `${style.name}: duplicate image`);
+      images.add(digest(pixels));
+      for (let offset = 3; offset < pixels.length; offset += 4) assert.equal(pixels[offset], 255, `${style.name}: transparent pixel`);
+      if (!themed) continue;
       const svg = await readFile(resolve(root, packDirectory, 'icons', `${style.name}.svg`), 'utf8');
       assert(svg.includes(`width="32" height="32" fill="${style.color}"`), style.name);
       assert.match(svg, /viewBox="0 0 32 32"/);
@@ -66,6 +90,23 @@ for (const packName of mapPackNames) {
       const shape = svg.replace(/<title>.*?<\/title>/s, '').replace(/(?:fill|stroke|color)="[^"]*"/g, '').replace(/\s+/g, '');
       assert(!geometry.has(shape), `${style.name}: artwork differs only by paint`);
       geometry.add(shape);
+    }
+  });
+
+  if (!themed) test(`${packName}: every tile exactly matches its named Atlas room rectangle`, () => {
+    assert.equal(atlasManifest.terrains.length, registry.terrains.length);
+    for (const terrain of registry.terrains) {
+      const name = terrain.name.trim().toLowerCase();
+      const rectangle = atlasManifest.terrains.find(item => item.name === name);
+      assert(rectangle, `${name}: missing Atlas rectangle`);
+      assert.equal(rectangle.id, terrain.id, `${name}: Atlas terrain ID differs`);
+      const sheet = atlasSheets.get(rectangle.sheet);
+      const { pixels } = decodePng(outputs.get(`dist/map-packs/${packName}/${name}.png`));
+      for (let y = 0; y < 128; y++) {
+        const sourceOffset = ((rectangle.y + y) * sheet.width + rectangle.x) * 4;
+        assert.deepEqual(pixels.subarray(y * 128 * 4, (y + 1) * 128 * 4),
+          sheet.pixels.subarray(sourceOffset, sourceOffset + 128 * 4), `${name}: Atlas artwork differs on row ${y}`);
+      }
     }
   });
 
@@ -79,14 +120,17 @@ for (const packName of mapPackNames) {
     assert.doesNotMatch(html, /<script\b|src="https?:/i);
     assert(html.includes('class="map-study"'));
     assert(html.includes('not a native-client capture'));
-    if (packName === 'aardwolf-three-moons') {
+    if (themed) {
       assert.equal((html.match(/class="repeat-grid"/g) || []).length, 114);
       assert(html.includes('3 × 3 tiled'));
       assert(html.includes('Dense 5 × 5 tiling study'));
+    } else {
+      assert(html.includes('Atlas artwork'));
+      assert(!html.includes('Editable SVG sources'));
     }
   });
 
-  test(`${packName}: terrain pixels are opaque and preserve the pack edge contract`, async () => {
+  if (themed) test(`${packName}: terrain pixels are opaque and preserve the pack edge contract`, async () => {
     for (const terrain of registry.terrains) {
       const name = terrain.name.toLowerCase();
       const svg = await readFile(resolve(root, packDirectory, 'icons', `${name}.svg`), 'utf8');
@@ -94,32 +138,24 @@ for (const packName of mapPackNames) {
       assert.equal(rendered.width, 128);
       assert.equal(rendered.height, 128);
       const pixels = rendered.pixels;
-      const expected = Buffer.from([...terrain.color.slice(1).match(/../g).map(part => parseInt(part, 16)), 255]);
       const edgeColors = new Set();
       for (let index = 0; index < rendered.width; index++) {
         for (const [x, y] of [[index, 0], [index, 127], [0, index], [127, index]]) {
           const offset = (y * rendered.width + x) * 4;
           const pixel = pixels.subarray(offset, offset + 4);
-          if (packName === 'aardwolf-three-moons') edgeColors.add(pixel.toString('hex'));
-          else assert.deepEqual(pixel, expected, `${name}: material seam at ${x},${y}`);
+          edgeColors.add(pixel.toString('hex'));
         }
       }
-      if (packName === 'aardwolf-three-moons') {
-        assert(edgeColors.size > 1, `${name}: a flat-color perimeter reintroduces a room frame`);
-        assert(svg.includes('id="terrain-surface"'), `${name}: missing repeating surface`);
-      }
+      assert(edgeColors.size > 1, `${name}: a flat-color perimeter reintroduces a room frame`);
+      assert(svg.includes('id="terrain-surface"'), `${name}: missing repeating surface`);
       for (let offset = 3; offset < pixels.length; offset += 4) assert.equal(pixels[offset], 255, `${name}: transparent pixel`);
     }
-    const urbanNames = packName === 'aardwolf-three-moons'
-      ? ['city', 'shop', 'castle', 'alley', 'temple']
-      : ['city', 'shop', 'castle', 'alley'];
+    const urbanNames = ['city', 'shop', 'castle', 'alley', 'temple'];
     const urban = registry.terrains.filter(terrain => urbanNames.includes(terrain.name));
     assert.equal(new Set(urban.map(terrain => terrain.color)).size, 1, 'adjoining urban terrain shares its stone edge color');
-    if (packName === 'aardwolf-three-moons') {
-      const timberRooms = registry.terrains.filter(terrain => ['inside', 'hut', 'cabin', 'office', 'archive'].includes(terrain.name));
-      assert.equal(new Set(timberRooms.map(terrain => terrain.color)).size, 1, 'timber interiors share their floor edge color');
-      assert(timberRooms.every(terrain => terrain.family === 'wood'));
-    }
+    const timberRooms = registry.terrains.filter(terrain => ['inside', 'hut', 'cabin', 'office', 'archive'].includes(terrain.name));
+    assert.equal(new Set(timberRooms.map(terrain => terrain.color)).size, 1, 'timber interiors share their floor edge color');
+    assert(timberRooms.every(terrain => terrain.family === 'wood'));
   });
 
   test(`${packName}: pack includes a portable connected-layout preview with room-sized scenery`, () => {
@@ -136,6 +172,48 @@ for (const packName of mapPackNames) {
     for (const [path, bytes] of outputs) assert(bytes.equals(second.get(path)), path);
   });
 }
+
+test('Atlas map pack validates its manifest and lossless sheets before exporting', async t => {
+  const fixtureRoot = await mkdtemp(resolve(tmpdir(), 'aardwolf-map-pack-'));
+  t.after(() => rm(fixtureRoot, { recursive: true, force: true }));
+  const atlasDirectory = resolve(fixtureRoot, 'src/atlas/assets');
+  const registryDirectory = resolve(fixtureRoot, 'src/map-packs/aardwolf-terrain-icons');
+  await mkdir(atlasDirectory, { recursive: true });
+  await mkdir(registryDirectory, { recursive: true });
+  await copyFile(resolve(root, 'src/map-packs/aardwolf-terrain-icons/terrains.json'), resolve(registryDirectory, 'terrains.json'));
+  for (const sheet of atlasManifest.sheets) {
+    await copyFile(resolve(root, 'src/atlas/assets', `${sheet.id}.png`), resolve(atlasDirectory, `${sheet.id}.png`));
+  }
+  const manifestPath = resolve(atlasDirectory, 'manifest.json');
+  for (const [label, mutate] of [
+    ['unsupported manifest', copy => { copy.version = 2; }],
+    ['missing terrain', copy => { copy.terrains.pop(); }],
+    ['mismatched terrain ID', copy => { copy.terrains[0].id = 999; }],
+    ['missing sheet reference', copy => { copy.terrains[0].sheet = 'missing'; }],
+    ['out-of-bounds rectangle', copy => { copy.terrains[0].x = copy.sheets[0].width; }],
+  ]) {
+    await t.test(label, async () => {
+      const copy = structuredClone(atlasManifest);
+      mutate(copy);
+      await writeFile(manifestPath, JSON.stringify(copy));
+      await assert.rejects(buildMapPackOutputs(fixtureRoot), /Atlas/);
+    });
+  }
+  await t.test('lookup follows terrain names instead of manifest order and uses only lossless sheets', async () => {
+    const copy = structuredClone(atlasManifest);
+    copy.terrains.reverse();
+    await writeFile(manifestPath, JSON.stringify(copy));
+    const actual = await buildMapPackOutputs(fixtureRoot);
+    const expected = await buildMapPackOutputs(root);
+    assert.deepEqual(actual, expected);
+  });
+  await t.test('PNG dimensions must match declared sheet dimensions', async () => {
+    await writeFile(manifestPath, JSON.stringify(atlasManifest));
+    const png = new Resvg('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1"/></svg>').render().asPng();
+    await writeFile(resolve(atlasDirectory, `${atlasManifest.sheets[0].id}.png`), png);
+    await assert.rejects(buildMapPackOutputs(fixtureRoot), /Atlas.*dimensions|dimensions.*Atlas/i);
+  });
+});
 
 test('Three Moons is a separate complete design rather than an alias of the original pack', async () => {
   const original = await buildMapPackOutputs(root, mapPackNames[0]);

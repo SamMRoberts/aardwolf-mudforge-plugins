@@ -43,20 +43,17 @@ the lore and the visual interpretation. Download the
 [contact sheet](dist/map-packs/aardwolf-three-moons.html), including a dense
 5 × 5 layout study and a 3 × 3 repeat for every terrain.
 
-The previous design remains available:
-
-[Aardwolf Terrain Icons 3.0.0](docs/TERRAIN-ICONS.md) gives every published Aardwolf
-terrain its own fantasy tile, including numbered and directional variants.
-Irregular flagstones, layered emerald foliage, flowing turquoise water,
-shingled roofs and luminous magic create a textured fantasy palette with
-128-pixel artwork. Download the
+[Aardwolf Terrain Icons 4.0.0](docs/TERRAIN-ICONS.md) now uses the enhanced
+room terrain artwork from Aardwolf Atlas for all 114 terrain types, including
+numbered and directional variants. Lossless 128-pixel tiles are embedded in the
+pack; Atlas does not need to be installed. Download the
 [JSON pack](dist/map-packs/aardwolf-terrain-icons.json) and import it through
 **Map settings → General → Map Pack Management → Choose File...**. Export your
 existing pack first: importing replaces the terrain-style list. The
 [contact sheet](dist/map-packs/aardwolf-terrain-icons.html) includes connected-map
 studies and all 114 tiles at 16, 24 and 32 px. MudForge draws walls and player
 markers above the artwork. This asset pack needs no Lua plugin or shared API.
-The format was browser-tested with 1.0.0; native acceptance of 3.0.0 is pending.
+The format was browser-tested with 1.0.0; native acceptance of 4.0.0 is pending.
 
 ## Installation
 

@@ -73,6 +73,10 @@ Pinned Resvg converts each crop into a 128 × 128 tile and packs six 512 × 640
 lossless PNG sheets. Pinned jpeg-js additionally encodes deterministic quality-85
 JPEG runtime sheets, keeping the plugin below MudForge's 5 MiB catalog limit.
 The original and normalized PNGs remain available for future exports.
+The Aardwolf Terrain Icons map pack now exports all 114 cells from these
+normalized lossless PNG sheets, using the same manifest rectangles. Its JSON
+embeds individual PNG tiles, so native map-pack users do not need Atlas installed.
+The separate Three Moons map pack continues to use its own SVG artwork.
 `manifest.json` maps all 114 normalized terrain keys to those
 rectangles. Cells after `water` on the sixth sheet are unused. Each renderer document
 embeds each sheet once and samples within texel centers to avoid adjacent-cell

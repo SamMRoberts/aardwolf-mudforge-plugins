@@ -1,21 +1,21 @@
 # Aardwolf Terrain Icons
 
-Version **3.0.0** contains **114 richly illustrated fantasy terrain tiles**:
+Version **4.0.0** contains **114 room terrain images from Aardwolf Atlas**:
 all 112 environments in the published Aardwolf client database, plus MudForge's
-`default` and `water`. Stone, timber, grass, sand, water, ice and lava surfaces
-replace the 1.0.0 white pictograms. Irregular beveled flagstones, individually layered foliage, flowing water
-highlights and detailed miniature scenery give each terrain distinct geometry, including numbered variants and directional
-roads. Related tiles have identical material pixels at every outer edge, so
-adjoining streets and floors read continuously. Artwork uses a 32-unit SVG grid
-and ships as 128 × 128 PNGs embedded directly in the pack. No image hosting,
-fonts, Lua plugin, API Core,
-SQLite helper, or live connection is needed to use the images.
+`default` and `water`. The pack uses Atlas's enhanced, hand-painted terrain
+artwork, exported from its normalized lossless sheets as individual 128 × 128
+PNGs. These depict terrain types rather than specific rooms. Each PNG is embedded
+directly in the JSON; no image hosting, Atlas plugin, API Core, SQLite helper,
+or live connection is needed. The existing pack name, filename, terrain keys,
+fallback colors and import structure are preserved. The separate Three Moons
+pack keeps its SVG artwork.
 
 - [Importable JSON pack](../dist/map-packs/aardwolf-terrain-icons.json)
 - [Contact sheet](../dist/map-packs/aardwolf-terrain-icons.html): open the downloaded HTML in a browser for labeled 16, 24 and 32 px samples on dark and light backgrounds
 - [Connected map preview](../dist/map-packs/aardwolf-terrain-icons-map-preview.png): town, woodland/river and dungeon studies, plus six biome swatches, with simulated client walls
 - [Individual PNGs](../dist/map-packs/aardwolf-terrain-icons/)
-- [Editable SVGs](../src/map-packs/aardwolf-terrain-icons/icons/)
+- [Atlas artwork and provenance](../src/atlas/assets/README.md)
+- [Atlas terrain rectangles](../src/atlas/assets/manifest.json)
 - [Registry, palette and provenance](../src/map-packs/aardwolf-terrain-icons/terrains.json)
 
 ## Import and restore
@@ -26,7 +26,7 @@ SQLite helper, or live connection is needed to use the images.
 2. Choose **Choose File...** under **Map Pack Management** and select
    `aardwolf-terrain-icons.json`. This is a terrain pack; use this control rather
    than **Import Map Data** or the Plugin Manager.
-3. The icons and palette apply immediately. Close the settings popover to inspect
+3. The images and palette apply immediately. Close the settings popover to inspect
    the map. Reopen the world to check that the styles persisted.
 4. To restore your previous styles, use the same **Choose File...** control with
    the pack saved in step 1.
@@ -35,7 +35,7 @@ SQLite helper, or live connection is needed to use the images.
 terrain name. Custom styles absent from this pack are removed. Matching terrain
 colors and images are replaced by this pack's palette and icons. Keep your export
 if you want to restore those customizations. This replacement behavior was
-verified with the 1.0.0 pack in the browser client v2.0.3702. The 3.0.0 pack keeps
+verified with the 1.0.0 pack in the browser client v2.0.3702. The 4.0.0 pack keeps
 the same terrain keys and import format. Native acceptance of the new artwork
 is pending; this task does not install it into the active map.
 
@@ -45,31 +45,33 @@ names have no dedicated icon until the registry/artwork is extended. Per-room
 color overrides can hide terrain artwork, and symbols and flags can cover parts
 of a tile. MudForge draws its walls, room outlines, player markers and other
 overlays above the terrain image. A terrain pack cannot remove or restyle those
-client overlays. Different materials such as grass and water still have visible
-transitions; matching edges apply within a material family, not across every
-terrain. Tiny map zoom levels necessarily lose scenery detail; the material
-surface remains visible. The contact sheet shows both individual tiles and
-connected room layouts rather than judging the art only in isolation.
+client overlays. Atlas artwork is not guaranteed to tile seamlessly; adjacent
+images can have visible joins even within one material family. Tiny map zoom
+levels lose scenery detail. The contact sheet shows both individual tiles and
+connected room layouts to help judge those joins at actual room sizes.
 
 ## Source and build
 
 The registry is pinned to the `environments` table in the [official Aardwolf
 client database at revision ac6e40ff](https://github.com/fiendish/aardwolfclientpackage/blob/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db).
 Its complete revision, original database SHA-256 and count are recorded in
-`terrains.json`. Builds read this checked-in registry and the SVG files, without
-network access or personal maps. This covers the published registry, not an
-independently verified current live-server sector list. The artwork is original;
-no upstream artwork or implementation code is included.
+`terrains.json`. Builds read this checked-in registry, Atlas's manifest and its
+six normalized lossless PNG sheets without network access or personal maps.
+This covers the published registry, not an independently verified current
+live-server sector list. The artwork was generated and reviewed for Atlas;
+[its README](../src/atlas/assets/README.md) records the prompts and enhancement
+process. No upstream artwork or implementation code is included.
 
-Edit an individual SVG and its registry color/motif together. Each SVG has an
-opaque background matching its `color`, paths, gradients and repeating material
-patterns, and no text glyphs, external resources or scripts. Keep numbered
-variants geometrically distinct.
-Keep the outermost rendered pixel the shared material color and all decoration
-inside the existing clip; this prevents tiny per-tile frames or gaps. City, shop,
-castle and alley use the same stone perimeter. Grassland and forest share grass.
-`@resvg/resvg-js` is pinned to **2.6.2** as a development-only renderer; system
-fonts are disabled. Consumers need only the generated JSON file.
+`tools/build-map-pack.mjs` matches each terrain by normalized name and validates
+its ID, sheet and rectangle against the registry before cropping. It uses the
+PNG companion of each Atlas runtime JPEG sheet to avoid additional compression
+loss. Update the Atlas artwork through `tools/build-atlas-art.mjs`, then run the
+repository build to refresh the map pack. The former SVGs under this pack's
+`icons/` directory and their registry motifs are retained as historical sources;
+they no longer supply its exported images. The registry colors still provide
+the existing fallbacks. `@resvg/resvg-js` is pinned to **2.6.2** as a
+development-only renderer; system fonts are disabled. Consumers need only the
+generated JSON file.
 
 ```sh
 npm ci
@@ -83,12 +85,28 @@ git diff --check
 The existing repository build now includes the PNGs, pack, and self-contained HTML
 preview, including the connected-layout PNG. Its plugin/library catalog and
 distributed Lua remain unchanged.
-Tests check pinned registry coverage, normalized keys, invalid registry entries,
-unique geometric designs and PNG hashes, dimensions, preview coverage,
-opaque pixels, matching material edges, the connected-layout preview, and
-byte-identical rebuilds. These checks do not prove native import or persistence.
+Tests check pinned registry coverage, normalized keys, invalid registry and
+Atlas metadata, unique tile pixels, dimensions, opacity, preview coverage and
+byte-identical rebuilds. All 114 exported images are compared pixel for pixel
+with their corresponding lossless Atlas sheet rectangles. The separate Three
+Moons pack retains its SVG geometry and material-edge checks. These checks do
+not prove native import or persistence.
 
 ## Acceptance evidence
+
+### 4.0.0 Atlas artwork
+
+All 114 exported terrain images now come from the enhanced Atlas sheets. The
+contact sheet and connected-layout PNG use those same images, with simulated
+walls. They are illustrative previews, not native-client captures. Existing
+1.0.0 import evidence below establishes only the historical format behavior;
+native import, rendering and persistence of 4.0.0 remain unverified. This update
+does not install the pack into the active world.
+
+Verification passed: **267 JavaScript tests and 25 Python tests**, the generated
+file check for all 245 repository outputs, and diff whitespace checks. The
+connected-layout PNG was visually inspected. Native acceptance was not run;
+this revision was validated through generated assets and offline tests.
 
 ### 3.0.0 artwork
 
