@@ -21,7 +21,7 @@ a connected session.
 
 ## Aardwolf Atlas
 
-[Aardwolf Atlas 0.2.0](docs/ATLAS.md) displays the native map in overhead or
+[Aardwolf Atlas 0.2.1](docs/ATLAS.md) displays the native map in overhead or
 orbitable 3D views, with terrain artwork, floors, area browsing, room inspection,
 and lock-aware route previews. Install `dist/plugins/aardwolf-atlas.lua` by itself;
 it needs no API Core, SQLite helper, connection, or runtime downloads. Type

@@ -55,7 +55,7 @@ The row-major subject requests were:
 Generated sheets were visually reviewed. Cell boundaries are not perfectly
 uniform, so the extraction script records explicit crop boundaries and removes
 two pixels from each edge before resampling. This is mechanical asset packing,
-not a runtime image-generation step. The source artwork is never modified.
+not a runtime image-generation step. The original source artwork is never modified.
 Artwork is not claimed to be seamlessly tileable; terrain joins and actual
 room connectivity remain separate layers.
 
@@ -74,6 +74,39 @@ lossless PNG sheets. Pinned jpeg-js additionally encodes deterministic quality-8
 JPEG runtime sheets, keeping the plugin below MudForge's 5 MiB catalog limit.
 The original and normalized PNGs remain available for future exports.
 `manifest.json` maps all 114 normalized terrain keys to those
-rectangles. Cells after `water` on the sixth sheet are unused. The runtime
+rectangles. Cells after `water` on the sixth sheet are unused. Each renderer document
 embeds each sheet once and samples within texel centers to avoid adjacent-cell
 bleeding. New source art requires reviewing and updating crop boundaries.
+
+## Readability enhancement — Atlas 0.2.1
+
+The built-in Imagegen tool edited all six normalized sheets on 2026-10-18.
+Enhanced full-resolution masters are saved at `source/enhanced/terrain-1.png`
+through `source/enhanced/terrain-6.png` (1122 × 1402 each). The first-generation
+masters remain at `source/terrain-1.png` through `source/terrain-6.png` unchanged.
+The build now crops the enhanced masters at the reviewed boundaries recorded in
+`tools/build-atlas-art.mjs`, trims two source pixels per edge, then produces the
+same six 512 × 640 sheets and 114 existing 128 × 128 terrain rectangles. There
+are no runtime filters, new downloads, or changes to native map packs.
+
+The shared edit prompt was:
+
+> Enhance the supplied fantasy game terrain atlas so its existing terrain
+> details remain readable when each cell is reduced to 32–64 pixels. Preserve
+> the hand-painted fantasy style, terrain identities, composition within every
+> cell, original colors and relative hue families. Open up dark midtones and
+> shadow detail moderately, make material edges and major shapes crisp,
+> strengthen separation between features and their ground, and reduce fine-grain
+> texture noise. Preserve depth with clean small shadows; avoid washed-out
+> highlights, oversaturation, halos and gritty oversharpening. Dark terrains
+> must remain dark but their features distinguishable. Keep exactly four equal
+> columns and five equal rows, all 20 cells in the same row-major order and
+> relative boundaries, portrait 4:5, with full-bleed artwork and straight-down
+> orthographic perspective. Do not add gutters, frames, divider lines, text,
+> labels, numbers, watermarks, props, people or UI. Do not merge or reorder cells.
+
+Each of the six edit calls additionally named that sheet's existing terrain
+subjects for identity preservation; their row-major subject lists are recorded
+in the original prompt set above. Inputs were the corresponding previous
+normalized `terrain-N.png` sheets. The enhanced outputs were reviewed as a set
+before integration; the new images remain illustrative terrain surfaces.

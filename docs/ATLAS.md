@@ -1,4 +1,4 @@
-# Aardwolf Atlas 0.2.0
+# Aardwolf Atlas 0.2.1
 
 Atlas is a standalone, read-only explorer for MudForge's native map. It combines
 an overhead view, orbitable 3D terrain slabs, floor selection, an exploded floor
@@ -103,6 +103,11 @@ Three.js shares room geometry between orthographic and perspective cameras.
 Rooms are instanced, connections are batched, textures are cached, and labels
 reduce at distant/dense views. Rendering is event-driven and stops while hidden.
 Native text is inserted as text, never interpreted as HTML.
+
+The 0.2.1 terrain artwork lifts shadow detail and strengthens major material
+edges so rooms remain easier to distinguish at small map sizes. The original
+source sheets are retained alongside the enhanced masters. All 114 terrain
+identities, tile rectangles, and native color/symbol overrides remain unchanged.
 
 Terrain names normalize by trimming and lowercasing, while numeric environment
 values resolve through the repository's pinned registry. Numbered/directional
@@ -259,3 +264,25 @@ creation/placement/docking, reload and saved preferences, hide/show, actual mous
 controls, two-world isolation, and before/after native map-export comparisons.
 Contract fixtures verify these adapter paths but do not prove native persistence
 or rendering. Browser preview windows are browser popups, not MudForge widgets.
+
+## 0.2.1 artwork verification — 2026-10-18
+
+All six runtime terrain sheets were rebuilt from enhanced Imagegen masters.
+The edit preserves the original sheet order and terrain subjects while lifting
+shadow detail, strengthening feature boundaries, and reducing fine texture
+noise. Crops were visually reviewed before producing the same 128 × 128 runtime
+tiles. Original source PNGs remain unchanged. Prompt provenance and source paths
+are recorded in [the artwork README](../src/atlas/assets/README.md).
+
+Native acceptance for this artwork update has not been performed. Earlier
+0.1.0 native results and 0.2.0 contract/browser results do not establish native
+rendering of these new sheets.
+
+The full suite passed 246 JavaScript tests and 25 Python tests, including
+deterministic crop reproduction, all 114 terrain mappings, JPEG fidelity, and
+catalog integrity. `npm run build:check` checked 245 generated artifacts and
+`git diff --check` passed. The installable plugin is 3,883,301 bytes (about
+3.7 MiB), below the 5 MiB catalog limit. Browser review compared the same
+900 × 640 camera before/after, exercised all 114 enhanced terrains in overhead
+and perspective views, selected-room artwork, and a 390 × 700 layout. Original
+source PNGs, terrain IDs/rectangles, map packs, and renderer behavior are unchanged.

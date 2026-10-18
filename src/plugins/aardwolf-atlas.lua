@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-atlas", name = "Aardwolf Atlas", version = "0.2.0", author = "Sam Roberts",
+  id = "aardwolf-atlas", name = "Aardwolf Atlas", version = "0.2.1", author = "Sam Roberts",
   description = "Read-only native map explorer with terrain artwork, overhead and orbitable 3D views, room details and route previews."
 }
 
