@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-atlas", name = "Aardwolf Atlas", version = "0.2.2", author = "Sam Roberts",
+  id = "aardwolf-atlas", name = "Aardwolf Atlas", version = "0.3.0", author = "Sam Roberts",
   description = "Read-only native map explorer with terrain artwork, overhead and orbitable 3D views, room details and route previews."
 }
 
@@ -19,6 +19,10 @@ local generations = { area = -1, inspect = -1, route = -1 }
 local preferences = nil
 local flagDefinitions = {}
 local CHUNK_SIZE, CHUNK_BYTES = 128, 131072
+local displayDefaults = { showVnums = true, northUp = false, floatingDetails = false,
+  showDoors = true, showLockedDoors = true, showUpExits = true, showDownExits = true, showAreaExits = true }
+local colorDefaults = { doorColor = "#ffd166", lockedDoorColor = "#ff997d", upExitColor = "#87edbd",
+  downExitColor = "#80bfff", areaExitColor = "#c9a1ff" }
 
 local function finite(value)
   if type(value) ~= "number" or value ~= value or value == math.huge or value == -math.huge then return nil end
@@ -53,7 +57,10 @@ local function refreshFlags()
 end
 
 local function defaults()
-  return { view = "overhead", follow = true, exploded = false, collapsed = false, showVnums = true, northUp = false, floatingDetails = false }
+  local result = { view = "overhead", follow = true, exploded = false, collapsed = false }
+  for key, value in pairs(displayDefaults) do result[key] = value end
+  for key, value in pairs(colorDefaults) do result[key] = value end
+  return result
 end
 
 local function validatePreferences(value)
@@ -63,9 +70,14 @@ local function validatePreferences(value)
     if type(value[key]) ~= "boolean" then return nil end
   end
   local result = { view = value.view, follow = value.follow, exploded = value.exploded, collapsed = value.collapsed }
-  for _, key in ipairs({ "showVnums", "northUp", "floatingDetails" }) do
+  for key, defaultValue in pairs(displayDefaults) do
     if value[key] ~= nil and type(value[key]) ~= "boolean" then return nil end
-    if value[key] == nil then result[key] = key == "showVnums" else result[key] = value[key] end
+    if value[key] == nil then result[key] = defaultValue else result[key] = value[key] end
+  end
+  for key, defaultValue in pairs(colorDefaults) do
+    local color = value[key]
+    if color ~= nil and (type(color) ~= "string" or not string.match(color, "^#%x%x%x%x%x%x$")) then return nil end
+    result[key] = color == nil and defaultValue or string.lower(color)
   end
   return result
 end
@@ -114,9 +126,21 @@ local function destinations(value, excluded)
   return result
 end
 
-local function roomRecord(id, detailed)
+local function resolvedRoom(id, cache)
+  if cache[id] ~= nil then return cache[id] or nil end
   local room = getMapRoom(id)
-  if type(room) ~= "table" or room.hidden == true or getRoomHidden(id) then return nil end
+  if type(room) ~= "table" or room.hidden == true or getRoomHidden(id) then
+    cache[id] = false
+    return nil
+  end
+  cache[id] = room
+  return room
+end
+
+local function roomRecord(id, detailed, roomCache)
+  local cache = roomCache or {}
+  local room = resolvedRoom(id, cache)
+  if not room then return nil end
   local area = text(room.area or room.zone, 4096) or ""
   -- Native getMapRoom includes custom commands in exits; keep each edge once.
   local specialExits = destinations(getSpecialExits(id))
@@ -144,9 +168,16 @@ local function roomRecord(id, detailed)
     end
   end
   -- Exit locks are needed for map markers as well as selected-room inspection.
-  record.exitLocks = {}
-  for direction, _ in pairs(record.exits) do record.exitLocks[direction] = hasExitLock(id, direction) == true end
-  for direction, _ in pairs(record.specialExits) do record.exitLocks[direction] = hasExitLock(id, direction) == true end
+  record.exitLocks, record.exitTargets = {}, {}
+  for _, exits in ipairs({ record.exits, record.specialExits }) do
+    for direction, target in pairs(exits) do
+      record.exitLocks[direction] = hasExitLock(id, direction) == true
+      -- Resolve independently of coordinates or the streamed area, so source
+      -- markers also describe exits to other floors and unmapped positions.
+      local destination = resolvedRoom(target, cache)
+      if destination then record.exitTargets[direction] = { areaId = text(destination.area or destination.zone, 4096) or "" } end
+    end
+  end
   if detailed then
     record.notes, record.details = text(room.notes), details(room.details)
     record.userData = getAllRoomUserData(id)
@@ -198,14 +229,14 @@ local function areaRequest(data)
     end
     generations.area = generation
     stream = { areaId = data.areaId, generation = generation, revision = revision, offset = 0,
-      ids = nativeList(getAreaRooms(data.areaId), function(value) return integer(value, 1) end) }
+      ids = nativeList(getAreaRooms(data.areaId), function(value) return integer(value, 1) end), roomCache = {} }
   end
   if not stream or stream.generation ~= generation or stream.areaId ~= data.areaId
     or stream.revision ~= revision or stream.offset ~= offset then return end
   local rows, cursor, bytes, visited = {}, offset, 0, 0
   local total = #stream.ids
   while cursor < total and visited < CHUNK_SIZE do
-    local row = roomRecord(stream.ids[cursor + 1], false)
+    local row = roomRecord(stream.ids[cursor + 1], false, stream.roomCache)
     local size = row and #json.encode(row) or 0
     if size > CHUNK_BYTES then
       stream = nil
@@ -315,10 +346,12 @@ local function surfaceMessage(role, event)
     syncSurfaces()
   elseif not surfaces[role].ready then return
   elseif role == "settings" and data.action == "setting" then
-    if data.key ~= "showVnums" and data.key ~= "northUp" and data.key ~= "floatingDetails" then return end
-    if type(data.value) ~= "boolean" then return end
+    if type(data.key) ~= "string" or (displayDefaults[data.key] == nil and colorDefaults[data.key] == nil) then return end
+    if data.value == nil then return end
     local nextPreferences = validatePreferences(preferences)
     nextPreferences[data.key] = data.value
+    nextPreferences = validatePreferences(nextPreferences)
+    if not nextPreferences then return end
     savePreferences(nextPreferences)
   elseif role == "details" and data.action == "navigate" then
     local index = integer(data.index, 0)
@@ -345,7 +378,7 @@ local function openSurface(role)
   surface.id = createWidget({ type = "html", name = "atlas-" .. role,
     title = isSettings and "Atlas Settings" or "Atlas Room Details",
     position = { x = isSettings and 120 or 360, y = isSettings and 140 or 160 },
-    size = { width = isSettings and 340 or 320, height = isSettings and 240 or 520 }, resizable = true })
+    size = { width = isSettings and 340 or 320, height = 520 }, resizable = true })
   if not surface.id or surface.id == "" then
     surface.id = nil; failure("Atlas could not open its " .. role .. " window."); return false
   end

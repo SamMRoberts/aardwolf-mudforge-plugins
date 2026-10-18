@@ -1,3 +1,4 @@
+import { indicatorSettings, indicatorOptions } from "./model.js";
 export function createPreviewBridge(assets, large = false) {
   const terrains = assets.terrains || [];
   const side = large ? 100 : 11;
@@ -10,12 +11,23 @@ export function createPreviewBridge(assets, large = false) {
     rooms.push({ id: 500, areaId: "The Emerald Expanse", name: "Upper observatory", x: 5, y: 5, z: 1, terrain: "stone", exits: { d: 61 }, notes: "A second floor above the crossing." });
     rooms.push({ id: 501, areaId: "The Emerald Expanse", name: "A hidden passage at the crossing", x: 5, y: 5, z: 0, terrain: "inside", exits: { e: 62 } });
   }
+  // Exercise off-floor and cross-area indicators in the browser-only fixture.
+  if (!large) rooms.find(room => room.id === 61).exits.u = 500;
+  rooms[0].specialExits = { "enter archive": 20000 };
+  rooms[0].doors = { ...rooms[0].doors, "enter archive": 3 };
   const archiveRooms = [
-    { id: 800, areaId: "The Glass Archive", name: "The reading room", x: 400, y: -30, z: 2, terrain: "inside", exits: { e: 801 }, doors: { e: 3 } },
-    { id: 801, areaId: "The Glass Archive", name: "The locked collection", x: 401, y: -30, z: 2, terrain: "city", exits: { w: 800 }, locked: true },
+    { id: 20000, areaId: "The Glass Archive", name: "The reading room", x: 400, y: -30, z: 2, terrain: "inside", exits: { e: 20001 }, doors: { e: 3 } },
+    { id: 20001, areaId: "The Glass Archive", name: "The locked collection", x: 401, y: -30, z: 2, terrain: "city", exits: { w: 20000 }, locked: true },
   ];
   const allRooms = [...rooms, ...archiveRooms];
-  const preferences = { view: "overhead", follow: true, exploded: false, collapsed: false, showVnums: true, northUp: false, floatingDetails: false };
+  const byId = new Map(allRooms.map(room => [room.id, room]));
+  for (const room of allRooms) {
+    room.exitTargets = Object.fromEntries(Object.entries({ ...room.exits, ...room.specialExits }).flatMap(([direction, id]) => {
+      const target = byId.get(id);
+      return target && !target.hidden ? [[direction, { areaId: target.areaId }]] : [];
+    }));
+  }
+  const preferences = { view: "overhead", follow: true, exploded: false, collapsed: false, showVnums: true, northUp: false, floatingDetails: false, ...indicatorOptions() };
   const windows = {}, ready = {};
   let snapshot = null;
   const name = `atlas-${crypto.randomUUID()}`;
@@ -23,7 +35,7 @@ export function createPreviewBridge(assets, large = false) {
   const open = (role) => {
     if (!windows[role] || windows[role].closed) {
       ready[role] = false;
-      windows[role] = window.open(`aardwolf-atlas-${role}.html`, `${name}-${role}`, `popup,width=${role === "settings" ? 340 : 320},height=${role === "settings" ? 240 : 520}`);
+      windows[role] = window.open(`aardwolf-atlas-${role}.html`, `${name}-${role}`, `popup,width=${role === "settings" ? 340 : 320},height=520`);
     } else windows[role].focus();
   };
   const sync = () => {
@@ -38,8 +50,8 @@ export function createPreviewBridge(assets, large = false) {
     if (!role) return;
     const data = event.data;
     if (data.action === "ready") { ready[role] = true; sync(); }
-    else if (role === "settings" && data.action === "setting" && ["showVnums", "northUp", "floatingDetails"].includes(data.key) && typeof data.value === "boolean") {
-      preferences[data.key] = data.value; emit({ type: "preferences", preferences: { ...preferences } }); sync();
+    else if (role === "settings" && data.action === "setting" && (["showVnums", "northUp", "floatingDetails", ...indicatorSettings.map(setting => setting.showKey)].includes(data.key) && typeof data.value === "boolean" || indicatorSettings.some(setting => setting.colorKey === data.key) && typeof data.value === "string" && /^#[0-9a-f]{6}$/i.test(data.value))) {
+      preferences[data.key] = typeof data.value === "string" ? data.value.toLowerCase() : data.value; emit({ type: "preferences", preferences: { ...preferences } }); sync();
     } else if (role === "details" && data.action === "dock") { preferences.floatingDetails = false; emit({ type: "preferences", preferences: { ...preferences } }); sync(); }
     else if (role === "details" && data.action === "navigate" && data.generation === snapshot?.generation) emit({ type: "navigate", index: data.index, generation: data.generation });
     else if (role === "details" && data.action === "closed" && preferences.floatingDetails && data.selectionEpoch === snapshot?.selectionEpoch) { snapshot = null; emit({ type: "deselect", selectionEpoch: data.selectionEpoch }); }
@@ -52,7 +64,7 @@ export function createPreviewBridge(assets, large = false) {
     receive = callback;
   }, send(event, message) {
     if (event !== "atlas") return;
-    if (message.action === "ready") emit({ type: "init", mapReady: true, areas: [{ id: "The Emerald Expanse", name: large ? "10,000-room performance fixture" : "The Emerald Expanse" }, { id: "The Glass Archive", name: "The Glass Archive" }], playerRoomId: Math.min(61, rooms.length), playerAreaId: "The Emerald Expanse", playerZ: 0 });
+    if (message.action === "ready") emit({ type: "init", mapReady: true, preferences: { ...preferences }, areas: [{ id: "The Emerald Expanse", name: large ? "10,000-room performance fixture" : "The Emerald Expanse" }, { id: "The Glass Archive", name: "The Glass Archive" }], playerRoomId: Math.min(61, rooms.length), playerAreaId: "The Emerald Expanse", playerZ: 0 });
     else if (message.action === "settings") open("settings");
     else if (message.action === "details") { snapshot = message.snapshot.selected ? message.snapshot : null; sync(); }
     else if (message.action === "preferences") { Object.assign(preferences, message.patch || message.preferences); emit({ type: "preferences", preferences: { ...preferences } }); sync(); }

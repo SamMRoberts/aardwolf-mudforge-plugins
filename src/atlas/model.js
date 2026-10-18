@@ -1,3 +1,17 @@
+export const indicatorSettings = [
+  { id: "doors", label: "Doors", showKey: "showDoors", colorKey: "doorColor", color: "#ffd166" },
+  { id: "lockedDoors", label: "Locked doors", showKey: "showLockedDoors", colorKey: "lockedDoorColor", color: "#ff997d" },
+  { id: "upExits", label: "Up exits", showKey: "showUpExits", colorKey: "upExitColor", color: "#87edbd" },
+  { id: "downExits", label: "Down exits", showKey: "showDownExits", colorKey: "downExitColor", color: "#80bfff" },
+  { id: "areaExits", label: "Area exits", showKey: "showAreaExits", colorKey: "areaExitColor", color: "#c9a1ff" },
+];
+export function indicatorOptions(preferences = {}) {
+  if (!preferences || typeof preferences !== "object") preferences = {};
+  return Object.fromEntries(indicatorSettings.flatMap(({ showKey, colorKey, color }) => [
+    [showKey, typeof preferences[showKey] === "boolean" ? preferences[showKey] : true],
+    [colorKey, typeof preferences[colorKey] === "string" && /^#[0-9a-f]{6}$/i.test(preferences[colorKey]) ? preferences[colorKey].toLowerCase() : color],
+  ]));
+}
 export function nativeList(value) {
   if (Array.isArray(value)) return value;
   if (!value || typeof value !== "object") return [];

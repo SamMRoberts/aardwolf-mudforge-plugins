@@ -1,4 +1,4 @@
-# Aardwolf Atlas 0.2.2
+# Aardwolf Atlas 0.3.0
 
 Atlas is a standalone, read-only explorer for MudForge's native map. It combines
 an overhead view, orbitable 3D terrain slabs, floor selection, an exploded floor
@@ -50,9 +50,10 @@ frame a new area, or the usual zoom/Reset controls to change scale.
 
 Connections use wide, bright strokes with dark contrast outlines and larger
 arrowheads kept clear of room artwork. Ordinary exits are light gray; custom
-exits are violet. Open doors have green jambs and an open leaf; closed doors use
-an amber bar; locked doors use an orange bar and red padlock. Independent room
-and exit routing locks also have red padlocks. Door states and routing locks
+exits are violet. Open doors have jambs and an open leaf; closed doors use a bar;
+locked doors use a bar and padlock. Their indicator colors and visibility are
+configurable in Settings. Independent room and exit routing locks retain their
+red padlocks regardless of door-indicator settings. Door states and routing locks
 remain separate native metadata; Atlas does not infer or change either. Route
 previews, player and selection overlays retain priority above connection marks.
 
@@ -67,6 +68,32 @@ values and displays an error. Existing Atlas preferences migrate automatically.
 | Show room vnums | On | Show numeric tile labels when space allows. Symbols remain visible when off; search, details, routes and status keep their room numbers. |
 | North always on top | Off | Lock 3D heading north-up while allowing tilt above the horizon, pan and zoom. Fit, reset, isometric and view changes retain the lock. Overhead is always north-up. |
 | Float room details | Off | Move selected-room details and route preview into a separate **Atlas Room Details** widget. |
+
+The **Exit indicators** section gives each indicator an independent visibility
+checkbox and color picker. All five are enabled by default:
+
+| Indicator | Default color | Appearance |
+| --- | --- | --- |
+| Doors | Amber `#ffd166` | Open-door jambs and leaf, or a closed-door bar; one color for both states. |
+| Locked doors | Coral `#ff997d` | Bar and padlock, controlled independently of ordinary doors. |
+| Up exits | Green `#87edbd` | Upward arrow for `u` or `up` exits. |
+| Down exits | Blue `#80bfff` | Downward arrow for `d` or `down` exits. |
+| Area exits | Violet `#c9a1ff` | Outward arrow when the destination's native area differs from the source area, including custom exits. |
+
+Up/down and area symbols appear at the source exit even when the full connection
+is visible. They also mark exits to other floors, other areas, or destinations
+without coordinates. Doors retain their connection marks when a connection is
+drawn and use source-side marks otherwise. Overlapping indicator types are
+offset so a door, vertical arrow, and area arrow can appear together. Hidden and
+unresolved destinations receive no exit indicators; independent routing-lock
+marks keep their existing behavior. Vertical arrows follow the exit's direction,
+not the relative room coordinates.
+
+Color and visibility changes redraw immediately, preserve the camera, selection,
+route preview, and Follow state, and save per world with the other preferences.
+Existing saves acquire the new defaults automatically. A failed save restores
+the previous values in the map and Settings window. The initial Settings window
+is 340 × 520 pixels, with scrolling available in smaller saved window sizes.
 
 Search stays in the toolbar whether or not a room is selected. Select with a
 primary click, a search result, or an overlap choice. A primary background click
@@ -141,6 +168,26 @@ terrain sheets into the Lua template, then regenerates catalog size and hash.
 Run `npm run build`, `npm run build:check`, and `npm test` after changes. The
 standalone generated `dist/atlas/aardwolf-atlas.html` uses synthetic preview data;
 browser results do not establish native compatibility or live-game acceptance.
+
+## Indicator verification (0.3.0)
+
+The automated suite passes 282 JavaScript tests and 25 Python tests, including
+82 focused Atlas adapter, settings and renderer tests. Browser checks exercised
+all five visibility controls, custom color synchronization, overhead and exploded
+3D rendering, a 280-pixel-wide scrolling settings frame, and the 10,000-room
+preview. A temporary browser fixture used the built documents with a synthetic
+widget bridge; this is separate from native persistence evidence. The iframe
+fixture also exposed an Electron-injected MutationObserver exception outside the
+Atlas source; the standalone map preview had no console errors.
+
+Native 0.3.0 acceptance remains **pending**. On MudForge 2.0.3701 arm64, a separate
+loopback-only world imported successfully, but the plugin-file Import action
+returned without creating an installed plugin, including a retry with an
+identical temporary copy. Native loading, rendering, color controls and persisted
+reload behavior could therefore not be verified. The test session was closed,
+the original connected session was restored, and the exported disposable world
+was retained rather than permanently deleted. The play-world plugin was not
+updated. Earlier acceptance records below apply only to the versions they name.
 
 ## Disposable native acceptance
 

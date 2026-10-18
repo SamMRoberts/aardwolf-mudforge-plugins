@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { coordinateGroups, roomPosition, terrainKey, perspectiveFitDistance } from "./model.js";
+import { coordinateGroups, roomPosition, terrainKey, perspectiveFitDistance, indicatorOptions } from "./model.js";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
-import { connectionSegments, connectionStyles } from "./connections.js";
+import { connectionSegments, configuredConnectionStyles } from "./connections.js";
 export class AtlasScene {
   constructor(canvas, assets, { select, manual, failed }) {
     this.canvas = canvas;
@@ -291,13 +291,30 @@ export class AtlasScene {
       this.content.add(mesh);
       this.meshes.push(mesh);
     }
-    const batches = connectionSegments(rooms, exploded);
+    this.drawConnections();
+    this.request();
+  }
+  setIndicatorOptions(preferences) {
+    const next = indicatorOptions(preferences);
+    if (this.indicators && Object.keys(next).every(key => next[key] === this.indicators[key])) return;
+    this.indicators = next;
+    this.drawConnections();
+    this.request();
+  }
+  drawConnections() {
+    for (const child of [...this.content.children]) if (child.userData.connection) {
+      this.content.remove(child);
+      child.geometry.dispose();
+      child.material.dispose();
+      child.dispose?.();
+    }
+    const batches = connectionSegments(this.rooms, this.exploded, this.indicators);
+    const styles = configuredConnectionStyles(this.indicators);
     for (const [kind, vertices] of Object.entries(batches)) {
-      const style = connectionStyles[kind];
+      const style = styles[kind];
       const order = kind === "normal" || kind === "custom" ? 2 : 3;
       for (const line of this.line(vertices, style.color, style.width, order)) line.userData.connection = kind;
     }
-    this.request();
   }
   line(vertices, color, width = 3, order = 2, overlay = false) {
     if (!vertices.length) return [];

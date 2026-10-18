@@ -1,4 +1,4 @@
-import { AreaTransfer, nativeList, normalizeRoom, visibleRooms } from "./model.js";
+import { AreaTransfer, nativeList, normalizeRoom, visibleRooms, indicatorSettings, indicatorOptions } from "./model.js";
 import { createInspector } from "./inspector.js";
 import { AtlasScene } from "./scene.js";
 import { createPreviewBridge } from "./fixture.js";
@@ -69,6 +69,13 @@ function applyPreferences(preferences) {
     ? `Left-drag pan · Right-drag ${p.northUp ? "tilt" : "orbit"} · Scroll zoom`
     : "Drag pan · Scroll zoom";
   scene?.setDisplayOptions({ showVnums: p.showVnums, northUp: p.northUp });
+  const indicators = indicatorOptions(p);
+  scene?.setIndicatorOptions(indicators);
+  for (const setting of indicatorSettings) {
+    const item = $(`key-${setting.id}`);
+    item.hidden = !indicators[setting.showKey];
+    item.style.color = indicators[setting.colorKey];
+  }
   syncDetails();
   if (scene && scene.view !== p.view) scene.setView(p.view);
   render(false);
