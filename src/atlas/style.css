@@ -515,3 +515,34 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+/* Compact chrome leaves room for the map, including when no room is selected. */
+header { gap: 8px; padding: 3px 8px; min-height: 34px; }
+.brand { min-width: 76px; gap: 5px; }
+.brand strong { font-size: 13px; letter-spacing: 2px; }
+.brand-mark { font-size: 22px; }
+header button, header select { padding: 3px 7px; }
+.area-label { gap: 6px; }
+.tools { padding: 3px 8px; gap: 6px; min-height: 32px; }
+.tools button, .tools select { padding: 3px 6px; font-size: 11px; }
+.tools label { font-size: 11px; }
+#settings { font-size: 17px; line-height: 20px; padding: 1px 6px; }
+.room-search { position: relative; flex: 0 1 170px; min-width: 130px; }
+#search { margin: 0; width: 100%; padding: 4px 7px; font-size: 11px; }
+#results { position: absolute; top: 100%; right: 0; width: min(320px, 85vw); margin: 4px 0 0; max-height: 240px; overflow: auto; padding: 6px; background: #1c272d; border: 1px solid #526c6c; border-radius: 6px; z-index: 10; }
+.inspector-head { padding: 6px 8px; gap: 6px; }
+.inspector-head > span { flex: 1; letter-spacing: 1px; }
+.surface { overflow: auto; height: auto; min-height: 100vh; background: #1c272d; }
+.surface #inspector-content { display: block; }
+.surface .inspector-head { position: sticky; }
+.settings-form { padding: 12px; }
+.settings-form label { display: flex; align-items: center; gap: 7px; }
+.settings-form p { font-size: 11px; color: #b4c1be; margin: 4px 0 14px 24px; line-height: 1.4; }
+#surface-status { padding: 0 12px; font-size: 11px; color: #e7ba72; }
+@media (max-width: 599px) {
+  .brand { min-width: 53px; }
+  .tools .spacer { display: none; }
+  .room-search { flex-grow: 1; }
+  #inspector.collapsed { height: 32px; }
+}
+
+.collapsed .inspector-head > span { display: none; }

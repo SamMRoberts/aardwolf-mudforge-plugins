@@ -14,6 +14,8 @@ export class AtlasScene {
     this.rooms = [];
     this.exploded = false;
     this.view = "overhead";
+    this.showVnums = true;
+    this.northUp = false;
     this.disposed = false;
     this.visible = true;
     this.frame = 0;
@@ -33,30 +35,19 @@ export class AtlasScene {
     this.camera.position.set(0, 50, 1e-3);
     this.camera.up.set(0, 0, -1);
     this.camera.lookAt(0, 0, 0);
-    this.controls = new OrbitControls(this.camera, canvas);
-    this.controls.enableDamping = false;
-    this.controls.enableRotate = false;
-    this.controls.screenSpacePanning = true;
-    this.controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-    this.controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
-    this.controls.touches.ONE = THREE.TOUCH.PAN;
-    this.controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
-    this.controls.addEventListener("change", () => this.request());
+    this.controls = this.createControls();
     this.down = null;
-    this.pointerDown = (e) => {
-      this.down = { x: e.clientX, y: e.clientY };
-    };
-    this.pointerUp = (e) => {
-      if (this.down) {
-        if (Math.hypot(e.clientX - this.down.x, e.clientY - this.down.y) < 5) this.pick(e);
-        else this.manual();
-      }
-      this.down = null;
-    };
+    this.pointerDown = (event) => this.beginPointer(event);
+    this.pointerMove = (event) => this.movePointer(event);
+    this.pointerUp = (event) => this.endPointer(event);
+    this.pointerCancel = (event) => this.cancelPointer(event);
     this.wheel = () => this.manual();
     canvas.addEventListener("wheel", this.wheel, { passive: true });
     canvas.addEventListener("pointerdown", this.pointerDown);
     canvas.addEventListener("pointerup", this.pointerUp);
+    canvas.addEventListener("pointermove", this.pointerMove);
+    canvas.addEventListener("pointercancel", this.pointerCancel);
+    canvas.addEventListener("lostpointercapture", this.pointerCancel);
     this.keydown = (e) => this.keyboard(e);
     canvas.addEventListener("keydown", this.keydown);
     this.visibility = () => {
@@ -104,18 +95,52 @@ export class AtlasScene {
     this.ortho.updateProjectionMatrix();
     this.request();
   }
+  createControls() {
+    const controls = new OrbitControls(this.camera, this.canvas);
+    controls.enableDamping = false;
+    controls.enableRotate = this.view === "perspective";
+    controls.screenSpacePanning = true;
+    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    controls.mouseButtons.RIGHT = this.view === "perspective" ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
+    controls.touches.ONE = this.view === "perspective" ? THREE.TOUCH.ROTATE : THREE.TOUCH.PAN;
+    controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
+    controls.addEventListener("change", () => this.request());
+    return controls;
+  }
   setView(view) {
     this.view = view;
     const target = this.controls.target.clone();
+    this.controls.dispose();
     this.camera = view === "perspective" ? this.perspective : this.ortho;
-    this.controls.object = this.camera;
     this.camera.up.set(0, 1, 0);
     if (view === "overhead") this.camera.up.set(0, 0, -1);
-    this.controls.enableRotate = view === "perspective";
-    this.controls.mouseButtons.LEFT = view === "perspective" ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
-    this.controls.touches.ONE = view === "perspective" ? THREE.TOUCH.ROTATE : THREE.TOUCH.PAN;
+    // OrbitControls captures the camera's up axis at construction time.
+    this.controls = this.createControls();
     this.controls.target.copy(target);
     this.resetCamera();
+  }
+  setDisplayOptions({ showVnums = this.showVnums, northUp = this.northUp }) {
+    this.showVnums = showVnums;
+    this.northUp = northUp;
+    this.constrainCamera();
+    this.controls.update();
+    this.request();
+  }
+  constrainCamera() {
+    const locked = this.view === "perspective" && this.northUp;
+    this.controls.minAzimuthAngle = locked ? 0 : -Infinity;
+    this.controls.maxAzimuthAngle = locked ? 0 : Infinity;
+    this.controls.maxPolarAngle = locked ? Math.PI / 2 - 0.01 : Math.PI;
+    if (locked) {
+      // Preserve distance and tilt while putting north along the top of the map.
+      const offset = this.camera.position.clone().sub(this.controls.target);
+      const spherical = new THREE.Spherical().setFromVector3(offset);
+      spherical.theta = 0;
+      spherical.phi = Math.min(spherical.phi, this.controls.maxPolarAngle);
+      spherical.makeSafe();
+      this.camera.position.copy(this.controls.target).add(offset.setFromSpherical(spherical));
+      this.camera.lookAt(this.controls.target);
+    }
   }
   resetCamera() {
     const target = this.controls.target;
@@ -125,6 +150,7 @@ export class AtlasScene {
     const offset = this.view === "perspective" ? new THREE.Vector3(1, 1.4, 1).normalize().multiplyScalar(perspectiveFitDistance(this.radius || scale, this.perspective.fov, this.perspective.aspect)) : new THREE.Vector3(0, scale * 3, 1e-3);
     this.camera.position.copy(target).add(offset);
     this.camera.lookAt(target);
+    this.constrainCamera();
     this.controls.update();
     this.request();
   }
@@ -146,6 +172,7 @@ export class AtlasScene {
     const offset = this.camera.position.clone().sub(this.controls.target);
     this.controls.target.copy(center);
     this.camera.position.copy(center).add(offset);
+    this.constrainCamera();
     this.controls.update();
     this.request();
   }
@@ -320,6 +347,29 @@ export class AtlasScene {
     }
     this.request();
   }
+  beginPointer(event) {
+    if (this.down) {
+      // A second pointer starts a gesture, never a room click.
+      this.down.selectable = false;
+      return;
+    }
+    this.down = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, distance: 0, selectable: event.button === 0 && event.isPrimary !== false };
+  }
+  movePointer(event) {
+    if (this.down?.pointerId !== event.pointerId) return;
+    this.down.distance = Math.max(this.down.distance, Math.hypot(event.clientX - this.down.x, event.clientY - this.down.y));
+  }
+  cancelPointer(event) {
+    if (this.down?.pointerId === event.pointerId) this.down = null;
+  }
+  endPointer(event) {
+    if (this.down?.pointerId !== event.pointerId) return;
+    this.movePointer(event);
+    const down = this.down;
+    this.down = null;
+    if (down.distance >= 5) this.manual();
+    else if (down.selectable && event.button === 0 && event.isPrimary !== false) this.pick(event);
+  }
   pick(event) {
     const rect = this.canvas.getBoundingClientRect();
     const pointer = new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
@@ -329,7 +379,7 @@ export class AtlasScene {
     if (hit) {
       const room = hit.object.userData.rooms[hit.instanceId];
       this.select(this.groups.get(`${room.x},${room.y},${room.z}`));
-    }
+    } else this.select([]);
   }
   keyboard(event) {
     if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "=", "-"].includes(event.key)) return;
@@ -346,6 +396,7 @@ export class AtlasScene {
       this.controls.target.add(delta);
       this.camera.position.add(delta);
     }
+    this.constrainCamera();
     this.controls.update();
     this.request();
   }
@@ -356,6 +407,7 @@ export class AtlasScene {
     let count = 0;
     for (const room of this.rooms) {
       if (count >= 120) break;
+      if (!this.showVnums && !room.symbol && !room.flagSymbol) continue;
       const world = new THREE.Vector3(...roomPosition(room, this.exploded));
       world.y += 0.2;
       const p = world.clone().project(this.camera), next = world.clone().add(new THREE.Vector3(1, 0, 0)).project(this.camera);
@@ -380,6 +432,10 @@ export class AtlasScene {
     this.canvas.removeEventListener("wheel", this.wheel);
     this.canvas.removeEventListener("pointerdown", this.pointerDown);
     this.canvas.removeEventListener("pointerup", this.pointerUp);
+    this.canvas.removeEventListener("pointermove", this.pointerMove);
+    this.canvas.removeEventListener("pointercancel", this.pointerCancel);
+    this.canvas.removeEventListener("lostpointercapture", this.pointerCancel);
+    this.down = null;
     this.canvas.removeEventListener("keydown", this.keydown);
     this.canvas.removeEventListener("webglcontextlost", this.contextLost);
     this.clear();

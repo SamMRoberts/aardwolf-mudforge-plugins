@@ -88,12 +88,12 @@ test('Atlas produces deterministic standalone artifacts without CDN or external 
   const source = await readFile(resolve(root, 'src/plugins/aardwolf-atlas.lua'), 'utf8');
   const first = await buildAtlasOutputs(root, source);
   const second = await buildAtlasOutputs(root, source);
-  assert.deepEqual([...first.keys()], ['dist/plugins/aardwolf-atlas.lua', 'dist/atlas/aardwolf-atlas.html']);
+  assert.deepEqual([...first.keys()], ['dist/plugins/aardwolf-atlas.lua', 'dist/atlas/aardwolf-atlas.html', 'dist/atlas/aardwolf-atlas-settings.html', 'dist/atlas/aardwolf-atlas-details.html']);
   for (const [path, bytes] of first) assert.deepEqual(bytes, second.get(path), path);
   const lua = first.get('dist/plugins/aardwolf-atlas.lua').toString();
   assert(first.get('dist/plugins/aardwolf-atlas.lua').length < 5 * 1024 * 1024, 'Catalog download must fit MudForge\'s 5 MiB limit');
   const html = first.get('dist/atlas/aardwolf-atlas.html').toString();
-  assert.doesNotMatch(lua, /__ATLAS_(?:HTML|STYLE|ASSETS|SCRIPT)__/);
+  assert.doesNotMatch(lua, /__ATLAS_[A-Z_]+__/);
   assert.doesNotMatch(html, /<(?:script|img|link)\b[^>]*(?:src|href)=["'](?:https?:|\/\/)/i);
   assert(!lua.includes('window.ATLAS_PREVIEW=true;'));
   assert(html.includes('window.ATLAS_PREVIEW=true;'));
@@ -101,5 +101,12 @@ test('Atlas produces deterministic standalone artifacts without CDN or external 
   assert(lua.includes('The above copyright notice and this permission notice shall be included'));
   assert.doesNotMatch(lua, /[^\x00-\x7f]/);
   assert(html.includes('&#8593;'), 'Compass arrow survives ASCII Lua encoding as an HTML entity');
-  for (const artifact of [lua, html]) assert.equal((artifact.match(/data:image\/jpeg;base64,/g) || []).length, manifest.sheets.length);
+  assert.equal((html.match(/data:image\/jpeg;base64,/g) || []).length, manifest.sheets.length);
+  assert.equal((lua.match(/data:image\/jpeg;base64,/g) || []).length, manifest.sheets.length * 2);
+  for (const role of ['settings', 'details']) {
+    const document = first.get(`dist/atlas/aardwolf-atlas-${role}.html`).toString();
+    assert(document.includes(`data-surface="${role}"`));
+    assert.doesNotMatch(document, /WebGLRenderer|OrbitControls|<script[^>]+src=/);
+    assert(!document.includes('__ATLAS_'));
+  }
 });
