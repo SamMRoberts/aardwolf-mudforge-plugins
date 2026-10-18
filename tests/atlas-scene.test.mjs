@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { AtlasScene } from "../src/atlas/scene.js";
+import { connectionSegments, connectionStyles } from "../src/atlas/connections.js";
+import { normalizeRoom } from "../src/atlas/model.js";
 
 // Exercise the production camera and controls without a WebGL context.
 function harness() {
@@ -202,4 +204,171 @@ test("vnum visibility suppresses numbers while preserving symbols and label dens
     globalThis.document = oldDocument;
     globalThis.CSS = oldCSS;
   }
+});
+
+
+test("area centering preserves orthographic world scale and perspective distance/orientation", () => {
+  const scene = harness();
+  scene.rooms = [{ id: 1, positioned: true, x: 50, y: -30, z: 2 }, { id: 2, positioned: true, x: 80, y: 10, z: 6 }];
+  scene.extent = 42;
+  scene.ortho.zoom = 3.4;
+  scene.resize();
+  const scale = scene.extent / scene.ortho.zoom;
+  const frustum = scene.ortho.top - scene.ortho.bottom;
+  let offset = scene.camera.position.clone().sub(scene.controls.target);
+  scene.centerArea();
+  assert.ok(Math.abs(scene.extent / scene.ortho.zoom - scale) < 1e-8);
+  assert.equal(scene.ortho.top - scene.ortho.bottom, frustum);
+  assert.ok(scene.camera.position.clone().sub(scene.controls.target).distanceTo(offset) < 1e-8);
+  assert.ok(scene.controls.target.distanceTo(new THREE.Vector3(130, 10.4, -20)) < 1e-8);
+  scene.setView("perspective");
+  scene.camera.position.copy(scene.controls.target).add(new THREE.Vector3(-14, 30, 19));
+  scene.controls.update();
+  offset = scene.camera.position.clone().sub(scene.controls.target);
+  scene.rooms = [{ id: 10, positioned: true, x: -100, y: 10, z: -1 }];
+  scene.centerArea();
+  assert.ok(scene.camera.position.clone().sub(scene.controls.target).distanceTo(offset) < 1e-8);
+  scene.setDisplayOptions({ northUp: true });
+  offset = scene.camera.position.clone().sub(scene.controls.target);
+  scene.exploded = true;
+  scene.rooms = [{ id: 11, positioned: true, x: 4, y: 7, z: 8 }];
+  scene.centerArea();
+  assertNorthUp(scene);
+  assert.ok(scene.camera.position.clone().sub(scene.controls.target).distanceTo(offset) < 1e-8);
+  assert.ok(scene.controls.target.distanceTo(new THREE.Vector3(8, 48, 14)) < 1e-8);
+  const target = scene.controls.target.clone();
+  scene.rooms = [];
+  scene.centerArea();
+  assert.ok(scene.controls.target.equals(target));
+});
+
+const room = (id, x, y, z = 0, fields = {}) => normalizeRoom({ id, x, y, z, ...fields });
+test("connections clip tile faces, retain direction arrows, separate reverse lanes and use distinct custom style", () => {
+  const batches = connectionSegments([
+    room(1, 0, 0, 0, { exits: { e: 2 }, specialExits: { portal: 3 } }),
+    room(2, 1, 0, 0, { exits: { w: 1 } }), room(3, 0, 3),
+  ]);
+  assert.equal(batches.normal.length, 36); // Two shafts and four chevron arms.
+  assert.equal(batches.custom.length, 18);
+  assert.notEqual(connectionStyles.normal.color, connectionStyles.custom.color);
+  assert.ok(connectionStyles.normal.width > 1);
+  const forward = batches.normal.slice(0, 6), reverse = batches.normal.slice(18, 24);
+  assert.ok(Math.abs(forward[0] - 0.82) < 1e-8);
+  assert.ok(Math.abs(forward[3] - 1.18) < 1e-8);
+  assert.ok(forward[1] > 0.11 && forward[4] > 0.11);
+  assert.ok(forward[2] > 0 && reverse[2] < 0);
+  const gap = forward[3] - forward[0];
+  const arrowLength = batches.normal[9] - batches.normal[6];
+  const arrowWidth = Math.abs(batches.normal[8] - forward[2]);
+  assert.ok(Math.abs(arrowLength - gap * 0.45) < 1e-8);
+  assert.ok(Math.abs(arrowWidth - gap * 0.28) < 1e-8);
+  // Widely separated rooms get capped arrowheads rather than giant chevrons.
+  assert.ok(Math.abs(batches.custom[11] - batches.custom[8] - 0.24) < 1e-8);
+  assert.ok(Math.abs(Math.abs(batches.custom[6]) - 0.15) < 1e-8);
+});
+
+test("reverse vertical connections use opposing lanes and finite direction/lock markers", () => {
+  const batches = connectionSegments([
+    room(1, 0, 0, 0, { exits: { u: 2 }, doors: { u: 3 } }),
+    room(2, 0, 0, 1, { exits: { d: 1 }, exitLocks: { d: true } }),
+  ], true);
+  assert.equal(batches.normal.length, 36);
+  assert.ok(batches.normal[0] > 0);
+  assert.ok(batches.normal[18] < 0);
+  assert.ok(batches.normal[1] < batches.normal[4]);
+  assert.ok(batches.normal[19] > batches.normal[22]);
+  assert.equal(batches.exitLocks.length, 108);
+  assert.ok(Object.values(batches).flat().every(Number.isFinite));
+});
+
+test("open, closed, locked doors and independent room/exit locks have distinct bounded geometry", () => {
+  const source = room(1, 0, 0, 0, {
+    exits: { e: 2, s: 3, w: 4, n: 5 }, doors: { e: 1, s: 2, w: 3 },
+    exitLocks: { n: true }, locked: true,
+  });
+  const batches = connectionSegments([source, room(2, 1, 0), room(3, 0, 1), room(4, -1, 0), room(5, 0, -1)]);
+  assert.equal(batches.openDoors.length, 18);
+  assert.equal(batches.closedDoors.length, 6);
+  assert.equal(batches.lockedDoors.length, 6);
+  assert.equal(batches.exitLocks.length, 108); // A closed door lock and an independent routing lock.
+  assert.equal(batches.roomLocks.length, 54);
+  assert.equal(new Set([connectionStyles.openDoors.color, connectionStyles.closedDoors.color, connectionStyles.lockedDoors.color]).size, 3);
+  assert.notDeepEqual(batches.openDoors, batches.closedDoors);
+  // Padlock bodies retain a visible interior at normal tile sizes, while the
+  // room-corner marker stays within the slab's 0.74-unit half-width.
+  assert.equal(connectionStyles.exitLocks.width, 2);
+  assert.equal(connectionStyles.roomLocks.width, 2);
+  const lockXs = batches.roomLocks.filter((_, index) => index % 3 === 0);
+  const lockZs = batches.roomLocks.filter((_, index) => index % 3 === 2);
+  assert.ok(Math.max(...lockXs) <= 0.74 && Math.min(...lockXs) >= -0.74);
+  assert.ok(Math.max(...lockZs) <= 0.74 && Math.min(...lockZs) >= -0.74);
+  assert.ok(Math.max(...lockXs) - Math.min(...lockXs) > 0.38);
+  assert.ok(Object.values(batches).flat().every(Number.isFinite));
+});
+
+test("diagonal, vertical, coincident, hidden and unpositioned rooms cannot create invalid or invented edges", () => {
+  const batches = connectionSegments([
+    room(1, 0, 0, 0, { exits: { ne: 2, u: 3, portal: 4, s: 5, w: 6, out: 999 } }),
+    room(2, 1, -1), room(3, 0, 0, 1), room(4, 0, 0),
+    room(5, 0, 1, 0, { hidden: true, locked: true }), normalizeRoom({ id: 6, locked: true }),
+  ], true);
+  assert.equal(batches.normal.length, 36); // Diagonal plus vertical, no coincident loop.
+  assert.equal(batches.custom.length, 0);
+  assert.equal(batches.roomLocks.length, 0);
+  assert.ok(Object.values(batches).flat().every(Number.isFinite));
+});
+
+function geometryHarness() {
+  const scene = harness();
+  scene.content = new THREE.Group();
+  scene.assets = { terrains: [] };
+  scene.materials = new Map();
+  scene.textures = new Map();
+  scene.material = () => {
+    if (!scene.materials.has("plain")) scene.materials.set("plain", new THREE.MeshBasicMaterial());
+    return scene.materials.get("plain");
+  };
+  return scene;
+}
+test("wide connection layers are batched, preserve room picking and keep route/player/selection above connections", () => {
+  const scene = geometryHarness();
+  const rooms = Array.from({ length: 100 }, (_, i) => room(i + 1, i, 0, 0, { exits: i < 99 ? { e: i + 2 } : {}, locked: true }));
+  scene.setRooms(rooms, false);
+  const links = scene.content.children.filter(child => child.userData.connection);
+  assert.ok(links.length <= Object.keys(connectionStyles).length * 2);
+  assert.ok(links.every(child => child.isLineSegments2 && child.material.isLineMaterial && child.material.linewidth >= 2));
+  assert.ok(links.every(child => child.material.depthWrite === false && child.material.alphaToCoverage));
+  assert.equal(connectionStyles.normal.width, 2);
+  assert.equal(connectionStyles.custom.width, 2.5);
+  assert.ok(scene.meshes.every(mesh => mesh.isInstancedMesh && !mesh.userData.connection));
+  scene.camera.updateMatrixWorld();
+  scene.content.updateMatrixWorld(true);
+  scene.pick(pointer({ clientX: 450, clientY: 300 }));
+  assert.equal(scene.selected[0].id, 1);
+  scene.overlays(1, 2, [{ roomId: 1 }, { roomId: 2 }]);
+  const overlays = scene.content.children.filter(child => child.userData.overlay);
+  assert.equal(overlays.length, 4);
+  assert.ok(overlays.every(child => child.material.depthTest === false));
+  assert.ok(overlays.filter(child => child.isLineSegments2).every(child => child.renderOrder >= 3));
+  const route = overlays.find(child => child.isLineSegments2 && child.renderOrder === 4);
+  const routeHalo = overlays.find(child => child.isLineSegments2 && child.renderOrder === 3);
+  assert.equal(route.material.linewidth, 4);
+  assert.equal(routeHalo.material.linewidth, 6);
+  assert.ok(overlays.filter(child => child.isMesh && !child.isLineSegments2).every(child => child.renderOrder === 5));
+  let geometryDisposals = 0, materialDisposals = 0;
+  const owned = [...scene.content.children];
+  for (const child of owned) {
+    child.geometry.addEventListener("dispose", () => geometryDisposals++);
+    if (child.userData.ownMaterial) child.material.addEventListener("dispose", () => materialDisposals++);
+  }
+  scene.overlays(1, null);
+  const replacedCount = overlays.length;
+  assert.equal(geometryDisposals, replacedCount);
+  assert.equal(materialDisposals, replacedCount);
+  scene.clear();
+  assert.equal(scene.content.children.length, 0);
+  assert.equal(scene.meshes.length, 0);
+  assert.equal(geometryDisposals, owned.length);
+  assert.equal(materialDisposals, owned.filter(child => child.userData.ownMaterial).length);
+  for (const material of scene.materials.values()) material.dispose();
 });

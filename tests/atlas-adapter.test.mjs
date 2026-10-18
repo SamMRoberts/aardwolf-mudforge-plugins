@@ -29,6 +29,7 @@ const cases = {
     assert(response.rooms[1].x == response.rooms[2].x and response.done and response.nextOffset == 2)
     assert(response.rooms[2].specialExits["enter portal"] == 3 and response.rooms[2].doors.u == 2)
     assert(response.rooms[2].exits["enter portal"] == nil and response.rooms[2].exits.u == 3)
+    assert(response.rooms[2].exitLocks["enter portal"] == true and response.rooms[2].exitLocks.u == false)
     assert(response.rooms[2].flags[1] == "shop" and response.rooms[2].flags[2] == "quest")
   `,
   'chunks a large area with sequential pulls and invalidates stale streams': `
@@ -75,6 +76,17 @@ const cases = {
     assert(#world.last().rooms == 1 and world.last().rooms[1].x == nil and world.last().nextOffset == 2)
     assert(world.last().rooms[1].exits.e == 2)
     world.request("inspect", { roomId = 2, generation = 0 }); assert(world.last().type == "error")
+  `,
+  'area records include room, door and independent exit locks before any room is inspected': `
+    ${setup}
+    world.metadata[2].locked = true
+    world.metadata[2].doors.u = 3
+    world.request("area", { areaId = "Alpha", generation = 0, offset = 0 })
+    local room = world.last().rooms[2]
+    assert(room.locked and room.doors.u == 3)
+    assert(room.exitLocks["enter portal"] and room.exitLocks.u == false)
+    assert(room.notes == nil and room.userData == nil)
+    assert(world.pathCalls == 0 and world.writes == 0)
   `,
   'inspection preserves inert text and native metadata, and rejects stale selection': `
     ${setup}

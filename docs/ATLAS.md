@@ -1,4 +1,4 @@
-# Aardwolf Atlas 0.2.1
+# Aardwolf Atlas 0.2.2
 
 Atlas is a standalone, read-only explorer for MudForge's native map. It combines
 an overhead view, orbitable 3D terrain slabs, floor selection, an exploded floor
@@ -23,7 +23,7 @@ moves beneath the map. No room details take map space until a room is selected.
 | Fit area | Frame the current floor/stack and pause following |
 | Reset / Isometric | Reset the camera to its default overhead/isometric placement |
 | Follow player | Resume centering on the player's native area and floor |
-| Area / Floor | Browse mapped rooms; manual browsing pauses following |
+| Area / Floor | Browse mapped rooms; manual browsing pauses following until the character enters a new area |
 | Explode floors | Separate all floors vertically in 3D |
 | Gear | Open or raise the floating Atlas Settings window |
 | Background click | Clear selection, room details, collision choices, and route preview |
@@ -35,6 +35,26 @@ Type `awatlas` or `awatlas show` to reopen a closed panel, `awatlas hide` to clo
 it, and `awatlas native` to open its read-only native mapper companion. The
 companion's `interactive=false` setting disables click-to-walk. If WebGL is
 unavailable, the panel offers this companion and explains the rendering failure.
+
+Entering a new character area always switches Atlas to that area and floor and
+resumes Follow, including after manual panning, zooming or area browsing. Moving
+within the same area keeps manual browsing paused. A temporary unknown location
+does not count as leaving or entering an area. Opening Atlas with a known mapped
+character location starts following that character.
+
+Only the first positioned area is fitted automatically. Later area changes,
+including manual area selection and returning with Follow, preserve orthographic
+world scale or 3D camera distance and orientation. The map recenters on the
+character when following, or the browsed area's bounds otherwise. Use Fit to
+frame a new area, or the usual zoom/Reset controls to change scale.
+
+Connections use wide, bright strokes with dark contrast outlines and larger
+arrowheads kept clear of room artwork. Ordinary exits are light gray; custom
+exits are violet. Open doors have green jambs and an open leaf; closed doors use
+an amber bar; locked doors use an orange bar and red padlock. Independent room
+and exit routing locks also have red padlocks. Door states and routing locks
+remain separate native metadata; Atlas does not infer or change either. Route
+previews, player and selection overlays retain priority above connection marks.
 
 ## Settings and room details
 
@@ -286,3 +306,29 @@ catalog integrity. `npm run build:check` checked 245 generated artifacts and
 900 × 640 camera before/after, exercised all 114 enhanced terrains in overhead
 and perspective views, selected-room artwork, and a 390 × 700 layout. Original
 source PNGs, terrain IDs/rectangles, map packs, and renderer behavior are unchanged.
+
+## 0.2.2 verification — 2026-10-18
+
+Focused regression tests reproduce the previous paused-follow area-change bug
+and automatic refitting, then verify forced following on area entry, manual
+browsing within an area, unknown locations, unassigned areas, rapid transitions
+and stale chunks. Real Three.js camera tests cover unchanged orthographic scale
+and perspective distance/orientation when recentering between differently sized
+areas. Geometry tests cover bidirectional/vertical lanes, door states, room/exit
+locks, bounded draw layers, picking, overlay order and resource disposal.
+
+The full suite passed 258 JavaScript tests and 25 Python tests. Deterministic
+build verification checked 245 artifacts; `git diff --check` passed. The
+installable plugin is 3,909,007 bytes, below the 5 MiB limit.
+
+Browser checks exercised synthetic area transitions, resumed following, floor
+changes and same-area manual browsing. Projected room spacing stayed identical
+through area round trips: 103.551 pixels overhead and 147.229 pixels in 3D.
+Visual review covered connection/door/lock marks in both views, a 900 × 640
+layout and a 390 × 700 layout with no horizontal control overflow. The
+10,000-room fixture rendered without a failure overlay or console errors.
+
+Native/live character traversal has not been exercised for this version; browser
+fixtures and injected host contracts do not establish live MudForge acceptance.
+No native map writes, walking, connection changes or play-world installation
+were performed.

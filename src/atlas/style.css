@@ -546,3 +546,6 @@ header button, header select { padding: 3px 7px; }
 }
 
 .collapsed .inspector-head > span { display: none; }
+
+.map-key .door-key { width: 10px; height: 3px; border-radius: 0; background: #ffd166; box-shadow: 0 0 0 1px #091219; }
+.lock-key { width: 10px; height: 12px; fill: #091219; stroke: #ff555f; stroke-width: 2; }
