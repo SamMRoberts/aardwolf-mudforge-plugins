@@ -90,6 +90,24 @@
       "sha256": "0ceb0d1896965438d527c2c28c03d4505bfced309f4e2e6634a1883013e38feb",
       "size": 42085,
       "format": "lua"
+    },
+    {
+      "id": "aardwolf-atlas",
+      "name": "Aardwolf Atlas",
+      "version": "0.1.0",
+      "author": "Sam Roberts",
+      "description": "Read-only native map explorer with terrain artwork, overhead and orbitable 3D views, room details and route previews.",
+      "category": "widgets",
+      "tags": [
+        "aardwolf",
+        "mapper",
+        "terrain",
+        "3d"
+      ],
+      "downloadUrl": "dist/plugins/aardwolf-atlas.lua",
+      "sha256": "738669e569f8ed4058cd39d09a9d2a55d6239471723315077b7c50ead3144cac",
+      "size": 1964560,
+      "format": "lua"
     }
   ],
   "libraries": [

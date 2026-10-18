@@ -20,9 +20,9 @@ test('catalog lists exact generated source bytes and correct integrity metadata'
   const outputs = await buildOutputs();
   const catalog = JSON.parse(outputs.get('plugins.json'));
   assert.equal(catalog.schemaVersion, 1);
-  assert.equal(catalog.plugins.length, 5);
+  assert.equal(catalog.plugins.length, 6);
   assert.deepEqual(catalog.plugins.map(plugin => plugin.id), [
-    'aardwolf-api-core', 'aardwolf-api-vitals-example', 'aardwolf-vitals', 'aardwolf-spells', 'aardwolf-room-details',
+    'aardwolf-api-core', 'aardwolf-api-vitals-example', 'aardwolf-vitals', 'aardwolf-spells', 'aardwolf-room-details', 'aardwolf-atlas',
   ]);
   assert.equal(catalog.libraries.length, 1);
   assert.equal(catalog.libraries[0].name, 'aardwolf-api');
@@ -32,6 +32,15 @@ test('catalog lists exact generated source bytes and correct integrity metadata'
     const source = outputs.get(listing.downloadUrl);
     assert.equal(listing.size, source.length);
     assert.equal(listing.sha256, createHash('sha256').update(source).digest('hex'));
+    const sourcePath = listing.downloadUrl.replace(/^dist\//, 'src/');
+    const original = await readFile(resolve(root, sourcePath));
+    if (listing.id === 'aardwolf-atlas') {
+      assert(original.includes(Buffer.from('__ATLAS_HTML__')));
+      assert(!source.includes(Buffer.from('__ATLAS_HTML__')));
+      assert.doesNotThrow(() => luaparse.parse(source.toString(), { luaVersion: '5.1' }));
+    } else {
+      assert.deepEqual(source, original, `${listing.downloadUrl}: preserve exact-copy distribution`);
+    }
   }
 });
 
@@ -48,5 +57,5 @@ test('build check resolves paths from an unrelated working directory', () => {
   const output = execFileSync(process.execPath, [resolve(root, 'tools/build-repository.mjs'), '--check'], {
     cwd: '/tmp', encoding: 'utf8',
   });
-  assert.match(output, /Checked 241 repository files/);
+  assert.match(output, /Checked 243 repository files/);
 });

@@ -16,7 +16,19 @@ a connected session.
 | Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
 | Aardwolf Spells | SQLite skill/spell snapshots and a dockable panel of learned damage abilities |
 | Aardwolf Room Details | Formatted tagged room characters/objects, selection, and automatic room refreshes |
+| [Aardwolf Atlas](docs/ATLAS.md) | Standalone native-map explorer with overhead/3D terrain views, room inspection and read-only routes |
 | Aardwolf Terrain Icons | Importable pack of 114 fantasy terrain tiles with matching material edges |
+
+## Aardwolf Atlas
+
+[Aardwolf Atlas 0.1.0](docs/ATLAS.md) displays the native map in overhead or
+orbitable 3D views, with terrain artwork, floors, area browsing, room inspection,
+and lock-aware route previews. Install `dist/plugins/aardwolf-atlas.lua` by itself;
+it needs no API Core, SQLite helper, connection, or runtime downloads. Type
+`awatlas` to reopen its dockable panel. Atlas never walks or edits native map data.
+See the guide for controls, build details, and disposable acceptance checks.
+Native checks on MudForge 2.0.3701, map-preservation comparisons, and remaining
+validation limits are recorded in the guide.
 
 ## Terrain icon packs
 
