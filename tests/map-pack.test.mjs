@@ -32,6 +32,7 @@ for (const packName of mapPackNames) {
   const outputs = await buildMapPackOutputs(root, packName);
   const pack = JSON.parse(outputs.get(packOutput));
   const digest = bytes => createHash('sha256').update(bytes).digest('hex');
+  const interiorVariantNames = ['inside-wide-planks', 'inside-parquet'];
 
   test(`${packName}: pack covers the complete pinned Aardwolf registry plus MudForge defaults`, () => {
     assert.equal(registry.source.revision, 'ac6e40ff5596e285cfcef6739d1dfdc257cfa162');
@@ -64,11 +65,24 @@ for (const packName of mapPackNames) {
     }
   });
 
+  if (!themed) test(`${packName}: terrain registry rejects unsafe, duplicate and invalid variant names`, () => {
+    for (const variants of ['inside-wide-planks', [], [null], ['../inside'], ['inside'],
+      ['inside-wide-planks', 'inside-wide-planks'], Array.from({ length: 10 }, (_, index) => `inside-variant-${index}`)]) {
+      const copy = structuredClone(registry);
+      copy.terrains.find(terrain => terrain.name === 'inside').variants = variants;
+      assert.throws(() => validateTerrainRegistry(copy), `variants: ${JSON.stringify(variants)}`);
+    }
+    const copy = structuredClone(registry);
+    copy.terrains.find(terrain => terrain.name === 'default').variants = ['inside-wide-planks'];
+    assert.throws(() => validateTerrainRegistry(copy), 'variant names must be unique across terrain styles');
+  });
+
   test(`${packName}: every terrain embeds a unique opaque 128px PNG with its registry fallback color`, async () => {
     const images = new Set();
     const geometry = new Set();
     for (const style of pack.terrainStyles) {
-      assert.deepEqual(Object.keys(style), ['name', 'color', 'image']);
+      assert.deepEqual(Object.keys(style), !themed && style.name === 'inside'
+        ? ['name', 'color', 'image', 'variants'] : ['name', 'color', 'image']);
       assert.match(style.color, /^#[a-f0-9]{6}$/);
       assert.equal(style.color, registry.terrains.find(terrain => terrain.name.trim().toLowerCase() === style.name).color);
       assert.match(style.image, /^data:image\/png;base64,[A-Za-z0-9+/]+=*$/);
@@ -93,6 +107,38 @@ for (const packName of mapPackNames) {
     }
   });
 
+  if (!themed) test(`${packName}: inside selects two unique opaque variants through all ten vnum slots`, async () => {
+    const inside = pack.terrainStyles.find(style => style.name === 'inside');
+    const interior = registry.terrains.find(terrain => terrain.name === 'inside');
+    assert.deepEqual(interior.variants, interiorVariantNames);
+    assert.deepEqual(pack.terrainStyles.filter(style => style.variants).map(style => style.name), ['inside']);
+    const images = [];
+    const pixelsSeen = new Set(pack.terrainStyles.map(style => digest(decodePng(Buffer.from(style.image.split(',')[1], 'base64')).pixels)));
+    for (const name of interiorVariantNames) {
+      const source = await readFile(resolve(root, packDirectory, 'variants', `${name}.png`));
+      const emitted = outputs.get(`dist/map-packs/${packName}/${name}.png`);
+      assert(emitted, `${name}: missing distributed variant PNG`);
+      assert.equal(emitted.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+      assert.equal(emitted.readUInt32BE(16), 128);
+      assert.equal(emitted.readUInt32BE(20), 128);
+      const { pixels } = decodePng(emitted);
+      const sourceAtRoomSize = new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><image href="data:image/png;base64,${source.toString('base64')}" width="128" height="128"/></svg>`, { font: { loadSystemFonts: false } }).render();
+      assert.deepEqual(pixels, sourceAtRoomSize.pixels, `${name}: exported artwork differs from the full source image`);
+      const hash = digest(pixels);
+      assert(!pixelsSeen.has(hash), `${name}: variant duplicates an existing image`);
+      pixelsSeen.add(hash);
+      for (let offset = 3; offset < pixels.length; offset += 4) assert.equal(pixels[offset], 255, `${name}: transparent pixel`);
+      images.push(`data:image/png;base64,${emitted.toString('base64')}`);
+    }
+    const [first, second] = images;
+    assert.deepEqual(inside.variants, ['', first, second, '', first, second, '', first, second, '']);
+    // MudForge indexes these slots by vnum % 10; empty slots retain the base image.
+    const selected = Array.from({ length: 10 }, (_, index) => inside.variants[(10000 + index) % 10] || inside.image);
+    assert.equal(selected.filter(image => image === inside.image).length, 4);
+    assert.equal(selected.filter(image => image === first).length, 3);
+    assert.equal(selected.filter(image => image === second).length, 3);
+  });
+
   if (!themed) test(`${packName}: every tile exactly matches its named Atlas room rectangle`, () => {
     assert.equal(atlasManifest.terrains.length, registry.terrains.length);
     for (const terrain of registry.terrains) {
@@ -112,10 +158,11 @@ for (const packName of mapPackNames) {
 
   test(`${packName}: contact sheet includes all terrains at three sizes on both backgrounds`, () => {
     const html = outputs.get(previewOutput).toString();
-    assert.equal((html.match(/<article>/g) || []).length, 114);
-    assert.equal((html.match(/class="samples dark"/g) || []).length, 114);
-    assert.equal((html.match(/class="samples light"/g) || []).length, 114);
-    for (const size of [16, 24, 32]) assert.equal((html.match(new RegExp(`width="${size}" height="${size}"`, 'g')) || []).length, 228);
+    const cardCount = themed ? 114 : 116;
+    assert.equal((html.match(/<article>/g) || []).length, cardCount);
+    assert.equal((html.match(/class="samples dark"/g) || []).length, cardCount);
+    assert.equal((html.match(/class="samples light"/g) || []).length, cardCount);
+    for (const size of [16, 24, 32]) assert.equal((html.match(new RegExp(`width="${size}" height="${size}"`, 'g')) || []).length, cardCount * 2);
     for (const style of pack.terrainStyles) assert(html.includes(`<h2>${style.name}</h2>`));
     assert.doesNotMatch(html, /<script\b|src="https?:/i);
     assert(html.includes('class="map-study"'));
@@ -127,6 +174,10 @@ for (const packName of mapPackNames) {
     } else {
       assert(html.includes('Atlas artwork'));
       assert(!html.includes('Editable SVG sources'));
+      for (const name of interiorVariantNames) assert(html.includes(`<h2>${name}</h2>`));
+      const headings = [...html.matchAll(/<h2>([^<]+)<\/h2>/g)].map(match => match[1]);
+      const insideIndex = headings.indexOf('inside');
+      assert.deepEqual(headings.slice(insideIndex, insideIndex + 3), ['inside', ...interiorVariantNames]);
     }
   });
 
@@ -181,6 +232,10 @@ test('Atlas map pack validates its manifest and lossless sheets before exporting
   await mkdir(atlasDirectory, { recursive: true });
   await mkdir(registryDirectory, { recursive: true });
   await copyFile(resolve(root, 'src/map-packs/aardwolf-terrain-icons/terrains.json'), resolve(registryDirectory, 'terrains.json'));
+  await mkdir(resolve(registryDirectory, 'variants'));
+  for (const name of ['inside-wide-planks', 'inside-parquet']) {
+    await copyFile(resolve(root, 'src/map-packs/aardwolf-terrain-icons/variants', `${name}.png`), resolve(registryDirectory, 'variants', `${name}.png`));
+  }
   for (const sheet of atlasManifest.sheets) {
     await copyFile(resolve(root, 'src/atlas/assets', `${sheet.id}.png`), resolve(atlasDirectory, `${sheet.id}.png`));
   }
@@ -206,6 +261,27 @@ test('Atlas map pack validates its manifest and lossless sheets before exporting
     const actual = await buildMapPackOutputs(fixtureRoot);
     const expected = await buildMapPackOutputs(root);
     assert.deepEqual(actual, expected);
+  });
+  await t.test('variant artwork must exist and be a square opaque PNG', async t => {
+    const variantPath = resolve(registryDirectory, 'variants/inside-wide-planks.png');
+    const original = await readFile(variantPath);
+    const image = (width, height, opaque) => Buffer.from(new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${opaque ? `<rect width="${width}" height="${height}" fill="#85603b"/>` : ''}</svg>`, { font: { loadSystemFonts: false } }).render().asPng());
+    for (const [label, bytes, error] of [
+      ['missing', null, /ENOENT/],
+      ['malformed', Buffer.from('not a PNG'), /square PNG/i],
+      ['nonsquare', image(128, 256, true), /square PNG/i],
+      ['transparent', image(128, 128, false), /opaque/i],
+    ]) {
+      await t.test(label, async () => {
+        try {
+          if (bytes) await writeFile(variantPath, bytes);
+          else await rm(variantPath);
+          await assert.rejects(buildMapPackOutputs(fixtureRoot), error);
+        } finally {
+          await writeFile(variantPath, original);
+        }
+      });
+    }
   });
   await t.test('PNG dimensions must match declared sheet dimensions', async () => {
     await writeFile(manifestPath, JSON.stringify(atlasManifest));

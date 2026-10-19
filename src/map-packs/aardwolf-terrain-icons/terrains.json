@@ -1,7 +1,7 @@
 {
   "name": "Aardwolf Terrain Icons",
-  "version": "4.0.0",
-  "description": "114 illustrated room terrain images from the enhanced Aardwolf Atlas artwork, exported as lossless 128-pixel PNG tiles. All 112 published Aardwolf environments plus MudForge default and water. Self-contained; no Atlas installation required. Version 4.0.0.",
+  "version": "4.1.0",
+  "description": "114 illustrated room terrains from the enhanced Aardwolf Atlas artwork, plus two matching timber-floor variants for inside rooms. Lossless 128-pixel PNG tiles cover all 112 published Aardwolf environments plus MudForge default and water. Self-contained; no Atlas installation required. Version 4.1.0.",
   "source": {
     "url": "https://raw.githubusercontent.com/fiendish/aardwolfclientpackage/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db",
     "revision": "ac6e40ff5596e285cfcef6739d1dfdc257cfa162",
@@ -15,7 +15,8 @@
       "name": "inside",
       "family": "wood",
       "color": "#885735",
-      "motif": "Warm timber and a jewel-colored woven rug"
+      "motif": "Warm timber flooring",
+      "variants": ["inside-wide-planks", "inside-parquet"]
     },
     {
       "id": 1,

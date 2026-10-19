@@ -1,6 +1,7 @@
 # Aardwolf Terrain Icons
 
-Version **4.0.0** contains **114 room terrain images from Aardwolf Atlas**:
+Version **4.1.0** contains **114 room terrain images from Aardwolf Atlas**
+and **two additional timber-floor variants for `inside` rooms**:
 all 112 environments in the published Aardwolf client database, plus MudForge's
 `default` and `water`. The pack uses Atlas's enhanced, hand-painted terrain
 artwork, exported from its normalized lossless sheets as individual 128 × 128
@@ -10,13 +11,23 @@ or live connection is needed. The existing pack name, filename, terrain keys,
 fallback colors and import structure are preserved. The separate Three Moons
 pack keeps its SVG artwork.
 
+The original `inside` floor now alternates with broad staggered planks and
+herringbone parquet, using MudForge's `variants` image array. Selection is stable
+by room number: its last decimal digit selects one of ten slots. Digits 0, 3, 6
+and 9 use the original; 1, 4 and 7 use broad planks; 2, 5 and 8 use parquet.
+Actual proportions depend on the area's room numbers. Empty variant slots fall
+back to the original image; clients without variant support still have that
+base image. Other indoor terrain types, all terrain names and fallback colors
+are unchanged. No room data needs to be edited.
+
 - [Importable JSON pack](../dist/map-packs/aardwolf-terrain-icons.json)
-- [Contact sheet](../dist/map-packs/aardwolf-terrain-icons.html): open the downloaded HTML in a browser for labeled 16, 24 and 32 px samples on dark and light backgrounds
+- [Contact sheet](../dist/map-packs/aardwolf-terrain-icons.html): labeled 16, 24 and 32 px samples on dark and light backgrounds, plus an original/varied interior comparison
 - [Connected map preview](../dist/map-packs/aardwolf-terrain-icons-map-preview.png): town, woodland/river and dungeon studies, plus six biome swatches, with simulated client walls
 - [Individual PNGs](../dist/map-packs/aardwolf-terrain-icons/)
 - [Atlas artwork and provenance](../src/atlas/assets/README.md)
 - [Atlas terrain rectangles](../src/atlas/assets/manifest.json)
 - [Registry, palette and provenance](../src/map-packs/aardwolf-terrain-icons/terrains.json)
+- [Interior variant sources and prompts](../src/map-packs/aardwolf-terrain-icons/variants/README.md)
 
 ## Import and restore
 
@@ -36,7 +47,8 @@ terrain name. Custom styles absent from this pack are removed. Matching terrain
 colors and images are replaced by this pack's palette and icons. Keep your export
 if you want to restore those customizations. This replacement behavior was
 verified with the 1.0.0 pack in the browser client v2.0.3702. The 4.0.0 pack keeps
-the same terrain keys and import format. Native acceptance of the new artwork
+the same terrain keys and base import format; 4.1.0 adds the optional `variants`
+field on `inside`. Native acceptance of the new artwork
 is pending; this task does not install it into the active map.
 
 Terrain keys are lowercase, matching MudForge's protocol terrain normalization;
@@ -56,7 +68,8 @@ The registry is pinned to the `environments` table in the [official Aardwolf
 client database at revision ac6e40ff](https://github.com/fiendish/aardwolfclientpackage/blob/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db).
 Its complete revision, original database SHA-256 and count are recorded in
 `terrains.json`. Builds read this checked-in registry, Atlas's manifest and its
-six normalized lossless PNG sheets without network access or personal maps.
+six normalized lossless PNG sheets, plus the two checked-in interior variant
+PNGs, without network access or personal maps.
 This covers the published registry, not an independently verified current
 live-server sector list. The artwork was generated and reviewed for Atlas;
 [its README](../src/atlas/assets/README.md) records the prompts and enhancement
@@ -72,6 +85,15 @@ they no longer supply its exported images. The registry colors still provide
 the existing fallbacks. `@resvg/resvg-js` is pinned to **2.6.2** as a
 development-only renderer; system fonts are disabled. Consumers need only the
 generated JSON file.
+
+Variant masters live in this pack's `variants/` directory and are resampled to
+128 × 128 by the same pinned renderer. The builder rejects unsafe or duplicate
+variant names, nonsquare/oversized PNGs and transparent variant pixels. It embeds
+the two images in ten selection slots under `inside`, with empty slots for the
+base-image fallback. This follows the public client's
+[room-number variant selection](https://play.mudvault.org/_next/static/chunks/1368.6d48732e73a20a4f.js)
+observed on 2026-10-19. Import/export preservation and image preloading were
+inspected in that code; this is source evidence, not native acceptance.
 
 ```sh
 npm ci
@@ -92,7 +114,23 @@ with their corresponding lossless Atlas sheet rectangles. The separate Three
 Moons pack retains its SVG geometry and material-edge checks. These checks do
 not prove native import or persistence.
 
+The two additional PNGs are tested for unique opaque pixels, source/rendered
+image agreement, embedded image equality and the exact ten-slot selection
+pattern. The contact sheet includes all 116 images and a 24-room comparison.
+
 ## Acceptance evidence
+
+### 4.1.0 interior variants
+
+The two new timber floors were generated with the built-in Imagegen tool and
+reviewed against the original floor. All 114 base images and the separate Three
+Moons outputs remain unchanged. The original and new floors were visually
+inspected at 16, 24, 32, 64 and 128 pixels and in repeated interior layouts.
+Verification passed: **289 JavaScript tests and 26 Python tests**, the
+deterministic check for all **247** generated repository files, and whitespace
+checks. Native import, room-number variant rendering
+and persistence have not been tested for this revision. The pack is not
+installed into the active world by this update.
 
 ### 4.0.0 Atlas artwork
 
