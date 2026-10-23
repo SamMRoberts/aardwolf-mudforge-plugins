@@ -46,17 +46,18 @@ the lore and the visual interpretation. Download the
 [contact sheet](dist/map-packs/aardwolf-three-moons.html), including a dense
 5 × 5 layout study and a 3 × 3 repeat for every terrain.
 
-[Aardwolf Terrain Icons 4.0.0](docs/TERRAIN-ICONS.md) now uses the enhanced
+[Aardwolf Terrain Icons 4.1.0](docs/TERRAIN-ICONS.md) now uses the enhanced
 room terrain artwork from Aardwolf Atlas for all 114 terrain types, including
-numbered and directional variants. Lossless 128-pixel tiles are embedded in the
-pack; Atlas does not need to be installed. Download the
+numbered and directional variants. Three additional `shop` images—general
+merchant, apothecary and smith—vary by room number while preserving the original.
+Lossless 128-pixel tiles are embedded in the pack; Atlas does not need to be installed. Download the
 [JSON pack](dist/map-packs/aardwolf-terrain-icons.json) and import it through
 **Map settings → General → Map Pack Management → Choose File...**. Export your
 existing pack first: importing replaces the terrain-style list. The
 [contact sheet](dist/map-packs/aardwolf-terrain-icons.html) includes connected-map
-studies and all 114 tiles at 16, 24 and 32 px. MudForge draws walls and player
-markers above the artwork. This asset pack needs no Lua plugin or shared API.
-The format was browser-tested with 1.0.0; native acceptance of 4.0.0 is pending.
+studies, all 114 tiles and three shop variants at 16, 24 and 32 px. MudForge draws
+walls and player markers above the artwork. This asset pack needs no Lua plugin or shared API.
+The format was browser-tested with 1.0.0; native acceptance of 4.1.0 is pending.
 
 ## Installation
 

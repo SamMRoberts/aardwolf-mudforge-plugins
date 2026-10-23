@@ -53,6 +53,27 @@ class TerrainAcceptanceTest(unittest.TestCase):
     def test_comparison_accepts_terrain_style_replacement(self):
         self.check_exports()
 
+    def test_comparison_rejects_changed_or_missing_shop_variants(self):
+        shop = next(style for style in self.after["settings"]["terrainStyles"] if style["name"] == "shop")
+        original = copy.deepcopy(shop)
+        self.assertEqual(len(shop["variants"]), 10)
+        for change in ["missing", "empty", "reordered", "truncated", "base"]:
+            with self.subTest(change=change):
+                shop.clear()
+                shop.update(copy.deepcopy(original))
+                if change == "missing":
+                    shop.pop("variants")
+                elif change == "empty":
+                    shop["variants"][1] = ""
+                elif change == "reordered":
+                    shop["variants"].reverse()
+                elif change == "truncated":
+                    shop["variants"].pop()
+                else:
+                    shop["image"] = ""
+                with self.assertRaisesRegex(ValueError, "terrain styles differ"):
+                    self.check_exports()
+
     def test_comparison_rejects_room_exit_settings_and_image_changes(self):
         valid = copy.deepcopy(self.after)
         changes = [

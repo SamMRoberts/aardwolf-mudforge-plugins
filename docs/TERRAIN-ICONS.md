@@ -1,6 +1,7 @@
 # Aardwolf Terrain Icons
 
-Version **4.0.0** contains **114 room terrain images from Aardwolf Atlas**:
+Version **4.1.0** contains **114 room terrain images from Aardwolf Atlas**
+and **three additional variants for `shop` rooms**:
 all 112 environments in the published Aardwolf client database, plus MudForge's
 `default` and `water`. The pack uses Atlas's enhanced, hand-painted terrain
 artwork, exported from its normalized lossless sheets as individual 128 × 128
@@ -10,12 +11,22 @@ or live connection is needed. The existing pack name, filename, terrain keys,
 fallback colors and import structure are preserved. The separate Three Moons
 pack keeps its SVG artwork.
 
+The original shop alternates with a general merchant, an apothecary and a smith's
+shop. These are visual variations, not detection of the actual shop inventory.
+The client's `variants` array selects by the last decimal digit of the room
+number: 0, 4 and 8 use the original; 1, 5 and 9 use the merchant; 2 and 6 use the
+apothecary; 3 and 7 use the smith. The same room keeps the same image across
+reloads. Empty slots fall back to the original image, which also remains
+available to clients without variant support. All other terrain images, terrain
+keys and fallback colors are preserved; no room data needs editing.
+
 - [Importable JSON pack](../dist/map-packs/aardwolf-terrain-icons.json)
-- [Contact sheet](../dist/map-packs/aardwolf-terrain-icons.html): open the downloaded HTML in a browser for labeled 16, 24 and 32 px samples on dark and light backgrounds
+- [Contact sheet](../dist/map-packs/aardwolf-terrain-icons.html): open the downloaded HTML in a browser for labeled 16, 24 and 32 px samples on dark and light backgrounds, including all three shop variants and an original/varied shop comparison
 - [Connected map preview](../dist/map-packs/aardwolf-terrain-icons-map-preview.png): town, woodland/river and dungeon studies, plus six biome swatches, with simulated client walls
 - [Individual PNGs](../dist/map-packs/aardwolf-terrain-icons/)
 - [Atlas artwork and provenance](../src/atlas/assets/README.md)
 - [Atlas terrain rectangles](../src/atlas/assets/manifest.json)
+- [Shop variant sources and prompts](../src/map-packs/aardwolf-terrain-icons/variants/README.md)
 - [Registry, palette and provenance](../src/map-packs/aardwolf-terrain-icons/terrains.json)
 
 ## Import and restore
@@ -35,9 +46,9 @@ pack keeps its SVG artwork.
 terrain name. Custom styles absent from this pack are removed. Matching terrain
 colors and images are replaced by this pack's palette and icons. Keep your export
 if you want to restore those customizations. This replacement behavior was
-verified with the 1.0.0 pack in the browser client v2.0.3702. The 4.0.0 pack keeps
-the same terrain keys and import format. Native acceptance of the new artwork
-is pending; this task does not install it into the active map.
+verified with the 1.0.0 pack in the browser client v2.0.3702. The 4.1.0 pack keeps
+the same terrain keys and adds the optional `variants` field on `shop`. Native
+acceptance of the new artwork is pending; this task does not install it into the active map.
 
 Terrain keys are lowercase, matching MudForge's protocol terrain normalization;
 the registry's `Mudschool` entry is emitted as `mudschool`. Unknown future terrain
@@ -56,7 +67,8 @@ The registry is pinned to the `environments` table in the [official Aardwolf
 client database at revision ac6e40ff](https://github.com/fiendish/aardwolfclientpackage/blob/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db).
 Its complete revision, original database SHA-256 and count are recorded in
 `terrains.json`. Builds read this checked-in registry, Atlas's manifest and its
-six normalized lossless PNG sheets without network access or personal maps.
+six normalized lossless PNG sheets and the three checked-in shop variant masters,
+without network access or personal maps.
 This covers the published registry, not an independently verified current
 live-server sector list. The artwork was generated and reviewed for Atlas;
 [its README](../src/atlas/assets/README.md) records the prompts and enhancement
@@ -72,6 +84,13 @@ they no longer supply its exported images. The registry colors still provide
 the existing fallbacks. `@resvg/resvg-js` is pinned to **2.6.2** as a
 development-only renderer; system fonts are disabled. Consumers need only the
 generated JSON file.
+
+Variant masters live in this pack's `variants/` directory and are resampled to
+128 × 128 by the same renderer. The builder rejects unsafe or duplicate variant
+names, nonsquare or oversized PNGs, and transparent pixels. It embeds the three
+images in ten selection slots, retaining empty slots for the base image. This
+matches the public client's [room-number selection and import/export source](https://play.mudvault.org/_next/static/chunks/273.7c82974a5122fd4c.js),
+inspected on 2026-10-23. Source inspection does not establish native acceptance.
 
 ```sh
 npm ci
@@ -93,6 +112,21 @@ Moons pack retains its SVG geometry and material-edge checks. These checks do
 not prove native import or persistence.
 
 ## Acceptance evidence
+
+### 4.1.0 shop variations
+
+Three additional shop images accompany the unchanged original. The contact
+sheet includes all four shop designs on light and dark backgrounds and an
+original/varied 20-room comparison at 32 px. The comparison uses the same ten
+slots as the pack. These are illustrative previews, not client captures.
+Tests cover variant names and files, dimensions, opacity, source/output pixels,
+unique artwork, selection slots, export comparison, and deterministic rebuilds.
+Verification passed: **291 JavaScript tests and 26 Python tests**, all **248**
+generated-file checks, and diff whitespace checks. The rebuilt PNGs were
+visually inspected at 128, 32, 24 and 16 px, and the contact sheet and shop
+comparison rendered in the in-app browser.
+Native import, rendering and persistence of these variants remain unverified;
+the pack has not been installed into an active world.
 
 ### 4.0.0 Atlas artwork
 

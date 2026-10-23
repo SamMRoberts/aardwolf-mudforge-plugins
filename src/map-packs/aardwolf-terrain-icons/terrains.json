@@ -1,7 +1,7 @@
 {
   "name": "Aardwolf Terrain Icons",
-  "version": "4.0.0",
-  "description": "114 illustrated room terrain images from the enhanced Aardwolf Atlas artwork, exported as lossless 128-pixel PNG tiles. All 112 published Aardwolf environments plus MudForge default and water. Self-contained; no Atlas installation required. Version 4.0.0.",
+  "version": "4.1.0",
+  "description": "114 illustrated room terrain images and three additional shop variants from the enhanced Aardwolf Atlas artwork, exported as lossless 128-pixel PNG tiles. All 112 published Aardwolf environments plus MudForge default and water. Self-contained; no Atlas installation required. Version 4.1.0.",
   "source": {
     "url": "https://raw.githubusercontent.com/fiendish/aardwolfclientpackage/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db",
     "revision": "ac6e40ff5596e285cfcef6739d1dfdc257cfa162",
@@ -470,7 +470,12 @@
       "name": "shop",
       "family": "stone",
       "color": "#72736a",
-      "motif": "Turquoise market awning and amber lantern"
+      "motif": "Turquoise market awning and amber lantern",
+      "variants": [
+        "shop-merchant",
+        "shop-apothecary",
+        "shop-smith"
+      ]
     },
     {
       "id": 66,
