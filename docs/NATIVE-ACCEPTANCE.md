@@ -1,8 +1,9 @@
 # Native acceptance — pending
 
-Target: **MudForge 2.0.3701**, initially observed on macOS. This scaffold has
-offline evidence only. No installation, native rendering/persistence, loopback
-transport or live Aardwolf acceptance has been performed.
+Target: **MudForge 2.0.3701**, initially observed on macOS. Repository tests do
+not establish native rendering, persistence, picker, transport or live Aardwolf
+acceptance. The checks below remain pending unless observed results are
+recorded explicitly for their version and environment.
 
 Use an explicitly authorized disposable world for these checks. Record the
 actual app version, original selected world and a private backup before writes.
@@ -12,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.3.0 and Core/example versions are 0.1.0, including library
+  library version is 0.4.0 and Core/example versions are 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -59,34 +60,84 @@ Record observed results and concrete blockers separately from offline tests.
 Any connection to live Aardwolf remains a separate, explicitly authorized
 acceptance step; loopback transport does not establish live-server behavior.
 
-## SQLite — native acceptance pending
+## Native storage and migration — verified subset
 
-Offline tests execute Fengari, real temporary SQLite databases and the Lua/Python
-file protocol together. They do not verify MudForge's transpiler, File System
-Access toggle, text-file handles, rename semantics or native timer delivery.
+### 2026-10-24 native verification — MudForge 2.0.3915
 
-- With separate authorization, create a disposable world and a dedicated helper
-  bridge directory inside the home folder. Start the Python helper manually;
-  record Python/SQLite and MudForge versions. Do not register existing databases.
-- Install library 0.3.0 and `examples/sqlite-consumer.lua`. Connect only to the
-  disposable loopback fixture. The example does not require API Core or GMCP.
-- With File System Access off, confirm a clear unavailable result and no helper
-  request. Enable it for the example, then run `awsql-demo disposable-character`.
-  Observe the success message and inspect the created managed SQLite file through
-  Python/sqlite3 after the operation. Verify actual atomic file rename and response
-  delivery, rather than inferring them from the offline filesystem adapters.
-- Run twice, reload the plugin and reopen the world. Confirm one command, no
-  duplicate poll timers and persisted schema. Test separate character keys and
-  plugins; only explicitly registered disposable aliases may be shared.
-- Exercise NULL between populated columns, Unicode/NUL TEXT, BLOB/base64 and int64
-  wrappers through native JSON encode/decode, including empty and zero-based arrays.
-- Stop the helper, restart it during a request, refuse permissions and inject
-  malformed replies. Confirm safe errors, no automatic write retries and no
-  callbacks after unloading. Disconnect during submitted and queued operations;
-  observe unknown/rejected outcomes and reject new disconnected operations.
-- Test helper locking, a read-only disposable alias, rollback, oversized results
-  and reopen persistence. Remove only disposable artifacts, restore the original
-  selected world and record evidence separately from live Aardwolf acceptance.
+A disconnected disposable world (`Native Storage Acceptance 20261024`,
+127.0.0.1:9, auto-connect off) loaded API 0.4.0 under the isolated library name
+`aardwolf-api-storage-acceptance` and Spells 0.3.0 with that dependency name.
+The editor reported no problems and the damage panel rendered. Native chooser
+and paste imports were exercised, including a fresh record, identical-import
+refusal to write again, and exact persistence after closing/reopening the world.
+
+Native execution exposed a read-back comparison bug: table constructors can
+retain nil-valued optional fields in `pairs()`. Equality now ignores those
+entries, matching Lua's absent-field semantics; a fixture regression reproduces
+this behavior. The initial missing completion output did not establish a failed
+picker callback: exported native state showed that the data had been saved.
+The corrected importer verifies both chooser and paste paths. Results also remain
+available through `awspells status`, and the paste panel displays feedback.
+
+After disposable acceptance, the existing Spells installation was updated in
+place to 0.3.0 with its original installed ID. In-place **Reinstall** refreshed
+the installed version label, which the source editor alone had retained at the
+old version. API 0.4.0 was saved as the native edited library; MudForge reloaded
+Core, Vitals, Spells and Room Details without editor problems. The underlying
+previous repository library remains available beneath this edited override.
+
+The authorized existing-world migration imported **370 abilities, 89 details,
+88 memberships, 40 refresh timestamps and 0 command overrides** while disconnected.
+Its exported native record matches every converter field after normalizing
+one-based numeric-key tables and nil/null fields. Closing/reopening the original
+world and repeating the import reported identical saved data. Existing Spells
+layout tables, unrelated plugin states, map rooms/connections/styles, world
+definition, and all existing widget positions were preserved. Native reopen
+updated only map save/cursor state; the optional paste panel adds its own saved
+placement without changing existing widget positions.
+
+Private before/after world exports, a consistent SQLite backup, the converter
+JSON and a verification report were retained outside the repository. The original
+SQLite database was not modified or deleted. With explicit cleanup approval,
+the disposable world and isolated test library were deleted; the original
+session label and selection were restored, still disconnected. No diagnostics
+remain in distributed or installed production code.
+
+These results establish native import, read-back, in-place installation and
+world-reopen persistence. Connected collection, live Aardwolf transport,
+comprehensive UI interaction, platform variants and the remaining scenarios
+below are still pending; do not infer those results from migration acceptance.
+
+Offline tests execute native-storage host fixtures and convert temporary real
+legacy SQLite databases. They do not verify MudForge's transpiler, platform
+file picker, storage engine or world reopen durability. The former Python
+helper, SQL facade and SQLite demonstration plugin have been removed.
+
+- Back up the selected world and preserve original plugin IDs, layout and saved
+  data. Use disposable records for failure and conflict tests. A separately
+  authorized migration into an existing world must preserve unrelated data.
+- Install API 0.4.0 and Spells 0.3.0. With File System Access off and no helper,
+  verify load/reload/disable/re-enable, native table availability and useful
+  `starting`/`failed` storage status without automatic retries.
+- Convert a legacy Spells fixture with `tools/migrate-spells-storage.py` and
+  compare all fields/counts with its source, including optional fields, empty
+  groups, multi-group memberships and retained command overrides. Verify source
+  preservation, committed WAL support, private output and refusal to overwrite
+  an existing export. Unknown schema or malformed data must fail without loss.
+- While disconnected, run `awspells import` and choose the JSON. Verify the
+  asynchronous native picker callback, count message and saved/read-back record.
+  Cancellation, unavailable picker, invalid/oversized/future input and callbacks
+  after unload, world switch or identity change must not write or send commands.
+- Import twice: identical data must produce no additional save. Import different
+  data for the same native key: refuse replacement and retain both inputs.
+  Refused saves/read-back failure must report failure and preserve backups.
+- Reopen/reload the world and confirm complete native persistence, original
+  layout order/visibility and unchanged public schema-1 consumer snapshots.
+  Verify separate characters, worlds and installed plugin IDs remain isolated;
+  an offline import becomes exposed only for verified matching character data.
+- Compare before/after worlds, maps and unrelated plugin records. Remove only
+  disposable fixtures and restore the originally selected world. Record native
+  evidence separately from connected Aardwolf acceptance.
 
 ## Room Details — 0.2.3 acceptance pending
 
@@ -163,47 +214,48 @@ the real panel markup with synthetic native messages, not live room transport.
 
 ## Aardwolf Spells — native and live acceptance pending
 
-Offline fixtures test parsing, collection lifecycle and shared access. The real
-file bridge test stores 250 abilities in SQLite, verifies rollback, reads back
-an unknown commit outcome, reloads persisted data and separates characters.
-These tests do not execute MudForge's transpiler, real file adapters, command
-hooks, provisional output, pager or connected Aardwolf transport.
+Offline fixtures test parsing, collection lifecycle, native record validation,
+save refusal, reload, import and shared access. Converter tests exercise real
+legacy databases separately. These tests do not execute MudForge's transpiler,
+storage engine, picker, command hooks, provisional output, pager or connected
+Aardwolf transport.
 
-- With separate authorization, install library 0.3.0, API Core and Spells 0.2.6
-  in a disposable world. Start the helper manually and record client/helper
-  versions. Confirm both provider/consumer load orders and the actual installed IDs.
-- With the helper absent or File System Access off, complete simulated login.
-  Expect one actionable error, no `allspells` send and no repeated retries.
-  Enable access/start the helper and invoke `awspells refresh`.
+- With separate authorization, install library 0.4.0, API Core and Spells 0.3.0
+  in a disposable world. Record the client version and confirm both
+  provider/consumer load orders and actual installed IDs.
+- With File System Access off and no helper, complete simulated login. Refuse
+  native readiness or saves in a disposable fixture; expect actionable feedback,
+  prior saved data retained and no repeated retries. Recover and invoke refresh.
 - Deliver `char.base.name` and active state in either order. Expect one
   automatic query only after negotiated GMCP and state 3, including enable
   during an existing active session. Repeat updates; no additional query occurs.
 - Feed the supplied table with ANSI, dash fields, stars, repeated page headers
   and chatter. Verify display order, preserved terminal output/prompt and the
-  saved database content after the footer. Verify Lua pattern behavior and
-  provisional line delivery directly in the installed client.
+  native record after the footer. Verify Lua pattern behavior and provisional
+  line delivery directly in the installed client.
 - Test plain user `allspells`, filtered variants, overlapping refreshes, manual
   pager continuation, malformed/duplicate rows and missing footer. Wait 60
-  seconds for a partial capture; the previous database snapshot must survive.
+  seconds for a partial capture; the previous native snapshot must survive.
   Do not change the character's pager settings or send pager-control commands.
-- Inspect committed snapshots from a separate `spells = true` consumer with no
-  file permission. Reload/disable the provider, disconnect during capture/save
-  and switch character identity. Verify cache invalidation and no stale callbacks.
-- Simulate helper restart/lost commit receipts using only disposable data.
-  Confirm readback without write replay and explicit recovery after a failed
-  reconciliation. Save/reopen the world and verify actual SQLite persistence.
-- With a separately authorized live Aardwolf connection, run one collection and
-  compare stored rows with the visible output. Record live acceptance separately.
-  Restore the original selected world and remove only disposable test artifacts.
+- Inspect committed snapshots from a separate `spells = true` consumer without
+  storage adapters. Reload/disable the provider, disconnect during capture/save
+  and switch character identity. Verify invalidation and no stale callbacks.
+- Save/reopen the world and verify actual native ability, enrichment and command
+  persistence. Confirm malformed/future stored records remain untouched and
+  cannot be replaced by an automatic collection.
+- Complete the import/preservation checks above before claiming migration
+  acceptance. With a separately authorized live Aardwolf connection, compare
+  collection results with visible output. Record live acceptance separately and
+  remove only disposable test artifacts.
 
-### Damage panel — 0.2.6 acceptance pending
+### Damage panel — 0.3.0 acceptance pending
 
 Offline fixtures cover the supplied tables and mixed-type continuation rows,
 empty bulk lists, two sequential requests, selection, command overrides, cancellation, malformed data and
-character isolation. The real bridge exercises a 0.1.0-shaped database upgrade,
-kind-wide membership replacement, mana/spell-number persistence, rollback, unknown
-outcome readback and reload. Browser checks use synthetic bindings/action capture
-and establish only rendered HTML behavior.
+character isolation. Native-storage fixtures cover kind-wide membership
+replacement, mana/spell-number persistence, failed saves and reload. Converter
+tests cover a legacy metadata/abilities-only database. Browser checks use
+synthetic bindings/action capture and establish only rendered HTML behavior.
 
 - In an authorized disposable world, observe the 540 × 400 panel, then dock it,
   resize to narrow/wide tiles, close/reopen with `awspells show`, reload and reopen
@@ -249,11 +301,11 @@ and establish only rendered HTML behavior.
   practice or omit a prior winner. Verify replacement across all groups of that
   kind, empty omitted groups, and preservation of the other kind. Confirm there
   are no per-type refresh controls. Test an ability in two damage groups,
-  full `allspells` replacement, malformed/duplicate/conflicting rows, helper
-  failure and an unknown commit outcome without retrying writes.
+  full `allspells` replacement, malformed/duplicate/conflicting rows and native
+  save refusal without retrying writes.
 - Save, inspect and reset a skill command override. Reload/reopen and switch
-  characters; verify database isolation, persistence and command precedence.
-  Check upgrade from a disposable 0.1.0 database retains its abilities.
+  characters; verify native record isolation, persistence and command precedence.
+  Check a converted legacy database retains its abilities and command overrides.
 - Live acceptance remains separately authorized. Compare both list formats and
   actual commands with visible server output, then complete preservation/cleanup
   checks before recording success.

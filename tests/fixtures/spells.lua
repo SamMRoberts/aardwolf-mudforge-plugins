@@ -1,8 +1,7 @@
--- The fake SQL boundary checks collector behavior. Real SQL is tested separately.
+-- Native storage host contract for collector, persistence, import and layout behavior.
 function spellsWorld(readerFirst)
   local world = newWorld()
-  world.databases, world.commands, world.sends, world.delayed = {}, {}, {}, {}
-  world.helperReady = true
+  world.commands, world.sends = {}, {}
   world.core()
   local reader = world.context("reader", "Spells Reader")
   reader.client = freshLibrary().new(reader.host, { spells = true })
@@ -17,136 +16,80 @@ function spellsWorld(readerFirst)
     table.insert(world.sends, command)
   end
   function env.registerCommand(name, callback) world.commands[name] = callback end
-  function world.complete(callback, value, issue)
-    if world.delay then table.insert(world.delayed, function() callback(value, issue) end)
-    else callback(value, issue) end
+  -- Native persistence is isolated to this plugin/world and copies across the host boundary.
+  world.dataWrites, world.dataAttempts = 0, 0
+  local function clone(value)
+    if type(value) ~= "table" then return value end
+    local copied = {}
+    for key, item in pairs(value) do copied[key] = clone(item) end
+    return copied
   end
-  function world.drain()
-    local steps = 0
-    while #world.delayed > 0 do
-      steps = steps + 1; assert(steps < 100)
-      local callback = table.remove(world.delayed, 1)
-      callback()
+  local saveLayout, loadLayout = env.saveTable, env.loadTable
+  function world.record(characterKey)
+    return context.storage["aardwolf-spells:data:" .. (characterKey or "fixture")]
+  end
+  function env.loadTable(key, scope)
+    assert(scope == nil)
+    if string.sub(key, 1, 21) == "aardwolf-spells:data:" then
+      if world.failRead then error("native read failed") end
+      return clone(context.storage[key])
+    end
+    return loadLayout(key)
+  end
+  function env.saveTable(key, value, scope)
+    assert(scope == nil)
+    if string.sub(key, 1, 21) == "aardwolf-spells:data:" then
+      world.dataAttempts = world.dataAttempts + 1
+      if world.throwDataWrites then error("native save failed") end
+      if world.refuseDataWrites then return false end
+      context.storage[key] = clone(value)
+      world.dataWrites = world.dataWrites + 1
+      return true
+    end
+    return saveLayout(key, value)
+  end
+  function env.pickFile(callback, options)
+    assert(type(options) == "table" and type(callback) == "function")
+    world.pickOptions, world.pickCallback = options, callback
+    return true
+  end
+  function world.pick(value, message, reason)
+    local callback = world.pickCallback
+    assert(callback, "No file picker pending")
+    world.pickCallback = nil
+    if type(value) == "table" and type(value.data) == "string" and value.size == nil then value.size = #value.data end
+    callback(value, message, reason)
+  end
+  -- MudForge's table constructor can retain nil fields that Lua tables omit.
+  function world.nativeNilPairs()
+    world.nilFieldsObserved = 0
+    env.pairs = function(value)
+      local iterator, state, cursor = pairs(value)
+      local extras, exhausted, index = {}, false, 0
+      if (value.kind == "skill" or value.kind == "spell") and value.mana == nil then
+        table.insert(extras, "mana")
+      end
+      if type(value.name) == "string" and type(value.level) == "number" then
+        if value.sn == nil then table.insert(extras, "sn") end
+        if value.percent == nil then table.insert(extras, "percent") end
+      end
+      return function()
+        if not exhausted then
+          local item
+          cursor, item = iterator(state, cursor)
+          if cursor ~= nil then return cursor, item end
+          exhausted = true
+        end
+        index = index + 1
+        if extras[index] then
+          world.nilFieldsObserved = world.nilFieldsObserved + 1
+          return extras[index], nil
+        end
+      end
     end
   end
   local lib = freshLibrary()
-  env.require = function(name)
-    assert(name == "aardwolf-api")
-    return { protocol = lib.protocol, new = function(host, options)
-      local key = options.sqlite and options.sqlite.characterKey
-      local consumer = lib.new(host, { packages = options.packages })
-      local sql = { null = { sqliteType = "null" } }
-      function sql.status()
-        return { available = key ~= nil and world.helperReady and world.connected,
-          reason = not key and "unconfigured" or not world.connected and "disconnected" or "helper_unavailable" }
-      end
-      function sql.open(name, callback)
-        assert(name == "spells" and key)
-        world.databases[key] = world.databases[key] or { rows = {}, details = {}, members = {}, times = {}, commands = {} }
-        local stored = world.databases[key]
-        local db = { closed = false }
-        function db.close() db.closed = true end
-        function db.query(sqlText, params, done)
-          assert(not db.closed)
-          if world.failRead then
-            world.complete(done, nil, { code = "helper_unavailable", outcome = "rejected" }); return
-          end
-          local rows = {}
-          if string.find(sqlText, "LEFT JOIN", 1, true) then
-            for _, item in ipairs(stored.rows) do
-              table.insert(rows, { stored.schemaVersion or 1, stored.name, stored.time, #stored.rows,
-                item[1], item[2], item[3], item[4], item[5] and 1 or 0, item[6] })
-            end
-          else
-            assert(string.find(sqlText, "FROM ability_details", 1, true))
-            local allRows = {}
-            for name, info in pairs(stored.details) do table.insert(allRows, { "detail", name, info.kind, info.mana }) end
-            for key, members in pairs(stored.members) do
-              local kind, damageType = string.match(key, "^(%a+):(%a+)$")
-              for name in pairs(members) do table.insert(allRows, { "member", kind, damageType, name }) end
-            end
-            for key, time in pairs(stored.times) do
-              local kind, damageType = string.match(key, "^(%a+):(%a+)$")
-              table.insert(allRows, { "time", kind, damageType, time })
-            end
-            for name, command in pairs(stored.commands) do table.insert(allRows, { "command", name, command }) end
-            table.sort(allRows, function(left, right)
-              for index = 1, 4 do
-                if left[index] ~= right[index] then return tostring(left[index]) < tostring(right[index]) end
-              end
-              return false
-            end)
-            for index = params[1]+1, math.min(params[1]+500, #allRows) do table.insert(rows, allRows[index]) end
-          end
-          world.complete(done, { rows = rows })
-        end
-        function db.transaction(statements, done)
-          assert(not db.closed and #statements <= 100)
-          if string.find(statements[1].sql, "CREATE TABLE", 1, true) then world.complete(done, {}); return end
-          if world.rollback then
-            world.complete(done, nil, { code = "sqlite_constraint", outcome = "rolled_back" }); return
-          end
-          local rows, metadata = nil, nil
-          if statements[1].sql == "DELETE FROM abilities" then rows = {} end
-          local function cell(value)
-            if type(value) == "table" and value.sqliteType == "null" then return nil end
-            return value
-          end
-          for _, statement in ipairs(statements) do
-            local sqlText, params = statement.sql, statement.params or {}
-            assert(#params <= 1000)
-            if string.find(sqlText, "INSERT INTO abilities ", 1, true) then
-              for first = 1, #params, 6 do
-                table.insert(rows, { params[first], params[first+1], params[first+2], params[first+3], params[first+4], params[first+5] })
-              end
-            elseif string.find(sqlText, "INSERT INTO metadata ", 1, true) then metadata = params
-            elseif string.find(sqlText, "INSERT INTO ability_details ", 1, true) then
-              for first = 1, #params, 3 do stored.details[params[first]] = { kind = params[first+1], mana = cell(params[first+2]) } end
-            elseif string.find(sqlText, "INSERT INTO damage_memberships ", 1, true) then
-              for first = 1, #params, 3 do
-                local key = params[first] .. ":" .. params[first+1]
-                stored.members[key] = stored.members[key] or {}
-                stored.members[key][params[first+2]] = true
-              end
-            elseif string.find(sqlText, "INSERT INTO damage_refreshes ", 1, true) then
-              for first = 1, #params, 3 do stored.times[params[first] .. ":" .. params[first+1]] = params[first+2] end
-            elseif sqlText == "DELETE FROM damage_memberships WHERE kind=?" then
-              for key in pairs(stored.members) do
-                if string.sub(key, 1, #params[1]+1) == params[1] .. ":" then stored.members[key] = nil end
-              end
-            elseif sqlText == "DELETE FROM ability_details WHERE kind=?" then
-              for name, info in pairs(stored.details) do if info.kind == params[1] then stored.details[name] = nil end end
-            elseif string.find(sqlText, "INSERT INTO skill_commands ", 1, true) then stored.commands[params[1]] = params[2]
-            elseif sqlText == "DELETE FROM skill_commands WHERE name=?" then stored.commands[params[1]] = nil
-            elseif string.find(sqlText, "WHERE name NOT IN", 1, true) then
-              local names = {}
-              for _, item in ipairs(rows) do names[string.lower(item[1])] = true end
-              if string.find(sqlText, "ability_details", 1, true) then
-                for name in pairs(stored.details) do if not names[name] then stored.details[name] = nil end end
-              else
-                for _, members in pairs(stored.members) do
-                  for name in pairs(members) do if not names[name] then members[name] = nil end end
-                end
-              end
-            else assert(sqlText == "DELETE FROM abilities", sqlText) end
-          end
-          if rows then stored.rows = rows end
-          if metadata then
-            assert(metadata[3] == #rows)
-            stored.name, stored.time = metadata[1], metadata[2]
-          end
-          world.lastBatchSize = #statements
-          if world.unknown then
-            world.complete(done, nil, { code = "timeout", outcome = "unknown" }); return
-          end
-          world.complete(done, {})
-        end
-        world.complete(callback, db)
-      end
-      consumer.sqlite = sql
-      return consumer
-    end }
-  end
+  env.require = function(name) assert(name == "aardwolf-api"); return lib end
   load_source("spells", env)
   env.init()
   if not readerFirst then reader.client.start() end
@@ -172,6 +115,12 @@ function spellsWorld(readerFirst)
     world.footer()
   end
   function world.panel() return context.widgets["spells-id:damage-abilities"] end
+  function world.importPanel() return context.widgets["spells-id:storage-import"] end
+  function world.paste(data, sessionId)
+    local panel = world.importPanel()
+    assert(panel, "No paste import panel")
+    panel.events.luamsg({ event = "import", data = data, sessionId = sessionId or world.id })
+  end
   function world.action(action) world.panel().events.action({ action = action }) end
   -- An outgoing manual bulk query is captured without the UI's two-query queue.
   function world.query(kind) env.onSend(world.id, kind .. "s combat") end

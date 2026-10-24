@@ -11,7 +11,7 @@ const cases = {
     provider.env.cleanup()
     provider.env.require = function() return { protocol = {} } end
     provider.env.init()
-    assert(string.find(provider.errors[#provider.errors], "aardwolf-api 0.3.0", 1, true))
+    assert(string.find(provider.errors[#provider.errors], "aardwolf-api 0.4.0", 1, true))
     world.active()
     assert(#world.sends == 0 and reader.client.spells.get() == nil)
   `,
@@ -80,14 +80,14 @@ const cases = {
     world.sample()
     provider.env.init(); assert(#world.sends == 2)
   `,
-  'spells dependencies fail once and allow explicit recovery': `
+  'spells native storage readiness fails once and allows explicit recovery': `
     local world, reader, provider = spellsWorld()
-    world.helperReady = false; world.active()
+    provider.storageState = "starting"; world.active()
     assert(#world.sends == 0 and #provider.errors == 1)
-    assert(string.find(world.commands.awspells("status"), "File System Access", 1, true))
+    assert(string.find(world.commands.awspells("status"), "starting", 1, true))
     for i = 1, 5 do world.packet("char.status", { state = 3 }) end
     assert(#provider.errors == 1)
-    world.helperReady = true
+    provider.storageState = "ready"
     world.commands.awspells("refresh"); world.sample()
     assert(#reader.client.spells.get().entries == 4)
   `,
@@ -135,66 +135,26 @@ const cases = {
     world.header(); world.line(" Fly     36 48 85"); world.footer()
     assert(#reader.client.spells.get().entries == 1)
   `,
-  'spells batches more than 100 rows and rolls back failed replacements': `
+  'spells saves a complete native record in one write and retains failed replacements': `
     local world, reader = spellsWorld(); world.active()
     world.header()
     for i = 1, 250 do world.line(" Ability " .. tostring(i) .. "    1 - 85") end
     world.footer()
-    assert(#reader.client.spells.get().entries == 250 and world.lastBatchSize == 7)
-    world.rollback = true; world.commands.awspells("refresh"); world.sample()
+    assert(#reader.client.spells.get().entries == 250 and world.dataWrites == 1)
+    world.refuseDataWrites = true; world.commands.awspells("refresh"); world.sample()
     assert(#reader.client.spells.get().entries == 250)
-    world.rollback = false; world.commands.awspells("refresh"); world.sample()
+    world.refuseDataWrites = false; world.commands.awspells("refresh"); world.sample()
     assert(#reader.client.spells.get().entries == 4)
   `,
-  'spells reconciles unknown commit outcomes without replaying writes': `
+  'spells validates restored native records and refuses future schema versions': `
     local world, reader = spellsWorld(); world.active(); world.sample()
-    world.unknown = true; world.time = world.time + 1000
-    world.commands.awspells("refresh"); world.header(); world.line(" Fly     36 48 85"); world.footer()
-    assert(#reader.client.spells.get().entries == 1 and not reader.client.spells.status().error)
-    world.commands.awspells("refresh")
-    world.failRead = true; world.sample()
-    assert(#reader.client.spells.get().entries == 1 and reader.client.spells.status().error)
-    local sends = #world.sends
-    world.commands.awspells("refresh")
-    assert(#world.sends == sends)
-    world.failRead = false; world.unknown = false
-    world.commands.awspells("refresh"); world.sample()
-    assert(#reader.client.spells.get().entries == 4)
-  `,
-  'spells defers persistence when output finishes before SQLite preparation': `
-    local world, reader, provider = spellsWorld()
-    world.helperReady = false; world.active()
-    world.helperReady, world.delay = true, true
-    provider.env.onSend(world.id, "allspells")
-    world.sample()
-    assert(reader.client.spells.get() == nil and reader.client.spells.status().refreshing)
-    world.drain()
-    assert(#reader.client.spells.get().entries == 4 and not reader.client.spells.status().refreshing)
-  `,
-  'spells cancels overlapping output while SQLite setup is pending': `
-    local world, reader, provider = spellsWorld()
-    world.helperReady = false; world.active()
-    world.helperReady, world.delay = true, true
-    world.commands.awspells("refresh")
-    provider.env.onSend(world.id, "allspells spellup")
-    world.sample(); world.drain()
-    assert(#world.sends == 0 and reader.client.spells.get() == nil and not reader.client.spells.status().refreshing)
-    world.delay = false; world.commands.awspells("refresh")
-    provider.env.onSend(world.id, "allspells")
-    world.sample()
-    assert(reader.client.spells.get() == nil and reader.client.spells.status().error)
-    world.commands.awspells("refresh"); world.sample()
-    assert(#reader.client.spells.get().entries == 4)
-  `,
-  'spells validates restored database records and refuses future metadata': `
-    local world, reader = spellsWorld(); world.active(); world.sample()
-    local stored = world.databases.fixture
-    stored.rows[1][2] = 0
+    local stored = world.record("fixture")
+    stored.snapshot.entries[1].level = 0
     local sends = #world.sends
     world.commands.awspells("refresh")
     assert(#world.sends == sends and #reader.client.spells.get().entries == 4)
     assert(reader.client.spells.status().error)
-    stored.rows[1][2] = 1
+    stored.snapshot.entries[1].level = 1
     stored.schemaVersion = 2
     world.commands.awspells("refresh")
     assert(#world.sends == sends and #reader.client.spells.get().entries == 4)
@@ -202,28 +162,28 @@ const cases = {
     world.commands.awspells("refresh"); world.sample()
     assert(#reader.client.spells.get().entries == 4)
   `,
-  'spells rejects refused timeouts and gates commands on active state after async setup': `
+  'spells rejects refused timeouts and gates commands on active state': `
     local world, reader = spellsWorld(); world.active(); world.sample()
     world.refuseTimers = true
     local sends = #world.sends
     world.commands.awspells("refresh")
     assert(#world.sends == sends and #reader.client.spells.get().entries == 4)
-    world.refuseTimers, world.delay = false, true
-    world.commands.awspells("refresh"); world.packet("char.status", { state = 8 }); world.drain()
+    world.refuseTimers = false
+    world.packet("char.status", { state = 8 }); world.commands.awspells("refresh")
     assert(#world.sends == sends and not reader.client.spells.status().refreshing)
   `,
-  'spells clears identities and ignores callbacks after disconnect or cleanup': `
+  'spells clears active identities while preserving independent character records': `
     local world, reader, provider = spellsWorld(); world.active(); world.sample()
-    world.delay = true; world.commands.awspells("refresh"); world.drain()
+    world.commands.awspells("refresh")
     world.header(); world.line(" Fly     36 48 85"); world.footer()
-    world.disconnect(); world.drain()
+    world.disconnect()
     assert(reader.client.spells.get() == nil)
-    world.delay = false; world.active("Other")
+    world.active("Other")
     world.sample()
     assert(reader.client.spells.get().characterName == "Other")
-    assert(world.databases.fixture and world.databases.other)
-    world.delay = true; world.commands.awspells("refresh")
-    provider.env.cleanup(); world.drain()
+    assert(world.record("fixture") and world.record("other"))
+    world.commands.awspells("refresh")
+    provider.env.cleanup()
     assert(reader.client.spells.get() == nil and not reader.client.spells.status().available)
     provider.env.cleanup()
   `,

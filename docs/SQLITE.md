@@ -1,241 +1,125 @@
-# Local SQLite support — aardwolf-api 0.3.0
+# Migrate Aardwolf Spells to native storage
 
-Plugins can create and query real SQLite databases through a separately running
-local helper. MudForge's built-in `sqlite` library is read-only and has no SQL
-execution; its plugin HTTP API cannot reach local helper services. This bridge
-uses text files with the consuming plugin's **File System Access** permission.
-Only the helper reads or writes binary database files.
+Aardwolf Spells **0.3.0** and `aardwolf-api` **0.4.0** replace the SQLite file
+bridge with MudForge's native storage. Normal collection, damage refreshes and
+command overrides need no Python process, SQLite reader or File System Access.
+The library's `client.sqlite` API is removed; passing `options.sqlite` now fails
+with a clear migration message. Existing `client.storage` preferences are unchanged.
 
-[Aardwolf Spells](../README.md#aardwolf-spells) is a production consumer of this
-bridge. It selects its stable character key only after Core supplies a verified
-GMCP character name, then recreates its single API consumer with SQLite configured.
+## Preserve and convert the legacy data
 
-## Setup
-
-1. Use macOS with Python **3.11+** and its `sqlite3` module. The helper uses
-   standard-library dependencies; no pip packages or database server are needed.
-2. From this repository, start the helper in a terminal:
+1. Back up the target MudForge world and keep the original SQLite databases.
+   Stop the old helper and disable the old Spells version during the transition
+   so it cannot write another legacy snapshot after conversion.
+2. Find each legacy `spells.sqlite` under
+   `~/MudForge/aardwolf-sqlite/databases/<namespace-hash>/`. The old helper used a
+   hash of the installed plugin ID and lowercase character name. That directory
+   name is not reversible; the database metadata identifies its character.
+3. From this repository, use Python 3 to create a new JSON file:
 
    ```sh
-   python3 tools/sqlite_helper.py
+   python3 tools/migrate-spells-storage.py \
+     --database "$HOME/MudForge/aardwolf-sqlite/databases/<namespace-hash>/spells.sqlite" \
+     --output "$HOME/Documents/aardwolf-spells-migration.json"
    ```
 
-3. Install `dist/libs/aardwolf-api.lua` as `aardwolf-api` and reload consumers.
-   Check that a user-edited/file library is not shadowing the new version.
-4. Enable **File System Access** in each consuming plugin's Permissions settings.
-   Granting it switches `io.*` from world pseudo-files to real files. The bridge
-   needs real files; a copied pseudo-file heartbeat does not provide SQLite.
-5. Supply the adapters and SQLite options below. Start the API consumer and
-   connect the world before submitting operations. GMCP Core availability and
-   negotiation are independent of SQLite availability.
+   Replace the hash and output location. The output's parent folder must exist;
+   an existing output file is never overwritten. Treat the JSON as personal data.
 
-The helper creates `~/MudForge/aardwolf-sqlite`, containing `heartbeat.json`,
-`requests/`, `processing/`, `responses/` and `databases/`. The directory is
-private (0700); messages and managed database files use 0600. It holds an
-exclusive process lock, so a second helper cannot use the same bridge.
-Stop it with Ctrl+C. Plugins cannot start it themselves.
+The standalone converter opens the source read-only and reads a consistent
+committed snapshot, including committed WAL data. It validates the schema,
+metadata, row ordering and relationships before exporting. It preserves ability
+names, levels, optional spell numbers/percentages, unusable flags and display
+order; kind/mana details; every damage membership and refresh timestamp; and
+command overrides, including overrides for temporarily absent abilities.
+Legacy databases with only metadata/abilities are supported. Unsupported tables,
+columns, future versions, malformed values and overflow are refused without
+truncation. The converter never changes or deletes the source database.
 
-`--root /absolute/home/folder` selects another bridge directory; consumers must
-set the same `bridgeDirectory`. MudForge real-file access stays inside the home
-folder. Paths with symlinks, including macOS's `/tmp` or `/var` aliases, are
-refused; use canonical paths when testing the helper separately.
+A successful export prints counts for abilities, details, memberships, refreshes
+and commands. The new file has owner-only permissions and must be at most
+**16 MiB**. Runtime plugins contain no SQLite code; this one-time converter is
+the only SQLite-dependent migration component.
 
-## Host adapters and configuration
+## Import into the intended world
 
-The complete text-file adapter implementation is in
-[`examples/sqlite-consumer.lua`](../examples/sqlite-consumer.lua). It uses
-`io.open`, bounded `file:read`, `file:write`, `file:close`, `os.rename` and
-`os.remove` at plugin scope. Inject:
+1. Open the intended world, remain disconnected, and install the updated library
+   and Spells plugin. API Core is needed for later collection;
+   importing a saved record does not require a connected MUD session.
+2. Type **`awspells import`**. Choose the converter's JSON in MudForge's platform
+   file picker. The chooser completes asynchronously through `pickFile`'s
+   callback; the command's initial response does not mean data was imported.
+   File System Access is unnecessary. Cancellation leaves storage unchanged.
+   A build without `pickFile` directs you to `awspells import-paste`.
 
-| Adapter | Contract |
-| --- | --- |
-| `sqliteReadFile(path, maximumBytes)` | Text or nil; read at most the requested amount. |
-| `sqliteWriteFile(path, text)` | Close the written file; return true only on success. |
-| `sqliteRenameFile(oldPath, newPath)` | Atomically rename within the bridge; true on success. |
-| `sqliteRemoveFile(path)` | Remove a temporary message; true on success. |
-| `getPluginId`, `getSession`, `getCurrentTime` | Native installed ID, session connectivity, Unix milliseconds. |
-| `addTimer`, `removeTimer` | Native repeating response polling and cancellation. |
+   Alternatively, type **`awspells import-paste`** for a paste workflow. Open the
+   converter's JSON in a text editor, copy its complete contents, and paste them
+   into the labeled text box in **Import saved abilities**. Press **Import saved
+   data**. This option also works on builds without a file picker and uses the
+   same 16 MiB limit, validation, native save/read-back and identical-data/conflict
+   handling. Opening it replaces a pending picker attempt, so a later chooser
+   callback cannot repeat that attempt. Do not paste the SQLite file or its path.
 
-Keep the existing lifecycle adapters too:
-`findPluginByName`, `onPluginBroadcast`, `broadcastToPlugin`, `on`, `off`.
+   Both import paths record their last result for **`awspells status`**. Use that
+   command if asynchronous terminal output is not visible. The paste panel also
+   displays import feedback. A missing visible terminal message does not establish
+   that the chooser callback failed or that the import was unsuccessful.
+3. Check the imported-count result in the terminal or `awspells status`. The
+   plugin validates the entire file,
+   saves one native record, reads it back, and compares every field before
+   reporting success. Compare the counts with the converter's output.
+4. Repeat the same import: identical data reports that it is already saved and
+   performs no write. Different existing native data causes refusal; neither
+   version is silently merged or replaced. Invalid/future native records also
+   remain preserved. Retain both files for reconciliation.
+5. Reload and reopen the world to verify persistence. After connection and
+   verified matching GMCP character identity, the provider can expose the saved
+   snapshot. Disconnected imports send no gameplay commands and do not expose
+   another character's data. Normal login collection can subsequently refresh
+   the record from Aardwolf.
 
-```lua
-local client = aardwolf.new(host, {
-  sqlite = {
-    characterKey = "my-stable-character-key",
-    bridgeDirectory = "~/MudForge/aardwolf-sqlite", -- optional
-    timeoutMs = 10000 -- optional; integer 1000-60000
-  }
-})
-client.start()
-```
+A pending chooser or paste form is ignored after unload, world change or
+character identity change. Import during collection/save is refused. Failed storage readiness,
+failed saves, malformed/oversized JSON or failed read-back verification report
+failure; keep the migration file and backups. Do not remove the legacy database
+until the native record has been verified after world reopen.
 
-Choose a stable key explicitly, rather than using a transient session ID or an
-initially unknown GMCP character name. The helper hashes the installed plugin ID
-and character key together for the managed directory. Different plugins and
-characters cannot accidentally collide. Changing either identifier selects a
-different database collection; there is no automatic data migration.
-This separation and alias configuration are logical routing, not a security
-sandbox against other code already granted broad home-folder access.
+## Storage ownership and compatibility
 
-Construction and loading perform no filesystem calls. SQLite is optional;
-unconfigured consumers work as before. Configured consumers validate adapter
-presence immediately. Database operations require `client.start()` and a native
-connected session. Call `client.stop()` in plugin cleanup.
+Spells saves a schema-versioned record through default-scope native
+`loadTable`/`saveTable` under `aardwolf-spells:data:<lowercase-character>`. It
+contains the canonical snapshot plus damage details, memberships, timestamps
+and commands. Every successful collection or override change saves a complete
+validated record before publishing new state. Storage must report `ready` and
+`saveTable` must accept the write; failed writes retain the prior published data.
+A dedicated record validator supports up to 1,000 abilities and the bounded
+damage catalog without loosening the shared API's GMCP/preference copy limits.
 
-## Database API
+Data belongs to this installed plugin and world. Import each character's file
+explicitly into every intended world; separate worlds do not share records.
+Changing the installed plugin ID or renaming a character selects another store.
+Existing native panel layout preferences retain their key, order and visibility;
+the importer does not overwrite them. The public `client.spells` methods,
+schema-version-1 snapshot and provider messaging contract remain unchanged.
 
-All methods use **dot calls**. Callbacks receive `(result, error)` once, with
-one value absent. Immediate rejection calls back synchronously; accepted
-requests complete through polling. Subscriber exceptions are contained and
-optionally reported with a fixed message through `host.reportError`.
+Arbitrary databases opened through the former generic SQLite API or registered
+aliases have no automatic native-storage translation. This converter accepts
+only the supported Aardwolf Spells schema and preserves unrelated databases.
+Consumers of the removed SQL API must adopt an appropriate native data model.
 
-```lua
-client.sqlite.open("records", function(db, issue)
-  if issue then return end
-  db.execute("CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, text TEXT)", {}, function(_, createIssue)
-    if createIssue then db.close(); return end
-    db.execute("INSERT INTO notes (text) VALUES (?)", { "literal 'quoted' text" }, function(inserted, insertIssue)
-      if insertIssue then db.close(); return end
-      db.query("SELECT id, text FROM notes WHERE id=?", { inserted.lastInsertId }, function(result, readIssue)
-        if not readIssue then
-          -- result.columns = { "id", "text" }; result.rows[1] = { id, text }
-        end
-        db.close()
-      end)
-    end)
-  end)
-end)
-```
+## Native verification
 
-`open(name, callback)` creates or opens a managed database. Names use
-`A-Z`, `a-z`, digits, `_`, `-`, with 1-128 characters; they never contain paths.
-`openAlias(alias, callback)` selects an explicitly registered existing file.
-`status()` returns `{ configured, connected, available, reason?, generation? }`.
+On **2026-10-24**, MudForge **2.0.3915** loaded API 0.4.0 and reinstalled Spells
+0.3.0 in place under the existing plugin ID. Fresh native-picker import and
+fresh/repeated paste import succeeded. The migrated record in an exported world
+matched the converter's output across all fields after normalizing native
+one-based lists and absent/null values. Closing and reopening the original world,
+then repeating the paste import, reported identical data and confirmed persistence.
 
-`db.query(sql, params, callback)` runs one read-only statement. Results are
-`{ columns = { ... }, rows = { { ... }, ... } }`, with **one-based** lists even
-when native JSON arrays are zero-based. Positional rows preserve duplicate
-column names and NULL columns. Empty results have empty lists.
-
-`db.execute(sql, params, callback)` runs one schema/data statement and commits
-before success. Results contain `{ changes, lastInsertId }`; `changes` is the
-driver's affected-row count (zero for DDL), excluding trigger side effects.
-`lastInsertId` is the driver's connection-local last inserted ID, or the NULL
-wrapper when unavailable; do not infer that an UPDATE inserted a record.
-For row-producing statements submitted to execute, returned rows are drained
-and discarded. Use query for reads.
-
-`db.transaction(statements, callback)` accepts a nonempty list of
-`{ kind = "execute" | "query", sql = "...", params = { ... } }`. All statements
-share one connection and transaction; failure rolls back the whole batch,
-including schema changes. Success returns `{ results = { ... } }` in statement
-order. There are no transactions spanning callbacks or multiple databases.
-
-`db.close()` is idempotent and prevents new submissions. Accepted work drains;
-the helper already closes its connection after every operation. Stop closes
-all handles; start again and reopen them. Disconnect cancels pending callbacks
-but handles can be reused after reconnect.
-
-Use positional `?` parameters; omit params or pass `{}` for none. Named params
-and SQL scripts containing multiple statements are not supported. Schema and
-migrations belong to the consuming plugin. No ORM or whole-database deletion
-API is provided. Foreign keys are enabled on every connection. User PRAGMAs,
-ATTACH/DETACH, extension loading and explicit transaction/savepoint commands
-are refused. Query cannot perform writes, even through `RETURNING`.
-
-### Values
-
-| Lua value | SQLite / returned Lua value |
-| --- | --- |
-| String | TEXT; Unicode and embedded NUL are preserved. SQL itself cannot contain NUL. |
-| Finite number | INTEGER for integral safe numbers, REAL otherwise. |
-| `client.sqlite.real(1e30)` | Explicit REAL, including integral-looking numbers outside the safe integer range. |
-| Boolean | INTEGER 1/0; reads return numbers. |
-| `client.sqlite.null` | SQL NULL; reads use `{ sqliteType = "null" }`. Test the marker, not table identity. |
-| `client.sqlite.blob("AP8=")` | BLOB from base64; reads return `{ sqliteType = "blob", value = base64 }`. |
-| `client.sqlite.integer("9223372036854775807")` | Signed int64; reads outside ±9007199254740991 retain the decimal wrapper. |
-
-Do not put nil in a parameter list: it removes the slot. Decimal integer text
-must have no leading zeroes except zero itself and fit signed int64.
-Arrays with holes, functions, arbitrary tables and non-finite numbers fail
-before publication. Parameters and batches are copied at submission.
-
-## Existing database aliases
-
-Create a local configuration file, then launch with
-`python3 tools/sqlite_helper.py --config /absolute/path/aliases.json`:
-
-```json
-{
-  "aliases": {
-    "shared-notes": {
-      "path": "/Users/your-user/Documents/shared-notes.sqlite",
-      "mode": "ro",
-      "namespaces": [
-        { "pluginId": "your-installed-plugin-id", "characterKey": "my-stable-character-key" }
-      ]
-    }
-  }
-}
-```
-
-Replace the example identifiers and path with actual values. Use `rw` explicitly
-to allow schema/data changes. Add each permitted plugin/character namespace to
-share an alias. Restart the helper after editing configuration. Registered
-files must exist both at startup and when opened; a missing file is never
-created. The standard SQLite engine reads WAL-backed data and observes normal
-locking. Backup existing files using their owning application's normal process
-before granting write access.
-
-## Failure and lifecycle behavior
-
-Errors have `{ code, message, outcome }`. Messages are fixed descriptions;
-SQL, values, database paths and raw exception text are not logged. SQLite engine
-errors retain their lowercase SQLite error name, such as `sqlite_busy`.
-
-- `rejected`: work was not submitted, or the helper declined it before beginning
-  a transaction. Opening a managed database may create an empty file before an
-  open failure; rejection is not a guarantee of no filesystem activity.
-- `rolled_back`: the helper confirmed transaction rollback.
-- `unknown`: submitted work may have committed. Inspect application state before
-  retrying; the API never automatically retries.
-
-Polling uses one 250 ms timer per consumer while requests are pending. Operations
-are serialized FIFO per consumer. Disconnect and stop remove the timer, reject
-unsent work and classify submitted work as unknown. Late replies cannot invoke
-cancelled callbacks. Independent consumers may submit to the same registered
-database; SQLite locking and the helper serialize access.
-
-The helper publishes a heartbeat every second, including during long SQLite
-execution. Submissions require a heartbeat no older than five seconds.
-Restart changes its generation. Requests expire after the configured timeout,
-including queue time. A helper restart marks claimed unfinished requests unknown
-and never replays them; a crash between commit and reply cannot be resolved
-automatically. Response receipts are retained for 24 hours to prevent replay of
-duplicate IDs. Unclaimed expired work is refused before execution.
-
-Limits: 32 pending requests per consumer; 100 statements per transaction;
-1,000 parameters, columns and result rows per statement; 1 MiB JSON messages
-and individual SQLite values; two-second lock waits; five-second SQLite execution
-deadline including connection setup. Oversized results fail without truncation,
-and transaction results are checked before commit. Use SQL LIMIT/keyset pagination
-for larger reads. Native file I/O and callback delivery remain client-controlled.
-
-## Example and verification
-
-Import `examples/sqlite-consumer.lua` only in an authorized disposable world,
-enable File System Access, start the helper and connect. Type
-`awsql-demo disposable-character`. It touches only its dedicated `sqlite-demo`
-database and `demo_records` table: create/upsert/read/update, intentionally
-fail a duplicate-key transaction, verify rollback, then delete the sample row.
-It sends no gameplay commands and does not need GMCP Core.
-
-Repository tests execute the Lua facade in Fengari, the helper against temporary
-real databases, and both together through real request/response files. These
-checks do not execute MudForge's JavaScript transpiler or its real-file adapters.
-Native acceptance remains separate; see [NATIVE-ACCEPTANCE.md](NATIVE-ACCEPTANCE.md).
-
-References: [MudForge authoring guide](https://mudforge.org/docs/ai-plugin-guide.md),
-[Python sqlite3](https://docs.python.org/3/library/sqlite3.html),
-[SQLite authorization](https://www.sqlite.org/c3ref/set_authorizer.html).
+The original map graph, terrain styles, unrelated plugin state and existing
+widget positions were preserved. Temporary verification world/library fixtures
+were removed and their absence checked. This verifies native import and storage
+for that client version; no live MUD connectivity or collection was tested.
+Broader damage-panel interactions, pager behavior and connected collection remain
+pending in [the acceptance checklist](NATIVE-ACCEPTANCE.md). Offline converter
+and injected-host tests remain separate evidence.

@@ -1,16 +1,21 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.2.6",
-  author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons backed by SQLite."
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.3.0",
+  author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons saved in native MudForge storage."
 }
 
 local PREFIX = "aardwolf-spells:"
 local FOOTER = "* means that you cannot use the skill/spell."
-local client, libraryApi, database, characterName, characterKey = nil, nil, nil, nil, nil
+local client, libraryApi, characterName, characterKey = nil, nil, nil, nil
 local initialized, registered, rebuilding, automaticAttempted = false, false, false, false
 local automaticCharacterKey = nil
 local generation, captureTimer = 0, nil
-local snapshot, capture, busy, uncertain = nil, nil, false, false
-local preparing, pendingEntries = false, nil
+local snapshot, capture, busy = nil, nil, false
+local preparing = false
+local importing = false
+local importWidget, importRevision = nil, 0
+local lastImport = nil
+local DATA_STORAGE = "aardwolf-spells:data:"
+local MAX_IMPORT_BYTES = 16 * 1024 * 1024
 local collectionCancelled, expectedSend = false, false
 local lastError, reason = nil, "waiting for API Core"
 local consumers, unsubscribers = {}, {}
@@ -29,7 +34,7 @@ local syncLayout, loadLayout
 local LAYOUT_STORAGE = "spells-panel-layouts"
 local DAMAGE_FOOTER = "To see all skills/spells for your class, use 'allspells <class>'"
 local SKILL_COMMANDS = { ["dirt kicking"] = "dirt" }
-local USAGE = 'Usage: awspells refresh | refresh-all | cancel | show | status | command "<skill>" [command] | command-reset "<skill>"'
+local USAGE = 'Usage: awspells refresh | refresh-all | cancel | show | status | import | import-paste | command "<skill>" [command] | command-reset "<skill>"'
 
 local function groupKey(kind, damageType) return kind .. ":" .. damageType end
 local function emptyDamage() return { details = {}, members = {}, times = {}, commands = {} } end
@@ -42,8 +47,13 @@ end
 local function equal(left, right)
   if type(left) ~= type(right) then return false end
   if type(left) ~= "table" then return left == right end
-  for key, item in pairs(left) do if not equal(item, right[key]) then return false end end
-  for key in pairs(right) do if type(left[key]) == "nil" then return false end end
+  -- Native table constructors may retain explicit nil-valued fields.
+  for key, item in pairs(left) do
+    if type(item) ~= "nil" and not equal(item, right[key]) then return false end
+  end
+  for key, item in pairs(right) do
+    if type(item) ~= "nil" and type(left[key]) == "nil" then return false end
+  end
   return true
 end
 
@@ -132,26 +142,6 @@ end
 
 local function trim(text) return string.match(text, "^%s*(.-)%s*$") end
 
-local function readFile(path, maximum)
-  local file = io.open(path, "r")
-  if type(file) == "nil" then return nil end
-  local ok, text = pcall(function() return file:read(maximum) end)
-  pcall(function() file:close() end)
-  if ok then return text end
-  return nil
-end
-
-local function writeFile(path, text)
-  local file = io.open(path, "w")
-  if type(file) == "nil" then return false end
-  local ok, written = pcall(function()
-    local value = file:write(text)
-    return type(value) ~= "nil" and value ~= false
-  end)
-  local closed, saved = pcall(function() return file:close() end)
-  return ok and written and closed and saved ~= false
-end
-
 local function connected()
   if not initialized or type(client) ~= "table" then return false end
   local nativeSession = getSession()
@@ -193,7 +183,7 @@ end
 
 local function failure(message)
   cancelCapture()
-  pendingEntries, queue, queueTotal = nil, {}, 0
+  queue, queueTotal = {}, 0
   collectionCancelled = true
   busy, lastError, reason = preparing or saving, message, "refresh failed"
   publish()
@@ -201,18 +191,17 @@ local function failure(message)
 end
 
 local function issueText(issue)
-  if issue.code == "helper_unavailable" or issue.code == "file_write_failed" or issue.code == "file_publish_failed" then
-    return "SQLite unavailable; start tools/sqlite_helper.py and enable this plugin's File System Access, then run awspells refresh."
-  end
-  return "SQLite " .. issue.code .. " (" .. issue.outcome .. "); run awspells refresh to try again."
+  return "Native storage: " .. tostring(issue.message or issue.code) .. "; previous data retained."
 end
 
 local function resetIdentity()
   generation = generation + 1
+  importing = false
+  importRevision = importRevision + 1
+  if importWidget then destroyWidget(importWidget); importWidget = nil end
   cancelCapture()
-  if database then database.close() end
-  database, snapshot, characterName, characterKey = nil, nil, nil, nil
-  busy, uncertain, preparing, pendingEntries = false, false, false, nil
+  snapshot, characterName, characterKey = nil, nil, nil
+  busy, preparing = false, false
   damage, saving, queue, queueTotal, restoredIdentity = emptyDamage(), false, {}, 0, false
   collectionCancelled, expectedSend = false, false
   layout, layouts, editing, layoutFeedback = defaultLayout(), {}, false, ""
@@ -220,203 +209,146 @@ local function resetIdentity()
   syncLayout()
 end
 
-local function guarded(callback)
-  local token = generation
-  return function(value, issue)
-    if initialized and token == generation then callback(value, issue)
-    elseif type(value) == "table" and type(value.close) == "function" then value.close() end
-  end
+local function onlyFields(value, allowed)
+  assert(type(value) == "table", "expected an object")
+  for key in pairs(value) do assert(allowed[key], "unsupported field") end
 end
 
-local READ_SNAPSHOT = "SELECT m.schema_version,m.character_name,m.collected_at,m.entry_count,"
-  .. "a.name,a.level,a.sn,a.percent,a.unusable,a.display_order "
-  .. "FROM metadata m LEFT JOIN abilities a ON 1=1 WHERE m.id=1 ORDER BY a.display_order"
-
-local function nullable(value)
-  if type(value) == "table" and value.sqliteType == "null" then return nil end
-  return value
+local function integer(value)
+  return type(value) == "number" and value >= 0 and value <= 9007199254740991 and value == math.floor(value)
 end
 
-local function decodeSnapshot(result)
-  if #result.rows == 0 then return nil end
-  local first = result.rows[1]
-  assert(first[1] == 1 and type(first[2]) == "string" and string.lower(first[2]) == characterKey, "invalid metadata")
-  assert(first[4] == #result.rows and first[4] > 0 and first[4] <= 1000, "invalid count")
-  local value = { schemaVersion = first[1], characterName = first[2], collectedAt = first[3], entries = {} }
-  for index, row in ipairs(result.rows) do
-    assert(row[1] == first[1] and row[2] == first[2] and row[3] == first[3] and row[4] == first[4], "mixed metadata")
-    assert(row[10] == index and (row[9] == 0 or row[9] == 1), "invalid ability order or flag")
-    table.insert(value.entries, { name = row[5], level = row[6], sn = nullable(row[7]),
-      percent = nullable(row[8]), unusable = row[9] == 1 })
-  end
-  return libraryApi.protocol.spellsSnapshot(value)
+local function validName(value)
+  return type(value) == "string" and #value > 0 and #value <= 128
+    and string.match(value, "%S") ~= nil and not string.find(value, "%c")
 end
 
-local function loadSnapshot(done)
-  database.query(READ_SNAPSHOT, {}, guarded(function(result, issue)
-    if issue then done(nil, issue); return end
-    local ok, value = pcall(decodeSnapshot, result)
-    if not ok then done(nil, { code = "invalid_snapshot", outcome = "rejected" }); return end
-    done(value)
-  end))
+local function validGroup(key)
+  if type(key) ~= "string" then return nil end
+  local kind, damageType = string.match(key, "^(%a+):(%a+)$")
+  if (kind == "skill" or kind == "spell") and typeSet[damageType] then return kind end
 end
 
-local READ_DAMAGE = "SELECT 'detail' AS tag,name AS a,kind AS b,mana AS c FROM ability_details UNION ALL "
-  .. "SELECT 'member',kind,damage_type,name FROM damage_memberships UNION ALL "
-  .. "SELECT 'time',kind,damage_type,collected_at FROM damage_refreshes UNION ALL "
-  .. "SELECT 'command',name,command,NULL FROM skill_commands ORDER BY tag,a,b,c LIMIT 500 OFFSET ?"
-
-local function loadSaved(done)
-  loadSnapshot(function(saved, issue)
-    if issue then done(nil, nil, issue); return end
-    local restored, offset = emptyDamage(), 0
-    local names = {}
-    if saved then for _, item in ipairs(saved.entries) do names[string.lower(item.name)] = true end end
-    local function page()
-      database.query(READ_DAMAGE, { offset }, guarded(function(result, readIssue)
-        if readIssue then done(nil, nil, readIssue); return end
-        local ok = pcall(function()
-          -- Bound historical memberships as well as new bulk lists.
-          assert(offset + #result.rows <= 2000 + 2 * #TYPES * 1001, "damage data exceeds limit")
-          for _, row in ipairs(result.rows) do
-            local tag, a, b, c = row[1], row[2], row[3], nullable(row[4])
-            if tag == "detail" then
-              assert(type(a) == "string" and names[a] and (b == "skill" or b == "spell"), "invalid detail")
-              assert(type(c) == "nil" or (type(c) == "number" and c >= 0 and c <= 9007199254740991 and c == math.floor(c)), "invalid mana")
-              assert(not restored.details[a], "duplicate detail")
-              restored.details[a] = { kind = b, mana = c }
-            elseif tag == "member" or tag == "time" then
-              assert((a == "skill" or a == "spell") and typeSet[b], "invalid damage group")
-              local key = groupKey(a, b)
-              if tag == "member" then
-                assert(type(c) == "string" and names[c], "invalid membership")
-                restored.members[key] = restored.members[key] or {}
-                assert(not restored.members[key][c], "duplicate membership")
-                restored.members[key][c] = true
-              else
-                assert(type(c) == "number" and c >= 0 and c <= 9007199254740991 and c == math.floor(c), "invalid refresh time")
-                assert(not restored.times[key], "duplicate refresh time")
-                restored.times[key] = c
-                restored.members[key] = restored.members[key] or {}
-              end
-            else
-              assert(tag == "command" and type(a) == "string" and #a > 0 and #a <= 128
-                and string.lower(a) == a and not string.find(a, "%c") and singleCommand(b), "invalid command")
-              assert(not restored.commands[a], "duplicate command")
-              restored.commands[a] = b
-            end
-          end
-        end)
-        if not ok then done(nil, nil, { code = "invalid_damage_data", outcome = "rejected" }); return end
-        offset = offset + #result.rows
-        if #result.rows == 500 then page(); return end
-        for key, members in pairs(restored.members) do
-          if not restored.times[key] then done(nil, nil, { code = "invalid_damage_data", outcome = "rejected" }); return end
-          for name in pairs(members) do
-            local info = restored.details[name]
-            if not info or string.sub(key, 1, #info.kind + 1) ~= info.kind .. ":" then
-              done(nil, nil, { code = "invalid_damage_data", outcome = "rejected" }); return
-            end
-          end
-        end
-        done(saved, restored)
-      end))
+-- Construct a fresh, bounded record rather than copying arbitrary input. A full
+-- damage catalog can exceed the API's general-purpose/GMCP copy budget.
+local function validateRecord(value, key)
+  onlyFields(value, { schemaVersion = true, characterKey = true, snapshot = true, damage = true })
+  assert(value.schemaVersion == 1 and validName(value.characterKey)
+    and string.lower(value.characterKey) == value.characterKey and trim(value.characterKey) == value.characterKey,
+    "invalid storage identity")
+  assert(not key or value.characterKey == key, "different character")
+  local result = { schemaVersion = 1, characterKey = value.characterKey, damage = emptyDamage() }
+  local names = {}
+  if type(value.snapshot) ~= "nil" then
+    onlyFields(value.snapshot, { schemaVersion = true, characterName = true, collectedAt = true, entries = true })
+    assert(type(value.snapshot.entries) == "table", "invalid entries")
+    local count = 0
+    for _, item in pairs(value.snapshot.entries) do
+      count = count + 1; assert(count <= 1000, "too many abilities")
+      onlyFields(item, { name = true, level = true, sn = true, percent = true, unusable = true })
     end
-    page()
+    result.snapshot = libraryApi.protocol.spellsSnapshot(value.snapshot)
+    assert(string.lower(result.snapshot.characterName) == value.characterKey
+      and trim(result.snapshot.characterName) == result.snapshot.characterName, "different character")
+    for _, item in ipairs(result.snapshot.entries) do names[string.lower(item.name)] = true end
+  end
+  onlyFields(value.damage, { details = true, members = true, times = true, commands = true })
+  local original, restored = value.damage, result.damage
+  assert(type(original.details) == "table" and type(original.members) == "table"
+    and type(original.times) == "table" and type(original.commands) == "table", "invalid damage state")
+  local count = 0
+  for name, info in pairs(original.details) do
+    count = count + 1; assert(count <= 1000 and names[name], "invalid detail name")
+    onlyFields(info, { kind = true, mana = true })
+    assert(info.kind == "skill" or info.kind == "spell", "invalid ability kind")
+    assert(type(info.mana) == "nil" or integer(info.mana), "invalid mana")
+    restored.details[name] = { kind = info.kind, mana = info.mana }
+  end
+  count = 0
+  for keyName, timestamp in pairs(original.times) do
+    count = count + 1
+    assert(count <= 2 * #TYPES and validGroup(keyName) and integer(timestamp), "invalid refresh")
+    restored.times[keyName], restored.members[keyName] = timestamp, {}
+  end
+  count = 0
+  for keyName, members in pairs(original.members) do
+    count = count + 1
+    local kind = validGroup(keyName)
+    assert(count <= 2 * #TYPES and kind and type(members) == "table"
+      and type(restored.times[keyName]) == "number", "invalid damage group")
+    local total = 0
+    for name, present in pairs(members) do
+      total = total + 1
+      local info = restored.details[name]
+      assert(total <= 1000 and present == true and names[name] and info and info.kind == kind, "invalid membership")
+      restored.members[keyName][name] = true
+    end
+  end
+  count = 0
+  for name, command in pairs(original.commands) do
+    count = count + 1
+    assert(count <= 1000 and validName(name) and string.lower(name) == name and singleCommand(command), "invalid command")
+    restored.commands[name] = command
+  end
+  return result
+end
+
+local function storageReady()
+  local ok, state = pcall(function()
+    local status, message = storageStatus()
+    return { status = status, message = message }
   end)
+  if not ok then return false, "storage status is unavailable" end
+  if state.status ~= "ready" then return false, state.message or ("storage is " .. tostring(state.status)) end
+  return true
+end
+
+local function loadRecord(key)
+  local ready, message = storageReady()
+  if not ready then return nil, { message = message } end
+  local ok, value = pcall(loadTable, DATA_STORAGE .. key)
+  if not ok then return nil, { message = "could not read saved abilities" } end
+  if type(value) == "nil" then return nil end
+  local valid, record = pcall(validateRecord, value, key)
+  if not valid then return nil, { message = "invalid or unsupported saved abilities" } end
+  return record
+end
+
+local function saveRecord(record)
+  local ready, message = storageReady()
+  if not ready then return false, message end
+  local ok, accepted = pcall(saveTable, DATA_STORAGE .. record.characterKey, record)
+  if not ok or accepted ~= true then return false, "storage refused the write" end
+  return true
 end
 
 local function prepare(done)
   restoredIdentity = true
-  local sqlState = client.sqlite.status()
-  if not sqlState.available then done({ code = sqlState.reason, outcome = "rejected" }); return end
-  local function readSaved()
-    loadSaved(function(value, restored, issue)
-      if not issue then snapshot, damage, uncertain = value, restored, false; publish() end
-      done(issue)
-    end)
-  end
-  if database then readSaved(); return end
-  client.sqlite.open("spells", guarded(function(value, issue)
-    if issue then done(issue); return end
-    database = value
-    database.transaction({
-      { kind = "execute", sql = "CREATE TABLE IF NOT EXISTS metadata (id INTEGER PRIMARY KEY CHECK(id=1),"
-        .. "schema_version INTEGER NOT NULL,character_name TEXT NOT NULL,collected_at INTEGER NOT NULL,entry_count INTEGER NOT NULL)" },
-      { kind = "execute", sql = "CREATE TABLE IF NOT EXISTS abilities (name TEXT PRIMARY KEY COLLATE NOCASE,"
-        .. "level INTEGER NOT NULL,sn INTEGER,percent INTEGER,unusable INTEGER NOT NULL CHECK(unusable IN (0,1)),"
-        .. "display_order INTEGER NOT NULL UNIQUE)" },
-      { kind = "execute", sql = "CREATE TABLE IF NOT EXISTS ability_details (name TEXT PRIMARY KEY COLLATE NOCASE,"
-        .. "kind TEXT NOT NULL CHECK(kind IN ('skill','spell')),mana INTEGER)" },
-      { kind = "execute", sql = "CREATE TABLE IF NOT EXISTS damage_memberships (kind TEXT NOT NULL,damage_type TEXT NOT NULL,"
-        .. "name TEXT NOT NULL COLLATE NOCASE,PRIMARY KEY(kind,damage_type,name))" },
-      { kind = "execute", sql = "CREATE TABLE IF NOT EXISTS damage_refreshes (kind TEXT NOT NULL,damage_type TEXT NOT NULL,"
-        .. "collected_at INTEGER NOT NULL,PRIMARY KEY(kind,damage_type))" },
-      { kind = "execute", sql = "CREATE TABLE IF NOT EXISTS skill_commands (name TEXT PRIMARY KEY COLLATE NOCASE,command TEXT NOT NULL)" }
-    }, guarded(function(_, createIssue)
-      if createIssue then database.close(); database = nil; done(createIssue); return end
-      readSaved()
-    end))
-  end))
-end
-
-local function sameSnapshot(left, right)
-  if not left or not right then return left == right end
-  if left.characterName ~= right.characterName or left.collectedAt ~= right.collectedAt
-    or #left.entries ~= #right.entries then return false end
-  for index, item in ipairs(left.entries) do
-    local other = right.entries[index]
-    if item.name ~= other.name or item.level ~= other.level or item.sn ~= other.sn
-      or item.percent ~= other.percent or item.unusable ~= other.unusable then return false end
-  end
-  return true
+  local value, issue = loadRecord(characterKey)
+  if issue then done(issue); return end
+  snapshot, damage = value and value.snapshot or nil, value and value.damage or emptyDamage()
+  done()
 end
 
 local function committed(value, updated)
-  snapshot, damage, saving, busy, uncertain = value, updated, false, false, false
+  snapshot, damage, saving, busy = value, updated, false, false
   reason = collectionCancelled and "cancelled" or (lastError and "refresh stopped" or "saved")
   publish()
   if value then echo("Aardwolf Spells: saved " .. tostring(#value.entries) .. " skills/spells for " .. value.characterName .. ".") end
   if not collectionCancelled then nextRefresh() end
 end
 
-local function sqlCell(value)
-  if type(value) == "nil" then return client.sqlite.null end
-  return value
-end
-
-local function writeCandidate(candidate, updated, statements)
+local function writeCandidate(candidate, updated)
+  local valid, record = pcall(validateRecord, {
+    schemaVersion = 1, characterKey = characterKey, snapshot = candidate, damage = updated
+  }, characterKey)
+  if not valid then failure("Invalid ability data; previous list retained."); return end
   saving, reason = true, "saving"
   publish()
-  database.transaction(statements, guarded(function(_, issue)
-    if not issue then committed(candidate, updated); return end
-    if issue.outcome ~= "unknown" then saving = false; failure(issueText(issue)); return end
-    uncertain, reason = true, "checking unknown SQLite outcome"
-    publish()
-    loadSaved(function(saved, restored, readIssue)
-      saving = false
-      if readIssue then failure("SQLite outcome is unknown; refresh will read the database before another collection."); return end
-      snapshot, damage, uncertain = saved, restored, false
-      if sameSnapshot(saved, candidate) and equal(restored, updated) then committed(saved, restored)
-      else failure("SQLite did not confirm this collection; saved list reloaded.") end
-    end)
-  end))
-end
-
--- Each statement stays below the bridge's 1,000 positional parameter ceiling.
-local function insertRows(statements, sql, rows, width, suffix)
-  for first = 1, #rows, 100 do
-    local placeholders, params = {}, {}
-    for index = first, math.min(first + 99, #rows) do
-      local cells = {}
-      for column = 1, width do
-        table.insert(cells, "?")
-        table.insert(params, sqlCell(rows[index][column]))
-      end
-      table.insert(placeholders, "(" .. table.concat(cells, ",") .. ")")
-    end
-    table.insert(statements, { kind = "execute", sql = sql .. table.concat(placeholders, ",") .. (suffix or ""), params = params })
-  end
+  local accepted, message = saveRecord(record)
+  saving = false
+  if not accepted then failure(issueText({ message = message })); return end
+  committed(record.snapshot, record.damage)
 end
 
 persist = function(entries, request)
@@ -464,39 +396,7 @@ persist = function(entries, request)
     })
     if not valid then failure("Invalid ability snapshot; previous list retained."); return end
   end
-  local statements = { { kind = "execute", sql = "DELETE FROM abilities" } }
-  local rows = {}
-  for index, item in ipairs(combined) do rows[index] = { item.name, item.level, sqlCell(item.sn), sqlCell(item.percent), item.unusable, index } end
-  insertRows(statements, "INSERT INTO abilities (name,level,sn,percent,unusable,display_order) VALUES ", rows, 6)
-  if request.kind then
-    table.insert(statements, { kind = "execute", sql = "DELETE FROM damage_memberships WHERE kind=?", params = { request.kind } })
-    table.insert(statements, { kind = "execute", sql = "DELETE FROM ability_details WHERE kind=?", params = { request.kind } })
-    rows = {}
-    for _, item in ipairs(entries) do
-      table.insert(rows, { string.lower(item.name), request.kind, sqlCell(item.mana) })
-    end
-    insertRows(statements, "INSERT INTO ability_details (name,kind,mana) VALUES ", rows, 3,
-      " ON CONFLICT(name) DO UPDATE SET kind=excluded.kind,mana=excluded.mana")
-    rows = {}
-    for _, item in ipairs(entries) do
-      for damageType in pairs(item.damageTypes) do table.insert(rows, { request.kind, damageType, string.lower(item.name) }) end
-    end
-    insertRows(statements, "INSERT INTO damage_memberships (kind,damage_type,name) VALUES ", rows, 3)
-    rows = {}
-    for _, damageType in ipairs(TYPES) do table.insert(rows, { request.kind, damageType, updated.times[groupKey(request.kind, damageType)] }) end
-    insertRows(statements, "INSERT INTO damage_refreshes (kind,damage_type,collected_at) VALUES ", rows, 3,
-      " ON CONFLICT(kind,damage_type) DO UPDATE SET collected_at=excluded.collected_at")
-  else
-    table.insert(statements, { kind = "execute", sql = "DELETE FROM ability_details WHERE name NOT IN (SELECT name FROM abilities)" })
-    table.insert(statements, { kind = "execute", sql = "DELETE FROM damage_memberships WHERE name NOT IN (SELECT name FROM abilities)" })
-  end
-  if candidate then
-    table.insert(statements, { kind = "execute", sql = "INSERT INTO metadata (id,schema_version,character_name,collected_at,entry_count)"
-      .. " VALUES (1,1,?,?,?) ON CONFLICT(id) DO UPDATE SET schema_version=excluded.schema_version,"
-      .. "character_name=excluded.character_name,collected_at=excluded.collected_at,entry_count=excluded.entry_count",
-      params = { characterName, candidate.collectedAt, #combined } })
-  end
-  writeCandidate(candidate, updated, statements)
+  writeCandidate(candidate, updated)
 end
 
 local function arm(request)
@@ -529,7 +429,7 @@ refresh = function(request)
   local ready, message = eligible()
   if not ready then return message end
   busy, preparing, collectionCancelled, lastError, reason = true, true, false, nil,
-    uncertain and "reconciling SQLite" or "opening SQLite"
+    "loading native storage"
   publish()
   prepare(function(issue)
     preparing = false
@@ -574,7 +474,6 @@ local function cancelCollection()
   -- The server cannot cancel a sent command. Discard its remaining output before
   -- admitting another query, so an old header/empty result cannot update it.
   if capture then capture.discard, capture.entries, capture.names = true, {}, {} end
-  pendingEntries = nil
   busy = preparing or saving or capture ~= nil
   reason = saving and "cancelling after save" or (capture and "cancelling; waiting for response" or "cancelled")
   publish()
@@ -585,8 +484,7 @@ local function finishCapture()
   local request, entries = capture.request, capture.entries
   cancelCapture()
   if not request.kind and #entries == 0 then failure("Empty allspells output; previous list retained."); return end
-  if preparing then pendingEntries, reason = { entries = entries, request = request }, "waiting for SQLite"; publish()
-  else persist(entries, request) end
+  persist(entries, request)
 end
 
 local function validateRow(item)
@@ -734,26 +632,12 @@ function onSend(sessionId, text)
     end
     local ready = eligible()
     if not ready then return end
-    -- Outgoing user commands cannot wait for asynchronous database setup.
-    local sqlState = client.sqlite.status()
-    if not sqlState.available or uncertain then
-      echo("Aardwolf Spells: run awspells refresh to prepare SQLite before capturing this command.")
-      return
-    end
     busy, preparing, collectionCancelled = true, true, false
-    if arm(request) then
-      prepare(function(issue)
-        preparing = false
-        if collectionCancelled then busy = saving or capture ~= nil; publish(); return end
-        if issue then failure(issueText(issue)); return end
-        if pendingEntries then
-          local pending = pendingEntries
-          pendingEntries = nil
-          persist(pending.entries, pending.request)
-        elseif capture then publish()
-        else busy = false; publish() end
-      end)
-    else preparing, busy = false, false end
+    prepare(function(issue)
+      preparing = false
+      if issue then failure(issueText(issue)); return end
+      arm(request)
+    end)
   elseif (string.match(command, "^allspells%s+") or command == "skills" or command == "spells"
     or string.match(command, "^skills%s") or string.match(command, "^spells%s")) and (capture or preparing or saving) then
     if saving then cancelCollection()
@@ -772,7 +656,7 @@ local function receive(sender, message, encoded)
   if found then consumers[sender] = true; deliver(sender) end
 end
 
-buildClient = function(key)
+buildClient = function()
   rebuilding = true
   for _, unsubscribe in ipairs(unsubscribers) do unsubscribe() end
   unsubscribers = {}
@@ -782,9 +666,8 @@ buildClient = function(key)
     on = on, off = off, getPluginId = getPluginId, getSession = getSession, getCurrentTime = getCurrentTime,
     addTimer = addTimer, removeTimer = removeTimer,
     loadTable = loadTable, saveTable = saveTable, storageStatus = storageStatus,
-    sqliteReadFile = readFile, sqliteWriteFile = writeFile, sqliteRenameFile = os.rename, sqliteRemoveFile = os.remove,
     reportError = function(message) echo(message) end
-  }, { packages = { "Char" }, sqlite = key and { characterKey = key } or nil })
+  }, { packages = { "Char" } })
   for _, topic in ipairs({ "session", "char.base", "char.status" }) do
     table.insert(unsubscribers, client.on(topic, synchronize))
   end
@@ -811,7 +694,7 @@ synchronize = function()
   if key ~= characterKey then
     resetIdentity()
     characterName, characterKey, automaticAttempted, lastError = name, key, automaticCharacterKey == key, nil
-    buildClient(key)
+    buildClient()
     loadLayout()
   end
   if not session.negotiated then
@@ -1158,7 +1041,7 @@ commandOverride = function(args)
   if busy then return "Aardwolf Spells is already collecting or saving." end
   local ready, message = eligible()
   if not ready then return message end
-  busy, preparing, collectionCancelled, lastError, reason = true, true, false, nil, "opening SQLite"
+  busy, preparing, collectionCancelled, lastError, reason = true, true, false, nil, "loading native storage"
   publish()
   prepare(function(issue)
     preparing = false
@@ -1168,25 +1051,113 @@ commandOverride = function(args)
     if not ready then failure("Character is no longer active; command not saved."); return end
     local info = damage.details[name]
     if operation == "command" and (not info or info.kind ~= "skill") then failure("Use Refresh all before setting this skill's command."); return end
-    local updated, statements = clone(damage), {}
+    local updated = clone(damage)
     if operation == "command" then
       updated.commands[name] = value
-      statements[1] = { kind = "execute", sql = "INSERT INTO skill_commands (name,command) VALUES (?,?)"
-        .. " ON CONFLICT(name) DO UPDATE SET command=excluded.command", params = { name, value } }
     else
       updated.commands[name] = nil
-      statements[1] = { kind = "execute", sql = "DELETE FROM skill_commands WHERE name=?", params = { name } }
     end
-    writeCandidate(snapshot, updated, statements)
+    writeCandidate(snapshot, updated)
   end)
   return "Skill command update requested."
+end
+
+-- Imports use the platform's chooser; normal persistence never needs real-file
+-- permission. A pending chooser belongs to this runtime/identity generation.
+local function importFeedback(message)
+  lastImport = message
+  if importWidget then setBoundValue(importWidget, "import_feedback", message) end
+  echo(message)
+end
+
+local function importSaved(usePaste)
+  if busy or (importing and not usePaste) then return "Aardwolf Spells is already collecting, saving or importing." end
+  if not usePaste and type(pickFile) ~= "function" then return "File import is unavailable; use awspells import-paste." end
+  if importWidget then destroyWidget(importWidget); importWidget = nil end
+  importRevision = importRevision + 1
+  local ticket = importRevision
+  local token, sessionId = generation, getSessionId()
+  importing = true
+  local function receiveFile(file, message, reasonCode)
+    if not initialized or token ~= generation or ticket ~= importRevision then return end
+    importing = false
+    if sessionId ~= getSessionId() then return end
+    if not file then
+      if reasonCode ~= "cancelled" then importFeedback("Aardwolf Spells: import could not read the selected file.") end
+      return
+    end
+    if busy then importFeedback("Aardwolf Spells: collection is in progress; import again when it finishes."); return end
+    if type(file.data) ~= "string" or #file.data > MAX_IMPORT_BYTES then
+      importFeedback("Aardwolf Spells: import must be a JSON file no larger than 16 MiB."); return
+    end
+    local decoded, value = pcall(json.decode, file.data)
+    local valid, record = false, nil
+    if decoded then valid, record = pcall(validateRecord, value) end
+    if not valid or not record.snapshot then
+      importFeedback("Aardwolf Spells: invalid or unsupported import; saved data unchanged."); return
+    end
+    local existing, issue = loadRecord(record.characterKey)
+    if issue then importFeedback("Aardwolf Spells: " .. issueText(issue)); return end
+    if existing then
+      if equal(existing, record) then importFeedback("Aardwolf Spells: identical data already saved for " .. record.snapshot.characterName .. ".")
+      else importFeedback("Aardwolf Spells: different native data already exists for this character; import refused.") end
+      return
+    end
+    local accepted, problem = saveRecord(record)
+    if not accepted then importFeedback("Aardwolf Spells: " .. issueText({ message = problem })); return end
+    local restored, readIssue = loadRecord(record.characterKey)
+    if readIssue or not restored or not equal(restored, record) then
+      importFeedback("Aardwolf Spells: import save could not be verified; retain the migration file and backups."); return
+    end
+    importRevision = importRevision + 1
+    if importWidget then destroyWidget(importWidget); importWidget = nil end
+    if characterKey == record.characterKey then
+      snapshot, damage, restoredIdentity = restored.snapshot, restored.damage, true
+      reason, lastError = "imported saved abilities", nil
+      publish()
+    end
+    local details, memberships, refreshes, commands = 0, 0, 0, 0
+    for _ in pairs(restored.damage.details) do details = details + 1 end
+    for _, members in pairs(restored.damage.members) do for _ in pairs(members) do memberships = memberships + 1 end end
+    for _ in pairs(restored.damage.times) do refreshes = refreshes + 1 end
+    for _ in pairs(restored.damage.commands) do commands = commands + 1 end
+    importFeedback("Aardwolf Spells: imported " .. tostring(#restored.snapshot.entries) .. " abilities, " .. tostring(details)
+      .. " details, " .. tostring(memberships) .. " memberships, " .. tostring(refreshes) .. " refresh timestamps and "
+      .. tostring(commands) .. " command overrides for " .. restored.snapshot.characterName .. ".")
+  end
+  if usePaste then
+    importing = false
+    importWidget = createWidget({ type = "html", name = "storage-import", title = "Import saved abilities",
+      position = { x = 180, y = 120 }, size = { width = 580, height = 380 } })
+    if type(importWidget) ~= "string" or importWidget == "" then importWidget = nil; return "Import panel unavailable." end
+    registerWidgetEvent(importWidget, "luamsg", function(event)
+      if type(event) ~= "table" or event.event ~= "import" then return end
+      if event.sessionId and event.sessionId ~= sessionId then return end
+      receiveFile({ data = event.data })
+    end)
+    setWidgetProperty(importWidget, "content", [=[<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+      *{box-sizing:border-box}body{margin:0;padding:16px;background:#152132;color:#e8edf4;font:14px system-ui}
+      form{display:flex;flex-direction:column;gap:12px}textarea{width:100%;height:215px;resize:vertical;background:#0d1623;color:#e8edf4;border:1px solid #708299;border-radius:6px;padding:8px;font:12px monospace}
+      button{align-self:flex-end;background:#efc86a;color:#17202c;padding:9px 15px;border:0;border-radius:6px;cursor:pointer}p{margin:0}
+      </style></head><body><form id="import"><label for="data">Paste the contents of your Spells migration JSON file</label>
+      <p>The import preserves existing saved data. Use awspells status to check the result.</p><p role="status" data-mud-bind="import_feedback"></p>
+      <textarea id="data" maxlength="16777216" spellcheck="false" required></textarea><button type="submit">Import saved data</button></form>
+      <script>document.getElementById('import').addEventListener('submit',function(e){e.preventDefault();mudforge.send('import',document.getElementById('data').value)})</script></body></html>]=])
+    showWidget(importWidget, true)
+    return "Paste the migration JSON into the Import saved abilities panel."
+  end
+  local opened = pcall(function()
+    pickFile(receiveFile, { title = "Import Aardwolf Spells migration", accept = ".json", maxBytes = MAX_IMPORT_BYTES })
+  end)
+  if not opened then importing = false; return "Could not open the migration file chooser." end
+  return "Choose the JSON file created by the Spells migration converter."
 end
 
 function init()
   if initialized then return end
   libraryApi = require("aardwolf-api")
   if type(libraryApi.protocol) ~= "table" or type(libraryApi.protocol.spellsSnapshot) ~= "function" then
-    echo("Aardwolf Spells requires aardwolf-api 0.3.0 or later; update the loaded library and reload Spells.")
+    echo("Aardwolf Spells requires aardwolf-api 0.4.0 or later; update the loaded library and reload Spells.")
     return
   end
   initialized = true
@@ -1203,6 +1174,8 @@ function init()
   if not registered then onPluginBroadcast(receive); registered = true end
   registerCommand("awspells", function(args)
     local command = string.lower(trim(args))
+    if command == "import" then return importSaved() end
+    if command == "import-paste" then return importSaved(true) end
     if command == "refresh" then return refresh() end
     if command == "refresh-all" then return refreshAll() end
     if command == "cancel" then return cancelCollection() end
@@ -1214,9 +1187,9 @@ function init()
     if command ~= "" and command ~= "status" then return USAGE end
     local saved = snapshot and (tostring(#snapshot.entries) .. " entries, collected at " .. tostring(snapshot.collectedAt) .. " Unix ms") or "no saved snapshot"
     return "Aardwolf Spells: " .. (characterName or "character unknown") .. "; " .. saved .. "; "
-      .. reason .. (lastError and ("; " .. lastError) or "")
+      .. reason .. (lastError and ("; " .. lastError) or "") .. (lastImport and ("; " .. lastImport) or "")
   end, "Refresh or inspect the character's saved allspells list")
-  buildClient(nil)
+  buildClient()
   synchronize()
   broadcastPlugin(PREFIX .. "ready")
 end

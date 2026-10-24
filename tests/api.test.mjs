@@ -4,8 +4,37 @@ import { runLua } from './lua-runtime.mjs';
 const cases = {
   'library loads without host globals or registrations': `
     local lib = freshLibrary()
-    assert(lib.version == "0.3.0" and type(lib.new) == "function")
+    assert(lib.version == "0.4.0" and type(lib.new) == "function")
     assert(not pcall(lib.new, {}))
+  `,
+  'removed SQLite options fail clearly without invoking host APIs': `
+    local world = newWorld()
+    local context = world.context("legacy", "Legacy SQL Consumer")
+    for _, value in ipairs({ {}, false, "legacy" }) do
+      local ok, issue = pcall(freshLibrary().new, context.host, { sqlite = value })
+      assert(not ok and string.find(issue, "SQLite support was removed; use native storage", 1, true))
+    end
+    local client = freshLibrary().new(context.host)
+    assert(client.sqlite == nil and type(client.storage.get) == "function")
+    assert(#context.broadcasts == 0 and next(context.events) == nil and context.writes == 0)
+  `,
+  'spells snapshots retain bounded list normalization after SQL removal': `
+    local validate = freshLibrary().protocol.spellsSnapshot
+    for _, entries in ipairs({
+      { { name = "Fireball", level = 10, unusable = false } },
+      { ["0"] = { name = "Fireball", level = 10, unusable = false } },
+      { ["1"] = { name = "Fireball", level = 10, unusable = false } }
+    }) do
+      local snapshot = validate({ schemaVersion = 1, characterName = "Fixture", collectedAt = 1, entries = entries })
+      assert(#snapshot.entries == 1 and snapshot.entries[1].name == "Fireball")
+    end
+    local entries = {}
+    for index = 1, 1000 do entries[index] = { name = "Ability " .. tostring(index), level = 1, unusable = false } end
+    assert(#validate({ schemaVersion = 1, characterName = "Fixture", collectedAt = 1, entries = entries }).entries == 1000)
+    entries[1001] = { name = "Overflow", level = 1, unusable = false }
+    assert(not pcall(validate, { schemaVersion = 1, characterName = "Fixture", collectedAt = 1, entries = entries }))
+    assert(not pcall(validate, { schemaVersion = 1, characterName = "Fixture", collectedAt = 1,
+      entries = { [1] = entries[1], [3] = entries[3] } }))
   `,
   'package requirements accept numeric string keys from the JavaScript runtime': `
     local lib = freshLibrary()
@@ -296,6 +325,18 @@ const cases = {
     value, problem = consumer.client.storage.get("prefs"); assert(value == nil and problem == "invalid stored value")
     assert(not consumer.client.storage.set("nil", nil))
     assert(not consumer.client.storage.set("function", function() end))
+  `,
+  'native preference storage retains its bounded copy limit': `
+    local world, consumer = runningWorld()
+    local value = {}
+    for index = 1, 8192 do value[index] = index end
+    assert(consumer.client.storage.set("bounded", value))
+    value[8193] = 8193
+    assert(not consumer.client.storage.set("bounded", value))
+    assert(#consumer.client.storage.get("bounded") == 8192 and consumer.writes == 1)
+    consumer.storage["aardwolf-api:oversized"] = { schemaVersion = 1, value = value }
+    local saved, issue = consumer.client.storage.get("oversized")
+    assert(saved == nil and issue == "invalid stored value")
   `,
   'UI helpers bind text without rebuilding and only clean owned widgets': `
     local world, consumer = runningWorld()
