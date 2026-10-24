@@ -8,6 +8,9 @@ import { Resvg } from '@resvg/resvg-js';
 import { root } from '../tools/build-repository.mjs';
 import { buildMapPackOutputs, mapPackNames, validateTerrainRegistry } from '../tools/build-map-pack.mjs';
 
+const shopVariantNames = ['shop-counter', 'shop-display', 'shop-shelves'];
+const manualShopNames = ['shop-merchant', 'shop-apothecary', 'shop-smith'];
+
 const atlasManifest = JSON.parse(await readFile(resolve(root, 'src/atlas/assets/manifest.json'), 'utf8'));
 
 function decodePng(png) {
@@ -32,7 +35,6 @@ for (const packName of mapPackNames) {
   const outputs = await buildMapPackOutputs(root, packName);
   const pack = JSON.parse(outputs.get(packOutput));
   const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-  const shopVariantNames = ['shop-merchant', 'shop-apothecary', 'shop-smith'];
 
   test(`${packName}: pack covers the complete pinned Aardwolf registry plus MudForge defaults`, () => {
     assert.equal(registry.source.revision, 'ac6e40ff5596e285cfcef6739d1dfdc257cfa162');
@@ -40,9 +42,11 @@ for (const packName of mapPackNames) {
     assert.match(registry.source.sha256, /^[a-f0-9]{64}$/);
     assert.deepEqual(registry.terrains.filter(terrain => terrain.id !== null).map(terrain => terrain.id), Array.from({ length: 112 }, (_, index) => index));
     assert.deepEqual(registry.terrains.filter(terrain => terrain.id === null).map(terrain => terrain.name), ['default', 'water']);
-    assert.equal(pack.terrainStyles.length, 114);
-    assert.equal(new Set(pack.terrainStyles.map(style => style.name)).size, 114);
-    assert.deepEqual(pack.terrainStyles.map(style => style.name), registry.terrains.map(terrain => terrain.name.trim().toLowerCase()));
+    const manualNames = themed ? [] : manualShopNames;
+    assert.equal(registry.terrains.length, 114);
+    assert.equal(pack.terrainStyles.length, themed ? 114 : 117);
+    assert.equal(new Set(pack.terrainStyles.map(style => style.name)).size, themed ? 114 : 117);
+    assert.deepEqual(pack.terrainStyles.map(style => style.name), [...registry.terrains.map(terrain => terrain.name.trim().toLowerCase()), ...manualNames]);
     assert(pack.terrainStyles.some(style => style.name === 'mudschool'));
     assert.deepEqual(Object.keys(pack), ['name', 'description', 'terrainStyles']);
   });
@@ -66,15 +70,32 @@ for (const packName of mapPackNames) {
   });
 
   if (!themed) test(`${packName}: terrain registry rejects unsafe, duplicate and invalid variant names`, () => {
-    for (const variants of ['shop-merchant', [], [null], ['../shop'], ['SHOP'], [' shop-merchant '], ['shop'], ['water'],
-      ['shop-merchant', 'shop-merchant'], Array.from({ length: 10 }, (_, index) => `shop-variant-${index}`)]) {
+    for (const variants of ['shop-counter', [], [null], ['../shop'], ['SHOP'], [' shop-counter '], ['shop'], ['water'],
+      ['shop-counter', 'shop-counter'], Array.from({ length: 10 }, (_, index) => `shop-variant-${index}`)]) {
       const copy = structuredClone(registry);
       copy.terrains.find(terrain => terrain.name === 'shop').variants = variants;
       assert.throws(() => validateTerrainRegistry(copy), `variants: ${JSON.stringify(variants)}`);
     }
     const copy = structuredClone(registry);
-    copy.terrains.find(terrain => terrain.name === 'default').variants = ['shop-merchant'];
+    copy.terrains.find(terrain => terrain.name === 'default').variants = ['shop-counter'];
     assert.throws(() => validateTerrainRegistry(copy), 'variant names must be unique across terrain styles');
+  });
+
+  if (!themed) test(`${packName}: manual image registry rejects invalid arrays, names and collisions`, () => {
+    for (const manualImages of ['shop-merchant', [], null, {}]) {
+      const copy = structuredClone(registry);
+      copy.manualImages = manualImages;
+      assert.throws(() => validateTerrainRegistry(copy), /manual images/i, JSON.stringify(manualImages));
+    }
+    for (const manualImages of [[null], ['../shop'], ['SHOP'], [' shop-merchant '], ['shop'], ['water'],
+      ['shop-counter'], ['shop-merchant', 'shop-merchant']]) {
+      const copy = structuredClone(registry);
+      copy.manualImages = manualImages;
+      assert.throws(() => validateTerrainRegistry(copy), /manual image/i, JSON.stringify(manualImages));
+    }
+    const copy = structuredClone(registry);
+    delete copy.manualImages;
+    assert.doesNotThrow(() => validateTerrainRegistry(copy), 'manual images are optional');
   });
 
   test(`${packName}: every terrain embeds a unique opaque 128px PNG with its registry fallback color`, async () => {
@@ -84,7 +105,10 @@ for (const packName of mapPackNames) {
       assert.deepEqual(Object.keys(style), !themed && style.name === 'shop'
         ? ['name', 'color', 'image', 'variants'] : ['name', 'color', 'image']);
       assert.match(style.color, /^#[a-f0-9]{6}$/);
-      assert.equal(style.color, registry.terrains.find(terrain => terrain.name.trim().toLowerCase() === style.name).color);
+      const terrain = registry.terrains.find(terrain => terrain.name.trim().toLowerCase() === style.name)
+        || (!themed && manualShopNames.includes(style.name) ? registry.terrains.find(terrain => terrain.name === 'shop') : null);
+      assert(terrain, `${style.name}: missing fallback color source`);
+      assert.equal(style.color, terrain.color);
       assert.match(style.image, /^data:image\/png;base64,[A-Za-z0-9+/]+=*$/);
       const png = Buffer.from(style.image.split(',')[1], 'base64');
       assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
@@ -107,7 +131,7 @@ for (const packName of mapPackNames) {
     }
   });
 
-  if (!themed) test(`${packName}: shop selects three unique opaque variants through all ten vnum slots`, async () => {
+  if (!themed) test(`${packName}: shop selects three generic opaque variants through all ten vnum slots`, async () => {
     const shop = pack.terrainStyles.find(style => style.name === 'shop');
     const shopTerrain = registry.terrains.find(terrain => terrain.name === 'shop');
     assert.deepEqual(shopTerrain.variants, shopVariantNames);
@@ -143,6 +167,32 @@ for (const packName of mapPackNames) {
     assert.equal(selected.filter(image => image === third).length, 2);
   });
 
+  if (!themed) test(`${packName}: vendor artwork is selectable by terrain name and excluded from automatic variants`, async () => {
+    assert.deepEqual(registry.manualImages, manualShopNames);
+    const automaticVariants = new Set(pack.terrainStyles.flatMap(style => style.variants || []).filter(Boolean));
+    const variantHashes = new Set([...automaticVariants].map(image => digest(decodePng(Buffer.from(image.split(',')[1], 'base64')).pixels)));
+    const shop = pack.terrainStyles.find(style => style.name === 'shop');
+    for (const name of manualShopNames) {
+      const style = pack.terrainStyles.find(style => style.name === name);
+      assert(style, `${name}: missing selectable terrain style`);
+      assert(!Object.hasOwn(style, 'variants'), `${name}: manually selected vendors must not have automatic variants`);
+      const source = await readFile(resolve(root, packDirectory, 'variants', `${name}.png`));
+      const emitted = outputs.get(`dist/map-packs/${packName}/${name}.png`);
+      assert(emitted, `${name}: missing manual PNG`);
+      assert.equal(emitted.readUInt32BE(16), 128);
+      assert.equal(emitted.readUInt32BE(20), 128);
+      const { pixels } = decodePng(emitted);
+      const sourceAtRoomSize = new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><image href="data:image/png;base64,${source.toString('base64')}" width="128" height="128"/></svg>`, { font: { loadSystemFonts: false } }).render();
+      assert.deepEqual(pixels, sourceAtRoomSize.pixels, `${name}: preserved manual artwork differs from source`);
+      const image = `data:image/png;base64,${emitted.toString('base64')}`;
+      assert.deepEqual(style, { name, color: shop.color, image });
+      assert(!automaticVariants.has(image), `${name}: manual artwork appears in an automatic variant slot`);
+      assert(!variantHashes.has(digest(pixels)), `${name}: manual artwork duplicates an automatic variant`);
+      assert(!shop.variants.includes(style.image), `${name}: manual terrain image must never be selected by shop vnum`);
+      for (let offset = 3; offset < pixels.length; offset += 4) assert.equal(pixels[offset], 255, `${name}: transparent pixel`);
+    }
+  });
+
   if (!themed) test(`${packName}: every tile exactly matches its named Atlas room rectangle`, () => {
     assert.equal(atlasManifest.terrains.length, registry.terrains.length);
     for (const terrain of registry.terrains) {
@@ -162,7 +212,7 @@ for (const packName of mapPackNames) {
 
   test(`${packName}: contact sheet includes all terrains at three sizes on both backgrounds`, () => {
     const html = outputs.get(previewOutput).toString();
-    const cardCount = themed ? 114 : 117;
+    const cardCount = themed ? 114 : 120;
     assert.equal((html.match(/<article>/g) || []).length, cardCount);
     assert.equal((html.match(/class="samples dark"/g) || []).length, cardCount);
     assert.equal((html.match(/class="samples light"/g) || []).length, cardCount);
@@ -182,6 +232,9 @@ for (const packName of mapPackNames) {
       const headings = [...html.matchAll(/<h2>([^<]+)<\/h2>/g)].map(match => match[1]);
       const shopIndex = headings.indexOf('shop');
       assert.deepEqual(headings.slice(shopIndex, shopIndex + 4), ['shop', ...shopVariantNames]);
+      assert.deepEqual(headings.slice(-3), manualShopNames);
+      assert.equal((html.match(/Manual assignment only/g) || []).length, 3);
+      assert.match(html, /generic/i);
     }
   });
 
@@ -237,7 +290,7 @@ test('Atlas map pack validates its manifest and lossless sheets before exporting
   await mkdir(registryDirectory, { recursive: true });
   await copyFile(resolve(root, 'src/map-packs/aardwolf-terrain-icons/terrains.json'), resolve(registryDirectory, 'terrains.json'));
   await mkdir(resolve(registryDirectory, 'variants'));
-  for (const name of ['shop-merchant', 'shop-apothecary', 'shop-smith']) {
+  for (const name of [...shopVariantNames, ...manualShopNames]) {
     await copyFile(resolve(root, 'src/map-packs/aardwolf-terrain-icons/variants', `${name}.png`), resolve(registryDirectory, 'variants', `${name}.png`));
   }
   for (const sheet of atlasManifest.sheets) {
@@ -267,7 +320,7 @@ test('Atlas map pack validates its manifest and lossless sheets before exporting
     assert.deepEqual(actual, expected);
   });
   await t.test('variant artwork must exist and be a square opaque PNG', async t => {
-    const variantPath = resolve(registryDirectory, 'variants/shop-merchant.png');
+    const variantPath = resolve(registryDirectory, 'variants/shop-counter.png');
     const original = await readFile(variantPath);
     const image = (width, height, opaque) => Buffer.from(new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${opaque ? `<rect width="${width}" height="${height}" fill="#85603b"/>` : ''}</svg>`, { font: { loadSystemFonts: false } }).render().asPng());
     const oversized = Buffer.from(original);
@@ -292,6 +345,19 @@ test('Atlas map pack validates its manifest and lossless sheets before exporting
       });
     }
   });
+  await t.test('manual artwork is required and rejects transparent images', async () => {
+    const manualPath = resolve(registryDirectory, 'variants/shop-merchant.png');
+    const original = await readFile(manualPath);
+    try {
+      await rm(manualPath);
+      await assert.rejects(buildMapPackOutputs(fixtureRoot), /ENOENT/);
+      const transparent = new Resvg('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"/>', { font: { loadSystemFonts: false } }).render().asPng();
+      await writeFile(manualPath, transparent);
+      await assert.rejects(buildMapPackOutputs(fixtureRoot), /opaque/i);
+    } finally {
+      await writeFile(manualPath, original);
+    }
+  });
   await t.test('PNG dimensions must match declared sheet dimensions', async () => {
     await writeFile(manifestPath, JSON.stringify(atlasManifest));
     const png = new Resvg('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1"/></svg>').render().asPng();
@@ -306,9 +372,11 @@ test('Three Moons is a separate complete design rather than an alias of the orig
   const originalPack = JSON.parse(original.get(`dist/map-packs/${mapPackNames[0]}.json`));
   const themedPack = JSON.parse(themed.get(`dist/map-packs/${mapPackNames[1]}.json`));
   assert.equal(themedPack.name, 'Andolor: Three Moons');
-  assert.deepEqual(themedPack.terrainStyles.map(style => style.name), originalPack.terrainStyles.map(style => style.name));
+  const originalCanonicalStyles = originalPack.terrainStyles.filter(style => !manualShopNames.includes(style.name));
+  assert.equal(originalCanonicalStyles.length, 114);
+  assert.deepEqual(themedPack.terrainStyles.map(style => style.name), originalCanonicalStyles.map(style => style.name));
   for (let index = 0; index < themedPack.terrainStyles.length; index++) {
-    assert.notEqual(themedPack.terrainStyles[index].image, originalPack.terrainStyles[index].image);
+    assert.notEqual(themedPack.terrainStyles[index].image, originalCanonicalStyles[index].image);
   }
   await assert.rejects(buildMapPackOutputs(root, '../unknown'), /Unknown map pack/);
 });
