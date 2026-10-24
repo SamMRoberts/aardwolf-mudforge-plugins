@@ -67,7 +67,6 @@ export function runLua(source, globals = {}) {
       core: 'src/plugins/aardwolf-api-core.lua',
       example: 'src/plugins/aardwolf-api-vitals-example.lua',
       vitals: 'src/plugins/aardwolf-vitals.lua',
-      'sqlite-example': 'examples/sqlite-consumer.lua',
       spells: 'src/plugins/aardwolf-spells.lua',
       'room-details': 'src/plugins/aardwolf-room-details.lua',
     };

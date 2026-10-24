@@ -1,4 +1,4 @@
-# Aardwolf API 0.3.0
+# Aardwolf API 0.4.0
 
 ## Lifecycle and host adapters
 
@@ -12,7 +12,6 @@ construction. Supply only the functions the consumer uses.
 | Required lifecycle/messaging | `findPluginByName`, `onPluginBroadcast`, `broadcastToPlugin`, `on`, `off` |
 | Explicit refresh requests | `sendGMCP` |
 | Storage | `loadTable`, `saveTable`, `storageStatus` |
-| Optional SQLite | `sqliteReadFile`, `sqliteWriteFile`, `sqliteRenameFile`, `sqliteRemoveFile`, `getPluginId`, `getSession`, `getCurrentTime`, `addTimer`, `removeTimer` |
 | Widget creation/cleanup | `createWidget`, `destroyWidget` |
 | Static HTML and reactive bindings | `setWidgetProperty`, `setBoundValue` |
 | Widget events | `registerWidgetEvent` |
@@ -116,31 +115,24 @@ strings and tables preserve their types. Save preferences when they change;
 do not rely on cleanup as the sole save point. Live protocol caches are never
 persisted by Core.
 
-## SQLite
+## Upgrading from SQLite support
 
-Optional `options.sqlite` adds callback-based local SQL operations through a
-separately launched Python helper. Supply a stable `characterKey`, optional
-`bridgeDirectory` and `timeoutMs`, plus the SQLite adapters listed above.
-Operations require File System Access, `client.start()` and a connected session;
-GMCP Core availability is independent. No adapters are called during construction.
-
-`client.sqlite.status()`, `open(name, callback)` and `openAlias(alias, callback)`
-provide availability and handles. Handles expose dot-call `query(sql, params,
-callback)`, `execute(sql, params, callback)`, `transaction(statements, callback)`
-and `close()`. Callbacks receive `(result, error)` exactly once. Stop closes
-handles and cancels pending delivery; submitted work may have an unknown outcome.
-
-See [SQLite setup, values and complete contracts](SQLITE.md), including NULL,
-BLOB/int64 wrappers, registered aliases, limits and retry semantics. Existing
-`client.storage` behavior and stored records are unchanged.
+Version 0.4.0 removes `client.sqlite` and the Python file bridge. Passing
+`options.sqlite` now raises `SQLite support was removed; use native storage`.
+Use `client.storage` for bounded preferences and structured data, or native
+`loadTable`/`saveTable` with a feature-specific schema for larger datasets.
+The existing storage envelope, keys and plugin/world scope are unchanged.
+Arbitrary SQL, aliases and database transactions have no native-storage API
+replacement. Spells 0.3.0 stores its character records in native storage; use
+the [one-time migration guide](SQLITE.md) to preserve legacy data.
 
 ## Spells
 
 Pass `spells = true` when constructing a consumer to subscribe to the optional
 **Aardwolf Spells** provider. Existing consumers are opted out by default.
-This uses only the required lifecycle/messaging adapters; SQLite adapters and
-file permission belong to the provider alone. Start/stop the consumer as usual.
-The provider owns collection and sends only committed SQLite snapshots.
+This uses only the required lifecycle/messaging adapters. Start/stop the
+consumer as usual. The provider owns collection and native persistence and
+sends only successfully saved snapshots.
 
 | Method | Behavior |
 | --- | --- |
@@ -153,7 +145,7 @@ immediately invoke the callback; use `get()` and `status()` for an already
 started instance. Callback errors are contained and do not block other readers.
 `available` means the provider responded, independently of GMCP Core status.
 During refresh or a failed replacement, `get()` retains the prior committed
-snapshot. Consumers do not trigger automatic queries or SQL work by reading.
+snapshot. Consumers do not trigger collection or persistence work by reading.
 
 ```lua
 local client = aardwolf.new(host, { spells = true })

@@ -1,12 +1,12 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.3.0** library provides a session Core, an injected library facade, storage
-and widget helpers, a small reactive vitals example, and a configurable vitals HUD.
-It also supports writable local SQLite through an optional Python helper and
-file bridge. See [SQLite setup and API](docs/SQLITE.md). Existing plugins retain
-their versions; the SQLite helper requires Python 3.11+, File System Access and
-a connected session.
+The **0.4.0** library provides a session Core, an injected library facade, native
+storage and widget helpers, a reactive vitals example, and a configurable vitals HUD.
+All plugin persistence uses MudForge's native plugin/world storage. Spells **0.3.0**
+replaces its former SQLite bridge; preserve existing data with the
+[one-time migration guide](docs/SQLITE.md). Normal use needs no Python process or
+File System Access.
 
 | Component | Purpose |
 | --- | --- |
@@ -14,7 +14,7 @@ a connected session.
 | Aardwolf API Core | One GMCP negotiation owner and one authoritative state cache per session |
 | Aardwolf API Vitals Example | HP/mana/moves bindings, an explicit refresh button and saved font-size preferences |
 | Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
-| Aardwolf Spells | SQLite skill/spell snapshots and a dockable panel of learned damage abilities |
+| Aardwolf Spells | Native skill/spell snapshots and a dockable panel of learned damage abilities |
 | Aardwolf Room Details | Formatted tagged room characters/objects, selection, and automatic room refreshes |
 | [Aardwolf Atlas](docs/ATLAS.md) | Standalone native-map explorer with overhead/3D terrain views, room inspection and read-only routes |
 | Aardwolf Terrain Icons | Importable pack of 114 fantasy terrain tiles with matching material edges |
@@ -27,7 +27,7 @@ and lock-aware route previews. Settings includes independent visibility and colo
 controls for doors, locked doors, up/down exits, and area exits, saved per world.
 Source indicators remain visible for exits to other floors and areas; routing
 locks keep their independent red markers. Install `dist/plugins/aardwolf-atlas.lua`
-by itself; it needs no API Core, SQLite helper, connection, or runtime downloads. Type
+by itself; it needs no API Core, connection, or runtime downloads. Type
 `awatlas` to reopen its dockable panel. Atlas never walks or edits native map data.
 See the guide for controls, build details, and disposable acceptance checks.
 Native checks on MudForge 2.0.3701, map-preservation comparisons, and remaining
@@ -78,7 +78,7 @@ have **not been published or installed** by this scaffold.
    [Spells setup](#aardwolf-spells) below before enabling automatic collection.
 6. Optionally install `dist/plugins/aardwolf-room-details.lua` for
    [Room Details](#aardwolf-room-details). It enables room tags and requests a look
-   after login; it needs no SQLite helper or file permission.
+   after login; it needs no file permission.
 
 With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
@@ -286,20 +286,29 @@ or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.2.6** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.3.0** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
 reloads. The original command output, pager controls and prompt remain visible.
 
-Install the **0.3.0** `aardwolf-api` library and API Core. Start
-`python3 tools/sqlite_helper.py` and enable **File System Access** for Spells;
-see [SQLite setup](docs/SQLITE.md). The plugin does not start the helper.
-Collection waits for a verified `char.base.name`, connected/negotiated Core state
-and `char.status.state == 3`. The lowercase character name selects its managed
-`spells` database; installed plugin IDs and character names isolate databases.
-Renaming a character or changing the installed plugin ID selects a new database.
-These SQLite files live outside the portable world file.
+Install the **0.4.0** `aardwolf-api` library and API Core. Collection waits for a
+verified `char.base.name`, connected/negotiated Core state and
+`char.status.state == 3`. Each lowercase character name selects one validated
+record in native storage owned by this installed plugin and world. Different
+worlds and installed plugin IDs remain isolated; character renames select a new
+record. Data follows MudForge's world persistence and backup mechanisms.
+
+For an upgrade, convert each old Spells database to private JSON with
+`tools/migrate-spells-storage.py`, then run **`awspells import`** and choose the
+file while disconnected. For an optional paste workflow, use
+**`awspells import-paste`**, paste the complete converted JSON into the
+**Import saved abilities** panel and press **Import saved data**. Check
+**`awspells status`** for the last import result if asynchronous terminal output
+is not visible; the paste panel also displays feedback. Both paths validate,
+save and read back all ability, damage and command data. Identical data is a no-op; a different existing native
+record is preserved and the import is refused. Keep the old database and backups.
+See [migration instructions](docs/SQLITE.md) before reconnecting and collecting.
 
 ### Damage ability panel
 
@@ -323,7 +332,7 @@ the entire row. Toggle Edit off to return to the ability buttons; using abilitie
 is disabled during editing, while Refresh and Cancel remain available.
 
 Each change saves immediately for the verified character in native plugin table
-storage, independently of the SQLite helper. Hiding a type preserves its skill
+storage, separately from the saved ability record. Hiding a type preserves its skill
 and spell settings; hiding both slots hides that row. Slot visibility applies
 regardless of which best ability occupies it. The Edit button remains available
 when all rows are hidden. Reloading or changing character exits Edit and restores
@@ -342,7 +351,7 @@ Damage types absent from a completed bulk list are also marked empty. Refreshing
 error retains the prior committed result. **Cancel** stops capture and remaining
 requests. A sent query's remaining output is discarded until its footer, empty
 result, prompt or original timeout; new refreshes wait for that boundary. An
-already submitted SQLite transaction finishes and reconciles first.
+native save already in progress completes before another collection begins.
 Errors stop Refresh all; recover and explicitly run it again. No automatic damage
 queries, pager changes, pager-control commands or background retries are sent.
 
@@ -358,7 +367,13 @@ when necessary. Unsafe fallback commands are disabled.
   dependency errors. Overlapping collections/saves are refused.
 - `awspells refresh-all` collects both bulk damage lists; `awspells cancel` stops it.
 - `awspells show` explicitly reopens a closed panel.
-- `awspells status` (or `awspells`) reports character, saved count/time and errors.
+- `awspells import` chooses a converted migration JSON file; it works disconnected
+  and preserves different existing native data.
+- `awspells import-paste` offers a labeled text box for the complete converter JSON,
+  including on builds without a file picker. **Import saved data** uses the same
+  validation and preservation rules; feedback appears in the panel and terminal.
+- `awspells status` (or `awspells`) reports character, saved count/time, errors and
+  the last import result.
 - `awspells command "Dirt kicking"` inspects the effective command.
 - `awspells command "Dirt kicking" dirt` saves a per-character override for a skill
   discovered in a damage list. Overrides are single commands, 1–128 characters,
@@ -393,29 +408,37 @@ multiple damage types. A blank Damage column is accepted: the ability remains
 in the catalog without a damage-group membership. Unknown nonempty damage types
 still reject the collection. Full-list replacement preserves damage enrichment for
 retained names and prunes removed associations. Kind, mana, memberships, filter
-timestamps and command overrides use additive tables in the existing database;
-0.1.0 databases upgrade without deleting their saved abilities. Overrides remain
-saved if an ability temporarily disappears.
+timestamps and command overrides are saved together with the canonical snapshot
+in one native character record. An accepted `saveTable` write precedes publication
+of the new data; a refused write retains the prior snapshot. Overrides remain
+saved if an ability temporarily disappears. Layout preferences retain their
+existing native key and are preserved during migration.
 
 Partial, malformed, duplicate memberships, conflicting or interrupted output retains the
-previous committed data. An unknown write outcome is read back before another
-refresh, without replaying the write. Disconnect, lost Core and character changes
-clear exposed data and cancel pending work. SQLite collection timestamps reflect
+previous committed data. Unavailable storage or a refused save reports the reason
+and retains prior data without automatic retries. Disconnect, lost Core and
+character changes clear exposed data and cancel pending work. Collection timestamps reflect
 the latest committed full or bulk collection; changing a command override
 does not change collection time.
 
 Other plugins opt into `{ spells = true }` and use
 `client.spells.get()`, `client.spells.status()` or `client.spells.on(callback)`.
 The public snapshot remains schema version 1, with updated canonical fields;
-damage enrichment is private to the provider. Readers need no SQLite adapters or
+damage enrichment is private to the provider. Readers need no storage adapters or
 file permission. See [the spells API](docs/API.md#spells).
 
-Offline fixtures and real SQLite bridge tests cover parsing, selection, command
-dispatch, upgrade, rollback, reconciliation, persistence and isolation. Chromium
-checks use generated widget HTML with synthetic bindings; they do not establish
-native docking or event delivery. Native transpilation, file permission/I/O,
-widget hooks, pager behavior and live Aardwolf capture remain pending; see
-[native acceptance](docs/NATIVE-ACCEPTANCE.md).
+Offline fixtures cover parsing, selection, command dispatch, native save refusal,
+reload, isolation and import validation. Converter tests read temporary legacy
+SQLite files and check field preservation, unsupported data refusal and source
+preservation. On **2026-10-24**, MudForge **2.0.3915** loaded API 0.4.0 and
+Spells 0.3.0 under the existing installed plugin ID. Native picker import, fresh
+and repeated paste import, exact exported-record comparison and persistence after
+world close/reopen were verified. Existing map data, terrain styles, unrelated
+plugin state and widget positions were preserved; temporary fixtures were removed.
+Chromium checks use synthetic bindings and do not establish native docking or all
+widget interactions. Connected collection, pager behavior, broader damage-panel
+acceptance and live Aardwolf transport remain pending; see the separate
+[native acceptance checks](docs/NATIVE-ACCEPTANCE.md).
 
 ## Writing a consumer
 
@@ -484,20 +507,17 @@ Tests check Lua 5.1 syntax and execute behavior in **Fengari's Lua 5.3 VM**
 with injected host fixtures. This verifies library logic, simulated lifecycle,
 and deterministic distribution; it does not execute MudForge's JavaScript
 transpiler, native widgets, persistence engine or GMCP transport.
-`npm test` also runs Python helper tests against temporary SQLite databases and
-a Lua-to-helper integration test through real files; Python 3.11+ is required.
+`npm test` also runs Python converter tests against temporary legacy SQLite
+databases and other artifact acceptance tests; Python 3 is required for those
+tests and the one-time converter. The installed plugins have no Python dependency.
 
-The initial native target is MudForge **2.0.3701**. Native and live-MUD
-acceptance remain pending; follow [the separate checklist](docs/NATIVE-ACCEPTANCE.md).
-No existing worlds, maps or installed plugins were changed. Aardwolf Vitals
+The initial native target was MudForge **2.0.3701**; Spells storage migration
+was verified on **2.0.3915** on **2026-10-24**, separately from fixture coverage.
+Remaining native and live-MUD checks are tracked in
+[the acceptance checklist](docs/NATIVE-ACCEPTANCE.md). Aardwolf Vitals
 has repository fixture coverage and standalone Chromium layout checks; native
 rendering, pulse behavior, keyboard interaction, disk persistence and live GMCP
 acceptance remain pending.
-
-`npm audit` currently reports the unpatched moderate `sprintf-js` precision
-specifier advisory through Fengari. These are development-only dependencies;
-the distributed Lua files contain no Node dependencies. Fixture format strings
-are fixed locally. See [GHSA-hp3w-g68c-fv3c](https://github.com/advisories/GHSA-hp3w-g68c-fv3c).
 
 ## References
 

@@ -22,8 +22,8 @@ test('Refresh all accepts the supplied blank damage skill and continues to spell
     local names = {}; for _, item in ipairs(reader.client.spells.get().entries) do names[item.name] = item end
     assert(names.Hammerswing.level == 51 and names.Hammerswing.percent == 85)
     assert(names.Sap.percent == 86 and panel.bindings.skill_bash_name == "Sap")
-    assert(world.databases.fixture.details.hammerswing.kind == "skill")
-    for _, members in pairs(world.databases.fixture.members) do assert(not members.hammerswing) end
+    assert(world.record("fixture").damage.details.hammerswing.kind == "skill")
+    for _, members in pairs(world.record("fixture").damage.members) do assert(not members.hammerswing) end
   `, { example_lines: () => lines });
 });
 
@@ -40,9 +40,9 @@ test('blank damage skill and spell continuation rows retain their fields without
   local names = {}; for _, item in ipairs(reader.client.spells.get().entries) do names[item.name] = item end
   assert(names.Hammerswing.level == 50 and names.Hammerswing.percent == 85)
   assert(names["Untyped spell"].level == 38 and names["Untyped spell"].sn == 46)
-  assert(names["Untyped spell"].percent == 90 and world.databases.fixture.details["untyped spell"].mana == 25)
+  assert(names["Untyped spell"].percent == 90 and world.record("fixture").damage.details["untyped spell"].mana == 25)
   assert(panel.bindings.skill_bash_name == "Sap" and panel.bindings.spell_fire_name == "Fireball")
-  for _, members in pairs(world.databases.fixture.members) do
+  for _, members in pairs(world.record("fixture").damage.members) do
     assert(not members.hammerswing and not members["untyped spell"])
   end
 `));
@@ -56,7 +56,7 @@ test('blank damage rows preserve duplicate and conflicting row rejection', () =>
     for _, row in ipairs(rows) do world.line(row) end
     world.damageFooter()
     assert(reader.client.spells.status().error and panel.bindings.skill_bash_name == "Sap")
-    assert(not world.databases.fixture.details.hammerswing)
+    assert(not world.record("fixture").damage.details.hammerswing)
   end
 `));
 
@@ -68,13 +68,13 @@ test('the supplied combat-format output parses every continuation row and damage
     assert(not reader.client.spells.status().refreshing and not reader.client.spells.status().error)
     local names = {}; for _, item in ipairs(reader.client.spells.get().entries) do names[item.name] = item end
     assert(names["Cause light"].level == 1 and names["Cause light"].percent == 85 and names["Cause light"].sn == 12)
-    assert(names["Earthquake"].level == 29 and world.databases.fixture.details.earthquake.mana == 40)
+    assert(names["Earthquake"].level == 29 and world.record("fixture").damage.details.earthquake.mana == 40)
     assert(names["Fire storm"].level == 44 and names["Lightning bolt"].level == 52)
-    assert(world.databases.fixture.members["spell:disease"]["minor swarm"])
-    assert(world.databases.fixture.members["spell:special"]["spirit bolt"])
+    assert(world.record("fixture").damage.members["spell:disease"]["minor swarm"])
+    assert(world.record("fixture").damage.members["spell:special"]["spirit bolt"])
     assert(panel.bindings.spell_magic_name == "Cause light" and panel.bindings.spell_negative_name == "Soften")
     assert(panel.bindings.spell_fire_name == "None learned" and panel.bindings.spell_disease_name == "None learned")
-    local count = 0; for _, info in pairs(world.databases.fixture.details) do if info.kind == "spell" then count = count + 1 end end
+    local count = 0; for _, info in pairs(world.record("fixture").damage.details) do if info.kind == "spell" then count = count + 1 end end
     assert(count == expected_count(), tostring(count))
   `, { example_lines: () => lines, expected_count: () => lines.filter(line => /\d+%\s+\d+\s+[A-Za-z]+\s*$/.test(line)).length });
 });
@@ -89,7 +89,7 @@ test('continuation rows without levels, malformed rows and conflicting duplicate
     for _, row in ipairs(rows) do world.line(row) end
     world.damageFooter()
     assert(panel.bindings.skill_bash_name == "Sap" and reader.client.spells.status().error)
-    assert(world.databases.fixture.members["skill:bash"].sap and not world.databases.fixture.members["skill:fire"])
+    assert(world.record("fixture").damage.members["skill:bash"].sap and not next(world.record("fixture").damage.members["skill:fire"] or {}))
   end
 `));
 

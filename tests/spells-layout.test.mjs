@@ -36,13 +36,11 @@ const cases = {
     end
     world.action("refresh-all")
     change({ operation = "edit" })
-    world.helperReady = false
     change({ operation = "slot", damageType = "fire", kind = "spell", visible = false })
     assert(state().editing and not state().layout.slots.spell.fire and provider.writes == 1)
     assert(#world.sends == before + 1 and reader.client.spells.status().refreshing)
     world.action("cancel"); assert(state().editing)
     world.line("No skills found."); assert(not reader.client.spells.status().refreshing)
-    world.helperReady = true
     provider.env.cleanup(); provider.env.init()
     panel = world.panel(); assert(panel.panelLayout == nil)
     ready(); assert(not state().editing and not state().layout.slots.spell.fire)
