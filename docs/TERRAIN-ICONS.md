@@ -1,8 +1,9 @@
 # Aardwolf Terrain Icons
 
-Version **4.0.0** contains **114 room terrain images from Aardwolf Atlas**:
-all 112 environments in the published Aardwolf client database, plus MudForge's
-`default` and `water`. The pack uses Atlas's enhanced, hand-painted terrain
+Version **4.2.1** contains **117 terrain styles**: all 112 environments in the
+published Aardwolf client database, MudForge's `default` and `water`, and three
+named shop styles for manual assignment. The standard `shop` style also has
+**three generic furniture variants**. The 114 base styles use Atlas's hand-painted terrain
 artwork, exported from its normalized lossless sheets as individual 128 × 128
 PNGs. These depict terrain types rather than specific rooms. Each PNG is embedded
 directly in the JSON; no image hosting, Atlas plugin, API Core, SQLite helper,
@@ -10,12 +11,33 @@ or live connection is needed. The existing pack name, filename, terrain keys,
 fallback colors and import structure are preserved. The separate Three Moons
 pack keeps its SVG artwork.
 
+The original shop alternates with three **generic shop layouts**. They share
+warm horizontal timber flooring and differ in furniture appearance, placement,
+size and shape: angular counters (`shop-counter`), rounded displays
+(`shop-display`) and narrow shelves (`shop-shelves`). All three retain clear
+floor aisles to the north, east, south and west edge midpoints.
+
+The preserved vendor artwork is included in the JSON as three **named terrain
+styles for manual assignment**: `shop-merchant`, `shop-apothecary` and
+`shop-smith`. Each has its own embedded PNG and the base shop fallback color.
+None has a `variants` array or appears in another terrain's automatic slots.
+The standalone PNGs are also retained. This update does not assign any rooms.
+
+The client's `variants` array selects by the last decimal digit of the room
+number: 0, 4 and 8 use the original; 1, 5 and 9 use angular counters; 2 and 6 use
+rounded displays; 3 and 7 use narrow shelves. The same room keeps the same image
+across reloads. Empty slots fall back to the original image, which also remains
+available to clients without variant support. Other terrain images, keys and
+fallback colors are preserved; no room data needs editing.
+
 - [Importable JSON pack](../dist/map-packs/aardwolf-terrain-icons.json)
-- [Contact sheet](../dist/map-packs/aardwolf-terrain-icons.html): open the downloaded HTML in a browser for labeled 16, 24 and 32 px samples on dark and light backgrounds
+- [Contact sheet](../dist/map-packs/aardwolf-terrain-icons.html): open the downloaded HTML in a browser for labeled 16, 24 and 32 px samples on dark and light backgrounds, including the generic shop variants, an original/varied comparison and the three manual images
 - [Connected map preview](../dist/map-packs/aardwolf-terrain-icons-map-preview.png): town, woodland/river and dungeon studies, plus six biome swatches, with simulated client walls
 - [Individual PNGs](../dist/map-packs/aardwolf-terrain-icons/)
+- Manual artwork: [merchant](../dist/map-packs/aardwolf-terrain-icons/shop-merchant.png), [apothecary](../dist/map-packs/aardwolf-terrain-icons/shop-apothecary.png), [smith](../dist/map-packs/aardwolf-terrain-icons/shop-smith.png)
 - [Atlas artwork and provenance](../src/atlas/assets/README.md)
 - [Atlas terrain rectangles](../src/atlas/assets/manifest.json)
+- [Shop variant sources and prompts](../src/map-packs/aardwolf-terrain-icons/variants/README.md)
 - [Registry, palette and provenance](../src/map-packs/aardwolf-terrain-icons/terrains.json)
 
 ## Import and restore
@@ -35,9 +57,9 @@ pack keeps its SVG artwork.
 terrain name. Custom styles absent from this pack are removed. Matching terrain
 colors and images are replaced by this pack's palette and icons. Keep your export
 if you want to restore those customizations. This replacement behavior was
-verified with the 1.0.0 pack in the browser client v2.0.3702. The 4.0.0 pack keeps
-the same terrain keys and import format. Native acceptance of the new artwork
-is pending; this task does not install it into the active map.
+verified with the 1.0.0 pack in the browser client v2.0.3702. The 4.2.1 pack keeps
+the same terrain keys and adds the optional `variants` field on `shop`. Native
+acceptance of the new artwork is pending; this task does not install it into the active map.
 
 Terrain keys are lowercase, matching MudForge's protocol terrain normalization;
 the registry's `Mudschool` entry is emitted as `mudschool`. Unknown future terrain
@@ -56,7 +78,9 @@ The registry is pinned to the `environments` table in the [official Aardwolf
 client database at revision ac6e40ff](https://github.com/fiendish/aardwolfclientpackage/blob/ac6e40ff5596e285cfcef6739d1dfdc257cfa162/MUSHclient/Aardwolf.db).
 Its complete revision, original database SHA-256 and count are recorded in
 `terrains.json`. Builds read this checked-in registry, Atlas's manifest and its
-six normalized lossless PNG sheets without network access or personal maps.
+six normalized lossless PNG sheets and six checked-in shop masters (three
+generic automatic variants and three vendor-specific manual images),
+without network access or personal maps.
 This covers the published registry, not an independently verified current
 live-server sector list. The artwork was generated and reviewed for Atlas;
 [its README](../src/atlas/assets/README.md) records the prompts and enhancement
@@ -72,6 +96,16 @@ they no longer supply its exported images. The registry colors still provide
 the existing fallbacks. `@resvg/resvg-js` is pinned to **2.6.2** as a
 development-only renderer; system fonts are disabled. Consumers need only the
 generated JSON file.
+
+Generic and manual masters live in this pack's `variants/` directory and are resampled to
+128 × 128 by the same renderer. The builder rejects unsafe or duplicate variant
+names, nonsquare or oversized PNGs, and transparent pixels. It embeds the three
+generic images in ten selection slots, retaining empty slots for the base image.
+The registry's `manualImages` list exports the preserved vendor PNGs and adds
+each as a named entry in `terrainStyles`, with no automatic variants. Those PNGs are also shown in the contact sheet
+with a manual-assignment label. The ten-slot automatic selection follows the
+public client's [room-number selection and import/export source](https://play.mudvault.org/_next/static/chunks/273.7c82974a5122fd4c.js),
+inspected on 2026-10-23. Source inspection does not establish native acceptance.
 
 ```sh
 npm ci
@@ -93,6 +127,79 @@ Moons pack retains its SVG geometry and material-edge checks. These checks do
 not prove native import or persistence.
 
 ## Acceptance evidence
+
+### 4.2.1 named vendor terrain styles
+
+The JSON now includes `shop-smith`, `shop-apothecary` and `shop-merchant` as
+independent terrain styles, each with its own embedded image and base shop
+fallback color. They have no variants and remain excluded from all automatic
+variant slots. Their PNGs and the generic shop layouts are unchanged. The pack
+contains 117 terrain styles; the separate Three Moons pack retains 114.
+All **294 JavaScript tests and 27 Python tests**, the **251** generated-file
+checks, and diff whitespace checks passed. Vendor masters and exported PNGs
+were verified byte-identical to the preserved artwork.
+No room assignments or native import/persistence tests were performed.
+
+### 4.2.0 generic automatic variants and manual artwork
+
+Only the new generic furniture layouts populate the ten `shop.variants` slots.
+They share horizontal brown timber flooring with the original shop and keep
+the four edge-midpoint exit paths clear. The original merchant, apothecary and
+smith source masters and 128 px exports are byte-identical to their 4.1.2
+versions. They remain separate manual-use files and are excluded from all
+embedded terrain styles. No rooms were assigned or altered.
+
+The original shop and generic variants were visually reviewed side by side at
+128, 32, 24 and 16 px. Tests check complete pinned terrain coverage, generic
+selection, manual exclusion, preserved manual pixels, invalid metadata/assets,
+contact-sheet coverage and deterministic outputs. Native import, rendering and
+persistence remain untested; this update does not install the pack into a world.
+Verification passed: **294 JavaScript tests and 26 Python tests**, all **251**
+generated-file checks, and diff whitespace checks. The 41 focused map-pack and
+distribution tests passed before the full suite.
+
+### 4.1.2 distinct shop rooms
+
+The three variants now use different floor materials, palettes, furniture
+silhouettes and layouts: bright honey parquet and textiles for the merchant,
+jade/ivory ceramic and lavender cabinets for the apothecary, and charcoal
+flagstones with steel and orange fire for the smith. All retain open paths
+through the center to north, east, south and west edge midpoints.
+
+The edited masters and exported PNGs were visually reviewed at 128, 32, 24 and
+16 px beside the original shop. The self-contained contact sheet was rebuilt;
+browser inspection of its local-file URL was blocked by the browser URL policy.
+All **291 JavaScript tests and 26 Python tests**, **248** generated-file checks,
+and diff whitespace checks passed. All 114 original base styles and images
+were compared with the previous pack and remain unchanged.
+Native import, rendering and persistence remain untested.
+
+### 4.1.1 shop exit clearance
+
+The merchant, apothecary and smith variants now leave open floor at the north,
+east, south and west edge midpoints, with continuous aisles through the center.
+Counters, shelves and stock have been split or moved to corner areas. The
+original shop, other terrain images, colors and variant selection are preserved.
+
+The three edited masters and their 128, 32, 24 and 16 px exports were visually
+inspected. All **291 JavaScript tests and 26 Python tests**, **248** generated-file
+checks, and diff whitespace checks passed. Native rendering, import and
+persistence were not run; this update does not install the pack into a world.
+
+### 4.1.0 shop variations
+
+Three additional shop images accompany the unchanged original. The contact
+sheet includes all four shop designs on light and dark backgrounds and an
+original/varied 20-room comparison at 32 px. The comparison uses the same ten
+slots as the pack. These are illustrative previews, not client captures.
+Tests cover variant names and files, dimensions, opacity, source/output pixels,
+unique artwork, selection slots, export comparison, and deterministic rebuilds.
+Verification passed: **291 JavaScript tests and 26 Python tests**, all **248**
+generated-file checks, and diff whitespace checks. The rebuilt PNGs were
+visually inspected at 128, 32, 24 and 16 px, and the contact sheet and shop
+comparison rendered in the in-app browser.
+Native import, rendering and persistence of these variants remain unverified;
+the pack has not been installed into an active world.
 
 ### 4.0.0 Atlas artwork
 

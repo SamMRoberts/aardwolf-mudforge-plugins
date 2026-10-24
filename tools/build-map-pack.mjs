@@ -13,6 +13,7 @@ const tilePixels = 128;
 export function validateTerrainRegistry(registry) {
   const names = new Set();
   const ids = new Set();
+  const variants = new Set();
   if (!registry.name || !registry.description || !Array.isArray(registry.terrains)) {
     throw new Error('Invalid terrain registry metadata');
   }
@@ -26,6 +27,31 @@ export function validateTerrainRegistry(registry) {
       ids.add(terrain.id);
     }
     names.add(name);
+    if (terrain.variants !== undefined) {
+      if (!Array.isArray(terrain.variants) || !terrain.variants.length || terrain.variants.length > 9) {
+        throw new Error(`Invalid terrain variants: ${name}`);
+      }
+      for (const variant of terrain.variants) {
+        if (typeof variant !== 'string' || !/^[a-z][a-z0-9_-]*$/.test(variant) || variants.has(variant)) {
+          throw new Error(`Invalid or duplicate terrain variant: ${name}`);
+        }
+        variants.add(variant);
+      }
+    }
+  }
+  if ([...variants].some(variant => names.has(variant))) throw new Error('Terrain variant collides with a terrain name');
+  if (registry.manualImages !== undefined) {
+    if (!Array.isArray(registry.manualImages) || !registry.manualImages.length) {
+      throw new Error('Invalid manual images');
+    }
+    const manualImages = new Set();
+    for (const name of registry.manualImages) {
+      if (typeof name !== 'string' || !/^[a-z][a-z0-9_-]*$/.test(name)
+          || names.has(name) || variants.has(name) || manualImages.has(name)) {
+        throw new Error(`Invalid or duplicate manual image: ${name}`);
+      }
+      manualImages.add(name);
+    }
   }
   if (ids.size !== registry.source?.count) throw new Error('Terrain count differs from pinned registry');
 }
@@ -82,15 +108,26 @@ function connectedMapPreview(styles, themed = false) {
   return Buffer.from(new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng());
 }
 
-function contactSheet(registry, styles, mapPreview, themed = false, atlas = false) {
-  const cards = styles.map((style, index) => {
-    const terrain = registry.terrains[index];
-    const motif = atlas ? `Atlas terrain surface: ${style.name}` : terrain.motif;
+function contactSheet(registry, styles, mapPreview, themed = false, atlas = false, manualStyles = []) {
+  const manualNames = new Set(manualStyles.map(style => style.name));
+  const samplesStyles = styles.flatMap((style, index) => [style,
+    ...(registry.terrains[index].variants || []).map((name, variantIndex) => ({ name, image: style.variants[variantIndex + 1] })),
+  ]).concat(manualStyles);
+  const variantCount = samplesStyles.length - styles.length - manualStyles.length;
+  const cards = samplesStyles.map(style => {
+    const terrain = registry.terrains.find(terrain => terrain.name.trim().toLowerCase() === style.name);
+    const motif = manualNames.has(style.name) ? 'Vendor-specific artwork for manual use'
+      : atlas ? `${terrain ? 'Atlas terrain' : 'Generic shop variant'} surface: ${style.name}` : terrain.motif;
     const samples = ['dark', 'light'].map(theme => `<div class="samples ${theme}" aria-label="${theme} background">${[16, 24, 32].map(size =>
       `<figure><img src="${style.image}" width="${size}" height="${size}" alt="${escapeHtml(motif)}"><figcaption>${size} px</figcaption></figure>`).join('')}</div>`).join('');
     const repeated = themed ? `<figure class="repeat-study"><div class="repeat-grid" role="img" aria-label="${escapeHtml(style.name)} repeated in a 3 by 3 map grid" style="background-image:url('${style.image}')"></div><figcaption>3 × 3 tiled · 32 px rooms</figcaption></figure>` : '';
-    return `<article><h2>${escapeHtml(style.name)}</h2><p>${escapeHtml(motif)}</p>${samples}${repeated}</article>`;
+    return `<article><h2>${escapeHtml(style.name)}</h2><p>${escapeHtml(motif)}</p>${manualNames.has(style.name) ? '<p>Manual assignment only</p>' : ''}${samples}${repeated}</article>`;
   }).join('\n');
+  const shop = styles.find(style => style.name === 'shop');
+  const shopStudy = shop?.variants ? `<section class="shop-study"><h2>Shop variations</h2><p>Original shop and three generic furniture layouts: angular counters, rounded displays and narrow shelves. All three use common timber flooring. Each square is a 32 px room; room numbers 10000–10019 select stable images by their last digit. Vendor-specific images shown below are named terrain styles for manual assignment and are excluded from shop's automatic selection.</p>${[false, true].map(varied => `<figure><div class="shop-grid" role="img" aria-label="${varied ? 'Varied' : 'Original'} shop terrain across 20 rooms">${Array.from({ length: 20 }, (_, index) => {
+    const image = varied ? shop.variants[(10000 + index) % 10] || shop.image : shop.image;
+    return `<span style="background-image:url('${image}')"></span>`;
+  }).join('')}</div><figcaption>${varied ? 'With three additional variants' : 'Original single image'}</figcaption></figure>`).join('')}</section>` : '';
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'">
@@ -104,13 +141,31 @@ article{padding:16px;border:1px solid #384a4e;border-radius:10px;min-width:0;bac
 h2{font:600 15px ui-monospace,monospace;overflow-wrap:anywhere;margin:0 0 6px}article p{font-size:12px;color:#baccc5;min-height:30px;margin:0 0 10px}
 .samples{display:flex;align-items:center;justify-content:space-around;gap:12px;padding:10px;border-radius:6px;margin-top:8px;min-height:80px}
 ${themed ? '.repeat-study{margin-top:12px}.repeat-grid{width:96px;height:96px;background-size:32px 32px;background-repeat:repeat}\n' : ''}.dark{background:#0b1117;color:#d0ded8}.light{background:#f3f5f0;color:#273749}figure{margin:0;display:grid;justify-items:center;align-content:end;gap:6px}
-img{display:block}figcaption{font-size:10px}@media(max-width:540px){body{padding:16px}}
+${shop?.variants ? '.shop-study{margin:0 0 32px;max-width:640px;display:flex;gap:24px;flex-wrap:wrap}.shop-study h2,.shop-study p{width:100%;margin:0}.shop-study p{line-height:1.6;color:#baccc5}.shop-grid{display:grid;grid-template-columns:repeat(5,32px)}.shop-grid span{width:32px;height:32px;background-size:32px 32px}\n' : ''}img{display:block}figcaption{font-size:10px}@media(max-width:540px){body{padding:16px}}
 </style></head><body><header><h1>${escapeHtml(registry.name)}</h1>
 <p>${escapeHtml(registry.description)} ${themed ? 'Surfaces repeat across room boundaries. Continuous runners and narrow shelf or counter runs replace full furnished-room scenes. Each terrain also appears below in a 3 × 3 repeat test.' : atlas ? 'Room tiles use the enhanced Aardwolf Atlas terrain artwork. These illustrative surfaces are not depictions of specific rooms and are not guaranteed to tile seamlessly.' : 'Related rooms share quiet material edges. Shaded scenery stays within the tile so streets, floors and ground can read continuously.'} MudForge draws walls, room borders, symbols and player markers above these tiles.</p>
-<p>${atlas ? 'Atlas artwork · lossless PNG crops' : 'Editable SVG sources'} · ${escapeHtml(registry.version)} · ${styles.length} terrain tiles</p></header>
+<p>${atlas ? 'Atlas artwork · lossless PNG crops' : 'Editable SVG sources'} · ${escapeHtml(registry.version)} · ${styles.length + manualStyles.length} terrain ${manualStyles.length ? 'styles' : 'tiles'}${variantCount ? ` + ${variantCount} generic shop variants` : ''}${manualStyles.length ? ` · ${manualStyles.length} for manual assignment` : ''}</p></header>
 <figure class="map-study"><img src="data:image/png;base64,${mapPreview.toString('base64')}" width="1024" height="608" alt="${themed ? 'Dense terrain tiling: shops, castle runners, ice chambers, wells and ruins in the supplied screenshot arrangement; woodland and river; dungeon slate' : 'Connected fantasy tile studies: limestone town and market at left, emerald woodland and turquoise river at upper right, slate dungeon at lower right; gold sand, timber, cyan ice, orange lava, violet magic and flowers along the bottom left'}"><figcaption>${themed ? 'Dense 5 × 5 tiling study based on the supplied screenshot (left): shop, castle, ice chamber, well and ruins. Woodland and river appear at upper right; dungeon slate appears below. ' : 'Connected layout study: town (left), woodland and river (upper right), dungeon (lower right). '}${themed ? 'Interior samples along the bottom left: castle, shop, palace, temple, cabin and archive.' : 'Biome palette along the bottom left: desert, timber, ice, lava, astral terrain and flowers.'} Walls and player outline are simulated to show how tiles sit beneath client overlays; this is an illustrative preview, not a native-client capture. Individual tiles appear below at 16, 24 and 32 pixels.</figcaption></figure>
-<main>${cards}</main></body></html>
+${shopStudy}<main>${cards}</main></body></html>
 `;
+}
+
+async function renderTerrainImage(directory, variant) {
+  const source = await readFile(resolve(directory, 'variants', `${variant}.png`));
+  if (source.length < 33 || source.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a'
+      || source.toString('ascii', 12, 16) !== 'IHDR'
+      || source.readUInt32BE(16) < tilePixels || source.readUInt32BE(16) > 4096
+      || source.readUInt32BE(16) !== source.readUInt32BE(20)) {
+    throw new Error(`Terrain variant must be a square PNG between 128 and 4096 pixels: ${variant}`);
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><image href="data:image/png;base64,${source.toString('base64')}" width="128" height="128"/></svg>`;
+  const rendered = new Resvg(svg, { font: { loadSystemFonts: false } }).render();
+  const pixels = rendered.pixels;
+  for (let offset = 3; offset < pixels.length; offset += 4) {
+    if (pixels[offset] !== 255) throw new Error(`Terrain variant must be opaque: ${variant}`);
+  }
+  const png = Buffer.from(rendered.asPng());
+  return png;
 }
 
 export async function buildMapPackOutputs(root, packName = mapPackNames[0]) {
@@ -158,12 +213,35 @@ export async function buildMapPackOutputs(root, packName = mapPackNames[0]) {
     if (rendered.width !== tilePixels || rendered.height !== tilePixels) throw new Error(`Terrain icon must be square: ${name}`);
     const png = Buffer.from(rendered.asPng());
     outputs.set(`${outputStem}/${name}.png`, png);
-    styles.push({ name, color: terrain.color, image: `data:image/png;base64,${png.toString('base64')}` });
+    const style = { name, color: terrain.color, image: `data:image/png;base64,${png.toString('base64')}` };
+    if (terrain.variants) {
+      const variantImages = [];
+      for (const variant of terrain.variants) {
+        const png = await renderTerrainImage(directory, variant);
+        outputs.set(`${outputStem}/${variant}.png`, png);
+        variantImages.push(`data:image/png;base64,${png.toString('base64')}`);
+      }
+      // MudForge selects by room.num % 10, not by the variant array length.
+      // Empty slots use the unchanged base image, including in older clients.
+      style.variants = Array.from({ length: 10 }, (_, index) => {
+        const choice = index % (variantImages.length + 1);
+        return choice ? variantImages[choice - 1] : '';
+      });
+    }
+    styles.push(style);
   }
-  outputs.set(`${outputStem}.json`, Buffer.from(`${JSON.stringify({ name: registry.name, description: registry.description, terrainStyles: styles }, null, 2)}\n`));
+  // Named vendor terrains are selectable explicitly; they never enter shop variants.
+  const manualStyles = [];
+  for (const name of registry.manualImages || []) {
+    const png = await renderTerrainImage(directory, name);
+    outputs.set(`${outputStem}/${name}.png`, png);
+    manualStyles.push({ name, color: styles.find(style => style.name === 'shop').color,
+      image: `data:image/png;base64,${png.toString('base64')}` });
+  }
+  outputs.set(`${outputStem}.json`, Buffer.from(`${JSON.stringify({ name: registry.name, description: registry.description, terrainStyles: [...styles, ...manualStyles] }, null, 2)}\n`));
   const themed = packName === 'aardwolf-three-moons';
   const mapPreview = connectedMapPreview(styles, themed);
   outputs.set(`${outputStem}-map-preview.png`, mapPreview);
-  outputs.set(`${outputStem}.html`, Buffer.from(contactSheet(registry, styles, mapPreview, themed, atlas)));
+  outputs.set(`${outputStem}.html`, Buffer.from(contactSheet(registry, styles, mapPreview, themed, atlas, manualStyles)));
   return outputs;
 }

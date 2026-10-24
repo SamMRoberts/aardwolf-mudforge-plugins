@@ -86,7 +86,7 @@ def compare(before_path, after_path):
     styles = after["settings"]["terrainStyles"]
     if styles != pack["terrainStyles"]:
         raise ValueError("Exported terrain styles differ from the pack")
-    print("PASS: all 115 room records and exits preserved; labels/extras preserved; all 114 styles match")
+    print(f"PASS: all {len(rooms(before))} room records and exits preserved; labels/extras preserved; all {len(styles)} styles match")
     if not any(style["name"] == "acceptance-only" for style in styles):
         print("Importer replaces the terrain-style list: the unmatched sentinel style was removed")
 

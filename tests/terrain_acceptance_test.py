@@ -33,8 +33,10 @@ class TerrainAcceptanceTest(unittest.TestCase):
         after = self.directory / "after.json"
         before.write_text(json.dumps(self.before))
         after.write_text(json.dumps(self.after))
-        with contextlib.redirect_stdout(io.StringIO()):
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
             acceptance.compare(before, after)
+        return output.getvalue()
 
     def test_fixture_is_complete_and_contains_only_local_test_data(self):
         with zipfile.ZipFile(self.world) as archive:
@@ -51,7 +53,44 @@ class TerrainAcceptanceTest(unittest.TestCase):
             self.assertTrue(set(room["exits"].values()) <= numbers)
 
     def test_comparison_accepts_terrain_style_replacement(self):
-        self.check_exports()
+        output = self.check_exports()
+        styles = self.after["settings"]["terrainStyles"]
+        self.assertEqual(len(styles), 117)
+        self.assertIn(f"all {len(styles)} styles match", output)
+
+    def test_comparison_requires_named_vendor_styles_without_automatic_variants(self):
+        styles = self.after["settings"]["terrainStyles"]
+        shop = next(style for style in styles if style["name"] == "shop")
+        valid = copy.deepcopy(styles)
+        for name in ["shop-merchant", "shop-apothecary", "shop-smith"]:
+            vendor = next(style for style in valid if style["name"] == name)
+            self.assertNotIn("variants", vendor)
+            self.assertNotIn(vendor["image"], shop["variants"])
+            with self.subTest(missing=name):
+                self.after["settings"]["terrainStyles"] = [style for style in valid if style["name"] != name]
+                with self.assertRaisesRegex(ValueError, "terrain styles differ"):
+                    self.check_exports()
+
+    def test_comparison_rejects_changed_or_missing_shop_variants(self):
+        shop = next(style for style in self.after["settings"]["terrainStyles"] if style["name"] == "shop")
+        original = copy.deepcopy(shop)
+        self.assertEqual(len(shop["variants"]), 10)
+        for change in ["missing", "empty", "reordered", "truncated", "base"]:
+            with self.subTest(change=change):
+                shop.clear()
+                shop.update(copy.deepcopy(original))
+                if change == "missing":
+                    shop.pop("variants")
+                elif change == "empty":
+                    shop["variants"][1] = ""
+                elif change == "reordered":
+                    shop["variants"].reverse()
+                elif change == "truncated":
+                    shop["variants"].pop()
+                else:
+                    shop["image"] = ""
+                with self.assertRaisesRegex(ValueError, "terrain styles differ"):
+                    self.check_exports()
 
     def test_comparison_rejects_room_exit_settings_and_image_changes(self):
         valid = copy.deepcopy(self.after)

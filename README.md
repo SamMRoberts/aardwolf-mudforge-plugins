@@ -46,17 +46,21 @@ the lore and the visual interpretation. Download the
 [contact sheet](dist/map-packs/aardwolf-three-moons.html), including a dense
 5 × 5 layout study and a 3 × 3 repeat for every terrain.
 
-[Aardwolf Terrain Icons 4.0.0](docs/TERRAIN-ICONS.md) now uses the enhanced
-room terrain artwork from Aardwolf Atlas for all 114 terrain types, including
-numbered and directional variants. Lossless 128-pixel tiles are embedded in the
-pack; Atlas does not need to be installed. Download the
-[JSON pack](dist/map-packs/aardwolf-terrain-icons.json) and import it through
-**Map settings → General → Map Pack Management → Choose File...**. Export your
-existing pack first: importing replaces the terrain-style list. The
-[contact sheet](dist/map-packs/aardwolf-terrain-icons.html) includes connected-map
-studies and all 114 tiles at 16, 24 and 32 px. MudForge draws walls and player
-markers above the artwork. This asset pack needs no Lua plugin or shared API.
-The format was browser-tested with 1.0.0; native acceptance of 4.0.0 is pending.
+[Aardwolf Terrain Icons 4.2.1](docs/TERRAIN-ICONS.md) uses enhanced Atlas
+artwork for all 114 terrain types. Three generic `shop` variants share common
+horizontal timber flooring and vary their furniture's appearance, placement,
+size and shape. All retain clear paths to the north, east, south and west exits.
+The merchant, apothecary and smith images are included as named terrain styles
+(`shop-merchant`, `shop-apothecary`, `shop-smith`) for manual assignment, bringing
+the pack to 117 styles. They remain excluded from automatic shop variants.
+
+Download the [JSON pack](dist/map-packs/aardwolf-terrain-icons.json) and import
+it through **Map settings → General → Map Pack Management → Choose File...**.
+Export your existing pack first: importing replaces the terrain-style list.
+The [contact sheet](dist/map-packs/aardwolf-terrain-icons.html) includes all
+terrain tiles, generic variants and manual images at 16, 24 and 32 px. The pack
+needs no Atlas installation, Lua plugin or shared API. The format was
+browser-tested with 1.0.0; native acceptance of 4.2.1 is pending.
 
 ## Installation
 
