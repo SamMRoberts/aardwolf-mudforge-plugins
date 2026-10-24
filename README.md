@@ -1,9 +1,9 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.4.0** library provides a session Core, an injected library facade, native
+The **0.5.0** library provides a session Core, an injected library facade, native
 storage and widget helpers, a reactive vitals example, and a configurable vitals HUD.
-All plugin persistence uses MudForge's native plugin/world storage. Spells **0.3.2**
+All plugin persistence uses MudForge's native plugin/world storage. Spells **0.4.0**
 retains the native storage introduced in 0.3.0; preserve legacy SQLite data with the
 [one-time migration guide](docs/SQLITE.md). Normal use needs no Python process or
 File System Access.
@@ -286,13 +286,13 @@ or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.3.2** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.4.0** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
 reloads. The original command output, pager controls and prompt remain visible.
 
-Install the **0.4.0** `aardwolf-api` library and API Core. Collection waits for a
+Install the **0.5.0** `aardwolf-api` library and API Core. Collection waits for a
 verified `char.base.name`, connected/negotiated Core state and
 `char.status.state == 3`. Each lowercase character name selects one validated
 record in native storage owned by this installed plugin and world. Different
@@ -352,9 +352,12 @@ restores the last accepted layout and shows the reason. Existing 18-type layouts
 retain their order and visibility, with Disease and Special appended and visible.
 Refresh all includes hidden types and slots.
 
-Damage data is collected manually. **Refresh all** sends just two commands,
-`skills combat` followed by `spells combat`, and groups their rows by the Damage
-column. There are no per-type refresh buttons. Saved results appear on load;
+Damage and area data are collected manually. **Refresh all** sends three commands:
+`skills combat`, `spells combat`, then `spells area`. Combat rows are grouped by
+the Damage column; area spell names are matched case-insensitively to the saved
+list and marked `area = true`. Area results preserve canonical fields and damage
+groups, skip unknown names, and remove stale area flags from omitted names. There
+are no per-type refresh buttons. Saved results appear on load;
 **Not refreshed** means that kind's damage list has not completed for the group,
 while **None learned** means it completed but currently has no qualifying ability.
 Damage types absent from a completed bulk list are also marked empty. Refreshing or an
@@ -375,7 +378,8 @@ when necessary. Unsafe fallback commands are disabled.
 
 - `awspells refresh` collects the full `allspells` list and recovers after resolving
   dependency errors. Overlapping collections/saves are refused.
-- `awspells refresh-all` collects both bulk damage lists; `awspells cancel` stops it.
+- `awspells refresh-all` collects both bulk damage lists and area spell flags;
+  `awspells cancel` stops it.
 - `awspells show` explicitly reopens a closed panel.
 - `awspells import` chooses a converted migration JSON file; it works disconnected
   and preserves different existing native data.
@@ -391,7 +395,7 @@ when necessary. Unsafe fallback commands are disabled.
   separators and multiline commands are refused.
 - `awspells command-reset "Dirt kicking"` removes the override.
 
-Sending plain `allspells`, `skills combat` or `spells combat`
+Sending plain `allspells`, `skills combat`, `spells combat` or `spells area`
 also captures its output when storage is ready and collection is idle.
 Legacy `skills damage` and `spells damage` commands remain supported for manual capture.
 Other filtered commands interrupt capture and never replace the full list.
@@ -402,7 +406,7 @@ The full-list header starts parsing and the exact
 `* means that you cannot use the skill/spell.` footer completes it. Names,
 levels, nullable spell numbers/percentages, explicit star flags and display order
 are preserved. A dash percentage does not imply an unusable star flag.
-Damage tables start at their Skill/Spell header and complete at
+Damage and area tables start at their Skill/Spell header and complete at
 `To see all skills/spells for your class, use 'allspells <class>'`.
 `No skills found.` and `No spells found.` are successful empty results.
 Repeated page headers are accepted, and indented continuation rows inherit the
@@ -416,8 +420,8 @@ Omitted/forgotten entries disappear from that kind's damage groups without
 deleting canonical abilities or command overrides. An ability can belong to
 multiple damage types. A blank Damage column is accepted: the ability remains
 in the catalog without a damage-group membership. Unknown nonempty damage types
-still reject the collection. Full-list replacement preserves damage enrichment for
-retained names and prunes removed associations. Kind, mana, memberships, filter
+still reject the collection. Full-list replacement preserves area flags and damage
+enrichment for retained names and prunes removed associations. Kind, mana, memberships, filter
 timestamps and command overrides are saved together with the canonical snapshot
 in one native character record. An accepted `saveTable` write precedes publication
 of the new data; a refused write retains the prior snapshot. Overrides remain
@@ -428,12 +432,12 @@ Partial, malformed, duplicate memberships, conflicting or interrupted output ret
 previous committed data. Unavailable storage or a refused save reports the reason
 and retains prior data without automatic retries. Disconnect, lost Core and
 character changes clear exposed data and cancel pending work. Collection timestamps reflect
-the latest committed full or bulk collection; changing a command override
+the latest committed full, bulk or area collection; changing a command override
 does not change collection time.
 
 Other plugins opt into `{ spells = true }` and use
 `client.spells.get()`, `client.spells.status()` or `client.spells.on(callback)`.
-The public snapshot remains schema version 1, with updated canonical fields;
+The public snapshot remains schema version 1, with optional boolean `area` on entries;
 damage enrichment is private to the provider. Readers need no storage adapters or
 file permission. See [the spells API](docs/API.md#spells).
 
@@ -446,7 +450,8 @@ and repeated paste import, exact exported-record comparison and persistence afte
 world close/reopen were verified. Existing map data, terrain styles, unrelated
 plugin state and widget positions were preserved; temporary fixtures were removed.
 Chromium checks use synthetic bindings and do not establish native docking or all
-widget interactions. Native acceptance of the 0.3.2 compact panel is pending.
+widget interactions. Native acceptance of the compact panel and 0.4.0 area
+collection is pending.
 Connected collection, pager behavior, broader damage-panel acceptance and live
 Aardwolf transport remain pending; see the separate
 [native acceptance checks](docs/NATIVE-ACCEPTANCE.md).

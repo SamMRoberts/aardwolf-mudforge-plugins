@@ -1,4 +1,4 @@
-# Aardwolf API 0.4.0
+# Aardwolf API 0.5.0
 
 ## Lifecycle and host adapters
 
@@ -161,15 +161,26 @@ client.start()
 Snapshots are
 `{ schemaVersion = 1, characterName, collectedAt, entries = { ... } }`.
 `collectedAt` is Unix milliseconds. Entries are in server display order:
-`{ name, level, sn?, percent?, unusable }`. Names are preserved; integer Sn
+`{ name, level, sn?, percent?, unusable, area? }`. Names are preserved; integer Sn
 and percentage fields are omitted for server dashes. Percentage includes zero.
 `unusable` is a boolean from an explicit star, not inferred from level or
 percentage. Both skills and spells are represented without inferring a type.
 
+Spells 0.4.0 with library 0.5.0 captures `spells area` and sets `area = true`
+on existing entries matched by name (case-insensitively). This optional boolean
+is preserved in native storage and defensive consumer snapshots; older records
+without it remain valid. A completed area result removes stale flags from names
+absent from that result, including an empty `No spells found.` result. Missing
+`area` does not establish whether area discovery has run. Area results do not
+add entries or replace canonical names, levels, Sn, percentages, unusable flags
+or damage enrichment. Full and combat refreshes preserve flags for retained
+names. Refresh all runs both combat queries followed by `spells area`; plain
+`allspells` alone does not run area discovery.
+
 Spells 0.2.4 also merges committed `skills combat` and `spells combat` results
 into these canonical fields. A bulk refresh retains unrelated entries and
 existing display order, appending newly discovered names. `collectedAt` reflects
-the latest committed full or bulk collection, not command-override changes.
+the latest committed full, bulk or area collection, not command-override changes.
 Damage memberships, ability kind/mana, per-filter timestamps and command
 mappings remain provider-owned; the public methods and schema are unchanged.
 Each bulk result replaces all damage memberships/details for its kind and marks

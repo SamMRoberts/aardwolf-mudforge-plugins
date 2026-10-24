@@ -18,6 +18,8 @@ test('Refresh all accepts the supplied blank damage skill and continues to spell
     for _, line in ipairs(example_lines()) do world.line(line) end
     assert(world.sends[3] == "spells combat" and not reader.client.spells.status().error)
     world.line("No spells found.")
+    assert(world.sends[4] == "spells area")
+    world.line("No spells found.")
     assert(not reader.client.spells.status().refreshing and not reader.client.spells.status().error)
     local names = {}; for _, item in ipairs(reader.client.spells.get().entries) do names[item.name] = item end
     assert(names.Hammerswing.level == 51 and names.Hammerswing.percent == 85)
@@ -104,7 +106,7 @@ test('old individual refresh actions are ignored and filtered manual commands ar
   assert(reader.client.spells.status().error and not reader.client.spells.status().refreshing)
 `));
 
-test('Refresh all uses exactly two bulk queries and marks absent damage groups empty', () => runLua(fixture + setup + `
+test('Refresh all uses three queries and marks absent damage groups empty', () => runLua(fixture + setup + `
   world.action("refresh-all")
   assert(world.sends[2] == "skills combat")
   world.damageHeader("skill")
@@ -117,7 +119,9 @@ test('Refresh all uses exactly two bulk queries and marks absent damage groups e
   world.line("           Major swarm 30 85% 192 Disease")
   world.line("           Spirit bolt 20 85% 365 Special")
   world.damageFooter()
-  assert(#world.sends == 3 and not reader.client.spells.status().refreshing)
+  assert(world.sends[4] == "spells area")
+  world.line("No spells found.")
+  assert(#world.sends == 4 and not reader.client.spells.status().refreshing)
   assert(panel.bindings.skill_bash_name == "Kick" and panel.bindings.skill_acid_name == "Acid attack")
   assert(panel.bindings.spell_fire_name == "Fireball" and panel.bindings.spell_disease_name == "Major swarm")
   assert(panel.bindings.spell_special_name == "Spirit bolt")

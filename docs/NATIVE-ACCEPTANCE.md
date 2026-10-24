@@ -220,7 +220,7 @@ legacy databases separately. These tests do not execute MudForge's transpiler,
 storage engine, picker, command hooks, provisional output, pager or connected
 Aardwolf transport.
 
-- With separate authorization, install library 0.4.0, API Core and Spells 0.3.2
+- With separate authorization, install library 0.5.0, API Core and Spells 0.4.0
   in a disposable world. Record the client version and confirm both
   provider/consumer load orders and actual installed IDs.
 - With File System Access off and no helper, complete simulated login. Refuse
@@ -318,7 +318,7 @@ rows and kept the toolbar and final row reachable without horizontal overflow.
   `sap`, `dirt` or `cast <sn>` as applicable, with no appended target; verify
   refreshed output is preserved. Test active/combat/ineligible/disconnected
   states and unsafe/invalid widget actions without sending commands.
-- Run Refresh all: expect only `skills combat` followed by `spells combat`, including `No skills found.` and
+- Run Refresh all: expect `skills combat`, `spells combat`, then `spells area`, including `No skills found.` and
   `No spells found.`. Confirm native empty-output wording and table footers,
   repeated headers, ANSI-clean lines, manual pager continuation and bounded
   timeouts. Include `Hammerswing 85%` with a blank Damage column: retain its
@@ -331,6 +331,13 @@ rows and kept the toolbar and final row reachable without horizontal overflow.
   are no per-type refresh controls. Test an ability in two damage groups,
   full `allspells` replacement, malformed/duplicate/conflicting rows and native
   save refusal without retrying writes.
+- Feed the supplied `spells area` table. Confirm matching saved names get
+  `area = true` in native storage and a separate consumer, including 1% rows.
+  Confirm case-insensitive matching, unknown names skipped, stale flags cleared
+  after complete/empty area output, and unchanged canonical fields/damage groups.
+  Test manual `spells area`, cancellation, timeout, malformed rows and refused
+  saves retaining prior flags. Reload and save/reopen the disposable world to
+  verify persistence. Full/combat refreshes must preserve retained area flags.
 - Save, inspect and reset a skill command override. Reload/reopen and switch
   characters; verify native record isolation, persistence and command precedence.
   Check a converted legacy database retains its abilities and command overrides.

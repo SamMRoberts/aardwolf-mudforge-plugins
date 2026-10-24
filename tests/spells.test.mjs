@@ -6,13 +6,58 @@ import { runLua } from './lua-runtime.mjs';
 
 const fixture = readFileSync(resolve(root, 'tests/fixtures/spells.lua'), 'utf8');
 const cases = {
+  'spells API validates optional area flags and keeps defensive consumer snapshots': `
+    local world, reader, provider = spellsWorld(); world.active(); world.sample()
+    local original = reader.client.spells.get()
+    local validate = freshLibrary().protocol.spellsSnapshot
+    assert(validate(original).entries[1].area == nil)
+    for _, flag in ipairs({ true, false }) do
+      local value = reader.client.spells.get()
+      value.entries[1].area = flag
+      local normalized = validate(value)
+      assert(normalized.entries[1].area == flag)
+      value.entries[1].area = not flag
+      assert(normalized.entries[1].area == flag)
+      provider.host.broadcastToPlugin("reader", "aardwolf-spells:state", json.encode({
+        version = 1, status = { connected = true, refreshing = false, characterName = "Fixture" }, snapshot = normalized
+      }))
+      local saved = reader.client.spells.get()
+      assert(saved.entries[1].area == flag)
+      saved.entries[1].area = not flag
+      assert(reader.client.spells.get().entries[1].area == flag)
+    end
+    for _, flag in ipairs({ 0, 1, "true", "false", {} }) do
+      local value = reader.client.spells.get()
+      value.entries[1].area = flag
+      assert(not pcall(validate, value))
+      provider.host.broadcastToPlugin("reader", "aardwolf-spells:state", json.encode({
+        version = 1, status = { connected = true, refreshing = false, characterName = "Fixture" }, snapshot = value
+      }))
+      assert(reader.client.spells.get().entries[1].area == false)
+    end
+  `,
   'spells reports an older loaded library before registering or sending commands': `
     local world, reader, provider = spellsWorld()
     provider.env.cleanup()
     provider.env.require = function() return { protocol = {} } end
     provider.env.init()
-    assert(string.find(provider.errors[#provider.errors], "aardwolf-api 0.4.0", 1, true))
+    assert(string.find(provider.errors[#provider.errors], "aardwolf-api 0.5.0", 1, true))
     world.active()
+    assert(#world.sends == 0 and reader.client.spells.get() == nil)
+  `,
+  'spells refuses older validators that silently drop area flags': `
+    local world, reader, provider = spellsWorld()
+    provider.env.cleanup()
+    local api = freshLibrary()
+    local validate = api.protocol.spellsSnapshot
+    api.protocol.spellsSnapshot = function(value)
+      local result = validate(value)
+      for _, item in ipairs(result.entries) do item.area = nil end
+      return result
+    end
+    provider.env.require = function() return api end
+    provider.env.init(); world.active()
+    assert(string.find(provider.errors[#provider.errors], "aardwolf-api 0.5.0", 1, true))
     assert(#world.sends == 0 and reader.client.spells.get() == nil)
   `,
   'spells captures the supplied column format and preserves all output': `

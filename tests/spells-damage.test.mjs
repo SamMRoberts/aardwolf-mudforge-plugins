@@ -66,18 +66,21 @@ const cases = {
     assert(panel.bindings.skill_bash_name == "None learned")
     assert(world.record("fixture").damage.commands["dirt kicking"] == "dirt")
   `,
-  'refresh all sends two requests in order and continues through empty responses': `
+  'refresh all sends three requests in order and continues through empty responses': `
     world.action("refresh-all")
     local count = 1
     for _, kind in ipairs({ "skill", "spell" }) do
       count = count + 1
       assert(#world.sends == count and world.sends[count] == kind .. "s combat")
       assert(reader.client.spells.status().refreshing)
-      assert(string.find(world.commands.awspells("status"), "(" .. tostring(count - 1) .. "/2)", 1, true))
+      assert(string.find(world.commands.awspells("status"), "(" .. tostring(count - 1) .. "/3)", 1, true))
       world.line("No " .. kind .. "s found.")
     end
-    assert(#world.sends == 3 and not reader.client.spells.status().refreshing)
-    assert(not string.find(world.commands.awspells("status"), "/2)", 1, true))
+    assert(world.sends[4] == "spells area" and reader.client.spells.status().refreshing)
+    assert(string.find(world.commands.awspells("status"), "(3/3)", 1, true))
+    world.line("No spells found.")
+    assert(#world.sends == 4 and not reader.client.spells.status().refreshing)
+    assert(not string.find(world.commands.awspells("status"), "/3)", 1, true))
     local groups = 0; for _ in pairs(world.record("fixture").damage.times) do groups = groups + 1 end
     assert(groups == 40)
     assert(panel.bindings.spell_water_name == "None learned" and panel.bindings.skill_acid_name == "None learned")

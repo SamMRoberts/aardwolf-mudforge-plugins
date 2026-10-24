@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.4.0", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.5.0", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, native storage and UI helpers."
 }
 
-local M = { version = "0.4.0", coreName = "Aardwolf API Core" }
+local M = { version = "0.5.0", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -321,11 +321,12 @@ local function spellsSnapshot(value)
     assert(type(item.sn) == "nil" or spellInteger(item.sn, 1, 9007199254740991), "invalid ability Sn")
     assert(type(item.percent) == "nil" or spellInteger(item.percent, 0, 100), "invalid ability percent")
     assert(type(item.unusable) == "boolean", "invalid ability flag")
+    assert(type(item.area) == "nil" or type(item.area) == "boolean", "invalid ability area flag")
     local key = string.lower(item.name)
     assert(not names[key], "duplicate ability")
     names[key] = true
     table.insert(result.entries, { name = item.name, level = item.level, sn = item.sn,
-      percent = item.percent, unusable = item.unusable })
+      percent = item.percent, unusable = item.unusable, area = item.area })
   end
   assert(#result.entries > 0, "empty spells snapshot")
   return result

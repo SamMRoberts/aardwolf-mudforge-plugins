@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.3.2",
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.4.0",
   author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons saved in native MudForge storage."
 }
 
@@ -245,7 +245,7 @@ local function validateRecord(value, key)
     local count = 0
     for _, item in pairs(value.snapshot.entries) do
       count = count + 1; assert(count <= 1000, "too many abilities")
-      onlyFields(item, { name = true, level = true, sn = true, percent = true, unusable = true })
+      onlyFields(item, { name = true, level = true, sn = true, percent = true, unusable = true, area = true })
     end
     result.snapshot = libraryApi.protocol.spellsSnapshot(value.snapshot)
     assert(string.lower(result.snapshot.characterName) == value.characterKey
@@ -353,7 +353,17 @@ end
 
 persist = function(entries, request)
   local updated, combined = clone(damage), {}
-  if request.kind then
+  if request.area then
+    if not snapshot then failure("Collect allspells before area spells; previous list retained."); return end
+    local names = {}
+    for _, item in ipairs(entries) do names[string.lower(item.name)] = true end
+    combined = clone(snapshot.entries)
+    -- The filtered list classifies known names; its practice/level columns do
+    -- not replace the canonical list, and omitted names lose stale area flags.
+    for _, item in ipairs(combined) do
+      item.area = names[string.lower(item.name)] and true or nil
+    end
+  elseif request.kind then
     local positions = {}
     if snapshot then
       for index, item in ipairs(snapshot.entries) do
@@ -374,7 +384,9 @@ persist = function(entries, request)
         failure("Conflicting ability kind; previous list retained."); return
       end
       local index = positions[name] or (#combined + 1)
-      combined[index] = { name = item.name, level = item.level, sn = item.sn, percent = item.percent, unusable = item.unusable }
+      local area = combined[index] and combined[index].area
+      combined[index] = { name = item.name, level = item.level, sn = item.sn, percent = item.percent,
+        unusable = item.unusable, area = area }
       positions[name] = index
       updated.details[name] = { kind = request.kind, mana = item.mana }
       for damageType in pairs(item.damageTypes) do updated.members[groupKey(request.kind, damageType)][name] = true end
@@ -382,7 +394,14 @@ persist = function(entries, request)
   else
     combined = entries
     local names = {}
-    for _, item in ipairs(entries) do names[string.lower(item.name)] = true end
+    local areas = {}
+    if snapshot then
+      for _, item in ipairs(snapshot.entries) do areas[string.lower(item.name)] = item.area end
+    end
+    for _, item in ipairs(entries) do
+      local name = string.lower(item.name)
+      names[name], item.area = true, areas[name]
+    end
     for name in pairs(updated.details) do if not names[name] then updated.details[name] = nil end end
     for _, members in pairs(updated.members) do
       for name in pairs(members) do if not names[name] then members[name] = nil end end
@@ -460,12 +479,13 @@ local function refreshAll()
   if busy then return "Aardwolf Spells is already collecting or saving." end
   local ready, message = eligible()
   if not ready then return message end
-  queue, queueTotal = {}, 2
+  queue, queueTotal = {}, 3
   for _, kind in ipairs({ "skill", "spell" }) do
     table.insert(queue, { kind = kind, command = kind .. "s combat" })
   end
+  table.insert(queue, { kind = "spell", area = true, command = "spells area" })
   nextRefresh()
-  return "Damage refresh requested."
+  return "Damage and area refresh requested."
 end
 
 local function cancelCollection()
@@ -496,7 +516,8 @@ end
 local function damageLine(line, cleanLine)
   local request = capture.request
   if line == "No " .. request.kind .. "s found." and not capture.started then finishCapture(); return end
-  local header = request.kind == "skill" and "^Skill name%s+Learned%s+Damage%s*$"
+  local header = request.area and "^Spell name%s+Mana%s+Learned%s+Spell#%s*$"
+    or request.kind == "skill" and "^Skill name%s+Learned%s+Damage%s*$"
     or "^Spell name%s+Mana%s+Learned%s+Spell#%s+Damage%s*$"
   if string.match(line, header) then capture.started, reason = true, "collecting " .. request.command; publish(); return end
   if not capture.started then return end
@@ -522,7 +543,7 @@ local function damageLine(line, cleanLine)
     end
   end
   local damageType = damageText and string.lower(damageText)
-  if not name or (damageType and not typeSet[damageType]) then
+  if not name or (damageType and (request.area or not typeSet[damageType])) then
     failure("Malformed or unknown damage row; previous list retained."); return
   end
   name = trim(name)
@@ -539,6 +560,7 @@ local function damageLine(line, cleanLine)
   capture.rowCount = capture.rowCount + 1
   local existing = capture.names[key]
   if existing then
+    if request.area then failure("Duplicate area row; previous list retained."); return end
     if (damageType and existing.damageTypes[damageType]) or (not damageType and existing.blankDamage) then
       failure("Duplicate damage row; previous list retained."); return
     end
@@ -616,6 +638,7 @@ function onSend(sessionId, text)
   local kind = string.match(command, "^(%a+)s%s+combat$") or string.match(command, "^(%a+)s%s+damage$")
   local request
   if command == "allspells" then request = { command = command }
+  elseif command == "spells area" then request = { command = command, kind = "spell", area = true }
   elseif kind == "skill" or kind == "spell" then
     request = { command = command, kind = kind }
   end
@@ -1195,8 +1218,14 @@ end
 function init()
   if initialized then return end
   libraryApi = require("aardwolf-api")
-  if type(libraryApi.protocol) ~= "table" or type(libraryApi.protocol.spellsSnapshot) ~= "function" then
-    echo("Aardwolf Spells requires aardwolf-api 0.4.0 or later; update the loaded library and reload Spells.")
+  -- Older validators silently omit unknown fields; require flag preservation.
+  local compatible, probe = pcall(function()
+    return libraryApi.protocol.spellsSnapshot({ schemaVersion = 1, characterName = "Probe", collectedAt = 0,
+      entries = { { name = "Probe", level = 1, unusable = false, area = true } } })
+  end)
+  if not compatible or type(probe) ~= "table" or type(probe.entries) ~= "table"
+    or type(probe.entries[1]) ~= "table" or probe.entries[1].area ~= true then
+    echo("Aardwolf Spells requires aardwolf-api 0.5.0 or later; update the loaded library and reload Spells.")
     return
   end
   initialized = true
