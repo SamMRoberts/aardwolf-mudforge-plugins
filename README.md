@@ -3,7 +3,7 @@
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
 The **0.4.0** library provides a session Core, an injected library facade, native
 storage and widget helpers, a reactive vitals example, and a configurable vitals HUD.
-All plugin persistence uses MudForge's native plugin/world storage. Spells **0.3.1**
+All plugin persistence uses MudForge's native plugin/world storage. Spells **0.3.2**
 retains the native storage introduced in 0.3.0; preserve legacy SQLite data with the
 [one-time migration guide](docs/SQLITE.md). Normal use needs no Python process or
 File System Access.
@@ -286,7 +286,7 @@ or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.3.1** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.3.2** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
@@ -326,7 +326,10 @@ ability buttons shrink to 22 px without reducing text size. If the rows still
 cannot fit, scroll vertically to reach them. Resizing does not change saved order
 or visibility.
 
-The compact pane opens at 540 × 400 px unless MudForge restores a saved size.
+The panel omits the repeated title and character/status line to save vertical
+space. Use `awspells status` for collection state and errors. Layout-save feedback
+remains visible when needed. The compact pane opens at 540 × 400 px unless
+MudForge restores a saved size.
 Its bottom-right toolbar stays visible while the ability list scrolls and uses
 icons: pencil for **Edit layout**, circular arrow for **Refresh
 all**, and × for **Cancel collection**. The bar reserves 24 px of space after
@@ -443,7 +446,7 @@ and repeated paste import, exact exported-record comparison and persistence afte
 world close/reopen were verified. Existing map data, terrain styles, unrelated
 plugin state and widget positions were preserved; temporary fixtures were removed.
 Chromium checks use synthetic bindings and do not establish native docking or all
-widget interactions. Native acceptance of the 0.3.1 adaptive layout is pending.
+widget interactions. Native acceptance of the 0.3.2 compact panel is pending.
 Connected collection, pager behavior, broader damage-panel acceptance and live
 Aardwolf transport remain pending; see the separate
 [native acceptance checks](docs/NATIVE-ACCEPTANCE.md).

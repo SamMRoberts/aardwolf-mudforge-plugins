@@ -220,7 +220,7 @@ legacy databases separately. These tests do not execute MudForge's transpiler,
 storage engine, picker, command hooks, provisional output, pager or connected
 Aardwolf transport.
 
-- With separate authorization, install library 0.4.0, API Core and Spells 0.3.1
+- With separate authorization, install library 0.4.0, API Core and Spells 0.3.2
   in a disposable world. Record the client version and confirm both
   provider/consumer load orders and actual installed IDs.
 - With File System Access off and no helper, complete simulated login. Refuse
@@ -248,7 +248,7 @@ Aardwolf transport.
   collection results with visible output. Record live acceptance separately and
   remove only disposable test artifacts.
 
-### Damage panel — 0.3.1 acceptance pending
+### Damage panel — 0.3.2 acceptance pending
 
 Offline fixtures cover the supplied tables and mixed-type continuation rows,
 empty bulk lists, two sequential requests, selection, command overrides, cancellation, malformed data and
@@ -266,6 +266,13 @@ long labels, wrapped status/feedback, focus/scroll retention and resizing withou
 host messages or preference changes. These do not establish native docking,
 MudForge bridge behavior, persistence or live transport acceptance.
 
+The same five sizes passed Chrome checks for 0.3.2 in normal and edit modes.
+The panel rendered without the repeated title/status line, retained all 20 type
+rows and kept the toolbar and final row reachable without horizontal overflow.
+
+- Confirm the 0.3.2 panel omits the repeated in-panel title and status line.
+  Run `awspells status` to inspect collection state and errors; layout-save
+  failures must still display their feedback in the panel.
 - In an authorized disposable world, observe the 540 × 400 panel, then dock it,
   resize to narrow/wide tiles, close/reopen with `awspells show`, reload and reopen
   the world. Verify saved docking, position and visibility, readable stacked
@@ -280,7 +287,7 @@ MudForge bridge behavior, persistence or live transport acceptance.
   scrolling and while editing or collecting. The final ability row must remain
   reachable, and hidden rows must not move the bar away from the bottom. Verify
   a 24 px buffer after Cancel, clear of the corner grip. Repeat in compact and
-  multicolumn layouts, with wrapped status/feedback, long ability names and all
+  multicolumn layouts, with wrapped layout feedback, long ability names and all
   rows hidden. The final row must not be obscured by the toolbar.
 - Check the icon-only Edit, Refresh all and Cancel collection toolbar labels,
   tooltips and keyboard focus. Enter Edit: all 20 types and 40 slots must be

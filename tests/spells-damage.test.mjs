@@ -73,9 +73,11 @@ const cases = {
       count = count + 1
       assert(#world.sends == count and world.sends[count] == kind .. "s combat")
       assert(reader.client.spells.status().refreshing)
+      assert(string.find(world.commands.awspells("status"), "(" .. tostring(count - 1) .. "/2)", 1, true))
       world.line("No " .. kind .. "s found.")
     end
     assert(#world.sends == 3 and not reader.client.spells.status().refreshing)
+    assert(not string.find(world.commands.awspells("status"), "/2)", 1, true))
     local groups = 0; for _ in pairs(world.record("fixture").damage.times) do groups = groups + 1 end
     assert(groups == 40)
     assert(panel.bindings.spell_water_name == "None learned" and panel.bindings.skill_acid_name == "None learned")
@@ -233,15 +235,15 @@ const cases = {
     assert(#world.sends == before and panel.bindings.skill_bash_name == "Sap")
     assert(reader.client.spells.get() and panel.bindings.skill_bash_disabled == "false")
   `,
-  'damage dependency and send failures remain actionable in the panel': `
+  'damage dependency and send failures remain available through awspells status': `
     provider.storageState = "starting"; world.action("refresh-all")
-    assert(string.find(panel.bindings.status, "starting", 1, true))
+    assert(string.find(world.commands.awspells("status"), "starting", 1, true))
     assert(not reader.client.spells.status().refreshing)
     provider.storageState = "ready"
     local sendCommand = provider.env.send
     provider.env.send = function() return false end
     world.action("refresh-all")
-    assert(string.find(panel.bindings.status, "Could not send skills combat", 1, true))
+    assert(string.find(world.commands.awspells("status"), "Could not send skills combat", 1, true))
     assert(not reader.client.spells.status().refreshing)
     provider.env.send = sendCommand
     world.action("refresh-all"); world.bash(); world.line("No spells found.")
