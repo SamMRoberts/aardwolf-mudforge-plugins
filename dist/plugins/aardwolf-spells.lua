@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.3.0",
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.3.2",
   author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons saved in native MudForge storage."
 }
 
@@ -766,10 +766,6 @@ render = function()
   local status = client and client.get("char.status") or {}
   local canUse = ready and characterKey and not busy and not editing and (status.state == 3 or status.state == 8)
   local canRefresh = ready and characterKey and not busy and status.state == 3
-  local summary = (characterName or "Character unknown") .. "; " .. reason
-  if queueTotal > 0 then summary = summary .. " (" .. tostring(queueTotal - #queue) .. "/" .. tostring(queueTotal) .. ")" end
-  if lastError then summary = summary .. ": " .. lastError end
-  setBoundValue(widget, "status", summary)
   setBoundValue(widget, "refreshDisabled", canRefresh and "false" or "true")
   setBoundValue(widget, "cancelDisabled", busy and not collectionCancelled and "false" or "true")
   for _, damageType in ipairs(TYPES) do
@@ -797,14 +793,16 @@ end
 local function panelMarkup()
   local html = { [[<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aardwolf Damage Abilities</title><style>
 :root{color-scheme:dark;font:12px system-ui,sans-serif;color:#e6edf5;background:#131b27}*{box-sizing:border-box}
-html{scroll-padding-bottom:36px}[hidden]{display:none!important}body{margin:0;padding:6px;min-height:100vh;display:flex;flex-direction:column}body>*{flex-shrink:0}header{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:4px}
-h1{font-size:13px;margin:0;font-weight:650}.toolbar{display:flex;justify-content:flex-end;gap:3px;margin-top:auto;padding-top:4px;padding-inline-end:24px;position:sticky;bottom:0;z-index:2;background:#131b27}button{font:inherit;color:inherit;background:#233247;
+html{scroll-padding-bottom:36px;scrollbar-gutter:stable}[hidden]{display:none!important}body{margin:0;padding:6px;min-height:100vh;display:flex;flex-direction:column;min-width:0}body>*{flex-shrink:0}
+.toolbar{display:flex;justify-content:flex-end;gap:3px;margin-top:auto;padding-top:4px;padding-inline-end:24px;position:sticky;bottom:0;z-index:2;background:#131b27}button{font:inherit;color:inherit;background:#233247;
  border:1px solid #435772;border-radius:4px;min-height:24px;padding:2px 5px;cursor:pointer}button:hover:not(:disabled){background:#30465f}
 button:focus-visible,input:focus-visible{outline:2px solid #8bc3ff;outline-offset:1px}button:disabled{opacity:.5;cursor:default}
 button[aria-pressed="true"]{background:#355779;border-color:#8bc3ff}.icon{flex:none;width:24px;padding:2px;font-size:15px}
-.status,.feedback,.edit-help{font-size:11px;color:#b9c7d8;margin:0 0 4px;overflow-wrap:anywhere}.feedback{color:#ffd18b}
+.feedback,.edit-help{font-size:11px;color:#b9c7d8;margin:0 0 4px;overflow-wrap:anywhere}.feedback{color:#ffd18b}
+#rows,#column-headings{display:grid;grid-template-columns:repeat(var(--columns,1),minmax(0,1fr));column-gap:10px;min-width:0}
+#rows{grid-auto-flow:column;align-content:start}
 .row,.headings{display:grid;grid-template-columns:58px minmax(0,1fr) minmax(0,1fr);gap:4px;align-items:center}
-.headings{color:#9eafc3;font-size:10px;margin-bottom:2px}.row{padding:2px 0;border-top:1px solid #29374b}
+.headings{color:#9eafc3;font-size:10px;margin-bottom:2px}.row{padding:2px 0;border-top:1px solid #29374b;min-width:0;align-self:start}
 .damage{display:flex;align-items:center;gap:3px;min-width:0;text-transform:capitalize;font-weight:600}
 .ability{display:flex;gap:3px;min-width:0;align-items:center}.skill{grid-column:2}.spell{grid-column:3}
 .use{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
@@ -813,17 +811,18 @@ body.editing .headings{grid-template-columns:98px minmax(0,1fr) minmax(0,1fr)}in
 .handle{width:17px;min-height:24px;padding:0;border-color:transparent;background:transparent;cursor:grab;flex:none;font-size:16px}
 .row[data-type-visible="false"] .damage,.ability[data-slot-visible="false"] .use{opacity:.55}.row.dragging{opacity:.5}
 .row.drop-before{box-shadow:0 -2px #8bc3ff}.row.drop-after{box-shadow:0 2px #8bc3ff}
-@media(max-width:419px){.headings{display:none}.row,body.editing .row{grid-template-columns:58px minmax(0,1fr);gap:3px 4px}
-body.editing .row{grid-template-columns:98px minmax(0,1fr)}.damage{grid-row:1 / span 2}.row.single-slot .damage{grid-row:1}
-.row .skill,.row .spell{grid-column:2}.kind{display:inline-block;width:28px;flex:none;font-size:10px;color:#9eafc3}
-header{flex-wrap:wrap}}
-@media(max-width:259px){body.editing .row{grid-template-columns:minmax(0,1fr)}body.editing .damage{grid-row:auto}
-body.editing .row .skill,body.editing .row .spell{grid-column:1}}
-</style></head><body><header><h1>Damage Abilities</h1></header>
-<p class="status" role="status" aria-live="polite" data-mud-bind="status">Waiting for API Core</p>
+body.compact .row{padding:1px 0}body.compact .use,body.compact .handle{min-height:22px;padding-top:1px;padding-bottom:1px}
+body.compact .feedback,body.compact .edit-help{margin-bottom:2px}
+body.compact .toolbar{padding-top:2px}
+body.stacked #column-headings{display:none}body.stacked .row,body.editing.stacked .row{grid-template-columns:58px minmax(0,1fr);gap:3px 4px}
+body.editing.stacked .row{grid-template-columns:98px minmax(0,1fr)}body.stacked .damage{grid-row:1 / span 2}body.stacked .row.single-slot .damage{grid-row:1}
+body.stacked .row .skill,body.stacked .row .spell{grid-column:2}body.stacked .kind{display:inline-block;width:28px;flex:none;font-size:10px;color:#9eafc3}
+@media(max-width:259px){body.editing.stacked .row{grid-template-columns:minmax(0,1fr)}body.editing.stacked .damage{grid-row:auto}
+body.editing.stacked .row .skill,body.editing.stacked .row .spell{grid-column:1}}
+</style></head><body>
 <p id="layout-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
 <p id="edit-help" class="edit-help" hidden>Checked = visible. Drag types or focus a handle and use Alt+&#8593;/&#8595;.</p>
-<div class="headings" aria-hidden="true"><span>Damage</span><span>Skill</span><span>Spell</span></div><main id="rows">]] }
+<div id="column-headings" aria-hidden="true"><div class="headings"><span>Damage</span><span>Skill</span><span>Spell</span></div></div><main id="rows">]] }
   for _, damageType in ipairs(TYPES) do
     table.insert(html, '<section class="row" data-type="' .. damageType .. '"><div class="damage">'
       .. '<button type="button" class="handle edit-control" draggable="false" aria-label="Move ' .. damageType
@@ -855,6 +854,45 @@ new MutationObserver(function(records) {
 var layoutState = null, pending = false, pendingFocus = null, dragged = null;
 var rows = document.getElementById('rows'), editButton = document.getElementById('edit');
 var rowElements = Array.from(rows.children);
+var headings = document.getElementById('column-headings'), toolbar = document.querySelector('.toolbar');
+var reflowFrame = null;
+// Read down a column before continuing across, using the fewest columns that fit.
+function chooseColumns(width, availableHeight, rowHeight, count, minimumWidth) {
+  var maximum = Math.max(1, Math.min(count, Math.floor((width + 10) / (minimumWidth + 10))));
+  var columns = 1;
+  while (columns < maximum && Math.ceil(count / columns) * rowHeight > availableHeight) columns++;
+  var rowCount = Math.ceil(count / columns);
+  // A scrolling fallback may reach a wider layout with the same row count.
+  return { columns: rowCount ? Math.ceil(count / rowCount) : 1, rows: rowCount };
+}
+function reflow() {
+  reflowFrame = null;
+  var scroll = document.scrollingElement.scrollTop;
+  var minimumWidth = layoutState && layoutState.editing ? 400 : 340;
+  document.body.classList.toggle('compact', window.innerHeight < 360);
+  document.body.classList.toggle('stacked', rows.clientWidth < minimumWidth);
+  var visible = rowElements.filter(function(row) { return !row.hidden; });
+  var rowHeight = visible.reduce(function(height, row) { return Math.max(height, row.getBoundingClientRect().height); }, 0);
+  // Convert viewport coordinates to document coordinates so scrolling cannot change the layout.
+  var top = rows.getBoundingClientRect().top + document.scrollingElement.scrollTop;
+  var availableHeight = Math.max(0, window.innerHeight - top - toolbar.getBoundingClientRect().height - 6);
+  var geometry = chooseColumns(rows.clientWidth, availableHeight, rowHeight, visible.length, minimumWidth);
+  rows.style.setProperty('--columns', geometry.columns);
+  headings.style.setProperty('--columns', geometry.columns);
+  rows.style.gridTemplateRows = geometry.rows ? 'repeat(' + geometry.rows + ',' + rowHeight + 'px)' : 'none';
+  while (headings.children.length < geometry.columns) headings.appendChild(headings.firstElementChild.cloneNode(true));
+  while (headings.children.length > geometry.columns) headings.lastElementChild.remove();
+  document.scrollingElement.scrollTop = scroll;
+}
+function scheduleReflow() {
+  if (reflowFrame === null) reflowFrame = requestAnimationFrame(reflow);
+}
+// Observe wrapped feedback/help text as well as the iframe and actual rendered row sizes.
+var resizeObserver = new ResizeObserver(scheduleReflow);
+[document.documentElement, rows, toolbar,
+ document.getElementById('layout-feedback'), document.getElementById('edit-help')].forEach(function(element) { resizeObserver.observe(element); });
+window.addEventListener('resize', scheduleReflow);
+scheduleReflow();
 function setPending(value) {
   if (value) pendingFocus = document.activeElement;
   pending = value;
@@ -912,6 +950,7 @@ function applyLayout(state) {
   if (focus && document.body.contains(focus) && !focus.closest('[hidden]')) focus.focus({ preventScroll: true });
   else if (focus && focus.closest('#rows')) editButton.focus({ preventScroll: true });
   document.scrollingElement.scrollTop = scroll;
+  scheduleReflow();
 }
 mudforge.onProperty('panelLayout', function(encoded) { applyLayout(JSON.parse(encoded)); });
 editButton.addEventListener('click', function() { sendLayout({ operation: 'edit' }); });
@@ -1186,8 +1225,9 @@ function init()
     if string.match(command, "^command") then return commandOverride(trim(args)) end
     if command ~= "" and command ~= "status" then return USAGE end
     local saved = snapshot and (tostring(#snapshot.entries) .. " entries, collected at " .. tostring(snapshot.collectedAt) .. " Unix ms") or "no saved snapshot"
+    local progress = queueTotal > 0 and (" (" .. tostring(queueTotal - #queue) .. "/" .. tostring(queueTotal) .. ")") or ""
     return "Aardwolf Spells: " .. (characterName or "character unknown") .. "; " .. saved .. "; "
-      .. reason .. (lastError and ("; " .. lastError) or "") .. (lastImport and ("; " .. lastImport) or "")
+      .. reason .. progress .. (lastError and ("; " .. lastError) or "") .. (lastImport and ("; " .. lastImport) or "")
   end, "Refresh or inspect the character's saved allspells list")
   buildClient()
   synchronize()

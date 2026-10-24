@@ -3,8 +3,8 @@
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
 The **0.4.0** library provides a session Core, an injected library facade, native
 storage and widget helpers, a reactive vitals example, and a configurable vitals HUD.
-All plugin persistence uses MudForge's native plugin/world storage. Spells **0.3.0**
-replaces its former SQLite bridge; preserve existing data with the
+All plugin persistence uses MudForge's native plugin/world storage. Spells **0.3.2**
+retains the native storage introduced in 0.3.0; preserve legacy SQLite data with the
 [one-time migration guide](docs/SQLITE.md). Normal use needs no Python process or
 File System Access.
 
@@ -286,7 +286,7 @@ or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.3.0** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.3.2** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
@@ -318,9 +318,18 @@ negative, pierce, slash, shadow, sonic, special and water. Only entries learned 
 starred unusable abilities and entries above the known character level are
 excluded. Highest level wins, followed by highest learned percentage and then
 alphabetical name. Hover over a button for level, percentage, command and last
-refresh time. Rows stack their controls at narrow widths and scroll vertically.
+refresh time. The panel adapts to its available width and height, using the fewest
+readable columns that fit the visible rows. Saved damage-type order flows down
+each column, then across; each type keeps its Skill and Spell together. Controls
+stack when a column is narrow. Below 360 px in height, spacing is reduced and
+ability buttons shrink to 22 px without reducing text size. If the rows still
+cannot fit, scroll vertically to reach them. Resizing does not change saved order
+or visibility.
 
-The compact pane opens at 540 × 400 px unless MudForge restores a saved size.
+The panel omits the repeated title and character/status line to save vertical
+space. Use `awspells status` for collection state and errors. Layout-save feedback
+remains visible when needed. The compact pane opens at 540 × 400 px unless
+MudForge restores a saved size.
 Its bottom-right toolbar stays visible while the ability list scrolls and uses
 icons: pencil for **Edit layout**, circular arrow for **Refresh
 all**, and × for **Cancel collection**. The bar reserves 24 px of space after
@@ -329,7 +338,8 @@ Toggle Edit to reveal drag handles and visibility checkboxes for every damage
 type and its skill/spell slots, including hidden ones. Checked means visible.
 Drag a type by its handle, or focus the handle and press **Alt+Up/Down**, to move
 the entire row. Toggle Edit off to return to the ability buttons; using abilities
-is disabled during editing, while Refresh and Cancel remain available.
+is disabled during editing, while Refresh and Cancel remain available. The grid
+reflows when editing, visibility or ordering changes, with room for edit controls.
 
 Each change saves immediately for the verified character in native plugin table
 storage, separately from the saved ability record. Hiding a type preserves its skill
@@ -436,8 +446,9 @@ and repeated paste import, exact exported-record comparison and persistence afte
 world close/reopen were verified. Existing map data, terrain styles, unrelated
 plugin state and widget positions were preserved; temporary fixtures were removed.
 Chromium checks use synthetic bindings and do not establish native docking or all
-widget interactions. Connected collection, pager behavior, broader damage-panel
-acceptance and live Aardwolf transport remain pending; see the separate
+widget interactions. Native acceptance of the 0.3.2 compact panel is pending.
+Connected collection, pager behavior, broader damage-panel acceptance and live
+Aardwolf transport remain pending; see the separate
 [native acceptance checks](docs/NATIVE-ACCEPTANCE.md).
 
 ## Writing a consumer

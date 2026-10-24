@@ -220,7 +220,7 @@ legacy databases separately. These tests do not execute MudForge's transpiler,
 storage engine, picker, command hooks, provisional output, pager or connected
 Aardwolf transport.
 
-- With separate authorization, install library 0.4.0, API Core and Spells 0.3.0
+- With separate authorization, install library 0.4.0, API Core and Spells 0.3.2
   in a disposable world. Record the client version and confirm both
   provider/consumer load orders and actual installed IDs.
 - With File System Access off and no helper, complete simulated login. Refuse
@@ -248,7 +248,7 @@ Aardwolf transport.
   collection results with visible output. Record live acceptance separately and
   remove only disposable test artifacts.
 
-### Damage panel — 0.3.0 acceptance pending
+### Damage panel — 0.3.2 acceptance pending
 
 Offline fixtures cover the supplied tables and mixed-type continuation rows,
 empty bulk lists, two sequential requests, selection, command overrides, cancellation, malformed data and
@@ -257,14 +257,38 @@ replacement, mana/spell-number persistence, failed saves and reload. Converter
 tests cover a legacy metadata/abilities-only database. Browser checks use
 synthetic bindings/action capture and establish only rendered HTML behavior.
 
+On 2026-10-24, Chrome checks of the 0.3.1 widget HTML with synthetic bindings
+passed at 260 × 500, 540 × 400, 540 × 800, 1200 × 300 and 1600 × 220 px.
+The two wide, short sizes used three and four columns respectively, with no
+vertical scrolling needed for all 20 types. Checks also covered final-row and
+toolbar access, cross-column drag/keyboard reordering, visibility changes,
+long labels, wrapped status/feedback, focus/scroll retention and resizing without
+host messages or preference changes. These do not establish native docking,
+MudForge bridge behavior, persistence or live transport acceptance.
+
+The same five sizes passed Chrome checks for 0.3.2 in normal and edit modes.
+The panel rendered without the repeated title/status line, retained all 20 type
+rows and kept the toolbar and final row reachable without horizontal overflow.
+
+- Confirm the 0.3.2 panel omits the repeated in-panel title and status line.
+  Run `awspells status` to inspect collection state and errors; layout-save
+  failures must still display their feedback in the panel.
 - In an authorized disposable world, observe the 540 × 400 panel, then dock it,
   resize to narrow/wide tiles, close/reopen with `awspells show`, reload and reopen
   the world. Verify saved docking, position and visibility, readable stacked
   rows, vertical scrolling and one panel through character/client rebuilds.
+  Check 260 × 500, 540 × 400, 540 × 800, 1200 × 300 and 1600 × 220 px content
+  areas: wide, short layouts should split into readable columns in saved order,
+  down each column then across, keeping each type's Skill and Spell together.
+  Below 360 px in height, verify compact spacing and 22 px ability buttons with
+  unchanged text size. Narrow columns should stack controls; insufficient space
+  should scroll vertically without horizontal overflow.
 - Confirm Edit, Refresh all and Cancel remain at the lower right before/after
   scrolling and while editing or collecting. The final ability row must remain
   reachable, and hidden rows must not move the bar away from the bottom. Verify
-  a 24 px buffer after Cancel, clear of the corner grip.
+  a 24 px buffer after Cancel, clear of the corner grip. Repeat in compact and
+  multicolumn layouts, with wrapped layout feedback, long ability names and all
+  rows hidden. The final row must not be obscured by the toolbar.
 - Check the icon-only Edit, Refresh all and Cancel collection toolbar labels,
   tooltips and keyboard focus. Enter Edit: all 20 types and 40 slots must be
   visible with checked-means-visible checkboxes, and ability execution disabled.
@@ -274,7 +298,11 @@ synthetic bindings/action capture and establish only rendered HTML behavior.
 - Drag a type using its handle; verify a single immediate native save and the
   resulting order. Focus a handle and use Alt+Up/Down, including first/last-row
   boundaries. Ordinary updates must preserve drag state, focus and scroll.
-  Resize to 220, 360 and 540 px and inspect both normal and edit layouts.
+  Reorder across column boundaries by dragging and keyboard; visual order must
+  match saved order. Resize repeatedly in normal and edit layouts and confirm
+  focus remains on the same control, ordinary updates retain scroll, and resizing
+  alone neither saves preferences nor sends gameplay commands. Visibility changes
+  and entering/leaving Edit must reflow the columns without losing row controls.
 - Reload/reopen the disposable world and switch verified characters: order and
   visibility must persist independently, with Edit off. Refuse native storage
   writes and verify the previous layout is restored with feedback; delayed
