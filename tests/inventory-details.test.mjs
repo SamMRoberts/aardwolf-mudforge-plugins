@@ -20,6 +20,17 @@ const helpers = `
 `;
 
 const cases = {
+  'reported potion details reach the manager and complete bag restoration': `
+    local world = bagged(); begin(world); world.monitor(5, "3896588735", 101)
+    world.frame("invdetails", { "{invheader}3896588735|105|Potion|1680|13||unique, glow, hum, magic, burn-proof, v3, searchable||Boot Lyceum|||||0" })
+    local details = world.state("manager").details
+    assert(details and details.id == 3896588735 and details.itemType == "Potion")
+    assert(details.fromClanName == "Boot Lyceum" and details.timer == nil and details.itemScore == 0)
+    assert(world.count("put 3896588735 101") == 1)
+    world.monitor(6, "3896588735", 101)
+    assert(not world.state("manager").busy and world.state("manager").details.id == 3896588735)
+    assert(string.find(world.state("manager").feedback, "Item details refreshed", 1, true))
+  `,
   'bagged details wait for retrieval, read once and return to the original bag': `
     local world = bagged(); begin(world)
     world.monitor(5, "3896588735", 101)

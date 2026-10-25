@@ -1,6 +1,6 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.4** uses `aardwolf-api` **0.8.4** and Aardwolf API
+Inventory Management **0.2.4** uses `aardwolf-api` **0.8.5** and Aardwolf API
 Core **0.4.3**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
@@ -190,6 +190,13 @@ login, loot, refresh or a timer.
 | `awinventory status` | Report inventory/workflow status and feedback. |
 
 ## Timeout troubleshooting
+
+Library 0.8.5 fixes `Malformed or mismatched inventory details header` for
+14-field replies such as the reported Boot Lyceum potion. It accepts the
+13-field layout too, reads item score from the final field, and preserves blank
+timer/item-score values as unknown. Nonempty invalid numbers and mismatched
+object IDs still fail. Update the loaded `aardwolf-api` library and reload Core;
+Inventory Management 0.2.4 and Core 0.4.3 do not need a plugin update for this fix.
 
 Library 0.8.1 identifies the timed-out command (`invdata`, `eqdata`,
 `invdata <bag-id>` or `invdetails <item-id>`) and whether its opening tag was

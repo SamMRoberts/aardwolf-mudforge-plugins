@@ -1,4 +1,4 @@
-# Aardwolf API 0.8.2
+# Aardwolf API 0.8.5
 
 ## Lifecycle and host adapters
 
@@ -282,6 +282,11 @@ Details contain the documented common header fields (`id`, `level`, `itemType`,
 `value`, `weight`, `wearLocation`, `flags`, `owner`, `fromClanName`, `timer`,
 `itemScore`) and raw type-specific `tags = { { tag, value }, ... }`. Header
 item type, wear location and flags are text, unlike numeric inventory fields.
+Library 0.8.5 accepts both the documented 13-field header and the observed
+14-field layout with an additional reserved field before the final item score.
+Blank timer and item-score fields remain unknown (`nil`); populated fields must
+be finite numbers. Invalid headers and mismatched object IDs still fail without
+replacing previously collected details.
 Capacity and other type-specific stats have no invented normalized schema.
 See Aardwolf's [Invdata](https://www.aardwolf.com/wiki/index.php/Help/Invdata),
 [Invdetails](https://www.aardwolf.com/wiki/index.php/Help/Invdetails) and
