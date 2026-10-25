@@ -13,14 +13,15 @@ body[data-role=summary] #summary-view{display:flex;flex-direction:column;flex:1;
 body[data-role=summary] .count{margin:2px 0 4px;gap:5px;flex-shrink:0}
 body[data-role=summary] .count strong{font-size:1.2em}
 body[data-role=summary] header,body[data-role=summary] .summary-controls{flex-shrink:0}
-body[data-role=summary] .bag-list{flex:1;min-height:0;max-height:none;align-content:start;gap:2px}
-body[data-role=summary] .bag{min-height:22px;padding:2px 5px;gap:5px}
+body[data-role=summary] .bag-list{flex:1;min-height:0;max-height:none;align-content:start;gap:2px;grid-template-columns:minmax(0,1fr);overflow-x:hidden}
+body[data-role=summary] .bag{min-height:22px;min-width:0;padding:2px 5px;gap:5px;flex-wrap:nowrap}
+body[data-role=summary] .bag-name{min-width:0;flex:1}
 body[data-role=summary] .bag-location{font-size:.85em}
 body[data-role=summary] #bags-empty{flex:1;min-height:0;overflow:auto;padding:4px 0}
 body[data-role=summary] .summary-controls{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding-top:4px}
 body[data-role=summary] .summary-controls button{grid-column:span 2;min-width:0;min-height:22px;padding:2px 4px;font-size:.92em;line-height:1.2;overflow-wrap:anywhere}
 body[data-role=summary] .summary-controls .quick-potion{grid-column:span 3}
-@media(min-width:280px){body[data-role=summary] .summary-controls{grid-template-columns:repeat(5,minmax(0,1fr))}body[data-role=summary] .summary-controls button{grid-column:auto}}
+@media(min-width:280px){body[data-role=summary] .summary-controls{grid-template-columns:repeat(5,minmax(0,1fr))}body[data-role=summary] .summary-controls button,body[data-role=summary] .summary-controls .quick-potion{grid-column:auto}}
 body[data-role=summary] .summary-notices{flex:0 1 auto;min-height:0;max-height:2.7em;overflow:auto;margin-top:4px}
 body[data-role=summary] .summary-notices .status,body[data-role=summary] .summary-notices .feedback{max-height:none;overflow:visible;margin:0}
 body[data-role=summary] .summary-notices .feedback:not(:empty){margin-top:2px}

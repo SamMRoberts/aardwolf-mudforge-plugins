@@ -130,6 +130,10 @@ version and tested artifact versions with any observed results.
 - Dock and resize the summary. Open Setup and the manager, move/resize/close
   each independently, save/reopen the world, then explicitly reopen them.
   Verify saved geometry/visibility and that data updates do not force reopen.
+  Check the compact summary at 200×150 and 310×220: all five controls remain
+  visible, bag names truncate before their location labels, and the list scrolls
+  above the footer. Repeat with a larger saved font and long status messages;
+  verify keyboard bag activation and scroll/focus preservation.
 - Double-click and keyboard-open a bag; use Manage Inventory to return to the
   main inventory. Exercise equipment/bag navigation, search, all sort columns,
   details, right-click selection, the Actions button and keyboard menu access.
