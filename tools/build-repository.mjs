@@ -13,6 +13,7 @@ const entries = [
   { kind: 'plugin', file: 'aardwolf-vitals.lua', category: 'widgets', tags: ['aardwolf', 'gmcp', 'vitals'] },
   { kind: 'plugin', file: 'aardwolf-spells.lua', category: 'widgets', tags: ['aardwolf', 'spells', 'skills', 'damage', 'storage'] },
   { kind: 'plugin', file: 'aardwolf-room-details.lua', category: 'widgets', tags: ['aardwolf', 'room', 'characters', 'objects'] },
+  { kind: 'plugin', file: 'aardwolf-inventory.lua', category: 'widgets', tags: ['aardwolf', 'inventory', 'containers', 'equipment'] },
   { kind: 'plugin', file: 'aardwolf-atlas.lua', category: 'widgets', tags: ['aardwolf', 'mapper', 'terrain', '3d'] },
   { kind: 'library', file: 'aardwolf-api.lua', tags: ['aardwolf', 'gmcp', 'api'] },
 ];

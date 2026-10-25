@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.6.0", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.7.0", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers."
 }
 
-local M = { version = "0.6.0", coreName = "Aardwolf API Core" }
+local M = { version = "0.7.0", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -441,7 +441,22 @@ local function inventoryKey(value)
 end
 
 local INVENTORY_ACTIONS = { take = true, put = true, wear = true, remove = true,
-  drop = true, give = true, sell = true, donate = true, sacrifice = true }
+  drop = true, give = true, sell = true, donate = true, sacrifice = true, hold = true }
+local INVENTORY_USES = { quaff = 8, eat = true, drink = 12, recite = 2, zap = 3, brandish = 4 }
+local INVENTORY_EXTENSIONS = { "hold", "quaff", "eat", "drink", "recite", "zap", "brandish" }
+M.protocol.inventoryActions = INVENTORY_EXTENSIONS
+
+local function inventoryTarget(value, allowId)
+  if allowId and inventoryKey(value) then return inventoryKey(value) end
+  if type(value) ~= "string" or #value > 128 then return nil end
+  local valid = string.match(value, "^[A-Za-z]+$") ~= nil
+  if not valid then
+    local selector, name = string.match(value, "^(%d+)%.([A-Za-z]+)$")
+    valid = name ~= nil and inventoryId(selector) ~= nil
+  end
+  if valid and string.lower(value) ~= "all" then return value end
+  return nil
+end
 
 local function inventoryCommand(kind, args)
   if type(args) ~= "table" then return nil, "invalid inventory arguments" end
@@ -454,6 +469,24 @@ local function inventoryCommand(kind, args)
   end
   if not id then return nil, "invalid item ID" end
   if kind == "identify" then return "invdetails " .. id end
+  if kind == "use" then
+    local action = args.action
+    if type(action) ~= "string" or not INVENTORY_USES[action] then return nil, "unsupported item use action" end
+    local target = args.target
+    if target ~= nil then
+      target = inventoryTarget(target, action == "recite")
+      if not target then return nil, "invalid item use target" end
+    end
+    if action == "zap" or action == "brandish" then
+      local slot = finite(args.heldSlot)
+      if not slot or slot < 0 or slot > 9007199254740991 or slot ~= math.floor(slot) then return nil, "invalid held slot" end
+      if action == "zap" and not target then return nil, "zap requires a target" end
+    end
+    if action ~= "recite" and action ~= "zap" and target then return nil, "this item use has no target" end
+    if action == "brandish" then return "brandish" end
+    if action == "zap" then return "zap " .. target end
+    return action .. " " .. id .. (target and (" " .. target) or "")
+  end
   if not INVENTORY_ACTIONS[kind] then return nil, "unsupported inventory action" end
   if kind == "take" or kind == "put" then
     local containerId = inventoryKey(args.containerId)
@@ -1184,6 +1217,33 @@ function M.protocol.inventoryCollector(host)
       local command
       command, issue = M.protocol.inventoryCommand(request.kind, args)
       if not command then result(waiter, "failed", issue or "Invalid inventory action"); return end
+      if request.kind == "use" or request.kind == "hold" then
+        local item = getItem(inventoryId(args.id))
+        local scope = item and scopes[item.location]
+        if not item or not scope or not scope.known or scope.stale then
+          result(waiter, "failed", "Item requires a fresh complete inventory listing"); return
+        end
+        local held = request.kind == "use" and (args.action == "zap" or args.action == "brandish")
+        if held then
+          if item.location ~= "equipment" or item.wearLocation ~= finite(args.heldSlot) then
+            result(waiter, "failed", "Selected item is not in the configured held slot"); return
+          end
+          for _, other in ipairs(scope.entries) do
+            if other.id ~= item.id and other.wearLocation == item.wearLocation then
+              result(waiter, "failed", "Held slot is ambiguous; refresh equipment"); return
+            end
+          end
+        elseif item.location ~= "inventory" then
+          result(waiter, "failed", "Retrieve or remove the item before using it"); return
+        end
+        if request.kind == "use" then
+          local expected = INVENTORY_USES[args.action]
+          if (args.action == "eat" and item.type ~= 14 and item.type ~= 19)
+            or (args.action ~= "eat" and item.type ~= expected) then
+            result(waiter, "failed", "Item type does not support this use action"); return
+          end
+        end
+      end
       ownSend = true
       local sent, accepted = pcall(host.send, command)
       ownSend = false
@@ -1208,7 +1268,7 @@ local function inventoryFor(host, enabled, dispatch)
   local serial, lifetime = 0, 0
   local state = { available = false, connected = false, collecting = false, active = false,
     reason = enabled and "not started" or "not enabled" }
-  local api = {}
+  local api, extensions = {}, {}
   local function snapshot()
     local value = { items = {}, scopes = {}, details = {} }
     for key, scope in pairs(scopes) do
@@ -1231,7 +1291,7 @@ local function inventoryFor(host, enabled, dispatch)
     end
   end
   local function clear(reason, available)
-    scopes, details, generation = {}, {}, nil
+    scopes, details, generation, extensions = {}, {}, nil, {}
     local previous = pending
     pending = {}
     lifetime = lifetime + 1
@@ -1239,8 +1299,14 @@ local function inventoryFor(host, enabled, dispatch)
     for requestId in pairs(previous) do invoke(results, { requestId = requestId, outcome = "failed", reason = reason }) end
     invoke(callbacks)
   end
-  local function capability(value, session)
+  local function capability(value, session, actions)
     if not enabled then return end
+    extensions = {}
+    if type(actions) == "table" then
+      for _, action in ipairs(actions) do
+        if contains(INVENTORY_EXTENSIONS, action) then extensions[action] = true end
+      end
+    end
     if value ~= 1 then clear("inventory requires API Core 0.2.0 or newer", false)
     elseif not session.connected then clear(session.reason or "disconnected", true)
     else
@@ -1357,15 +1423,27 @@ local function inventoryFor(host, enabled, dispatch)
   end
   function api.getDetails(id) return copyInventoryDetails(details[inventoryKey(id)]) end
   function api.status() return copy(state) end
+  function api.supports(action)
+    if type(action) ~= "string" or not enabled or not state.available then return false end
+    if action == "use" then
+      for name in pairs(INVENTORY_USES) do if not extensions[name] then return false end end
+      return true
+    end
+    return action == "refresh" or action == "lookIn" or action == "identify"
+      or (INVENTORY_ACTIONS[action] == true and action ~= "hold") or extensions[action] == true
+  end
   function api.on(callback) return subscribe(callbacks, callback) end
   function api.onResult(callback) return subscribe(results, callback) end
   local function request(kind, args)
     local command, reason = inventoryCommand(kind, args)
     if not command then return nil, reason end
     if not enabled or not state.available or not generation then return nil, state.reason or "inventory unavailable" end
+    if (kind == "hold" and not extensions.hold) or (kind == "use" and not extensions[args.action]) then
+      return nil, "item use and Hold require API Core 0.3.0 or newer; update Core and reload"
+    end
     if not state.connected then return nil, "disconnected" end
     if not state.active then return nil, "waiting for an active character" end
-    if INVENTORY_ACTIONS[kind] and state.collecting then return nil, "inventory collection is busy" end
+    if (INVENTORY_ACTIONS[kind] or kind == "use") and state.collecting then return nil, "inventory collection is busy" end
     local count = 0
     for _ in pairs(pending) do count = count + 1 end
     if count >= 64 then return nil, "too many inventory requests" end
@@ -1379,6 +1457,11 @@ local function inventoryFor(host, enabled, dispatch)
   function api.refresh() return request("refresh", {}) end
   function api.lookIn(id) return request("lookIn", { containerId = id }) end
   function api.identify(id) return request("identify", { id = id }) end
+  function api.use(id, action, options)
+    if options ~= nil and type(options) ~= "table" then return nil, "invalid item use options" end
+    local opts = options or {}
+    return request("use", { id = id, action = action, target = opts.target, heldSlot = opts.heldSlot })
+  end
   for kind in pairs(INVENTORY_ACTIONS) do
     local action = kind
     api[action] = function(id, argument)
@@ -1475,7 +1558,8 @@ function M.new(host, options)
           if type(value) == "table" then snapshots[packageName] = value end
         end
       end
-      inventoryCapability(type(data.capabilities) == "table" and data.capabilities.inventory or nil, session)
+      inventoryCapability(type(data.capabilities) == "table" and data.capabilities.inventory or nil, session,
+        type(data.capabilities) == "table" and data.capabilities.inventoryActions or nil)
       notify("session", session)
       for _, packageName in ipairs(STATE) do notify(packageName, snapshots[packageName]) end
     elseif message == PREFIX .. "update" and session.connected then

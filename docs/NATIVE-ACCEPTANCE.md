@@ -13,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.6.0, Core is 0.2.0 and the example is 0.1.0, including library
+  library version is 0.7.0, Core is 0.3.0 and the example is 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -63,7 +63,7 @@ acceptance step; loopback transport does not establish live-server behavior.
 
 ## Inventory — pending
 
-API **0.6.0** / Core **0.2.0** inventory acceptance has not been observed in
+API **0.7.0** / Core **0.3.0** inventory acceptance has not been observed in
 MudForge or on live Aardwolf. Existing storage and UI results below do not
 establish inventory behavior. Use an explicitly authorized disposable world and
 local Telnet fixture for native checks; live Aardwolf needs separate authorization.
@@ -99,6 +99,62 @@ local Telnet fixture for native checks; live Aardwolf needs separate authorizati
 Record the app version, fixture details and observed results separately from
 offline tests. Live acceptance must verify actual tag framing and command behavior;
 a successful local replay does not establish those server contracts.
+
+## Inventory Management plugin — pending
+
+Inventory Management **0.1.0**, API **0.7.0** and Core **0.3.0** require their own
+native acceptance. Offline Lua fixtures and standalone browser checks do not
+establish native docking, context-menu delivery, persistence or live gameplay.
+Use only an explicitly authorized disposable world and local transport fixture;
+live Aardwolf connections need separate authorization. Record the actual app
+version and tested artifact versions with any observed results.
+
+- Import the plugin with the current library/Core, in both load orders. Verify
+  load/reload, disable/re-enable, file-import-generated IDs and missing/old Core
+  feedback. No duplicate windows, subscriptions or commands should remain.
+- Replay loose items, worn bags, unopened bags and nested discovered bags. The
+  summary count includes directly carried bags but excludes equipment and bag
+  contents. Unknown/stale counts and unknown/partial/empty bag contents remain
+  distinct. Opening one bag requests only that bag, without an eager scan.
+- Dock and resize the summary. Open Setup and the manager, move/resize/close
+  each independently, save/reopen the world, then explicitly reopen them.
+  Verify saved geometry/visibility and that data updates do not force reopen.
+- Double-click and keyboard-open a bag; use Manage Inventory to return to the
+  main inventory. Exercise equipment/bag navigation, search, all sort columns,
+  details, right-click selection, the Actions button and keyboard menu access.
+  Observe actual native `menuselect` and dismissal delivery. Hostile names and
+  details must render as text, and unrelated updates must retain focus/scroll.
+- Edit Setup while inventory changes. Preserve drafts until save/cancel or an
+  identity change. Verify font size, hidden/worn bags, bag order, confirmations,
+  ordered rules and held-slot selection/numeric input. Test rejected storage
+  writes and close/reopen persistence; save failures must not claim success.
+- Test all single-item management and type-specific use actions against the
+  local fixture, with exact IDs and validated targets. Confirm Drop, Sell and
+  Donate by default. Disable busy/inactive or unsupported actions with reasons;
+  never silently unkeep items or treat transport dispatch as server success.
+- Preview prepared bagged-item use, then replay retrieval, use and restoration.
+  For wands/staves, verify the configured held slot, replacement of prior held
+  equipment, selected-ID checks before `zap`/`brandish`, restoration of the prior
+  held item and return of surviving retrieved items to their original bags.
+  Consumed items are not returned. Items equipped elsewhere need explicit removal.
+- Exercise missing/full bags, refused commands, incomplete output, timeout,
+  cancellation and restoration failure at every step. Verify bounded work, no
+  automatic command retries, and clear recovery guidance. Disconnect, change
+  character, reattach and reload while a workflow is pending; no later command
+  may target the previous identity or resume the old workflow.
+- Preview ordered type/name rules with duplicate names, case differences,
+  literal pattern characters and unresolved destination IDs. Start Organize
+  explicitly. Only loose matched non-container items move, one at a time after
+  observation; failure/cancellation stops further moves. No login/loot/refresh
+  event starts sorting.
+- Open two disposable worlds with different characters/settings and verify
+  widget events, menus, counts, rules, held slots and commands remain isolated.
+  Disable/remove fixtures and restore the original selected world. Confirm
+  unrelated worlds, native map data, plugin settings and layouts are unchanged.
+
+Live acceptance must additionally verify real tag framing, action restrictions,
+held-slot mapping, target syntax and restoration with expendable fixture items.
+Do not use valuable items to validate destructive or consumable actions.
 
 ## Native storage and migration — verified subset
 

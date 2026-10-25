@@ -316,6 +316,47 @@ inventory data is written to native storage or replayed from an old connection.
 | `client.inventory.sell(id)` | `sell <id>` |
 | `client.inventory.donate(id)` | `donate <id>` |
 | `client.inventory.sacrifice(id)` | `sacrifice <id>` |
+| `client.inventory.hold(id)` | `hold <id>`; requires API 0.7.0 / Core 0.3.0. |
+
+### Item use and capability discovery
+
+API **0.7.0** / Core **0.3.0** add
+`client.inventory.use(id, action, options?)` and
+`client.inventory.supports(action)`. `supports` returns a boolean for read names
+(`refresh`, `lookIn`, `identify`), existing single-item action names, `hold`,
+and the six use actions below. `supports("use")` requires all six use actions.
+It reports provider support, not current item eligibility or connection activity.
+An older inventory-capable Core continues to support existing methods; Hold and
+item use fail with an upgrade explanation. A disconnected/unavailable consumer
+clears the advertised extensions.
+
+| Use action | Required item and location | Command / options |
+| --- | --- | --- |
+| `quaff` | Potion (8), carried inventory | `quaff <id>` |
+| `eat` | Food (14) or pill (19), carried inventory | `eat <id>` |
+| `drink` | Drink container (12), carried inventory | `drink <id>` |
+| `recite` | Scroll (2), carried inventory | `recite <id> [target]`; optional `options.target`. |
+| `zap` | Wand (3), configured held slot in equipment | `zap <target>`; requires `options.target` and `options.heldSlot`. |
+| `brandish` | Staff (4), configured held slot in equipment | `brandish`; requires `options.heldSlot`, no target. |
+
+Targets are single alphabetic names/keywords, optionally prefixed by a positive
+selector such as `2.guard`; `all`, whitespace, separators, and arbitrary command
+text are rejected. Recite additionally accepts a positive object ID target.
+`heldSlot` is a nonnegative safe integer, or its numeric string representation;
+learn it from the character's current equipment / `wearable`, rather than
+assuming one race-independent number. Server restrictions and skills still apply.
+
+Core requires a fresh, complete scope containing the selected item for Hold and
+use. Hold requires carried inventory. For Zap and Brandish, Core checks that the
+selected ID has the correct type and occupies `heldSlot` in equipment, with no
+ambiguous duplicate occupying that slot. This matters because those two commands
+do not include the item ID. Bagged items must be explicitly retrieved first;
+none of these primitive methods prepares equipment or restores an arrangement.
+
+Like existing actions, these methods return a request ID or `nil, reason` and
+notify `onResult` with `sent` or `failed`. Results can arrive synchronously before
+the method returns. `sent` establishes transport handoff only, not a successful
+cast or consumption. Busy/inactive calls are never deferred or retried.
 
 Read-request and action methods return a request ID string or `nil, reason`.
 Result outcomes are `complete` for a completed read, `sent` for a command handed
@@ -370,14 +411,17 @@ registrations by the callback's sender ID, not a payload-provided owner.
 - `register`: targeted JSON `{ version = 1, packages = [...], inventory? = true }` replaces a consumer declaration; replies with `state`.
 - `unregister`: targeted withdrawal during consumer cleanup.
 - `ready` / `stopped`: Core lifecycle announcements; consumers rediscover or clear state.
-- `state`: targeted JSON `{ version = 1, session = {...}, snapshots = {...}, capabilities = { inventory = 1 } }`.
+- `state`: targeted JSON `{ version = 1, session = {...}, snapshots = {...}, capabilities = { inventory = 1, inventoryActions = [...] } }`.
 - `update`: targeted JSON `{ version = 1, package = "...", payload = {...} }`.
 
 Inventory adds targeted `inventory-status`, `inventory-scope`,
 `inventory-details` and `inventory-result` messages. Each carries version 1 and
 a connection generation; requests carry consumer-local request IDs. Scopes are
 transferred separately with inventory-specific validation. Only registered
-inventory consumers can request work or receive inventory data.
+inventory consumers can request work or receive inventory data. Core 0.3.0 adds
+an optional `capabilities.inventoryActions` list (`hold`, `quaff`, `eat`, `drink`,
+`recite`, `zap`, `brandish`) without changing `inventory = 1` or protocol version 1;
+older consumers ignore the additive field.
 
 Only Core-origin state/update/stopped and inventory messages are accepted. Registration
 replies can arrive after `start()` returns; consumers observe availability
