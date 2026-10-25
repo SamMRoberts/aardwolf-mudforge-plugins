@@ -342,7 +342,7 @@ legacy databases separately. These tests do not execute MudForge's transpiler,
 storage engine, picker, command hooks, provisional output, pager or connected
 Aardwolf transport.
 
-- With separate authorization, install library 0.5.0, API Core and Spells 0.5.0
+- With separate authorization, install library 0.8.3, API Core 0.4.1 and Spells 0.5.1
   in a disposable world. Record the client version and confirm both
   provider/consumer load orders and actual installed IDs.
 - With File System Access off and no helper, complete simulated login. Refuse
@@ -352,9 +352,14 @@ Aardwolf transport.
   automatic query only after negotiated GMCP and state 3, including enable
   during an existing active session. Repeat updates; no additional query occurs.
 - Feed the supplied table with ANSI, dash fields, stars, repeated page headers
-  and chatter. Verify display order, preserved terminal output/prompt and the
-  native record after the footer. Verify Lua pattern behavior and provisional
-  line delivery directly in the installed client.
+  and chatter. Verify automatic and explicit refresh tables are hidden while
+  their parsed data reaches the native record after the footer. Manual queries,
+  pager controls, prompts, errors and chatter must stay visible. Cancel owned
+  queries before/after their header and verify only recognized remaining table
+  lines are hidden until the existing capture boundary. Test timeout, manual
+  interruption, disconnect, identity change and unload to release suppression.
+  Confirm the documented effect on later plugins' line hooks/triggers. Verify
+  Lua pattern behavior and provisional line delivery in the installed client.
 - Test plain user `allspells`, filtered variants, overlapping refreshes, manual
   pager continuation, malformed/duplicate rows and missing footer. Wait 60
   seconds for a partial capture; the previous native snapshot must survive.
@@ -438,8 +443,9 @@ rows and kept the toolbar and final row reachable without horizontal overflow.
   Verify actual text/attribute bindings, disabled state and retained focus/scroll.
 - Click and keyboard-activate an ability and the toolbar's Refresh all. Verify one
   `sap`, `dirt` or `cast <sn>` as applicable, with no appended target; verify
-  refreshed output is preserved. Test active/combat/ineligible/disconnected
-  states and unsafe/invalid widget actions without sending commands.
+  refreshed tables are hidden while the parsed data updates. Test active, combat,
+  ineligible and disconnected states and unsafe/invalid widget actions without
+  sending commands.
 - Run Refresh all: expect `skills combat`, `spells combat`, then `spells area`, including `No skills found.` and
   `No spells found.`. Confirm native empty-output wording and table footers,
   repeated headers, ANSI-clean lines, manual pager continuation and bounded

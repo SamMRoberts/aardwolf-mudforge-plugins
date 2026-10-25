@@ -99,8 +99,12 @@ function spellsWorld(readerFirst)
     world.packet("char.base", { name = name or "Fixture" })
     world.packet("char.status", { state = 3 })
   end
+  world.output = {}
   function world.line(text, sessionId, raw)
-    assert(env.onLine(sessionId or world.id, raw or text, text) == nil)
+    local result = env.onLine(sessionId or world.id, raw or text, text)
+    assert(result == nil or result == false, "Spells must preserve or suppress the original line")
+    table.insert(world.output, { text = text, hidden = result == false })
+    return result
   end
   function world.header()
     world.line("Skill/Spell name            Level  Sn   % ")
