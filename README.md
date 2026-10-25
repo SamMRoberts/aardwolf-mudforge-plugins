@@ -3,7 +3,7 @@
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
 The **0.5.0** library provides a session Core, an injected library facade, native
 storage and widget helpers, a reactive vitals example, and a configurable vitals HUD.
-All plugin persistence uses MudForge's native plugin/world storage. Spells **0.4.1**
+All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.0**
 retains the native storage introduced in 0.3.0; preserve legacy SQLite data with the
 [one-time migration guide](docs/SQLITE.md). Normal use needs no Python process or
 File System Access.
@@ -286,7 +286,7 @@ or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.4.1** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.5.0** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
@@ -312,20 +312,23 @@ See [migration instructions](docs/SQLITE.md) before reconnecting and collecting.
 
 ### Damage ability panel
 
-Each row displays **Skill**, **Spell**, and **Area** from left to right for acid, air,
+Each row displays **Single** and **Area** from left to right for acid, air,
 bash, cold, disease, earth, electric, energy, fire, holy, light, magic, mental,
-negative, pierce, slash, shadow, sonic, special and water. Skill selects the best
-skill, Spell the best non-area spell, and Area the best spell marked `area = true`.
-Area spells are always excluded from Spell selection, including fallback choices.
+negative, pierce, slash, shadow, sonic, special and water. Single selects the best
+skill or non-area spell together; Area selects the best spell marked `area = true`.
+Area spells are always excluded from Single selection, including fallback choices.
 Only entries learned **above 1%** qualify;
 starred unusable abilities and entries above the known character level are
 excluded. Highest level wins, followed by highest learned percentage and then
-alphabetical name. Hover over a button for level, percentage, command and last
-refresh time. The panel adapts to its available width and height, using the fewest
-readable columns that fit the visible rows. Saved damage-type order flows down
-each column, then across; each type keeps its Skill, Spell and Area together. Controls
-stack when a column is narrow. Below 360 px in height, spacing is reduced and
-ability buttons shrink to 22 px without reducing text size. If the rows still
+alphabetical name. Hover over a button for its kind, level, percentage, command
+and source refresh time. The panel adapts to its available width and height,
+using the fewest readable columns that fit the visible rows. Saved damage-type order flows down
+each column, then across; each type keeps its Single and Area together. Ability
+widths follow the displayed label lengths, sharing aligned widths within each
+column and shrinking with ellipsis when space is limited. Very long labels have
+bounded influence on sizing; hover for their full text. Columns need 340 px
+normally or 400 px while editing; controls stack below those widths. Below
+360 px in height, spacing is reduced and ability buttons shrink to 22 px without reducing text size. If the rows still
 cannot fit, scroll vertically to reach them. Resizing does not change saved order
 or visibility.
 
@@ -338,7 +341,7 @@ icons: pencil for **Edit layout**, circular arrow for **Refresh
 all**, and × for **Cancel collection**. The bar reserves 24 px of space after
 the buttons to keep the corner clear. Hover for labels or use the keyboard.
 Toggle Edit to reveal drag handles and visibility checkboxes for every damage
-type and its Skill/Spell/Area slots, including hidden ones. Checked means visible.
+type and its Single/Area slots, including hidden ones. Checked means visible.
 Drag a type by its handle, or focus the handle and press **Alt+Up/Down**, to move
 the entire row. Toggle Edit off to return to the ability buttons; using abilities
 is disabled during editing, while Refresh and Cancel remain available. The grid
@@ -346,15 +349,17 @@ reflows when editing, visibility or ordering changes, with room for edit control
 
 Each change saves immediately for the verified character in native plugin table
 storage, separately from the saved ability record. Hiding a type preserves its
-slot settings; hiding all three slots hides that row. Slot visibility applies
+slot settings; hiding both slots hides that row. Slot visibility applies
 regardless of which best ability occupies it. The Edit button remains available
 when all rows are hidden. Reloading or changing character exits Edit and restores
 that character's layout. Missing preferences use alphabetical order with every
 slot visible; invalid preferences use defaults and show feedback. A failed save
 restores the last accepted layout and shows the reason. Existing 18-type layouts
 retain their order and visibility, with Disease and Special appended and visible.
-Layouts saved before Area was added keep their existing settings and show Area
-by default; migration does not write preferences until the next layout edit.
+Existing Skill/Spell layouts show Single when either old slot was visible; Single
+is hidden only when both were hidden. Area visibility is preserved. Layouts saved
+before Area was added show Area by default. Migration does not write preferences
+until the next successful layout edit.
 Refresh all includes hidden types and slots.
 
 Damage and area data are collected manually. **Refresh all** sends three commands:
@@ -363,8 +368,9 @@ the Damage column; area spell names are matched case-insensitively to the saved
 list and marked `area = true`. Area results preserve canonical fields and damage
 groups, skip unknown names, and remove stale area flags from omitted names. There
 are no per-type refresh buttons. Saved results appear on load;
-**Not refreshed** means that kind's damage list has not completed for the group,
-while **None learned** means it completed but currently has no qualifying ability.
+Single displays eligible abilities as soon as either combat list provides them.
+Without a qualifying ability, **Not refreshed** means at least one combat list has
+not completed; **None learned** requires both lists to have completed for the group.
 Area requires both the spell damage list and area classification; before those
 are available it shows **Not refreshed**. Legacy saved area flags remain usable.
 Damage types absent from a completed bulk list are also marked empty. Refreshing or an
@@ -375,9 +381,9 @@ native save already in progress completes before another collection begins.
 Errors stop Refresh all; recover and explicitly run it again. No automatic damage
 queries, pager changes, pager-control commands or background retries are sent.
 
-Clicking an ability sends one command without a target. Spell and Area buttons send
-`cast <spell number>`; skills use a saved override, a verified mapping (currently
-`Dirt kicking` → `dirt`), or the lowercased skill name. Aardwolf decides the default
+Clicking an ability sends one command without a target. A Single winner that is
+a spell, or an Area button, sends `cast <spell number>`; skills use a saved override,
+a verified mapping (currently `Dirt kicking` → `dirt`), or the lowercased skill name. Aardwolf decides the default
 target. Ability buttons work in active or combat state; refreshes require active
 state. Collection/save disables ability buttons to avoid interrupting its output.
 Some skills require a command different from their label; configure an override
@@ -458,7 +464,7 @@ world close/reopen were verified. Existing map data, terrain styles, unrelated
 plugin state and widget positions were preserved; temporary fixtures were removed.
 Chromium checks use synthetic bindings and do not establish native docking or all
 widget interactions. Native acceptance of the compact panel, area
-collection and 0.4.1 Area column is pending.
+collection and 0.5.0 Single/Area panel is pending.
 Connected collection, pager behavior, broader damage-panel acceptance and live
 Aardwolf transport remain pending; see the separate
 [native acceptance checks](docs/NATIVE-ACCEPTANCE.md).

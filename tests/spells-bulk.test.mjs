@@ -23,7 +23,7 @@ test('Refresh all accepts the supplied blank damage skill and continues to spell
     assert(not reader.client.spells.status().refreshing and not reader.client.spells.status().error)
     local names = {}; for _, item in ipairs(reader.client.spells.get().entries) do names[item.name] = item end
     assert(names.Hammerswing.level == 51 and names.Hammerswing.percent == 85)
-    assert(names.Sap.percent == 86 and panel.bindings.skill_bash_name == "Sap")
+    assert(names.Sap.percent == 86 and panel.bindings.single_bash_name == "Sap")
     assert(world.record("fixture").damage.details.hammerswing.kind == "skill")
     for _, members in pairs(world.record("fixture").damage.members) do assert(not members.hammerswing) end
   `, { example_lines: () => lines });
@@ -43,7 +43,7 @@ test('blank damage skill and spell continuation rows retain their fields without
   assert(names.Hammerswing.level == 50 and names.Hammerswing.percent == 85)
   assert(names["Untyped spell"].level == 38 and names["Untyped spell"].sn == 46)
   assert(names["Untyped spell"].percent == 90 and world.record("fixture").damage.details["untyped spell"].mana == 25)
-  assert(panel.bindings.skill_bash_name == "Sap" and panel.bindings.spell_fire_name == "Fireball")
+  assert(panel.bindings.single_bash_name == "Sap" and panel.bindings.single_fire_name == "Fireball")
   for _, members in pairs(world.record("fixture").damage.members) do
     assert(not members.hammerswing and not members["untyped spell"])
   end
@@ -57,7 +57,7 @@ test('blank damage rows preserve duplicate and conflicting row rejection', () =>
     world.query("skill"); world.damageHeader("skill")
     for _, row in ipairs(rows) do world.line(row) end
     world.damageFooter()
-    assert(reader.client.spells.status().error and panel.bindings.skill_bash_name == "Sap")
+    assert(reader.client.spells.status().error and panel.bindings.single_bash_name == "Sap")
     assert(not world.record("fixture").damage.details.hammerswing)
   end
 `));
@@ -74,8 +74,8 @@ test('the supplied combat-format output parses every continuation row and damage
     assert(names["Fire storm"].level == 44 and names["Lightning bolt"].level == 52)
     assert(world.record("fixture").damage.members["spell:disease"]["minor swarm"])
     assert(world.record("fixture").damage.members["spell:special"]["spirit bolt"])
-    assert(panel.bindings.spell_magic_name == "Cause light" and panel.bindings.spell_negative_name == "Soften")
-    assert(panel.bindings.spell_fire_name == "None learned" and panel.bindings.spell_disease_name == "None learned")
+    assert(panel.bindings.single_magic_name == "Cause light" and panel.bindings.single_negative_name == "Soften")
+    assert(panel.bindings.single_fire_name == "Not refreshed" and panel.bindings.single_disease_name == "Not refreshed")
     local count = 0; for _, info in pairs(world.record("fixture").damage.details) do if info.kind == "spell" then count = count + 1 end end
     assert(count == expected_count(), tostring(count))
   `, { example_lines: () => lines, expected_count: () => lines.filter(line => /\d+%\s+\d+\s+[A-Za-z]+\s*$/.test(line)).length });
@@ -90,7 +90,7 @@ test('continuation rows without levels, malformed rows and conflicting duplicate
     world.query("skill"); world.damageHeader("skill")
     for _, row in ipairs(rows) do world.line(row) end
     world.damageFooter()
-    assert(panel.bindings.skill_bash_name == "Sap" and reader.client.spells.status().error)
+    assert(panel.bindings.single_bash_name == "Sap" and reader.client.spells.status().error)
     assert(world.record("fixture").damage.members["skill:bash"].sap and not next(world.record("fixture").damage.members["skill:fire"] or {}))
   end
 `));
@@ -101,7 +101,7 @@ test('old individual refresh actions are ignored and filtered manual commands ar
   assert(#world.sends == before and not reader.client.spells.status().refreshing)
   provider.env.onSend(world.id, "skills bash"); world.bash()
   provider.env.onSend(world.id, "spells fire"); world.fire()
-  assert(panel.bindings.skill_bash_name == "Not refreshed" and panel.bindings.spell_fire_name == "Not refreshed")
+  assert(panel.bindings.single_bash_name == "Not refreshed" and panel.bindings.single_fire_name == "Not refreshed")
   world.action("refresh-all"); provider.env.onSend(world.id, "spells fire")
   assert(reader.client.spells.status().error and not reader.client.spells.status().refreshing)
 `));
@@ -122,10 +122,12 @@ test('Refresh all uses three queries and marks absent damage groups empty', () =
   assert(world.sends[4] == "spells area")
   world.line("No spells found.")
   assert(#world.sends == 4 and not reader.client.spells.status().refreshing)
-  assert(panel.bindings.skill_bash_name == "Kick" and panel.bindings.skill_acid_name == "Acid attack")
-  assert(panel.bindings.spell_fire_name == "Fireball" and panel.bindings.spell_disease_name == "Major swarm")
-  assert(panel.bindings.spell_special_name == "Spirit bolt")
-  assert(panel.bindings.skill_fire_name == "None learned" and panel.bindings.spell_bash_name == "None learned")
+  assert(panel.bindings.single_bash_name == "Kick" and panel.bindings.single_acid_name == "Acid attack")
+  assert(panel.bindings.single_fire_name == "Fireball" and panel.bindings.single_disease_name == "Major swarm")
+  assert(panel.bindings.single_special_name == "Spirit bolt")
+  assert(not next(world.record("fixture").damage.members["skill:fire"] or {}))
+  assert(not next(world.record("fixture").damage.members["spell:bash"] or {}))
+  assert(panel.bindings.single_air_name == "None learned")
   assert(not string.find(panel.content, 'data-mud-action="refresh:', 1, true))
 `));
 
@@ -133,6 +135,6 @@ test('legacy manual damage queries still capture complete results', () => runLua
   provider.env.onSend(world.id, "skills damage"); world.bash()
   provider.env.onSend(world.id, "spells damage"); world.damageHeader("spell")
   world.line("Level 38 : Fireball 30 85% 45 Fire"); world.damageFooter()
-  assert(panel.bindings.skill_bash_name == "Sap" and panel.bindings.spell_fire_name == "Fireball")
+  assert(panel.bindings.single_bash_name == "Sap" and panel.bindings.single_fire_name == "Fireball")
   assert(not reader.client.spells.status().refreshing and not reader.client.spells.status().error)
 `));
