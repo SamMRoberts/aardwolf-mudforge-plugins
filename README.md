@@ -1,8 +1,9 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.5.0** library provides a session Core, an injected library facade, native
-storage and widget helpers, a reactive vitals example, and a configurable vitals HUD.
+The **0.6.0** library provides a session Core, an injected library facade, native
+storage and widget helpers, opt-in inventory management, a reactive vitals example,
+and a configurable vitals HUD.
 All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.0**
 retains the native storage introduced in 0.3.0; preserve legacy SQLite data with the
 [one-time migration guide](docs/SQLITE.md). Normal use needs no Python process or
@@ -11,7 +12,7 @@ File System Access.
 | Component | Purpose |
 | --- | --- |
 | `aardwolf-api` library | Data subscriptions, snapshots, refresh requests, local persistence and consumer-owned UI |
-| Aardwolf API Core | One GMCP negotiation owner and one authoritative state cache per session |
+| Aardwolf API Core | One GMCP negotiation owner and shared GMCP/inventory caches per session |
 | Aardwolf API Vitals Example | HP/mana/moves bindings, an explicit refresh button and saved font-size preferences |
 | Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
 | Aardwolf Spells | Native skill/spell snapshots and a dockable panel of learned damage abilities |
@@ -97,6 +98,33 @@ repository copy.
 Core discovers registered consumers in either load order. Each consuming
 plugin gets its own library instance; Core communicates with them using
 world/session-scoped messages. The API does not connect to the MUD itself.
+
+## Inventory management API
+
+Library **0.6.0** and API Core **0.2.0** add an optional inventory API for other
+plugins. Construct a consumer with `inventory = true` to share live carried
+inventory/equipment tracking, discover storage bags (including worn bags), and
+request container contents or tagged item details. No inventory panel or extra
+plugin installation is required. Existing consumers remain opted out.
+
+Core enables `invmon` explicitly and collects inventory/equipment after an
+identified character becomes active. Containers and details load on demand;
+getters read the cache without sending commands. Complete empty listings are
+distinct from unopened or partially observed bags, and failed refreshes retain
+stale last-good data.
+The cache is session-local and never persisted. Monitoring is left enabled when
+collection stops because other integrations may share it.
+
+The same API exposes explicit single-item get/put, wear/remove, drop, give,
+sell, donate and sacrifice actions using object IDs. Actions fail while busy or
+inactive and never run later automatically. A sent result reports command
+dispatch; server tags establish observed inventory changes. Sacrifice targets
+an item already on the ground and never automatically drops it first.
+
+See [the inventory API reference](docs/API.md#inventory) for methods, callback
+results, validation and freshness. Native transpiler/loopback checks and live
+Aardwolf acceptance for inventory remain pending in the
+[acceptance checklist](docs/NATIVE-ACCEPTANCE.md#inventory--pending).
 
 ## Aardwolf Vitals
 
@@ -553,5 +581,6 @@ acceptance remain pending.
 - [MudForge plugin and library authoring guide](https://mudforge.org/docs/ai-plugin-guide.md)
 - [Aardwolf GMCP modules and commands](https://www.aardwolf.com/wiki/index.php/Clients/GMCP)
 
-This foundation does not migrate older plugin suites, provide a mapper or
-automate gameplay. Consumers must not send `Core.Supports.Set` themselves.
+This foundation does not migrate older plugin suites or provide automatic
+gameplay routines. Inventory actions run only on explicit API calls. Consumers
+must not send `Core.Supports.Set` themselves.

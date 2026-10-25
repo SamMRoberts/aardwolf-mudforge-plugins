@@ -1,4 +1,4 @@
-# Aardwolf API 0.5.0
+# Aardwolf API 0.6.0
 
 ## Lifecycle and host adapters
 
@@ -85,10 +85,11 @@ negotiation has already reached the server. Timer or transport refusal is
 reported in status rather than retried in a loop. Reload Core or reconnect to
 retry bootstrap after correcting the underlying failure.
 
-Core never automatically requests fresh character/quest data or changes tags,
-channel visibility, rawcolor or debugging options. A late-enabled or reloaded
-Core may initially have unknown data; use the explicit refresh methods when
-needed. `request("area")` requests server data but this version does not model
+Core never automatically requests fresh character/quest data or changes
+channel visibility, rawcolor or debugging options. Inventory consumers explicitly
+opt in to the monitoring setup and collection described below; other consumers
+do not cause tag changes. A late-enabled or reloaded Core may initially have
+unknown data; use the explicit refresh methods when needed. `request("area")` requests server data but this version does not model
 an area snapshot or event.
 
 Known competing Cores are detected by installed ID (`aw-core`,
@@ -198,6 +199,140 @@ messages to 1 MiB and snapshots to 1,000 unique entries. Shutdown/disconnect
 invalidates cached data; reconnect and provider reload discover again.
 This leaves Core's GMCP package messages and negotiation contract unchanged.
 
+## Inventory
+
+Library **0.6.0** and API Core **0.2.0** provide one shared, transient inventory
+collector per session. Pass `inventory = true` to `aardwolf.new`; the default is
+opted out. This feature uses only the required lifecycle/messaging adapters in
+the consuming plugin. Core owns all inventory commands; consumers do not inject
+`send` or `sendGMCP` for inventory access. An older Core without inventory
+capability reports inventory unavailable while existing GMCP methods still work.
+
+```lua
+local client = aardwolf.new(host, { inventory = true })
+local unsubscribe = client.inventory.on(function(snapshot, status)
+  if status.available then
+    for _, bag in ipairs(client.inventory.getContainers()) do
+      echo(tostring(bag.id) .. ": " .. bag.name)
+    end
+  end
+end)
+local unsubscribeResults = client.inventory.onResult(function(result)
+  echo(result.requestId .. ": " .. result.outcome)
+end)
+client.start()
+-- Explicitly request a discovered bag's contents:
+-- local requestId, reason = client.inventory.lookIn(bagId)
+-- Later: unsubscribe(); unsubscribeResults(); client.stop()
+```
+
+Subscribe before `start()`. Neither subscription method calls the callback
+immediately; use the cached getters when subscribing to an already started
+instance. Subscribers receive defensive copies, and callback errors do not stop
+other subscribers. Unsubscribe functions are idempotent.
+
+| Method | Contract |
+| --- | --- |
+| `client.inventory.get()` | Defensive cached `{ items, scopes, details }` snapshot. All three maps are empty while unavailable. Never sends a command. |
+| `client.inventory.getItem(id)` | Known item or `nil`; does not search unopened containers. |
+| `client.inventory.getContainers()` | Ordered list of known storage containers, including worn bags; numeric item type 11, without guessing from names. Drink containers (type 12) remain distinct. |
+| `client.inventory.getContents(containerId)` | Cached container scope or `nil` when entirely unobserved. Only `known = true` with empty `entries` means a completed empty listing. |
+| `client.inventory.getDetails(id)` | Cached tagged item details or `nil`. |
+| `client.inventory.status()` | Defensive `{ available, connected, active, collecting, characterName?, reason?, error? }`. `active` requires an identified character in state 3 and a connected, negotiated session. |
+| `client.inventory.on(callback)` | Notify `(snapshot, status)` on cache/status changes; `snapshot` is always a table. |
+| `client.inventory.refresh()` | Request carried inventory and equipment through `invdata` and `eqdata`. |
+| `client.inventory.lookIn(containerId)` | Request one container through `invdata <id>`. |
+| `client.inventory.identify(id)` | Request tagged item details through `invdetails <id>`. Does not send the separate `identify` command or cast a spell. |
+| `client.inventory.onResult(callback)` | Notify a result table `{ requestId, outcome, reason? }` for requests issued by this consumer. |
+
+A snapshot is `{ items, scopes, details }`. `items` and `details` use decimal
+object-ID strings as keys. `scopes` uses `inventory`, `equipment` and
+`container:<id>` keys. Each scope is
+`{ key, entries, known, stale, collectedAt? }`; entries preserve server listing
+order and `collectedAt` uses Unix milliseconds after a completed listing. An
+unscanned container observed through live item movements may have partial entries
+with `known = false, stale = true`; these entries do not establish its complete
+contents. A wholly unobserved scope is absent from `scopes`. Item records are
+`{ id, flags, name, level, type, unique, wearLocation, timer, location }`, where
+`id` is a positive safe integer, `unique` is boolean and `location` is its scope
+key. Names preserve embedded commas and Aardwolf color codes. Timer and wear
+location retain the server's `-1` sentinel rather than treating it as unknown.
+Render names as text or deliberately convert their color codes; never treat them
+as trusted HTML or commands.
+
+Details contain the documented common header fields (`id`, `level`, `itemType`,
+`value`, `weight`, `wearLocation`, `flags`, `owner`, `fromClanName`, `timer`,
+`itemScore`) and raw type-specific `tags = { { tag, value }, ... }`. Header
+item type, wear location and flags are text, unlike numeric inventory fields.
+Capacity and other type-specific stats have no invented normalized schema.
+See Aardwolf's [Invdata](https://www.aardwolf.com/wiki/index.php/Help/Invdata),
+[Invdetails](https://www.aardwolf.com/wiki/index.php/Help/Invdetails) and
+[Invmon](https://www.aardwolf.com/wiki/index.php/Help/Invmon) references.
+
+### Collection and freshness
+
+The first interested consumer causes Core to send explicit GMCP
+`config invmon on` and collect carried inventory/equipment once a connected,
+negotiated session has an identified character in active state (`char.status`
+state 3). This is a request to enable monitoring, not proof of a particular
+undocumented confirmation payload. Core leaves `invmon` enabled on shutdown
+because other integrations may share it.
+
+Container contents and details load only on explicit request. Getters never
+refresh. Core coalesces duplicate reads and serializes collection; it does not
+poll or scan every bag. Live `invmon` and `invitem` tags update known locations;
+ambiguous changes trigger bounded reconciliation of affected scopes. Concurrent
+events cannot be overwritten by an older listing's completion. Unscanned contents
+remain unknown or explicitly partial (`known = false`), rather than being
+presented as a completely listed empty bag.
+
+A closing tag commits a complete scope atomically. Malformed, incomplete,
+oversized or timed-out collection retains the last-good scope marked stale and
+reports failure; it never publishes a partial replacement. Manual tagged commands
+are observed without assigning their output to an unrelated owned request.
+An interrupted response keeps the collector busy until its matching closing tag
+arrives or the session reconnects. When a manual command interrupts an owned read,
+both replies must drain. Ambiguous nested/unsolicited frames require reconnecting;
+no read or action is retried automatically. Timer/transport setup failures can be
+retried after Core reload or reconnect.
+Inventory-specific bounds are 10,000 known items, 256 cached container scopes,
+4 KiB per name and 1 MiB per captured frame. Overflow reports failure without
+truncation. These do not relax the general API copy limits.
+
+Disconnect, character change, screen reattachment and Core shutdown clear caches
+and pending requests. Collection stops when no interested consumer remains. No
+inventory data is written to native storage or replayed from an old connection.
+
+### Explicit single-item actions
+
+| Method | Command |
+| --- | --- |
+| `client.inventory.take(id, containerId)` | `get <id> <containerId>` |
+| `client.inventory.put(id, containerId)` | `put <id> <containerId>` |
+| `client.inventory.wear(id)` | `wear <id>` |
+| `client.inventory.remove(id)` | `remove <id>` |
+| `client.inventory.drop(id)` | `drop <id>` |
+| `client.inventory.give(id, recipient)` | `give <id> <recipient>` |
+| `client.inventory.sell(id)` | `sell <id>` |
+| `client.inventory.donate(id)` | `donate <id>` |
+| `client.inventory.sacrifice(id)` | `sacrifice <id>` |
+
+Read-request and action methods return a request ID string or `nil, reason`.
+Result outcomes are `complete` for a completed read, `sent` for a command handed
+to transport and `failed` for failure. An action's `sent` result does not claim
+that the server performed it; inventory changes follow observed server tags.
+
+Actions require the active, identified, connected and negotiated session and an
+idle collector. Busy/inactive actions fail immediately; they are never queued
+for later execution or retried. Every action targets one positive integer object
+ID. `give` accepts a single alphabetic recipient name/keyword, optionally prefixed
+by a positive selector such as `2.guard`. Whitespace, command separators, bulk
+selectors and self-container puts are rejected. No action implicitly removes
+worn equipment, retrieves an item from a bag, or drops an item first. In
+particular, `sacrifice(id)` targets an item already on the ground, as described
+in [Sacrifice help](https://www.aardwolf.com/wiki/index.php/Help/Sacrifice).
+Server restrictions and item flags still determine whether commands succeed.
+
 ## UI helpers
 
 | Helper | Contract |
@@ -232,13 +367,19 @@ broadcasts. The library discovers **Aardwolf API Core** by name and uses the
 returned installed ID, including file-import-generated IDs. Core keys
 registrations by the callback's sender ID, not a payload-provided owner.
 
-- `register`: targeted JSON `{ version = 1, packages = [...] }` replaces a consumer declaration; replies with `state`.
+- `register`: targeted JSON `{ version = 1, packages = [...], inventory? = true }` replaces a consumer declaration; replies with `state`.
 - `unregister`: targeted withdrawal during consumer cleanup.
 - `ready` / `stopped`: Core lifecycle announcements; consumers rediscover or clear state.
-- `state`: targeted JSON `{ version = 1, session = {...}, snapshots = {...} }`.
+- `state`: targeted JSON `{ version = 1, session = {...}, snapshots = {...}, capabilities = { inventory = 1 } }`.
 - `update`: targeted JSON `{ version = 1, package = "...", payload = {...} }`.
 
-Only Core-origin state/update/stopped messages are accepted. Registration
+Inventory adds targeted `inventory-status`, `inventory-scope`,
+`inventory-details` and `inventory-result` messages. Each carries version 1 and
+a connection generation; requests carry consumer-local request IDs. Scopes are
+transferred separately with inventory-specific validation. Only registered
+inventory consumers can request work or receive inventory data.
+
+Only Core-origin state/update/stopped and inventory messages are accepted. Registration
 replies can arrive after `start()` returns; consumers observe availability
 through `session`, rather than assuming synchronous delivery. Core rebuilds
 requirements on registration/withdrawal and prunes unloaded/disabled senders

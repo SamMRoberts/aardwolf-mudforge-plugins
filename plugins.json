@@ -6,9 +6,9 @@
     {
       "id": "aardwolf-api-core",
       "name": "Aardwolf API Core",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": "Sam Roberts",
-      "description": "Shared Aardwolf session state and exclusive GMCP negotiation.",
+      "description": "Shared Aardwolf session and inventory state with exclusive GMCP negotiation.",
       "category": "utilities",
       "tags": [
         "aardwolf",
@@ -16,8 +16,8 @@
         "core"
       ],
       "downloadUrl": "dist/plugins/aardwolf-api-core.lua",
-      "sha256": "67b5eba0251896c55734634fc15b7b010f21aa45880977a1f80f4b0ef8acea89",
-      "size": 8223,
+      "sha256": "4878e0161298804a15414d2589d2a27e23ef260c26cc22fe1b7aa36fc92d4893",
+      "size": 10956,
       "format": "lua"
     },
     {
@@ -113,17 +113,17 @@
   "libraries": [
     {
       "name": "aardwolf-api",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "author": "Sam Roberts",
-      "description": "Session-scoped Aardwolf data, events, native storage and UI helpers.",
+      "description": "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers.",
       "tags": [
         "aardwolf",
         "gmcp",
         "api"
       ],
       "downloadUrl": "dist/libs/aardwolf-api.lua",
-      "sha256": "c1fd70255dfd805574b5317d54db6f9de9d80c3ce2dc2ec70c033755c80f4cfa",
-      "size": 24567
+      "sha256": "0f85fe285551b2cda1ec3ef9fb1471fc6070d77fff13fcd8b92016bb980ff849",
+      "size": 72838
     }
   ]
 }
