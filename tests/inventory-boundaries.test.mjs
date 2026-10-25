@@ -16,9 +16,139 @@ const helpers = `
     frame(world, "eqdata")
     return world, consumer.client.inventory, consumer, core
   end
+  local function nearLimitFrame(world, header)
+    local opening = "{" .. header .. "}"
+    world.line(opening)
+    local bytes, id = #opening, 1000
+    if header == "invdetails" then
+      local row = "{invheader}101|1|Container|10|1|none||Fixture||-1|||1"
+      world.line(row); bytes = bytes + #row + 1
+    end
+    while bytes < 1048574 do
+      local prefix = header == "invdetails" and "{invextra}" or tostring(id) .. ",,"
+      local suffix = header == "invdetails" and "" or ",1,10,0,-1,-1"
+      local size = math.min(header == "invdetails" and 65000 or 4000,
+        1048574 - bytes - #prefix - #suffix - 1)
+      assert(size > 0)
+      local row = prefix .. string.rep("x", size) .. suffix
+      world.line(row); bytes, id = bytes + #row + 1, id + 1
+    end
+  end
 `;
 
 const cases = {
+  'an oversized carried inventory footer fails safely and allows a fresh explicit request': `
+    local world, inventory = ready()
+    local results = {}; inventory.onResult(function(value) table.insert(results, value) end)
+    local requestId = inventory.refresh()
+    nearLimitFrame(world, "invdata"); world.line("{/invdata}")
+    assert(results[#results].requestId == requestId and results[#results].outcome == "failed")
+    assert(string.find(results[#results].reason, "1 MiB", 1, true))
+    assert(inventory.getItem(101) and inventory.get().scopes.inventory.stale)
+    frame(world, "eqdata")
+    assert(not inventory.status().collecting, "The already-received footer left a drain barrier")
+    inventory.refresh()
+    frame(world, "invdata", { "101,,a refreshed bag,1,11,0,-1,-1" }); frame(world, "eqdata")
+    assert(not inventory.status().collecting and not inventory.get().scopes.inventory.stale)
+    assert(inventory.getItem(101).name == "a refreshed bag")
+  `,
+  'an oversized equipment footer preserves stale equipment and permits an explicit refresh': `
+    local world, inventory = ready()
+    frame(world, "eqdata", { "201,,a worn helm,1,7,0,6,-1" })
+    inventory.refresh()
+    frame(world, "invdata", { "101,,a bag,1,11,0,-1,-1" })
+    nearLimitFrame(world, "eqdata"); world.line("{/eqdata}")
+    assert(inventory.getItem(201) and inventory.get().scopes.equipment.stale)
+    assert(not inventory.status().collecting)
+    inventory.refresh(); frame(world, "invdata", { "101,,a bag,1,11,0,-1,-1" })
+    frame(world, "eqdata", { "201,,a refreshed helm,1,7,0,6,-1" })
+    assert(not inventory.get().scopes.equipment.stale and inventory.getItem(201).name == "a refreshed helm")
+  `,
+  'an oversized container footer preserves stale contents and permits another explicit read': `
+    local world, inventory = ready()
+    inventory.lookIn(101); frame(world, "invdata 101", { "301,,a ruby,1,6,0,-1,-1" })
+    inventory.lookIn(101); nearLimitFrame(world, "invdata 101"); world.line("{/invdata}")
+    assert(inventory.getItem(301) and inventory.getContents(101).stale)
+    assert(not inventory.status().collecting)
+    inventory.lookIn(101); frame(world, "invdata 101", { "302,,a sapphire,1,6,0,-1,-1" })
+    assert(not inventory.getContents(101).stale and inventory.getItem(302) and not inventory.getItem(301))
+  `,
+  'an oversized details footer preserves prior details and permits another explicit identify': `
+    local world, inventory = ready()
+    inventory.identify(101)
+    world.line("{invdetails}"); world.line("{invheader}101|1|Container|10|1|none||Fixture||-1|||1"); world.line("{/invdetails}")
+    inventory.identify(101); nearLimitFrame(world, "invdetails"); world.line("{/invdetails}")
+    assert(inventory.getDetails(101).value == 10 and not inventory.status().collecting)
+    inventory.identify(101)
+    world.line("{invdetails}"); world.line("{invheader}101|1|Container|20|1|none||Fixture||-1|||1"); world.line("{/invdetails}")
+    assert(inventory.getDetails(101).value == 20 and not inventory.status().collecting)
+  `,
+  'a mismatched footer crossing the size limit still waits for the matching footer': `
+    local world, inventory = ready()
+    inventory.lookIn(101); nearLimitFrame(world, "invdata 101"); world.line("{/eqdata}")
+    assert(inventory.status().collecting)
+    local before = #world.commands; inventory.refresh()
+    assert(#world.commands == before)
+    world.line("{/invdata}")
+    assert(not inventory.status().collecting)
+  `,
+  'large object IDs and server flag and color combinations complete both listings': `
+    local world, inventory = ready()
+    inventory.refresh()
+    frame(world, "invdata", {
+      "3950000001,NKGH,@GAn example bag@w,200,11,1,-1,-1",
+      "3950000002,NC,@G(@WPolished@G)@w a robe,99,7,1,-1,-1"
+    })
+    frame(world, "eqdata", { "3950000003,NIH,@x250An example weapon@w ,71,5,1,27,-1" })
+    assert(not inventory.status().collecting and inventory.status().error == nil)
+    assert(inventory.getItem(3950000001).type == 11)
+    assert(inventory.getItem(3950000003).wearLocation == 27)
+    inventory.lookIn(3950000001)
+    assert(world.commands[#world.commands] == "invdata 3950000001")
+    frame(world, "invdata 3950000001")
+    assert(inventory.getContents(3950000001).known)
+  `,
+  'whitespace around inventory tags does not hide complete replies or alter item text': `
+    local world, inventory = ready()
+    inventory.refresh()
+    world.line("  {invdata}  ")
+    world.line("101,,  a bag  ,1,11,0,-1,-1")
+    world.line("  {/invdata}  ")
+    world.line("\\t{eqdata}\\r")
+    world.line("\\t{/eqdata}\\r")
+    assert(not inventory.status().collecting and inventory.status().error == nil)
+    assert(inventory.getItem(101).name == "  a bag  ")
+    inventory.lookIn(101)
+    world.line("  {invdata 101}  "); world.line("  {/invdata}  ")
+    assert(inventory.getContents(101).known and not inventory.getContents(101).stale)
+    inventory.identify(101)
+    world.line("  {invdetails}  ")
+    world.line("{invheader}101|1|Container|10|1|none||Fixture||-1|||1")
+    world.line("{invextra}   ")
+    world.line("  {/invdetails}  ")
+    assert(inventory.getDetails(101).tags[1].value == "   ")
+  `,
+  'whitespace around normalized tags still counts toward the frame size limit': `
+    local world, inventory = ready()
+    inventory.refresh()
+    world.line(string.rep(" ", 1048576) .. "{invdata}")
+    world.line("{/invdata}")
+    assert(inventory.getItem(101) and inventory.get().scopes.inventory.stale)
+    assert(string.find(inventory.status().error, "1 MiB", 1, true))
+  `,
+  'draining a timed out reply clears obsolete waiting feedback and preserves stale data': `
+    local world, inventory = ready()
+    inventory.refresh(); world.tick(10001)
+    assert(string.find(inventory.status().error, "invdata", 1, true))
+    assert(string.find(inventory.status().error, "opening tag", 1, true))
+    world.line("  {/eqdata}  ")
+    assert(inventory.status().collecting)
+    world.line("  {/invdata}  ")
+    assert(not inventory.status().collecting and inventory.status().error == nil)
+    assert(inventory.getItem(101) and inventory.get().scopes.inventory.stale)
+    inventory.refresh(); world.line("{invdata}"); world.tick(10001)
+    assert(string.find(inventory.status().error, "closing tag", 1, true))
+  `,
   'manual interruption drains both replies before another owned read can complete': `
     local world, inventory, consumer = ready()
     local results = {}; inventory.onResult(function(value) table.insert(results, value) end)

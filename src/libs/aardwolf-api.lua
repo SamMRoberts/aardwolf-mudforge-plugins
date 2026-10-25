@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.8.0", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.8.2", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers."
 }
 
-local M = { version = "0.8.0", coreName = "Aardwolf API Core" }
+local M = { version = "0.8.2", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -172,6 +172,16 @@ local function requireHost(host, name)
   return host[name]
 end
 
+-- Host failures must not interrupt the remaining lifecycle cleanup. Keep native
+-- exception text private, as with subscriber errors.
+local function guarded(host, operation, callback)
+  local ok = pcall(callback)
+  if not ok and type(host.reportError) == "function" then
+    pcall(host.reportError, "aardwolf-api " .. operation .. " failed")
+  end
+  return ok
+end
+
 local function storageFor(host)
   local storage = {}
   local function name(key)
@@ -254,8 +264,14 @@ local function uiFor(host)
     for name, widget in pairs(names) do if widget == id then names[name] = nil end end
   end
   function ui.cleanup()
-    for id in pairs(owned) do requireHost(host, "destroyWidget")(id) end
-    owned, names = {}, {}
+    local remaining, remainingNames = {}, {}
+    for id, kind in pairs(owned) do
+      if type(kind) == "string" and not guarded(host, "widget cleanup", function() requireHost(host, "destroyWidget")(id) end) then
+        remaining[id] = kind
+      end
+    end
+    for name, id in pairs(names) do if remaining[id] then remainingNames[name] = id end end
+    owned, names = remaining, remainingNames
   end
   function ui.typography(options)
     local opts = options or {}
@@ -339,30 +355,61 @@ local function spellsFor(host, enabled)
   local prefix = "aardwolf-spells:"
   local provider, snapshot = nil, nil
   local active, disconnected = false, false
+  local revision = 0
+  local listeners = {}
+  local pendingUnsubscribe = {}
   local subscribers = {}
   local status = { available = false, connected = false, refreshing = false, reason = enabled and "not started" or "not enabled" }
   local api = {}
   local function notify()
+    local token = revision
     local callbacks = {}
-    for _, item in ipairs(subscribers) do if item.active then table.insert(callbacks, item.callback) end end
-    for _, callback in ipairs(callbacks) do
-      local ok = pcall(callback, copy(snapshot), copy(status))
-      if not ok and type(host.reportError) == "function" then pcall(host.reportError, "aardwolf-api spells subscriber failed") end
+    for _, item in ipairs(subscribers) do if item.active then table.insert(callbacks, item) end end
+    for _, item in ipairs(callbacks) do
+      if token ~= revision then return end
+      if item.active then
+        local ok = pcall(item.callback, copy(snapshot), copy(status))
+        if not ok and type(host.reportError) == "function" then pcall(host.reportError, "aardwolf-api spells subscriber failed") end
+      end
     end
   end
   local function clear(reason)
+    revision = revision + 1
+    local token = revision
     snapshot = nil
     status = { available = false, connected = false, refreshing = false, reason = reason }
     notify()
+    return token
+  end
+  local function hasPendingUnsubscribe()
+    for _ in pairs(pendingUnsubscribe) do return true end
+    return false
+  end
+  local function withdraw()
+    local token, ids = revision, {}
+    for id in pairs(pendingUnsubscribe) do table.insert(ids, id) end
+    for _, id in ipairs(ids) do
+      if token ~= revision then return end
+      if pendingUnsubscribe[id] then
+        pendingUnsubscribe[id] = nil
+        local ok = guarded(host, "Spells unsubscribe", function() host.broadcastToPlugin(id, prefix .. "unsubscribe") end)
+        if not ok and token == revision then pendingUnsubscribe[id] = true end
+      end
+    end
   end
   local function discover()
     if not active then return end
+    revision = revision + 1
     local found = host.findPluginByName("Aardwolf Spells")
     if type(found) ~= "table" or type(found.id) ~= "string" or found.enabled == false then
       provider = nil; clear("Spells provider is unavailable"); return
     end
     provider = found.id
-    clear("waiting for Spells provider")
+    local token = clear("waiting for Spells provider")
+    if not active or token ~= revision or provider ~= found.id then return end
+    -- A new subscription replaces this consumer's old registration. Do not
+    -- leave deferred cleanup that could later remove the new subscription.
+    pendingUnsubscribe[provider] = nil
     host.broadcastToPlugin(provider, prefix .. "subscribe", json.encode({ version = 1 }))
   end
   local function receive(sender, message, encoded)
@@ -386,6 +433,7 @@ local function spellsFor(host, enabled)
         or string.lower(candidate.characterName) ~= string.lower(state.characterName) then return end
     end
     if disconnected then return end
+    revision = revision + 1
     snapshot = candidate
     status = { available = true, connected = state.connected, refreshing = state.refreshing,
       characterName = state.characterName, reason = state.reason, error = state.error }
@@ -404,23 +452,56 @@ local function spellsFor(host, enabled)
     disconnected = true; clear("disconnected")
   end
   local function onConnect()
+    if not active then return end
     disconnected = false; discover()
+  end
+  local function removeListener(event, registration)
+    if not registration then return end
+    host.off(event, registration.callback)
+    if listeners[event] == registration then listeners[event] = nil end
+  end
+  local function listen(event, callback)
+    local registration = {}
+    registration.callback = function()
+      if active and listeners[event] == registration then callback() end
+    end
+    -- A bridge may register the hook and then throw. Retain its identity until
+    -- removal succeeds so retry cannot leave an old hook or create a duplicate.
+    listeners[event] = registration
+    host.on(event, registration.callback)
+    return registration
   end
   local function start()
     if not enabled or active then return end
+    local token = revision
+    withdraw()
+    if active or token ~= revision then return end
+    removeListener("connected", listeners.connected)
+    if active or token ~= revision then return end
+    removeListener("disconnected", listeners.disconnected)
+    if active or token ~= revision then return end
     active, disconnected = true, false
-    host.on("connected", onConnect)
-    host.on("disconnected", onDisconnect)
+    revision = revision + 1
+    local connectedRegistration = listen("connected", onConnect)
+    if not active or listeners.connected ~= connectedRegistration then return end
+    local disconnectedRegistration = listen("disconnected", onDisconnect)
+    if not active or listeners.disconnected ~= disconnectedRegistration then return end
     discover()
   end
   local function stop()
-    if not active then return end
+    if not active and not listeners.connected and not listeners.disconnected and not hasPendingUnsubscribe() then return end
     active = false
-    if provider then host.broadcastToPlugin(provider, prefix .. "unsubscribe") end
+    revision = revision + 1
+    local token, previousProvider = revision, provider
+    local connectedRegistration, disconnectedRegistration = listeners.connected, listeners.disconnected
+    if previousProvider then pendingUnsubscribe[previousProvider] = true end
     provider = nil
-    host.off("connected", onConnect)
-    host.off("disconnected", onDisconnect)
-    clear("not started")
+    -- Remove the old hooks before notifying the provider: its synchronous
+    -- response may restart this consumer and register a new set of hooks.
+    guarded(host, "Spells connected listener cleanup", function() removeListener("connected", connectedRegistration) end)
+    guarded(host, "Spells disconnected listener cleanup", function() removeListener("disconnected", disconnectedRegistration) end)
+    if token == revision then withdraw() end
+    if not active and token == revision then clear("not started") end
   end
   return api, start, stop, receive
 end
@@ -813,7 +894,12 @@ function M.protocol.inventoryCollector(host)
     timeoutSerial = timeoutSerial + 1
     local token, timerToken = epoch, timeoutSerial
     local ok, timer = pcall(host.addTimer, 10000, function()
-      if not stopped and token == epoch and timerToken == timeoutSerial then timeout = nil; finish("failed", "Inventory response timed out; waiting for its closing tag or reconnect", true) end
+      if not stopped and token == epoch and timerToken == timeoutSerial then
+        local command = current and current.command or "inventory"
+        local missing = capture and "missing closing tag" or "no opening tag received"
+        timeout = nil
+        finish("failed", "Inventory response timed out for " .. command .. " (" .. missing .. "); waiting for its closing tag or reconnect", true)
+      end
     end, false)
     if not ok or type(timer) ~= "string" or timer == "" then return false end
     timeout = timer
@@ -991,24 +1077,35 @@ function M.protocol.inventoryCollector(host)
   end
   function service.line(rawLine, cleanLine)
     if not interested() or not connection.connected or not monitoring or type(cleanLine) ~= "string" then return end
+    -- ANSI-stripped host lines may still contain surrounding whitespace.
+    -- Normalize standalone tags only: item names and detail values stay intact.
     local line = cleanLine
+    local tagLine = string.match(cleanLine, "^%s*(.-)%s*$")
+    local kind, key = header(tagLine)
+    local closing = tagLine == "{/invdata}" or tagLine == "{/eqdata}" or tagLine == "{/invdetails}"
+    if kind or closing then line = tagLine end
     if capture then
-      capture.bytes = capture.bytes + #line + 1
-      if capture.bytes > 1048576 then finish("failed", "Inventory frame exceeds 1 MiB", true); return end
+      capture.bytes = capture.bytes + #cleanLine + 1
+      if capture.bytes > 1048576 then
+        local expected = capture.kind == "details" and "{/invdetails}"
+          or capture.key == "equipment" and "{/eqdata}" or "{/invdata}"
+        -- A matching footer has already ended this reply, even when its bytes
+        -- cross the limit. Other lines still need the original reply drained.
+        finish("failed", "Inventory frame exceeds 1 MiB", line ~= expected); return
+      end
     end
     -- Keep explicit live item movements accurate in every connected state.
     -- Inactive characters cannot start new captures or defer reconciliation
     -- commands until waking; an already-cancelled reply may still drain.
     if monitor(line) then return end
     if not collectionReady() and not draining then return end
-    local kind, key = header(line)
     if draining then
       local expected = draining.footers and draining.footers[1]
         or (draining.kind == "details" and "{/invdetails}" or draining.key == "equipment" and "{/eqdata}" or "{/invdata}")
       if not draining.ambiguous and line == expected then
         if draining.footers then table.remove(draining.footers, 1) end
         if not draining.footers or #draining.footers == 0 then
-          draining, reason = nil, "ready"; notify(); startNext()
+          draining, reason, lastError = nil, "ready", nil; notify(); startNext()
         end
       end
       return
@@ -1023,7 +1120,7 @@ function M.protocol.inventoryCollector(host)
         finish("failed", "Unsolicited inventory frame interrupted collection; reconnect to reset", true)
         draining = { ambiguous = true }; return
       end
-      capture = { epoch = epoch, kind = kind, key = key, owned = matches == true, entries = {}, ids = {}, overrides = {}, bytes = #line,
+      capture = { epoch = epoch, kind = kind, key = key, owned = matches == true, entries = {}, ids = {}, overrides = {}, bytes = #cleanLine,
         tags = 0, dirty = false }
       if not current then
         current = { key = key, kind = kind, command = "manual tagged inventory", waiters = {}, manual = true }
@@ -1033,7 +1130,6 @@ function M.protocol.inventoryCollector(host)
     end
     if not capture then return end
     local frame = capture
-    local closing = line == "{/invdata}" or line == "{/eqdata}" or line == "{/invdetails}"
     if closing then
       if (frame.kind == "details" and line ~= "{/invdetails}")
         or (frame.kind == "scope" and ((frame.key == "equipment" and line ~= "{/eqdata}")
@@ -1313,15 +1409,18 @@ local function inventoryFor(host, enabled, dispatch)
     return value
   end
   local function invoke(list, result)
-    local calls = {}
+    local calls, token = {}, lifetime
     for _, subscription in ipairs(list) do
-      if subscription.active then table.insert(calls, subscription.callback) end
+      if subscription.active then table.insert(calls, subscription) end
     end
-    for _, callback in ipairs(calls) do
-      local ok
-      if result then ok = pcall(callback, copy(result))
-      else ok = pcall(callback, snapshot(), copy(state)) end
-      if not ok and type(host.reportError) == "function" then pcall(host.reportError, "aardwolf-api inventory subscriber failed") end
+    for _, subscription in ipairs(calls) do
+      if token ~= lifetime then return end
+      if subscription.active then
+        local ok
+        if result then ok = pcall(subscription.callback, copy(result))
+        else ok = pcall(subscription.callback, snapshot(), copy(state)) end
+        if not ok and type(host.reportError) == "function" then pcall(host.reportError, "aardwolf-api inventory subscriber failed") end
+      end
     end
   end
   local function clear(reason, available)
@@ -1329,9 +1428,13 @@ local function inventoryFor(host, enabled, dispatch)
     local previous = pending
     pending = {}
     lifetime = lifetime + 1
+    local token = lifetime
     state = { available = available == true, connected = false, collecting = false, active = false, potionReady = false, reason = reason }
-    for requestId in pairs(previous) do invoke(results, { requestId = requestId, outcome = "failed", reason = reason }) end
-    invoke(callbacks)
+    for requestId in pairs(previous) do
+      if token ~= lifetime then return end
+      invoke(results, { requestId = requestId, outcome = "failed", reason = reason })
+    end
+    if token == lifetime then invoke(callbacks) end
   end
   local function capability(value, session, actions)
     if not enabled then return end
@@ -1373,10 +1476,12 @@ local function inventoryFor(host, enabled, dispatch)
         characterName = value.characterName, reason = value.reason, error = value.error }
       -- Commit the complete new state before calling user code. A subscriber
       -- may stop or restart the client; nothing after it may restore old state.
+      local token = lifetime
       for requestId in pairs(previous) do
+        if token ~= lifetime then return end
         invoke(results, { requestId = requestId, outcome = "failed", reason = value.reason or "inventory reset" })
       end
-      invoke(callbacks)
+      if token == lifetime then invoke(callbacks) end
       return
     end
     if generation ~= data.generation or not state.connected then return end
@@ -1533,7 +1638,18 @@ function M.new(host, options)
   local spellsStart, spellsStop, spellsReceive
   self.spells, spellsStart, spellsStop, spellsReceive = spellsFor(host, opts.spells == true)
   local active, registered, lifecycle = false, false, 0
+  local deliveryEpoch, disconnectListening, broadcastRegistration = 0, false, 0
   local coreId = nil
+  local pendingUnregister = {}
+  local function withdraw()
+    local previous = pendingUnregister
+    pendingUnregister = {}
+    for id in pairs(previous) do
+      if not guarded(host, "Core unregister", function() host.broadcastToPlugin(id, PREFIX .. "unregister") end) then
+        pendingUnregister[id] = true
+      end
+    end
+  end
   local inventoryReceive, inventoryCapability, inventoryClear
   self.inventory, inventoryReceive, inventoryCapability, inventoryClear = inventoryFor(host, opts.inventory == true, function(data)
     if not active or not coreId then return false end
@@ -1543,24 +1659,31 @@ function M.new(host, options)
   local session = { available = false, connected = false, negotiated = false, reason = "not started" }
 
   local function notify(topic, value)
-    local callbacks = {}
+    local callbacks, token = {}, deliveryEpoch
     for _, subscription in ipairs(subscribers) do
-      if subscription.topic == topic and subscription.active then table.insert(callbacks, subscription.callback) end
+      if subscription.topic == topic and subscription.active then table.insert(callbacks, subscription) end
     end
-    for _, callback in ipairs(callbacks) do
-      local ok = pcall(callback, copy(value))
-      if not ok and type(host.reportError) == "function" then
-        pcall(host.reportError, "aardwolf-api subscriber failed: " .. topic)
+    for _, subscription in ipairs(callbacks) do
+      if token ~= deliveryEpoch then return end
+      if subscription.active then
+        local ok = pcall(subscription.callback, copy(value))
+        if not ok and type(host.reportError) == "function" then
+          pcall(host.reportError, "aardwolf-api subscriber failed: " .. topic)
+        end
       end
     end
   end
   local function unavailable(reason)
+    deliveryEpoch = deliveryEpoch + 1
+    local token = deliveryEpoch
     coreId, snapshots = nil, {}
     session = { available = false, connected = false, negotiated = false, reason = reason }
     inventoryClear(reason, false)
-    notify("session", session)
+    if token == deliveryEpoch then notify("session", session) end
   end
   local function discover()
+    deliveryEpoch = deliveryEpoch + 1
+    local epoch = deliveryEpoch
     local token = lifecycle
     local found = host.findPluginByName(M.coreName)
     if type(found) ~= "table" or type(found.id) ~= "string" or found.enabled == false then
@@ -1571,14 +1694,16 @@ function M.new(host, options)
     snapshots = {}
     session = { available = false, connected = false, negotiated = false, reason = "waiting for Core" }
     inventoryClear("waiting for Core", false)
-    if not active or token ~= lifecycle then return end
+    if not active or token ~= lifecycle or epoch ~= deliveryEpoch then return end
     notify("session", session)
-    if not active or token ~= lifecycle then return end
+    if not active or token ~= lifecycle or epoch ~= deliveryEpoch then return end
     host.broadcastToPlugin(coreId, PREFIX .. "register", json.encode({ version = 1, packages = packages, inventory = opts.inventory == true }))
   end
   local function receive(sender, message, encoded)
     if not active then return end
+    local token = lifecycle
     spellsReceive(sender, message, encoded)
+    if not active or token ~= lifecycle then return end
     if message == PREFIX .. "ready" then
       discover()
       return
@@ -1593,6 +1718,8 @@ function M.new(host, options)
       return
     end
     if message == PREFIX .. "state" and type(data.session) == "table" and type(data.snapshots) == "table" then
+      deliveryEpoch = deliveryEpoch + 1
+      local epoch = deliveryEpoch
       session = {
         available = true, connected = data.session.connected == true,
         negotiated = data.session.negotiated == true,
@@ -1607,8 +1734,12 @@ function M.new(host, options)
       end
       inventoryCapability(type(data.capabilities) == "table" and data.capabilities.inventory or nil, session,
         type(data.capabilities) == "table" and data.capabilities.inventoryActions or nil)
+      if epoch ~= deliveryEpoch then return end
       notify("session", session)
-      for _, packageName in ipairs(STATE) do notify(packageName, snapshots[packageName]) end
+      for _, packageName in ipairs(STATE) do
+        if epoch ~= deliveryEpoch then return end
+        notify(packageName, snapshots[packageName])
+      end
     elseif message == PREFIX .. "update" and session.connected then
       local value = normalize(data.package, data.payload)
       if type(value) ~= "table" then return end
@@ -1618,30 +1749,61 @@ function M.new(host, options)
   end
   local function disconnected()
     if not active then return end
+    deliveryEpoch = deliveryEpoch + 1
+    local token = deliveryEpoch
     snapshots = {}
-    session.connected, session.negotiated = false, false
-    session.reason = "disconnected"
+    session = { available = session.available, connected = false, negotiated = false, reason = "disconnected" }
     inventoryClear("disconnected", false)
-    notify("session", session)
+    if token == deliveryEpoch then notify("session", session) end
   end
   function self.start()
     if active then return self.status() end
+    withdraw()
     active = true
     lifecycle = lifecycle + 1
+    deliveryEpoch = deliveryEpoch + 1
     local token = lifecycle
-    if not registered then host.onPluginBroadcast(receive); registered = true end
-    host.on("disconnected", disconnected)
-    discover()
-    if active and token == lifecycle then spellsStart() end
+    local ok = guarded(host, "startup", function()
+      if not registered then
+        broadcastRegistration = broadcastRegistration + 1
+        local registrationToken = broadcastRegistration
+        -- Broadcast hooks cannot be removed before plugin unload. If the host
+        -- registers one then throws, a retry makes that partial hook inert.
+        host.onPluginBroadcast(function(sender, message, encoded)
+          if registered and registrationToken == broadcastRegistration then receive(sender, message, encoded) end
+        end)
+        registered = true
+      end
+      -- Mark ownership before registering so rollback also handles a host that
+      -- throws after partially adding its listener.
+      if disconnectListening then host.off("disconnected", disconnected); disconnectListening = false end
+      disconnectListening = true
+      host.on("disconnected", disconnected)
+      discover()
+      if active and token == lifecycle then spellsStart() end
+    end)
+    if not ok and active and token == lifecycle then
+      self.stop()
+      if not active and lifecycle == token + 1 then unavailable("Client startup failed") end
+    end
     return self.status()
   end
   function self.stop()
-    spellsStop()
-    if not active then self.ui.cleanup(); return end
+    local token = lifecycle
+    guarded(host, "Spells cleanup", spellsStop)
+    -- A cleanup notification may have stopped or restarted this consumer.
+    if token ~= lifecycle then return end
+    if not active then
+      withdraw()
+      if disconnectListening and guarded(host, "disconnect listener cleanup", function() host.off("disconnected", disconnected) end) then disconnectListening = false end
+      self.ui.cleanup(); return
+    end
     active = false
     lifecycle = lifecycle + 1
-    if type(coreId) == "string" then host.broadcastToPlugin(coreId, PREFIX .. "unregister") end
-    host.off("disconnected", disconnected)
+    deliveryEpoch = deliveryEpoch + 1
+    if type(coreId) == "string" then pendingUnregister[coreId] = true end
+    withdraw()
+    if disconnectListening and guarded(host, "disconnect listener cleanup", function() host.off("disconnected", disconnected) end) then disconnectListening = false end
     unavailable("not started")
     if not active then self.ui.cleanup() end
   end

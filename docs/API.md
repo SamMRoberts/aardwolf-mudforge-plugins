@@ -1,4 +1,4 @@
-# Aardwolf API 0.6.0
+# Aardwolf API 0.8.2
 
 ## Lifecycle and host adapters
 
@@ -41,6 +41,18 @@ Subscribe before starting. Subscriptions remain attached across `stop/start`
 until their unsubscribe function is called; owned widgets must be recreated.
 MudForge keeps the broadcast callback until plugin unload, so the library
 installs it once and gates it on whether the instance is active.
+
+Library **0.8.2** rolls back a startup host exception and returns an unavailable
+status with `reason = "Client startup failed"`; another explicit `start()` retries.
+Shutdown attempts every cleanup step even if a host operation throws. Failed
+withdrawals and listener removals can be retried by another explicit `stop()` or
+`start()`; failed widget destruction stays owned for another `stop()` attempt.
+Lifecycle failures use fixed `reportError` messages without native exception text.
+
+Callback dispatch respects same-turn unsubscription and stops an obsolete batch
+when a callback stops, restarts or disconnects the consumer. Initial state replay
+also stops after such a change. These rules apply to protocol, inventory and
+Spells subscriptions; callbacks still receive independent defensive copies.
 
 ## State and events
 
@@ -287,6 +299,14 @@ ambiguous changes trigger bounded reconciliation of affected scopes. Concurrent
 events cannot be overwritten by an older listing's completion. Unscanned contents
 remain unknown or explicitly partial (`known = false`), rather than being
 presented as a completely listed empty bag.
+
+Library **0.8.1** accepts surrounding whitespace on standalone inventory tags
+and includes the command and missing opening/closing tag in timeout feedback.
+Completing a drain clears the obsolete waiting error while retaining stale data.
+Library **0.8.2** treats a matching footer that crosses the frame size limit as
+already drained: the oversized response fails and preserves stale cache, while
+subsequent explicit reads remain available. A mismatched footer cannot release
+the drain barrier.
 
 A closing tag commits a complete scope atomically. Malformed, incomplete,
 oversized or timed-out collection retains the last-good scope marked stale and
