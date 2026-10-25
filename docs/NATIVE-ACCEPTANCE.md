@@ -113,7 +113,7 @@ a successful local replay does not establish those server contracts.
 
 ## Inventory Management plugin — pending
 
-Inventory Management **0.2.2**, API **0.8.4** and Core **0.4.2** require their own
+Inventory Management **0.2.3**, API **0.8.4** and Core **0.4.2** require their own
 native acceptance. Offline Lua fixtures and standalone browser checks do not
 establish native docking, context-menu delivery, persistence or live gameplay.
 Use only an explicitly authorized disposable world and local transport fixture;

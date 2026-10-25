@@ -1,6 +1,6 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.2** uses `aardwolf-api` **0.8.4** and Aardwolf API
+Inventory Management **0.2.3** uses `aardwolf-api` **0.8.4** and Aardwolf API
 Core **0.4.2**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
@@ -13,6 +13,11 @@ The summary is a normal dockable MudForge widget. It shows the number of items
 directly in carried inventory, including storage bags themselves. Worn equipment
 and bag contents are excluded. Unknown or stale data is labeled rather than
 presented as a fresh count.
+
+The summary uses smaller labels, 22 px minimum bag rows and buttons, and tighter
+spacing. At widths of 280 px or more, its five action buttons share one row;
+narrower docks use two rows. The saved font-size setting still scales the widget,
+and the bag list scrolls within the space left above the controls.
 
 The bag list contains discovered storage containers, with their location shown;
 worn bags are included by default. Drink containers remain a separate item type.

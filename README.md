@@ -105,7 +105,7 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Inventory Management
 
-[Aardwolf Inventory Management 0.2.2](docs/INVENTORY.md) adds a dockable summary
+[Aardwolf Inventory Management 0.2.3](docs/INVENTORY.md) adds a dockable summary
 with the directly carried item count and discovered storage bags. The count
 includes bags themselves, but excludes worn equipment and items inside bags.
 Double-click a bag, or press Enter on it, to open its contents in the floating
