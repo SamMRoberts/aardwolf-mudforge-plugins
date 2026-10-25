@@ -1,6 +1,6 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.0** uses `aardwolf-api` **0.8.0** and Aardwolf API
+Inventory Management **0.2.1** uses `aardwolf-api` **0.8.2** and Aardwolf API
 Core **0.4.0**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
@@ -118,7 +118,10 @@ Setup saves font size, bag visibility/order and disposal-confirmation preference
 in native plugin/world storage. Rules, quick potion choices and held-slot
 configuration are specific to the identified character. Inventory snapshots and
 pending workflows are never
-persisted. A failed settings save is shown and does not claim persistence.
+persisted. A failed settings save is shown and does not claim persistence. Widget array
+indexes are normalized before validation, preserving bag and rule order. Save
+errors distinguish invalid preferences, invalid character settings, a changed
+character and a running workflow.
 
 Setup supports up to 64 sorting rules. Each rule has an enabled state, an item type
 (or Any type), an optional name substring
@@ -143,6 +146,23 @@ login, loot, refresh or a timer.
 | `awinventory setup` | Open settings. |
 | `awinventory refresh` | Refresh carried inventory and equipment. |
 | `awinventory status` | Report inventory/workflow status and feedback. |
+
+## Timeout troubleshooting
+
+Library 0.8.1 identifies the timed-out command (`invdata`, `eqdata`,
+`invdata <bag-id>` or `invdetails <item-id>`) and whether its opening tag was
+received. It tolerates whitespace around standalone tags while preserving item
+names and detail values. After the expected closing tag drains an interrupted
+reply, the obsolete waiting error clears; the affected cached listing stays stale
+until explicitly refreshed. No gameplay command is retried automatically.
+
+Library 0.8.2 also releases collection when a matching closing tag crosses the
+frame size limit: the oversized listing fails without waiting for a second tag.
+
+If the expected tag never arrives, reconnect to reset collection, then run
+`awinventory refresh`. If the timeout recurs, retain the complete message and
+that command's tagged output. Update the loaded `aardwolf-api` library as well
+as Inventory Management, and reload Core so it uses the new collector.
 
 ## Verification boundary
 

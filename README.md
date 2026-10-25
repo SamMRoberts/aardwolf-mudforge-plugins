@@ -1,7 +1,7 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.8.0** library provides a session Core, an injected library facade, native
+The **0.8.2** library provides a session Core, an injected library facade, native
 storage and widget helpers, opt-in inventory management, a reactive vitals example,
 and a configurable vitals HUD.
 All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.0**
@@ -82,7 +82,7 @@ have **not been published or installed** by this scaffold.
    [Room Details](#aardwolf-room-details). It enables room tags and requests a look
    after login; it needs no file permission.
 7. Optionally install `dist/plugins/aardwolf-inventory.lua` for
-   [Inventory Management](docs/INVENTORY.md). Update the library to **0.8.0** and
+   [Inventory Management](docs/INVENTORY.md). Update the library to **0.8.2** and
    API Core to **0.4.0** for held-item preparation and item-use actions.
 
 With these files hosted, the root `plugins.json` publishes plugin and
@@ -105,7 +105,7 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Inventory Management
 
-[Aardwolf Inventory Management 0.2.0](docs/INVENTORY.md) adds a dockable summary
+[Aardwolf Inventory Management 0.2.1](docs/INVENTORY.md) adds a dockable summary
 with the directly carried item count and discovered storage bags. The count
 includes bags themselves, but excludes worn equipment and items inside bags.
 Double-click a bag, or press Enter on it, to open its contents in the floating

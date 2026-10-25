@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.2.0",
+  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.2.1",
   author = "Sam Roberts", description = "Dockable inventory, bag management, prepared item use and explicit sorting rules."
 }
 
@@ -248,6 +248,25 @@ local function validList(value, maximum, validate)
     count = count + 1
   end
   return count == #value
+end
+-- HTML widget arrays can arrive with zero-based or string numeric keys.
+-- Normalize only the submitted lists; stored settings keep their validated schema.
+local function widgetList(value, maximum)
+  if type(value) ~= "table" then return nil end
+  local indexed, count, first = {}, 0, 1
+  for name, entry in pairs(value) do
+    local index = tonumber(name)
+    if not integer(index, 0, maximum) or entry == nil or indexed[index] ~= nil then return nil end
+    indexed[index], count = entry, count + 1
+    if count > maximum then return nil end
+    if index == 0 then first = 0 end
+  end
+  local result = {}
+  for index = first, first + count - 1 do
+    if indexed[index] == nil then return nil end
+    table.insert(result, indexed[index])
+  end
+  return result
 end
 local function validProfile(value)
   if type(value) ~= "table" then return false end
@@ -837,23 +856,31 @@ local function saveOutcome(ok, text)
   publish()
 end
 local function saveSettings(data)
-  if type(data) ~= "table" or data.identity ~= identity or workflow or not validPreferences(data.preferences) or not validProfile(data.profile) then
-    saveOutcome(false,"Settings are invalid, belong to another character, or a workflow is running"); return
-  end
+  if type(data) ~= "table" then saveOutcome(false,"Settings message is invalid"); return end
+  if data.identity ~= identity then saveOutcome(false,"Character changed; reopen Setup before saving"); return end
+  if workflow then saveOutcome(false,"Finish or cancel the inventory workflow before saving settings"); return end
   if not characterKey then saveOutcome(false,"Log in to save character settings"); return end
+  local rawPreferences, rawProfile = data.preferences, data.profile
+  if type(rawPreferences) ~= "table" or type(rawProfile) ~= "table" then saveOutcome(false,"Settings message is invalid"); return end
+  local preferences = { fontSize = rawPreferences.fontSize, showWorn = rawPreferences.showWorn,
+    confirmDisposal = rawPreferences.confirmDisposal, bagOrder = widgetList(rawPreferences.bagOrder, 256),
+    hiddenBags = widgetList(rawPreferences.hiddenBags, 256) }
+  local submittedProfile = { heldSlot = rawProfile.heldSlot, rules = widgetList(rawProfile.rules, 64), quickPotions = rawProfile.quickPotions }
+  if not validPreferences(preferences) then saveOutcome(false,"Display preferences or bag choices are invalid; check Setup"); return end
+  if not validProfile(submittedProfile) then saveOutcome(false,"Held slot, potion choices, or sorting rules are invalid; check Setup"); return end
   local updated = copy(settings)
   -- Only persist the validated fields, rather than recursively copying arbitrary
   -- extra data supplied by a widget message.
-  local preferences, savedProfile = data.preferences, { heldSlot = data.profile.heldSlot, rules = {}, quickPotions = defaultPotions() }
+  local savedProfile = { heldSlot = submittedProfile.heldSlot, rules = {}, quickPotions = defaultPotions() }
   updated.preferences = { fontSize = preferences.fontSize, showWorn = preferences.showWorn,
     confirmDisposal = preferences.confirmDisposal, bagOrder = {}, hiddenBags = {} }
   for _, id in ipairs(preferences.bagOrder) do table.insert(updated.preferences.bagOrder, id) end
   for _, id in ipairs(preferences.hiddenBags) do table.insert(updated.preferences.hiddenBags, id) end
-  for _, rule in ipairs(data.profile.rules) do
+  for _, rule in ipairs(submittedProfile.rules) do
     table.insert(savedProfile.rules, { enabled = rule.enabled, type = rule.type, name = rule.name, bagId = rule.bagId })
   end
   for _, slot in ipairs({ "heal", "mana" }) do
-    local potion = data.profile.quickPotions and data.profile.quickPotions[slot]
+    local potion = submittedProfile.quickPotions and submittedProfile.quickPotions[slot]
     if potion then savedProfile.quickPotions[slot] = { name = trimmed(potion.name), bagId = potion.bagId } end
   end
   updated.profiles[characterKey] = savedProfile

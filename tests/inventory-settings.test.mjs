@@ -14,6 +14,38 @@ const cases = {
     local saved = context.storage["aardwolf-api:inventory:settings"].value
     assert(saved.preferences.extra == nil and saved.profiles.fixture.extra == nil)
   `,
+  'setup normalizes zero-based widget lists before validating and saving their full order': `
+    local world, context = inventoryWorld(); world.loaded(); world.setup()
+    local state = world.state("setup")
+    state.preferences.bagOrder = { [0] = 102, [1] = 101, [2] = 201 }
+    state.preferences.hiddenBags = { [0] = 201 }
+    state.profile.rules = { [0] = { enabled = true, type = 8, name = "red", bagId = 101 },
+      [1] = { enabled = false, type = 0, name = "", bagId = 102 } }
+    world.save(state.profile, state.preferences)
+    assert(world.state("setup").feedback == "Settings saved", world.state("setup").feedback)
+    local saved = context.storage["aardwolf-api:inventory:settings"].value
+    assert(saved.preferences.bagOrder[1] == 102 and saved.preferences.bagOrder[3] == 201)
+    assert(saved.preferences.hiddenBags[1] == 201 and saved.profiles.fixture.rules[1].name == "red")
+    assert(saved.profiles.fixture.rules[2].enabled == false and #saved.profiles.fixture.rules == 2)
+    assert(world.state().bags[1].id == 102)
+  `,
+  'setup accepts string numeric widget indexes but rejects holes duplicate indexes and list metadata': `
+    local world, context = inventoryWorld(); world.loaded(); world.setup()
+    local state = world.state("setup")
+    state.preferences.bagOrder = { ["0"] = 102, ["1"] = 101 }
+    state.profile.rules = { ["0"] = { enabled = true, type = 8, name = "red", bagId = 101 } }
+    world.save(state.profile, state.preferences)
+    assert(world.state("setup").feedback == "Settings saved", world.state("setup").feedback)
+    local saved = context.storage["aardwolf-api:inventory:settings"].value
+    assert(saved.preferences.bagOrder[1] == 102 and saved.profiles.fixture.rules[1].bagId == 101)
+    local writes = context.writes
+    for _, invalid in ipairs({ { [0] = 101, [2] = 102 }, { [0] = 101, ["0"] = 102 },
+      { [1] = 101, note = 102 }, { [0] = 0 }, { [-1] = 101 } }) do
+      local preferences = world.state("setup").preferences
+      preferences.bagOrder = invalid; world.save(nil, preferences)
+    end
+    assert(context.writes == writes)
+  `,
   'settings reject invalid scalars IDs rule text and sparse or oversized lists without writes': `
     local world, context = inventoryWorld(); world.loaded(); world.setup()
     local revision, writes = world.state("setup").settingsRevision, context.writes
@@ -68,6 +100,22 @@ const cases = {
     world.packet("char.base", { name = "Second" }); world.packet("char.status", { state = 3 })
     world.message("setup", "save", { identity = data.identity, preferences = data.preferences, profile = data.profile })
     assert(context.writes == writes and world.state("setup").profile.heldSlot == nil)
+    assert(world.state("setup").feedback == "Character changed; reopen Setup before saving")
+  `,
+  'setup explains invalid fields and running workflows without writing or ending the workflow': `
+    local world, context = inventoryWorld(); world.loaded(); world.setup()
+    local preferences = world.state("setup").preferences; preferences.fontSize = 7
+    world.save(nil, preferences)
+    assert(string.find(world.state("setup").feedback, "Display preferences", 1, true) and context.writes == 0)
+    world.save({ heldSlot = 999, rules = {} })
+    assert(string.find(world.state("setup").feedback, "Held slot", 1, true) and context.writes == 0)
+    world.save({ rules = {}, quickPotions = { heal = { name = "red" } } })
+    world.message("summary", "quick-potion", { slot = "heal" }); world.tick(2)
+    assert(world.state().busy)
+    local writes = context.writes
+    world.save()
+    assert(world.state().busy and context.writes == writes)
+    assert(world.state("setup").feedback == "Finish or cancel the inventory workflow before saving settings")
   `,
   'unsupported saved settings schemas remain visible without silently overwriting stored data': `
     local saved = { schemaVersion = 99, value = { preferences = {} } }

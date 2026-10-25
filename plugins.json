@@ -94,7 +94,7 @@
     {
       "id": "aardwolf-inventory",
       "name": "Aardwolf Inventory Management",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": "Sam Roberts",
       "description": "Dockable inventory, bag management, prepared item use and explicit sorting rules.",
       "category": "widgets",
@@ -105,8 +105,8 @@
         "equipment"
       ],
       "downloadUrl": "dist/plugins/aardwolf-inventory.lua",
-      "sha256": "6411a564badaf023bbcf0a04b48e78e1a99feaa6d14e76c86606bd33762b5047",
-      "size": 88543,
+      "sha256": "25ba60719af3c823b7c229cb8b5110330626fa1e0fb02eb36919d2bb56eedb2e",
+      "size": 90248,
       "format": "lua"
     },
     {
@@ -131,7 +131,7 @@
   "libraries": [
     {
       "name": "aardwolf-api",
-      "version": "0.8.0",
+      "version": "0.8.2",
       "author": "Sam Roberts",
       "description": "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers.",
       "tags": [
@@ -140,8 +140,8 @@
         "api"
       ],
       "downloadUrl": "dist/libs/aardwolf-api.lua",
-      "sha256": "cb5d457e5b1258824c77772e7b919ddc0fe9e5bee0bd29594bcb80c8c83d8511",
-      "size": 80168
+      "sha256": "61298b11f527295c8fab9a9c1c1717707b7f1973c5c56275fc7395b7fd27dc56",
+      "size": 87906
     }
   ]
 }

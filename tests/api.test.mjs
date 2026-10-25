@@ -4,7 +4,7 @@ import { runLua } from './lua-runtime.mjs';
 const cases = {
   'library loads without host globals or registrations': `
     local lib = freshLibrary()
-    assert(lib.version == "0.8.0" and type(lib.new) == "function")
+    assert(lib.version == "0.8.2" and type(lib.new) == "function")
     assert(not pcall(lib.new, {}))
   `,
   'removed SQLite options fail clearly without invoking host APIs': `
