@@ -13,19 +13,19 @@ const setup = `
 const cases = {
   'damage panel parses supplied lists, selects Sap, and excludes 1% spells': `
     assert(panel.config.size.width == 540 and panel.config.size.height == 400)
-    assert(panel.bindings.skill_bash_name == "Not refreshed")
+    assert(panel.bindings.single_bash_name == "Not refreshed")
     world.query("skill"); assert(reader.client.spells.status().refreshing)
     world.bash()
-    assert(panel.bindings.skill_bash_name == "Sap" and panel.bindings.skill_bash_disabled == "false")
+    assert(panel.bindings.single_bash_name == "Sap" and panel.bindings.single_bash_disabled == "false")
     assert(#reader.client.spells.get().entries == 10)
     world.query("spell"); assert(reader.client.spells.status().refreshing)
     world.fire()
-    assert(panel.bindings.spell_fire_name == "None learned" and panel.bindings.spell_fire_disabled == "true")
+    assert(panel.bindings.single_fire_name == "None learned" and panel.bindings.single_fire_disabled == "true")
     assert(world.record("fixture").damage.details.fireball.mana == 30)
     assert(panel.contentWrites == 1)
-    assert(string.find(panel.bindings.skill_bash_tip, "level 50, learned 85%; sap", 1, true))
-    world.action("use:skill:bash"); assert(world.sends[#world.sends] == "sap")
-    local before = #world.sends; world.action("use:spell:fire"); assert(#world.sends == before)
+    assert(string.find(panel.bindings.single_bash_tip, "level 50, learned 85%; sap", 1, true))
+    world.action("use:single:bash"); assert(world.sends[#world.sends] == "sap")
+    local before = #world.sends; world.action("use:single:fire"); assert(#world.sends == before)
   `,
   'damage selection applies threshold, flags, level, percentage and alphabetical ties': `
     world.query("spell"); world.damageHeader("spell")
@@ -33,9 +33,9 @@ const cases = {
       "Level 44 : Two 0 2% 3 Fire", "Level 44 : Beta 1 100% 4 Fire", "Level 44 : Alpha 1 100% 5 Fire",
       "Level 70 : *Unavailable 1 100% 6 Fire", "Level 300 : Future 1 100% 7 Fire" }) do world.line(row) end
     world.damageFooter()
-    assert(panel.bindings.spell_fire_name == "Alpha")
-    world.packet("char.status", { level = 43 }); assert(panel.bindings.spell_fire_name == "None learned")
-    world.packet("char.status", { level = 44 }); world.action("use:spell:fire")
+    assert(panel.bindings.single_fire_name == "Alpha")
+    world.packet("char.status", { level = 43 }); assert(panel.bindings.single_fire_name == "Not refreshed")
+    world.packet("char.status", { level = 44 }); world.action("use:single:fire")
     assert(world.sends[#world.sends] == "cast 5")
   `,
   'bulk refresh replaces all memberships for its kind and merges canonical values': `
@@ -45,25 +45,25 @@ const cases = {
     world.line("Level 1 : Kick 99% Fire"); world.line("          Kick 99% Bash"); world.damageFooter()
     assert(world.record("fixture").damage.members["skill:bash"].kick and world.record("fixture").damage.members["skill:fire"].kick)
     world.query("skill"); world.damageHeader("skill"); world.line("Level 1 : Kick 2% Bash"); world.damageFooter()
-    assert(panel.bindings.skill_bash_name == "Kick" and panel.bindings.skill_fire_name == "None learned")
+    assert(panel.bindings.single_bash_name == "Kick" and panel.bindings.single_fire_name == "Fireball")
     assert(not world.record("fixture").damage.members["skill:bash"].sap)
-    assert(not next(world.record("fixture").damage.members["skill:fire"] or {}) and panel.bindings.spell_fire_name == "Fireball")
+    assert(not next(world.record("fixture").damage.members["skill:fire"] or {}) and panel.bindings.single_fire_name == "Fireball")
     local saved = reader.client.spells.get(); assert(#saved.entries == 11)
     for _, item in ipairs(saved.entries) do if item.name == "Kick" then assert(item.percent == 2) end end
     world.query("skill"); world.line("No skills found.")
-    assert(panel.bindings.skill_bash_name == "None learned" and panel.bindings.skill_fire_name == "None learned")
-    assert(#reader.client.spells.get().entries == 11 and panel.bindings.spell_fire_name == "Fireball")
+    assert(panel.bindings.single_bash_name == "None learned" and panel.bindings.single_fire_name == "Fireball")
+    assert(#reader.client.spells.get().entries == 11 and panel.bindings.single_fire_name == "Fireball")
   `,
   'full refresh preserves retained enrichment and prunes removed memberships': `
     world.query("skill"); world.bash()
     world.commands.awspells("refresh"); world.header()
     world.line(" Sap 50 - 1"); world.line(" Dirt kicking 17 - 85"); world.footer()
-    assert(panel.bindings.skill_bash_name == "Dirt kicking")
+    assert(panel.bindings.single_bash_name == "Dirt kicking")
     assert(not world.record("fixture").damage.details.kick and not world.record("fixture").damage.members["skill:bash"].kick)
-    world.action("use:skill:bash"); assert(world.sends[#world.sends] == "dirt")
+    world.action("use:single:bash"); assert(world.sends[#world.sends] == "dirt")
     world.commands.awspells('command "Dirt kicking" dirt')
     world.commands.awspells("refresh"); world.sample()
-    assert(panel.bindings.skill_bash_name == "None learned")
+    assert(panel.bindings.single_bash_name == "Not refreshed")
     assert(world.record("fixture").damage.commands["dirt kicking"] == "dirt")
   `,
   'refresh all sends three requests in order and continues through empty responses': `
@@ -83,7 +83,7 @@ const cases = {
     assert(not string.find(world.commands.awspells("status"), "/3)", 1, true))
     local groups = 0; for _ in pairs(world.record("fixture").damage.times) do groups = groups + 1 end
     assert(groups == 40)
-    assert(panel.bindings.spell_water_name == "None learned" and panel.bindings.skill_acid_name == "None learned")
+    assert(panel.bindings.single_water_name == "None learned" and panel.bindings.single_acid_name == "None learned")
     assert(panel.bindings.cancelDisabled == "true")
   `,
   'refresh queue stops on cancellation, changed eligibility, overlap and failure': `
@@ -104,11 +104,11 @@ const cases = {
     local before = #world.sends
     world.query("skill"); assert(#world.sends == before)
     world.damageFooter(); assert(not reader.client.spells.status().refreshing)
-    assert(panel.bindings.skill_bash_name == "Not refreshed")
+    assert(panel.bindings.single_bash_name == "Not refreshed")
     world.query("skill"); world.action("cancel")
     world.tick(60000); assert(not reader.client.spells.status().refreshing)
-    assert(panel.bindings.skill_fire_name == "Not refreshed")
-    world.query("skill"); world.bash(); assert(panel.bindings.skill_bash_name == "Sap")
+    assert(panel.bindings.single_fire_name == "Not refreshed")
+    world.query("skill"); world.bash(); assert(panel.bindings.single_bash_name == "Sap")
     world.query("skill"); world.action("cancel")
     world.line("[1543/1543hp 1239/1239mn 1562/1562mv 0qt 1987tnl] >")
     assert(not reader.client.spells.status().refreshing)
@@ -121,22 +121,22 @@ const cases = {
     world.query("skill"); assert(#world.sends == before)
     world.line("No skills found."); assert(not reader.client.spells.status().refreshing)
     world.query("skill"); world.bash()
-    assert(panel.bindings.skill_bash_name == "Sap")
+    assert(panel.bindings.single_bash_name == "Sap")
   `,
   'damage failures retain prior results and never publish partial rows': `
     world.query("skill"); world.bash()
     for _, row in ipairs({ "Level BAD : Broken 85% Bash", "Level 0 : Broken 85% Bash",
       "Level 4 : Broken 101% Bash", "Level 5 : Broken 85% Bogus", "Level 5 : Broken", "Level 5 : Broken BAD% Bash" }) do
       world.query("skill"); world.damageHeader("skill"); world.line(row); world.damageFooter()
-      assert(panel.bindings.skill_bash_name == "Sap" and reader.client.spells.status().error)
+      assert(panel.bindings.single_bash_name == "Sap" and reader.client.spells.status().error)
     end
     world.query("skill"); world.damageHeader("skill")
     world.line("Level 1 : Kick 85% Bash"); world.line("Level 1 : kick 85% Bash"); world.damageFooter()
-    assert(panel.bindings.skill_bash_name == "Sap")
+    assert(panel.bindings.single_bash_name == "Sap")
     world.query("spell"); world.damageHeader("spell"); world.line("Level 1 : Broken 1 2% 0 Fire"); world.damageFooter()
-    assert(panel.bindings.spell_fire_name == "Not refreshed")
+    assert(panel.bindings.single_fire_name == "Not refreshed")
     world.query("skill"); world.damageHeader("skill"); world.line("Level 1 : Kick 100% Bash")
-    world.tick(60000); assert(panel.bindings.skill_bash_name == "Sap" and not reader.client.spells.status().refreshing)
+    world.tick(60000); assert(panel.bindings.single_bash_name == "Sap" and not reader.client.spells.status().refreshing)
   `,
   'damage parser preserves chatter, ANSI-clean data, repeated headers and other sessions': `
     world.query("skill")
@@ -146,39 +146,39 @@ const cases = {
     world.line("You have 2 abilities forgotten.")
     world.line("Level 1 : Kick 100% Bash", nil, "\\27[31mLevel 1 : Kick 100% Bash\\27[0m")
     world.damageHeader("skill"); world.line("Level 50 : Sap 85% Bash"); world.damageFooter()
-    assert(panel.bindings.skill_bash_name == "Sap")
+    assert(panel.bindings.single_bash_name == "Sap")
     provider.env.onSend(world.id, "spells combat"); world.fire()
-    assert(panel.bindings.spell_fire_name == "None learned")
+    assert(panel.bindings.single_fire_name == "None learned")
   `,
   'damage commands validate actions and current state, including combat': `
     world.query("skill"); world.bash()
     local before = #world.sends
-    for _, action in ipairs({ "use:skill:poison", "use:skill:bash;quit", "use:spell:bash", "noop:skill:bash" }) do world.action(action) end
+    for _, action in ipairs({ "use:single:poison", "use:single:bash;quit", "use:skill:bash", "use:spell:bash", "noop:single:bash" }) do world.action(action) end
     panel.events.action({ action = 1 }); panel.events.action(nil)
     assert(#world.sends == before)
-    world.packet("char.status", { state = 8 }); world.action("use:skill:bash")
+    world.packet("char.status", { state = 8 }); world.action("use:single:bash")
     assert(world.sends[#world.sends] == "sap" and panel.bindings.refreshDisabled == "true")
     before = #world.sends; world.query("skill"); assert(#world.sends == before)
-    world.packet("char.status", { state = 9 }); world.action("use:skill:bash"); assert(#world.sends == before)
+    world.packet("char.status", { state = 9 }); world.action("use:single:bash"); assert(#world.sends == before)
     world.packet("char.status", { state = 3 }); world.query("skill")
-    before = #world.sends; world.action("use:skill:bash"); assert(#world.sends == before)
-    world.bash(); world.disconnect(); world.action("use:skill:bash"); assert(#world.sends == before)
-    assert(panel.bindings.skill_bash_name == "Not refreshed" and panel.bindings.skill_bash_disabled == "true")
+    before = #world.sends; world.action("use:single:bash"); assert(#world.sends == before)
+    world.bash(); world.disconnect(); world.action("use:single:bash"); assert(#world.sends == before)
+    assert(panel.bindings.single_bash_name == "Not refreshed" and panel.bindings.single_bash_disabled == "true")
   `,
   'command overrides are character-scoped, validated, persisted and resettable': `
     world.query("skill"); world.damageHeader("skill"); world.line("Level 17 : Dirt kicking 85% Bash"); world.damageFooter()
-    world.action("use:skill:bash"); assert(world.sends[#world.sends] == "dirt")
+    world.action("use:single:bash"); assert(world.sends[#world.sends] == "dirt")
     world.commands.awspells('command "Dirt kicking" kick')
     assert(world.record("fixture").damage.commands["dirt kicking"] == "kick")
     assert(world.commands.awspells('command "Dirt kicking"') == "dirt kicking: kick")
-    world.action("use:skill:bash"); assert(world.sends[#world.sends] == "kick")
+    world.action("use:single:bash"); assert(world.sends[#world.sends] == "kick")
     for _, command in ipairs({ "dirt;quit", "dirt|quit", "dirt\\nquit", "dirt~quit", "", string.rep("x",129) }) do
       world.commands.awspells('command "Dirt kicking" ' .. command)
       assert(world.record("fixture").damage.commands["dirt kicking"] == "kick")
     end
     world.commands.awspells('command-reset "Dirt kicking"')
     assert(not world.record("fixture").damage.commands["dirt kicking"])
-    world.action("use:skill:bash"); assert(world.sends[#world.sends] == "dirt")
+    world.action("use:single:bash"); assert(world.sends[#world.sends] == "dirt")
     world.commands.awspells('command "Dirt kicking" kick')
     world.packet("char.base", { name = "Other" }); world.sample()
     assert(world.commands.awspells('command "Dirt kicking"') == "dirt kicking: dirt")
@@ -186,12 +186,12 @@ const cases = {
   'damage saves fail atomically for empty lists and command overrides': `
     world.query("skill"); world.bash()
     world.refuseDataWrites = true; world.query("skill"); world.line("No skills found.")
-    assert(panel.bindings.skill_bash_name == "Sap")
+    assert(panel.bindings.single_bash_name == "Sap")
     world.refuseDataWrites = false
     world.query("skill"); world.line("No skills found.")
-    assert(panel.bindings.skill_bash_name == "None learned" and not reader.client.spells.status().error)
+    assert(panel.bindings.single_bash_name == "Not refreshed" and not reader.client.spells.status().error)
     world.query("skill"); world.bash()
-    assert(panel.bindings.skill_bash_name == "Sap" and not reader.client.spells.status().error)
+    assert(panel.bindings.single_bash_name == "Sap" and not reader.client.spells.status().error)
     world.commands.awspells('command "Sap" kick')
     assert(world.commands.awspells('command "Sap"') == "sap: kick" and not reader.client.spells.status().error)
     world.refuseDataWrites = true
@@ -207,12 +207,12 @@ const cases = {
     world.query("skill"); world.bash()
     provider.env.cleanup(); assert(next(provider.widgets) == nil)
     provider.env.init(); panel = world.panel()
-    assert(panel.bindings.skill_bash_name == "Sap" and panel.bindings.skill_bash_disabled == "true")
+    assert(panel.bindings.single_bash_name == "Sap" and panel.bindings.single_bash_disabled == "true")
     world.header(); world.line(" Sap 50 - 85"); world.footer()
-    assert(panel.bindings.skill_bash_name == "Sap" and panel.bindings.skill_bash_disabled == "false")
+    assert(panel.bindings.single_bash_name == "Sap" and panel.bindings.single_bash_disabled == "false")
     local original = panel
     world.packet("char.base", { name = "Other" }); world.sample()
-    assert(world.panel() == original and panel.bindings.skill_bash_name == "Not refreshed" and panel.contentWrites == 1)
+    assert(world.panel() == original and panel.bindings.single_bash_name == "Not refreshed" and panel.contentWrites == 1)
     world.commands.awspells("show"); assert(panel.lastShowForced and panel.visible)
     provider.env.cleanup(); provider.env.cleanup(); assert(next(provider.widgets) == nil)
   `,
@@ -222,7 +222,7 @@ const cases = {
     world.damageFooter()
     assert(#reader.client.spells.get().entries == 994)
     world.query("skill"); world.line("No skills found.")
-    assert(panel.bindings.skill_bash_name == "None learned" and not reader.client.spells.status().error)
+    assert(panel.bindings.single_bash_name == "Not refreshed" and not reader.client.spells.status().error)
     world.query("skill"); world.damageHeader("skill")
     for index = 1, 10 do world.line("Level 1 : New ability " .. tostring(index) .. " 85% Bash") end
     world.damageFooter()
@@ -232,11 +232,11 @@ const cases = {
     world.query("skill"); world.bash()
     local before = #world.sends
     world.unload(world.plugins["imported-core-17"])
-    assert(reader.client.spells.get() == nil and panel.bindings.skill_bash_name == "Not refreshed")
+    assert(reader.client.spells.get() == nil and panel.bindings.single_bash_name == "Not refreshed")
     world.core("replacement-core")
     world.packet("char.base", { name = "Fixture" }); world.packet("char.status", { state = 3, level = 200 })
-    assert(#world.sends == before and panel.bindings.skill_bash_name == "Sap")
-    assert(reader.client.spells.get() and panel.bindings.skill_bash_disabled == "false")
+    assert(#world.sends == before and panel.bindings.single_bash_name == "Sap")
+    assert(reader.client.spells.get() and panel.bindings.single_bash_disabled == "false")
   `,
   'damage dependency and send failures remain available through awspells status': `
     provider.storageState = "starting"; world.action("refresh-all")
@@ -250,25 +250,25 @@ const cases = {
     assert(not reader.client.spells.status().refreshing)
     provider.env.send = sendCommand
     world.action("refresh-all"); world.bash(); world.line("No spells found.")
-    assert(panel.bindings.skill_bash_name == "Sap" and not reader.client.spells.status().error)
+    assert(panel.bindings.single_bash_name == "Sap" and not reader.client.spells.status().error)
   `,
   'damage rejects corrupt private records without replacing the exposed snapshot': `
     world.query("skill"); world.bash()
     world.record("fixture").damage.times["skill:bash"] = "invalid"
     local before = #world.sends; world.query("skill")
     assert(#world.sends == before and reader.client.spells.status().error)
-    assert(panel.bindings.skill_bash_name == "Sap")
+    assert(panel.bindings.single_bash_name == "Sap")
     world.record("fixture").damage.times["skill:bash"] = world.time
     world.record("fixture").damage.commands.sap = "sap;quit"
     world.query("skill")
-    assert(#world.sends == before and panel.bindings.skill_bash_name == "Sap")
+    assert(#world.sends == before and panel.bindings.single_bash_name == "Sap")
   `,
   'damage markup treats external names as text and refuses unsafe fallback commands': `
     world.query("skill"); world.damageHeader("skill")
     world.line("Level 50 : <img src=x onerror=alert(1)> 85% Bash"); world.damageFooter()
-    assert(panel.bindings.skill_bash_name == "<img src=x onerror=alert(1)>")
-    assert(not string.find(panel.content, "<img", 1, true) and panel.bindings.skill_bash_disabled == "true")
-    local before = #world.sends; world.action("use:skill:bash"); assert(#world.sends == before)
+    assert(panel.bindings.single_bash_name == "<img src=x onerror=alert(1)>")
+    assert(not string.find(panel.content, "<img", 1, true) and panel.bindings.single_bash_disabled == "true")
+    local before = #world.sends; world.action("use:single:bash"); assert(#world.sends == before)
   `,
 };
 
@@ -280,16 +280,18 @@ test('empty damage result is saved before any full snapshot', () => runLua(fixtu
   assert(reader.client.spells.get() == nil and not reader.client.spells.status().refreshing)
   world.query("skill"); world.line("No skills found.")
   assert(reader.client.spells.get() == nil and not reader.client.spells.status().error)
-  assert(world.panel().bindings.skill_electric_name == "None learned")
+  assert(world.panel().bindings.single_electric_name == "Not refreshed")
+  world.query("spell"); world.line("No spells found.")
+  assert(world.panel().bindings.single_electric_name == "None learned")
   provider.env.cleanup(); provider.env.init()
-  assert(world.panel().bindings.skill_electric_name == "None learned")
-  world.sample(); assert(reader.client.spells.get() and world.panel().bindings.skill_electric_name == "None learned")
+  assert(world.panel().bindings.single_electric_name == "None learned")
+  world.sample(); assert(reader.client.spells.get() and world.panel().bindings.single_electric_name == "None learned")
 `));
 
 test('oversized damage output retains the last committed abilities and filter state', () => runLua(fixture + setup + `
   world.query("skill"); world.damageHeader("skill")
   for index = 1, 1001 do world.line("Level 1 : Skill " .. tostring(index) .. " 85% Bash") end
   world.damageFooter()
-  assert(#reader.client.spells.get().entries == 4 and panel.bindings.skill_bash_name == "Not refreshed")
+  assert(#reader.client.spells.get().entries == 4 and panel.bindings.single_bash_name == "Not refreshed")
   assert(not reader.client.spells.status().refreshing and reader.client.spells.status().error)
 `));

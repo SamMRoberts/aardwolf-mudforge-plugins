@@ -37,7 +37,7 @@ const cases = {
     world.packet("char.base", { name = "Fixture" })
     assert(reader.client.spells.get().characterName == "Fixture")
     assert(reader.client.spells.get().entries[2].name == "Fireball")
-    assert(world.panel().bindings.spell_fire_name == "Fireball")
+    assert(world.panel().bindings.single_fire_name == "Fireball")
   `,
   'native import is idempotent and refuses replacement of different stored data': `
     local world, reader, provider = spellsWorld()
@@ -349,7 +349,7 @@ const cases = {
     local count = 0
     for _, members in pairs(saved.damage.members) do for _ in pairs(members) do count = count + 1 end end
     assert(count == 9000 and #reader.client.spells.get().entries == 450)
-    assert(world.panel().bindings.skill_water_name ~= "Not refreshed")
+    assert(world.panel().bindings.single_water_name ~= "Not refreshed")
   `,
 };
 

@@ -220,7 +220,7 @@ legacy databases separately. These tests do not execute MudForge's transpiler,
 storage engine, picker, command hooks, provisional output, pager or connected
 Aardwolf transport.
 
-- With separate authorization, install library 0.5.0, API Core and Spells 0.4.1
+- With separate authorization, install library 0.5.0, API Core and Spells 0.5.0
   in a disposable world. Record the client version and confirm both
   provider/consumer load orders and actual installed IDs.
 - With File System Access off and no helper, complete simulated login. Refuse
@@ -354,6 +354,34 @@ rows and kept the toolbar and final row reachable without horizontal overflow.
 - Live acceptance remains separately authorized. Compare both list formats and
   actual commands with visible server output, then complete preservation/cleanup
   checks before recording success.
+
+### Single/Area panel — 0.5.0 acceptance pending
+
+Offline fixtures cover mixed skill/spell ranking, kind-specific commands and
+skill overrides, partial discovery, combined empty states, area exclusion,
+source refresh timestamps and legacy visibility migration. Layout migration
+combines Skill and Spell visibility with OR, preserves Area/order/type settings,
+and writes only on the next successful edit. Native acceptance remains pending.
+
+On 2026-10-24, headless Chrome checks of the 0.5.0 widget HTML with synthetic
+bindings/actions passed at all five sizes below, in normal and edit modes.
+Checks covered Single/Area controls, aligned label-aware widths, label updates,
+hidden rows/slots, keyboard and drag reordering, toolbar/final-row access and
+resize without host messages. No horizontal overflow or console errors were
+observed. These checks do not establish native MudForge bridge, docking,
+storage or live Aardwolf transport behavior.
+
+- In an authorized disposable world, verify Single/Area headings and edit
+  controls, skill and spell winners, command overrides and area exclusion.
+- Resize through 260 × 500, 540 × 400, 540 × 800, 1200 × 300 and 1600 × 220 px
+  in normal and edit modes. Check aligned content-aware widths, ellipsis,
+  narrow stacking, compact spacing, toolbar/final-row access and no horizontal
+  overflow. Update labels and visibility without rebuilding the widget; verify
+  focus, scroll, row order and saved layout remain stable during reflow.
+- Load legacy layouts with each Skill/Spell visibility combination, including
+  18-type and missing-Area records. Verify Single uses OR, hidden types remain
+  hidden, and no migration write occurs until a successful layout edit. Reload
+  and save/reopen the disposable world to verify native persistence separately.
 
 ## Aardwolf Vitals — native and live acceptance pending
 
