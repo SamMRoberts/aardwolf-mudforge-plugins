@@ -105,12 +105,16 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Inventory Management
 
-[Aardwolf Inventory Management 0.3.0](docs/INVENTORY.md) adds a dockable summary
+[Aardwolf Inventory Management 0.4.0](docs/INVENTORY.md) adds a dockable summary
 with the directly carried item count and discovered storage bags. The count
 includes bags themselves, but excludes worn equipment and items inside bags.
 Double-click a bag, or press Enter on it, to open its contents in the floating
 manager. **Manage Inventory** opens the same manager on main inventory;
-**Setup** opens a separate floating settings window. Bag contents load on demand;
+**Setup** opens a separate floating settings window. **Pin to Inventory**
+saves any known item above the bag list for that character. Clicking a pin opens
+its normal native actions menu; use and disposal confirmations still apply.
+Pins track exact object IDs and retain unavailable placeholders rather than
+substituting similarly named items. Bag contents load on demand;
 unopened, partial and stale listings stay distinguishable from empty bags.
 With library 0.9.0 and Core 0.5.0, plugin-requested inventory, equipment, bag and
 item-detail data is parsed and hidden from the terminal. Manual queries, prompts

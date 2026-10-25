@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.3.0",
+  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.4.0",
   author = "Sam Roberts", description = "Dockable inventory, bag management, prepared item use and explicit sorting rules."
 }
 
@@ -29,8 +29,13 @@ body[data-role=summary] .summary-notices .feedback:not(:empty){margin-top:2px}
 tr.level-restricted td{color:var(--muted);opacity:.55}
 .quick-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:8px}.quick-slot{padding:10px;border:1px solid var(--line);border-radius:5px}.quick-slot label{display:flex;flex-direction:column;gap:4px;margin-top:8px}.quick-slot input,.quick-slot select{width:100%;min-width:0}.unavailable{color:#f2bf97}.preview-problem{color:#f2bf97;font-size:.92rem;margin:7px 0}
 @media(max-width:560px){.quick-settings{grid-template-columns:1fr}}
+body[data-role=summary] #summary-items{flex:1;min-height:0;overflow:auto}
+body[data-role=summary] .bag-list{flex:none;overflow:visible}
+body[data-role=summary] #bags-empty{flex:none;overflow:visible}
+body[data-role=summary] .summary-heading{font-size:.92em;margin:4px 0 3px;color:var(--muted)}
+body[data-role=summary] .pin-unavailable{color:var(--muted)}
 </style></head><body data-role="__ROLE__">
-<section id="summary-view" hidden><header class="toolbar spread"><h1>Inventory</h1><span id="summary-freshness" class="hint"></span></header><div class="count"><strong id="item-count"> - </strong><span>carried items</span></div><div id="bags" class="bag-list" aria-label="Inventory containers"></div><p id="bags-empty" class="empty" hidden>No storage bags found.</p><div id="summary-notices" class="summary-notices" role="region" aria-label="Inventory status and feedback" tabindex="0" hidden></div><footer class="summary-controls"><button id="heal-button" type="button" class="primary quick-potion" disabled>Heal</button><button id="mana-button" type="button" class="primary quick-potion" disabled>Mana</button><button id="manage-button" type="button" title="Manage Inventory" aria-label="Manage Inventory">Manage</button><button id="setup-button" type="button">Setup</button><button id="summary-refresh" type="button">Refresh</button></footer></section>
+<section id="summary-view" hidden><header class="toolbar spread"><h1>Inventory</h1><span id="summary-freshness" class="hint"></span></header><div class="count"><strong id="item-count"> - </strong><span>carried items</span></div><div id="summary-items"><section id="pinned-section" hidden><h2 class="summary-heading">Pinned items</h2><div id="pins" class="bag-list" aria-label="Pinned items"></div><h2 class="summary-heading">Bags</h2></section><div id="bags" class="bag-list" aria-label="Inventory containers"></div><p id="bags-empty" class="empty" hidden>No storage bags found.</p></div><div id="summary-notices" class="summary-notices" role="region" aria-label="Inventory status and feedback" tabindex="0" hidden></div><footer class="summary-controls"><button id="heal-button" type="button" class="primary quick-potion" disabled>Heal</button><button id="mana-button" type="button" class="primary quick-potion" disabled>Mana</button><button id="manage-button" type="button" title="Manage Inventory" aria-label="Manage Inventory">Manage</button><button id="setup-button" type="button">Setup</button><button id="summary-refresh" type="button">Refresh</button></footer></section>
 <section id="manager-view" hidden><header class="toolbar spread"><h1>Inventory Manager</h1><div class="toolbar"><button id="manager-refresh" type="button">Refresh</button><button id="organize-button" type="button">Organize</button><button id="manager-setup" type="button">Setup</button></div></header><div class="manager-controls"><label>Location<select id="scope-select" aria-label="Inventory location"></select></label><label>Search<input id="search" type="search" placeholder="Item name" autocomplete="off"></label></div><p id="scope-state" class="muted" role="status"></p><div class="table-wrap" id="items-scroll"><table aria-label="Inventory items"><thead><tr><th><button type="button" data-sort="name">Name</button></th><th><button type="button" data-sort="level">Level</button></th><th><button type="button" data-sort="type">Type</button></th><th><button type="button" data-sort="flags">Flags</button></th><th><button type="button" data-sort="id">ID</button></th></tr></thead><tbody id="items"></tbody></table><p id="items-empty" class="empty" hidden>No items.</p></div><footer class="manager-footer"><button id="actions-button" type="button" disabled>Actions</button><button id="details-button" type="button" disabled>View details</button><button id="workflow-cancel" type="button" hidden>Cancel workflow</button></footer><details id="item-details"><summary>Item details</summary><div id="detail-text" class="detail-text">Select an item and choose View details.</div></details></section>
 <section id="setup-view" hidden><h1>Inventory Setup</h1><form id="settings-form"><h2>Display and actions</h2><div class="form-grid"><label>Font size<input id="font-size" type="number" min="8" max="24" required></label><label class="check"><input id="show-worn" type="checkbox">Show worn bags in summary</label><label class="check wide"><input id="confirm-disposal" type="checkbox">Confirm Drop, Sell, and Donate</label></div><h2>Character&#39;s held slot</h2><div class="form-grid"><label>Slot number<input id="held-slot" type="number" min="0" max="255" placeholder="Unset"></label><label>Currently held item<select id="held-item"><option value="">Select to identify slot...</option></select></label></div><p class="hint" style="margin-top:6px">Select the item you are currently holding, or enter its slot number from Aardwolf&#39;s wearable command. This enables wand/staff preparation and equipment restoration. Portal actions discover their current equipment slots automatically.</p><p id="portal-slots" class="hint" style="margin-top:6px"></p><h2>Quick potions</h2><p class="hint">Heal and Mana quaff one matching potion per click. Carried potions are preferred; optionally search a bag if needed. Leave the name blank to disable a button.</p><div class="quick-settings"><section class="quick-slot"><h3>Heal</h3><label>Heal potion name contains<input id="heal-potion-name" type="text" maxlength="128" autocomplete="off" placeholder="e.g. healing potion"></label><label>Also search bag<select id="heal-potion-bag"></select></label></section><section class="quick-slot"><h3>Mana</h3><label>Mana potion name contains<input id="mana-potion-name" type="text" maxlength="128" autocomplete="off" placeholder="e.g. mana potion"></label><label>Also search bag<select id="mana-potion-bag"></select></label></section></div><h2>Summary bags</h2><p class="hint" style="margin-bottom:8px">Checked bags appear in the summary. Use arrows to change their order.</p><div id="setting-bags" class="setting-bags"></div><div class="section-heading"><h2>Organize rules</h2><button id="add-rule" type="button">Add rule</button></div><p class="hint" style="margin-bottom:8px">The first enabled rule matching type and optional name text wins. Only loose inventory is moved.</p><div id="rules" class="rules"></div><footer class="setup-footer"><button type="submit" class="primary">Save setup</button><span id="draft-state" class="hint"></span></footer></form></section>
 <section id="prompt-panel" class="panel" hidden aria-labelledby="prompt-title"><h2 id="prompt-title"></h2><form id="prompt-form"><ol id="prompt-steps"></ol><label id="bag-field" hidden>Destination bag<select id="destination-bag"></select></label><label id="recipient-field" hidden>Recipient<input id="recipient" type="text" maxlength="128" autocomplete="off" placeholder="Name or 2.guard"></label><label id="target-field" hidden>Target<input id="use-target" type="text" maxlength="128" autocomplete="off" placeholder="Name or 2.guard"></label><div class="panel-footer"><button id="prompt-submit" type="submit" class="primary">Continue</button><button id="prompt-dismiss" type="button">Cancel</button></div></form></section>
@@ -50,7 +55,7 @@ function inventoryList(value){
 }
 function normalizeInventoryState(value){
   const result={...value};
-  for(const key of ['bags','entries','equipment','actions'])result[key]=inventoryList(value[key]);
+  for(const key of ['bags','entries','equipment','actions','pins'])result[key]=inventoryList(value[key]);
   result.preferences={...(value.preferences||{}),bagOrder:inventoryList((value.preferences||{}).bagOrder),hiddenBags:inventoryList((value.preferences||{}).hiddenBags)};
   result.profile={...(value.profile||{}),rules:inventoryList((value.profile||{}).rules)};
   const potions=result.profile.quickPotions||{};
@@ -70,6 +75,24 @@ function locationLabel(value){if(value==='inventory')return'Carried';if(value===
 function visibleBags(){const prefs=state.preferences||{},hidden=new Set((prefs.hiddenBags||[]).map(String));return(state.bags||[]).filter(b=>!hidden.has(String(b.id))&&(prefs.showWorn!==false||b.location!=='equipment'))}
 function orderedBags(bags,order){const ranks=new Map((order||[]).map((id,i)=>[String(id),i]));return bags.slice().sort((a,b)=>(ranks.get(String(a.id))??1e9)-(ranks.get(String(b.id))??1e9)||itemName(a).localeCompare(itemName(b))||a.id-b.id)}
 function renderBags(){const bags=orderedBags(visibleBags(),(state.preferences||{}).bagOrder),key=JSON.stringify(bags);if(key===bagsKey)return;bagsKey=key;const old=$('bags').scrollTop,focusedId=document.activeElement&&document.activeElement.closest('#bags .bag')&&document.activeElement.closest('#bags .bag').dataset.id;const nodes=bags.map(b=>{const row=element('button',null,'bag');row.type='button';row.dataset.id=b.id;row.append(element('span',itemName(b),'bag-name'),element('span',locationLabel(b.location),'bag-location'));row.title=itemName(b)+' / #'+b.id+' / '+locationLabel(b.location);row.addEventListener('dblclick',()=>send('open',{scope:'container:'+b.id}));row.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send('open',{scope:'container:'+b.id})}});row.addEventListener('contextmenu',e=>requestMenu(e,b.id));return row});$('bags').replaceChildren(...nodes);$('bags').scrollTop=old;$('bags-empty').hidden=bags.length>0;$('bags').hidden=bags.length===0;if(focusedId){const row=Array.from($('bags').children).find(row=>row.dataset.id===focusedId);if(row)row.focus({preventScroll:true})}}
+function renderPins(){
+  const pins=state.pins||[],root=$('pins'),key=JSON.stringify(pins);
+  $('pinned-section').hidden=pins.length===0;
+  if(root.dataset.items===key)return;
+  root.dataset.items=key;
+  const scroll=$('summary-items').scrollTop,focused=document.activeElement&&document.activeElement.closest('#pins [data-id]'),focusId=focused&&focused.dataset.id;
+  root.replaceChildren(...pins.map(pin=>{
+    const row=element('button',null,'bag'+(pin.available?'':' pin-unavailable'));row.type='button';row.dataset.id=pin.id;
+    row.append(element('span',itemName(pin),'bag-name'),element('span',pin.available?locationLabel(pin.location):'Unavailable','bag-location'));
+    row.title=itemName(pin)+' / #'+pin.id+' / '+(pin.available?locationLabel(pin.location):'Unavailable; open actions to unpin');
+    row.addEventListener('click',event=>requestMenu(event,pin.id));
+    row.addEventListener('contextmenu',event=>requestMenu(event,pin.id));
+    row.addEventListener('keydown',event=>{if(event.key==='ContextMenu'||(event.shiftKey&&event.key==='F10'))requestMenu(event,pin.id)});
+    return row;
+  }));
+  if(focusId){const row=Array.from(root.children).find(row=>row.dataset.id===focusId);if(row)row.focus({preventScroll:true})}
+  $('summary-items').scrollTop=scroll;
+}
 function setOptions(select,options,value){const key=JSON.stringify(options);if(select.dataset.options!==key){select.dataset.options=key;select.replaceChildren(...options.map(o=>{const option=element('option',o.label);option.value=o.value;return option}))}select.value=value==null?'':String(value)}
 function renderScopes(){const options=[{value:'inventory',label:'Inventory'},{value:'equipment',label:'Equipment'},...(state.bags||[]).map(b=>({value:'container:'+b.id,label:itemName(b)+' (#'+b.id+')'}))];if(state.scope&&!options.some(o=>o.value===state.scope))options.push({value:state.scope,label:state.scope+' (unavailable)'});setOptions($('scope-select'),options,state.scope||'inventory')}
 function selectedItem(){return(state.entries||[]).find(item=>idEqual(item.id,localSelected))}
@@ -144,7 +167,7 @@ function renderPreview(){
   $('preview-list').replaceChildren(...preview.map(move=>{const bag=state.bags.find(bag=>idEqual(bag.id,move.bagId)),label=itemName(move)+' -> '+(bag?itemName(bag):move.bagName)+' (#'+move.bagId+')'+(move.unavailable?' - destination unavailable':'');return element('li',label,move.unavailable?'unavailable':'')}));
   $('preview-empty').hidden=preview.length>0;
 }
-function render(value){if(!value||typeof value!=='object')return;const previousIdentity=state.identity,previousScope=state.scope;state=normalizeInventoryState(value);if(previousIdentity!==state.identity){localSelected=null;pendingMenu=null;lastMenu=null}if(state.selected!=null)localSelected=state.selected;else if(previousScope!==state.scope)localSelected=null;document.documentElement.style.fontSize=(Number(state.fontSize)||13)+'px';text('status',state.status);text('feedback',state.feedback);if(role==='summary'){text('item-count',state.count==null?' - ':state.count);text('summary-freshness',state.countState||'');renderBags();renderQuickPotions();$('summary-notices').hidden=!state.status&&!state.feedback;$('summary-notices').title=[state.status,state.feedback].filter(Boolean).join('\n')}if(role==='manager'){if(localSelected!=null&&!(state.entries||[]).some(item=>idEqual(item.id,localSelected)))localSelected=null;renderScopes();text('scope-state',state.scopeState||'');renderItems();renderDetails();if(Number(state.detailsSerial)>0&&state.detailsSerial!==lastDetailsSerial)$('item-details').open=true;lastDetailsSerial=state.detailsSerial;$('workflow-cancel').hidden=!state.busy;$('organize-button').disabled=!!state.busy||!state.active;renderPrompt();renderPreview();$('prompt-submit').disabled=!!state.busy||!!(state.prompt&&state.prompt.disabled);$('prompt-submit').title=(state.prompt&&state.prompt.reason)||''}if(role==='setup')renderSetup();for(const id of ['summary-refresh','manager-refresh'])$(id).disabled=!!state.busy||!state.active;if(pendingMenu&&state.menuSerial!=null&&state.menuSerial!==lastMenu){lastMenu=state.menuSerial;const items=(state.actions||[]).map(action=>({type:'item',id:action.id,text:action.text+(action.reason?'  -  '+action.reason:''),disabled:!!action.disabled}));if(items.length)mudforge.showMenu(items,pendingMenu.x,pendingMenu.y);pendingMenu=null}}
+function render(value){if(!value||typeof value!=='object')return;const previousIdentity=state.identity,previousScope=state.scope;state=normalizeInventoryState(value);if(previousIdentity!==state.identity){localSelected=null;pendingMenu=null;lastMenu=null}if(state.selected!=null)localSelected=state.selected;else if(previousScope!==state.scope)localSelected=null;document.documentElement.style.fontSize=(Number(state.fontSize)||13)+'px';text('status',state.status);text('feedback',state.feedback);if(role==='summary'){text('item-count',state.count==null?' - ':state.count);text('summary-freshness',state.countState||'');renderBags();renderPins();renderQuickPotions();$('summary-notices').hidden=!state.status&&!state.feedback;$('summary-notices').title=[state.status,state.feedback].filter(Boolean).join('\n')}if(role==='manager'){if(localSelected!=null&&!(state.entries||[]).some(item=>idEqual(item.id,localSelected)))localSelected=null;renderScopes();text('scope-state',state.scopeState||'');renderItems();renderDetails();if(Number(state.detailsSerial)>0&&state.detailsSerial!==lastDetailsSerial)$('item-details').open=true;lastDetailsSerial=state.detailsSerial;$('workflow-cancel').hidden=!state.busy;$('organize-button').disabled=!!state.busy||!state.active;renderPrompt();renderPreview();$('prompt-submit').disabled=!!state.busy||!!(state.prompt&&state.prompt.disabled);$('prompt-submit').title=(state.prompt&&state.prompt.reason)||''}if(role==='setup')renderSetup();for(const id of ['summary-refresh','manager-refresh'])$(id).disabled=!!state.busy||!state.active;if(pendingMenu&&state.menuSerial!=null&&state.menuSerial!==lastMenu){lastMenu=state.menuSerial;const items=(state.actions||[]).map(action=>({type:'item',id:action.id,text:action.text+(action.reason?'  -  '+action.reason:''),disabled:!!action.disabled}));if(items.length)mudforge.showMenu(items,pendingMenu.x,pendingMenu.y);pendingMenu=null}}
 $('summary-view').hidden=role!=='summary';$('manager-view').hidden=role!=='manager';$('setup-view').hidden=role!=='setup';
 if(role==='summary')$('summary-notices').append($('status'),$('feedback'));
 for(const id of ['setup-button','manager-setup'])$(id).addEventListener('click',()=>send('setup'));
@@ -198,7 +221,7 @@ local menu, workflow, issuing, advanceTimer = nil, nil, nil, nil
 local promptSerial, detailsSerial, saveSerial = 0, 0, 0
 local saveResult = nil
 local lifetime = 0
-local publish, synchronize, advance, recover, message, createWindow, resolvePotion
+local publish, synchronize, advance, recover, message, createWindow, resolvePotion, changePin
 local TYPE_NAMES = { "Light", "Scroll", "Wand", "Staff", "Weapon", "Treasure", "Armor", "Potion", "Furniture",
   "Trash", "Container", "Drink container", "Key", "Food", "Boat", "Mob corpse", "Player corpse", "Fountain",
   "Pill", "Portal", "Beacon", "Gift card", "Unused", "Raw material", "Campfire", "Forge", "Runestone" }
@@ -260,12 +283,13 @@ local function defaults()
   return { preferences = { fontSize = 13, showWorn = true, confirmDisposal = true, bagOrder = {}, hiddenBags = {} }, profiles = {} }
 end
 local function defaultPotions() return { heal = { name = "" }, mana = { name = "" } } end
-local function defaultProfile() return { rules = {}, quickPotions = defaultPotions() } end
+local function defaultProfile() return { rules = {}, quickPotions = defaultPotions(), pins = {} } end
 local function normalizedProfile(value)
   local result = copy(value or defaultProfile())
   result.quickPotions = result.quickPotions or defaultPotions()
   result.quickPotions.heal = result.quickPotions.heal or { name = "" }
   result.quickPotions.mana = result.quickPotions.mana or { name = "" }
+  result.pins = result.pins or {}
   return result
 end
 local function validList(value, maximum, validate)
@@ -299,6 +323,15 @@ local function widgetList(value, maximum)
 end
 local function validProfile(value)
   if type(value) ~= "table" then return false end
+  if value.pins ~= nil then
+    local ids = {}
+    if not validList(value.pins, 32, function(pin)
+      if type(pin) ~= "table" or not objectId(pin.id) or ids[key(pin.id)] or type(pin.name) ~= "string"
+        or #pin.name == 0 or #pin.name > 256 or string.find(pin.name, "%c") then return false end
+      ids[key(pin.id)] = true
+      return true
+    end) then return false end
+  end
   if value.quickPotions ~= nil then
     if type(value.quickPotions) ~= "table" then return false end
     for _, slot in ipairs({ "heal", "mana" }) do
@@ -360,6 +393,9 @@ local function workflowStatus()
   return "Preparing the selected item"
 end
 local function inList(list, id) for _, value in ipairs(list) do if value == id then return true end end; return false end
+local function pinned(id)
+  for _, pin in ipairs(profile.pins) do if pin.id == id then return pin end end
+end
 local function bags(includeHidden)
   local result, preferences = {}, settings.preferences
   for _, bag in pairs(snapshot.items) do
@@ -384,6 +420,14 @@ local function scopeState()
 end
 local function eligible(id, action)
   local entry = item(id)
+  if action == "pin" or action == "unpin" then
+    if not characterKey then return "Log in to pin items for this character" end
+    if workflow then return "Another inventory workflow is running" end
+    if action == "unpin" then return not pinned(id) and "Item is not pinned" or nil end
+    if not entry then return "Item is no longer available" end
+    if not pinned(id) and #profile.pins >= 32 then return "Unpin an item first; at most 32 items can be pinned" end
+    return nil
+  end
   if not entry then return "Item is no longer available" end
   if workflow then return "Another inventory workflow is running" end
   if action == "open" then return entry.type ~= 11 and "This item is not a storage bag" or nil end
@@ -437,11 +481,13 @@ local function eligible(id, action)
 end
 local function actions(id)
   local entry, result = item(id), {}
-  if not entry then return result end
   local function add(action, text)
     local reason = eligible(id, action)
     table.insert(result, { id = action, text = text, disabled = reason ~= nil, reason = reason })
   end
+  if pinned(id) then add("unpin", "Unpin from Inventory")
+  elseif entry then add("pin", "Pin to Inventory") end
+  if not entry then return result end
   if entry.type == 11 then add("open", "Open container") end
   add("details", "View item details")
   if string.match(entry.location, "^container:") then add("take", "Get from bag") end
@@ -492,6 +538,13 @@ publish = function()
   local equipment = {}; for _, entry in pairs(snapshot.items) do if entry.location == "equipment" then table.insert(equipment, entry) end end
   table.sort(equipment, function(a,b) return a.id < b.id end)
   local entries = snapshot.scopes[scope] and snapshot.scopes[scope].entries or {}
+  local pins = {}
+  for _, pin in ipairs(profile.pins) do
+    local entry = item(pin.id)
+    table.insert(pins, { id = pin.id, name = entry and entry.name or pin.name,
+      plainName = entry and plainName(entry.name) or pin.name, location = entry and entry.location or nil,
+      available = entry ~= nil and fresh(entry.location) == true })
+  end
   if prompt then
     prompt.reason = prompt.kind == "use" and levelReason(item(prompt.itemId)) or nil
     prompt.disabled = prompt.reason ~= nil
@@ -519,7 +572,7 @@ publish = function()
     scope = scope, scopeState = scopeState(), entries = entries, selected = selected, equipment = equipment,
     details = selected and (snapshot.details[key(selected)] or (viewedDetails and viewedDetails.id == selected
       and item(selected) and item(selected).location == viewedLocation and viewedDetails)) or nil,
-    preferences = settings.preferences, profile = profile,
+    preferences = settings.preferences, profile = profile, pins = pins,
     settingsRevision = settingsRevision, actions = actions(menu and menu.id or selected), menuSerial = menuSerial,
     detailsSerial = detailsSerial, saveResult = saveResult,
     quickPotions = { heal = shortcutState("heal"), mana = shortcutState("mana") },
@@ -1013,8 +1066,10 @@ local function executeAction(id, action)
   if not objectId(id) or type(action) ~= "string" then return end
   local reason = eligible(id, action)
   if reason then feedback = reason; publish(); return end
+  if action == "pin" or action == "unpin" then changePin(id, action == "pin"); return end
   selected, menu, preview, prompt = id, nil, nil, nil
   local entry = item(id)
+  scope = entry.location
   if action == "open" then openScope("container:" .. key(id)); return end
   createWindow("manager", true)
   if action == "details" then
@@ -1089,6 +1144,51 @@ local function saveOutcome(ok, text)
   saveResult, feedback = { serial = saveSerial, ok = ok, message = text }, text
   publish()
 end
+local function persistSettings(updated)
+  if not validSettings(updated) then return false, "Settings exceed the supported limits" end
+  local ok, accepted, reason = pcall(client.storage.set, STORAGE, updated)
+  if not ok or accepted ~= true then storageError = "Could not save settings: " .. tostring(reason or "native storage refused the write"); return false, storageError end
+  local readOk, loaded, issue = pcall(client.storage.get, STORAGE)
+  if not readOk or issue or not validSettings(loaded) then storageError = "Could not verify saved settings"; return false, storageError end
+  -- Compare using scalar/tree equality: MudForge pairs may retain nil fields.
+  local function equal(a,b)
+    if type(a) ~= type(b) then return false end
+    if type(a) ~= "table" then return a == b end
+    local function entry(value, name)
+      if value[name] ~= nil then return value[name] end
+      local index = tonumber(name)
+      if index then return value[index] end
+    end
+    for name, value in pairs(a) do if value ~= nil and not equal(value,entry(b,name)) then return false end end
+    for name, value in pairs(b) do if value ~= nil and entry(a,name) == nil then return false end end
+    return true
+  end
+  if not equal(updated, loaded) then storageError = "Saved settings read-back did not match; retain your setup draft"; return false, storageError end
+  settings, profile, storageError = updated, normalizedProfile(updated.profiles[characterKey]), nil
+  return true
+end
+changePin = function(id, enabled)
+  local exists = pinned(id)
+  menu = nil
+  if enabled and exists then feedback = "Item is already pinned"; publish(); return end
+  local updated = copy(settings)
+  local savedProfile = copy(profile)
+  savedProfile.pins = {}
+  for _, pin in ipairs(profile.pins) do
+    if pin.id ~= id then table.insert(savedProfile.pins, { id = pin.id, name = pin.name }) end
+  end
+  if enabled then
+    local entry = item(id)
+    local label = string.sub(string.gsub(plainName(entry.name), "%c", " "), 1, 256)
+    if label == "" then label = "Item #" .. key(id) end
+    table.insert(savedProfile.pins, { id = id, name = label })
+  end
+  updated.profiles[characterKey] = savedProfile
+  local saved, issue = persistSettings(updated)
+  feedback = saved and (enabled and "Item pinned to Inventory" or "Item unpinned from Inventory") or issue
+  -- Pinning changes no Setup fields. Keep the revision and unfinished drafts.
+  publish()
+end
 local function saveSettings(data)
   if type(data) ~= "table" then saveOutcome(false,"Settings message is invalid"); return end
   if data.identity ~= identity then saveOutcome(false,"Character changed; reopen Setup before saving"); return end
@@ -1105,7 +1205,7 @@ local function saveSettings(data)
   local updated = copy(settings)
   -- Only persist the validated fields, rather than recursively copying arbitrary
   -- extra data supplied by a widget message.
-  local savedProfile = { heldSlot = submittedProfile.heldSlot, rules = {}, quickPotions = defaultPotions() }
+  local savedProfile = { heldSlot = submittedProfile.heldSlot, rules = {}, quickPotions = defaultPotions(), pins = copy(profile.pins) }
   updated.preferences = { fontSize = preferences.fontSize, showWorn = preferences.showWorn,
     confirmDisposal = preferences.confirmDisposal, bagOrder = {}, hiddenBags = {} }
   for _, id in ipairs(preferences.bagOrder) do table.insert(updated.preferences.bagOrder, id) end
@@ -1119,25 +1219,8 @@ local function saveSettings(data)
   end
   updated.profiles[characterKey] = savedProfile
   if not validSettings(updated) then saveOutcome(false,"Settings exceed the supported limits"); return end
-  local ok, accepted, reason = pcall(client.storage.set, STORAGE, updated)
-  if not ok or accepted ~= true then storageError = "Could not save settings: " .. tostring(reason or "native storage refused the write"); saveOutcome(false,storageError); return end
-  local readOk, loaded, issue = pcall(client.storage.get, STORAGE)
-  if not readOk or issue or not validSettings(loaded) then storageError = "Could not verify saved settings"; saveOutcome(false,storageError); return end
-  -- Compare using scalar/tree equality: MudForge pairs may retain nil fields.
-  local function equal(a,b)
-    if type(a) ~= type(b) then return false end
-    if type(a) ~= "table" then return a == b end
-    local function entry(value, name)
-      if value[name] ~= nil then return value[name] end
-      local index = tonumber(name)
-      if index then return value[index] end
-    end
-    for name, value in pairs(a) do if value ~= nil and not equal(value,entry(b,name)) then return false end end
-    for name, value in pairs(b) do if value ~= nil and entry(a,name) == nil then return false end end
-    return true
-  end
-  if not equal(updated, loaded) then storageError = "Saved settings read-back did not match; retain your setup draft"; saveOutcome(false,storageError); return end
-  settings, profile, storageError = updated, normalizedProfile(updated.profiles[characterKey]), nil
+  local saved, issue = persistSettings(updated)
+  if not saved then saveOutcome(false, issue); return end
   settingsRevision = settingsRevision + 1
   saveOutcome(true,"Settings saved")
 end
@@ -1153,7 +1236,7 @@ message = function(role, event)
     if not workflow then feedback = ""; readScope(role == "manager" and scope or "inventory") end
   elseif event.event == "select" and objectId(data.id) then
     local entry = item(data.id)
-    if entry and (role == "summary" and entry.type == 11 or role == "manager" and entry.location == scope) then
+    if entry and (role == "summary" and (entry.type == 11 or pinned(data.id)) or role == "manager" and entry.location == scope) then
       if selected ~= data.id then prompt = nil end
       selected, menu = data.id, nil; publish()
     end
@@ -1161,9 +1244,10 @@ message = function(role, event)
     if not menu or menu.role ~= "summary" then selected, prompt, menu = nil, nil, nil; publish() end
   elseif event.event == "menu" and (role == "manager" or role == "summary") and objectId(data.id) then
     local entry = item(data.id)
-    if entry and ((role == "manager" and entry.location == scope) or (role == "summary" and entry.type == 11)) then
+    if (role == "manager" and entry and entry.location == scope)
+      or (role == "summary" and ((entry and entry.type == 11) or pinned(data.id))) then
       selected, menuSerial = data.id, menuSerial + 1
-      menu = { id = data.id, identity = identity, scope = scope, role = role, location = entry.location, actions = actions(data.id) }; publish()
+      menu = { id = data.id, identity = identity, scope = scope, role = role, location = entry and entry.location or nil, actions = actions(data.id) }; publish()
     end
   elseif event.event == "action" and role == "manager" and data.id == selected and item(data.id) and item(data.id).location == scope then executeAction(data.id, data.action)
   elseif event.event == "submit" and role == "manager" then submit(data)
@@ -1186,7 +1270,7 @@ createWindow = function(role, force)
     if (role ~= "manager" and role ~= "summary") or type(event) ~= "table" or (event.sessionId and event.sessionId ~= getSessionId()) then return end
     local context = menu; menu = nil
     if not context or context.role ~= role or context.identity ~= identity or (role == "manager" and context.scope ~= scope)
-      or not item(context.id) or item(context.id).location ~= context.location then return end
+      or (event.id ~= "unpin" and (not item(context.id) or item(context.id).location ~= context.location)) then return end
     for _, action in ipairs(context.actions) do
       if action.id == event.id and not action.disabled then executeAction(context.id, action.id); return end
     end

@@ -117,7 +117,7 @@ a successful local replay does not establish those server contracts.
 
 ## Inventory Management plugin — pending
 
-Inventory Management **0.3.0**, API **0.9.0** and Core **0.5.0** require their own
+Inventory Management **0.4.0**, API **0.9.0** and Core **0.5.0** require their own
 native acceptance. Offline Lua fixtures and standalone browser checks do not
 establish native docking, context-menu delivery, persistence or live gameplay.
 Use only an explicitly authorized disposable world and local transport fixture;
@@ -138,6 +138,18 @@ version and tested artifact versions with any observed results.
   visible, bag names truncate before their location labels, and the list scrolls
   above the footer. Repeat with a larger saved font and long status messages;
   verify keyboard bag activation and scroll/focus preservation.
+- Pin known inventory, equipment and bagged items of different types. Verify
+  insertion order and the 32-pin limit, then save/reopen the disposable world and
+  switch characters: pins remain specific to the correct character. Clicking a
+  pin opens the native actions menu with normal eligibility and confirmation;
+  pinning/clicking alone sends no gameplay command. Observe item moves, stale
+  locations, missing items and duplicate names: exact IDs retain unavailable
+  placeholders, no replacement item is selected and no unopened bag is scanned.
+  Unpin both available and unavailable entries. Pin/unpin while editing Setup,
+  then save the older form: drafts and the latest pins must survive.
+- Fill the summary with pins and bags at 200×150 and 310×220, including long
+  labels and larger fonts. Both sections share one content scroller above the
+  fixed five controls; keyboard focus, scroll and saved geometry remain stable.
 - Double-click and keyboard-open a bag; use Manage Inventory to return to the
   main inventory. Exercise equipment/bag navigation, search, all sort columns,
   details, right-click selection, the Actions button and keyboard menu access.

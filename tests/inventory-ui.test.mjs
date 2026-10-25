@@ -124,3 +124,14 @@ test('quick potion controls honor their own eligibility instead of the ordinary 
   assert.equal(controls['heal-button'].disabled, true);
   assert.equal(controls['heal-button'].title, 'Configure Heal in Setup');
 });
+
+test('pinned summary rows normalize Lua list objects while preserving IDs and missing placeholders', () => {
+  const pins = { 2: { id: 302, plainName: '<missing portal>', available: false },
+    1: { id: 301, plainName: 'A portal', available: true, location: 'container:101' } };
+  const result = plain(normalize({ pins }));
+  assert.deepEqual(result.pins.map(pin => pin.id), [301, 302]);
+  assert.equal(result.pins[1].plainName, '<missing portal>');
+  assert.equal(result.pins[1].available, false);
+  assert.equal(pins[1].location, 'container:101');
+  assert.deepEqual(plain(normalize({ pins: {} })).pins, []);
+});
