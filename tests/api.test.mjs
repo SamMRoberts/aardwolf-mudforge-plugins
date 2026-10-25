@@ -4,7 +4,7 @@ import { runLua } from './lua-runtime.mjs';
 const cases = {
   'library loads without host globals or registrations': `
     local lib = freshLibrary()
-    assert(lib.version == "0.8.3" and type(lib.new) == "function")
+    assert(lib.version == "0.8.4" and type(lib.new) == "function")
     assert(not pcall(lib.new, {}))
   `,
   'removed SQLite options fail clearly without invoking host APIs': `
@@ -123,6 +123,27 @@ const cases = {
     world.packet("char.vitals", { hp = 100 })
     assert(calls == 1 and #consumer.events.disconnected == 1)
     unsubscribe(); world.packet("char.vitals", { hp = 99 }); assert(calls == 1)
+  `,
+  'character changes clear old character snapshots while same-name partial updates retain them': `
+    local world, consumer = runningWorld()
+    world.packet("char.base", { level = 201, tier = 7 })
+    world.packet("char.status", { level = 201, state = 3 })
+    world.packet("char.vitals", { hp = 99 })
+    world.packet("char.base", { name = "FIXTURE" })
+    assert(consumer.client.get("char.base").tier == 7 and consumer.client.get("char.vitals").hp == 99)
+    world.packet("char.base", { name = "Other", level = 20 })
+    assert(consumer.client.get("char.base").level == 20 and consumer.client.get("char.base").tier == nil)
+    assert(consumer.client.get("char.status") == nil and consumer.client.get("char.vitals") == nil)
+    world.packet("char.status", { state = 3 })
+    assert(consumer.client.get("char.status").level == nil)
+    local late = world.consumer("late", { "Char" })
+    assert(late.client.get("char.base").name == "Other" and late.client.get("char.status").level == nil)
+    assert(late.client.get("char.vitals") == nil)
+    world.packet("char.status", { level = 201 })
+    world.packet("char.base", { name = false })
+    world.packet("char.base", { name = "Third", level = 10 })
+    world.packet("char.status", { state = 3 })
+    assert(consumer.client.get("char.base").level == 10 and consumer.client.get("char.status").level == nil)
   `,
   'character updates merge, invalid numeric fields become unknown': `
     local world, consumer = runningWorld()

@@ -13,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.8.3, Core is 0.4.1 and the example is 0.1.0, including library
+  library version is 0.8.4, Core is 0.4.3 and the example is 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -63,7 +63,7 @@ acceptance step; loopback transport does not establish live-server behavior.
 
 ## Inventory — pending
 
-API **0.8.3** / Core **0.4.1** inventory acceptance has not been observed in
+API **0.8.4** / Core **0.4.3** inventory acceptance has not been observed in
 MudForge or on live Aardwolf. Existing storage and UI results below do not
 establish inventory behavior. Use an explicitly authorized disposable world and
 local Telnet fixture for native checks; live Aardwolf needs separate authorization.
@@ -80,6 +80,10 @@ local Telnet fixture for native checks; live Aardwolf needs separate authorizati
   remain distinct from drink containers. Entirely unobserved contents return nil;
   live movements may expose partial scopes with `known = false, stale = true`,
   without claiming complete contents. Unavailable snapshots contain empty maps.
+- Request details for a missing item and replay `Item <id> not found.` without
+  tags. Verify immediate failure, visible error and a working subsequent refresh.
+  Repeat after timeout and after manual interruption with both reply orders.
+  Wrong IDs and errors inside opened frames must not clear the barrier.
 - Verify owned `invdata`, `eqdata`, container and `invdetails` opening tags,
   recognized data and footers stay off screen while caches still update. Test
   late replies after timeout and malformed rows. Manual/unsolicited frames,
@@ -109,7 +113,7 @@ a successful local replay does not establish those server contracts.
 
 ## Inventory Management plugin — pending
 
-Inventory Management **0.2.1**, API **0.8.3** and Core **0.4.1** require their own
+Inventory Management **0.2.4**, API **0.8.4** and Core **0.4.3** require their own
 native acceptance. Offline Lua fixtures and standalone browser checks do not
 establish native docking, context-menu delivery, persistence or live gameplay.
 Use only an explicitly authorized disposable world and local transport fixture;
@@ -126,11 +130,20 @@ version and tested artifact versions with any observed results.
 - Dock and resize the summary. Open Setup and the manager, move/resize/close
   each independently, save/reopen the world, then explicitly reopen them.
   Verify saved geometry/visibility and that data updates do not force reopen.
+  Check the compact summary at 200×150 and 310×220: all five controls remain
+  visible, bag names truncate before their location labels, and the list scrolls
+  above the footer. Repeat with a larger saved font and long status messages;
+  verify keyboard bag activation and scroll/focus preservation.
 - Double-click and keyboard-open a bag; use Manage Inventory to return to the
   main inventory. Exercise equipment/bag navigation, search, all sort columns,
   details, right-click selection, the Actions button and keyboard menu access.
   Observe actual native `menuselect` and dismissal delivery. Hostile names and
   details must render as text, and unrelated updates must retain focus/scroll.
+- View details of a bagged item. Confirm preparation, observe one get by ID,
+  then one `invdetails` only after retrieval, then one put to the original bag.
+  Keep selection and the displayed details after return. Dismiss confirmation
+  without sending commands; test failed retrieval, cancellation during the read,
+  missing bag, disconnect and manual movement without retries or unsafe restores.
 - Edit Setup while inventory changes. Preserve drafts until save/cancel or an
   identity change. Verify font size, hidden/worn bags, bag order, confirmations,
   ordered rules and held-slot selection/numeric input. Test rejected storage
@@ -139,6 +152,16 @@ version and tested artifact versions with any observed results.
   local fixture, with exact IDs and validated targets. Confirm Drop, Sell and
   Donate by default. Disable busy/inactive or unsupported actions with reasons;
   never silently unkeep items or treat transport dispatch as server success.
+- At a known character level/tier, verify over-level rows are dimmed but still
+  selectable. Wear, Hold and each type-specific use action must be disabled with
+  a level explanation; details, get/put, Remove and disposal remain available.
+  Raise/lower level or tier without refreshing inventory and check dimming/menu
+  eligibility. Confirm the tier bonus and pre-201 cap. Repeat a level decrease
+  during preparation and an open use prompt, preserving its typed target while
+  disabling submission. Heal/Mana must skip over-level matching potions.
+- Switch from a high-level tiered character to another identity with partial
+  character packets. Old levels, tier and other character snapshots must clear;
+  no old use/preparation can resume on the new character.
 - Preview prepared bagged-item use, then replay retrieval, use and restoration.
   For wands/staves, verify the configured held slot, replacement of prior held
   equipment, selected-ID checks before `zap`/`brandish`, restoration of the prior
@@ -342,7 +365,7 @@ legacy databases separately. These tests do not execute MudForge's transpiler,
 storage engine, picker, command hooks, provisional output, pager or connected
 Aardwolf transport.
 
-- With separate authorization, install library 0.8.3, API Core 0.4.1 and Spells 0.5.1
+- With separate authorization, install library 0.8.4, API Core 0.4.3 and Spells 0.5.1
   in a disposable world. Record the client version and confirm both
   provider/consumer load orders and actual installed IDs.
 - With File System Access off and no helper, complete simulated login. Refuse

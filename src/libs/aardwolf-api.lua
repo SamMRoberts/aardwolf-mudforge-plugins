@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.8.3", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.8.4", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers."
 }
 
-local M = { version = "0.8.3", coreName = "Aardwolf API Core" }
+local M = { version = "0.8.4", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -873,11 +873,16 @@ function M.protocol.inventoryCollector(host)
       jobResult(job, "failed", issue)
     end
   end
+  local function pendingReply(job, opened)
+    return { key = job.key, kind = job.kind, expectedId = job.expectedId, opened = opened == true,
+      footer = job.kind == "details" and "{/invdetails}" or job.key == "equipment" and "{/eqdata}" or "{/invdata}" }
+  end
   finish = function(outcome, issue, shouldDrain)
     local job, token = current, epoch
     stopTimer()
     if shouldDrain and job then
-      draining = { key = job.key, kind = job.kind, hidden = not job.manual, opened = capture ~= nil }
+      draining = pendingReply(job, capture ~= nil)
+      draining.hidden = not job.manual
     end
     current, capture = nil, nil
     if issue then lastError, reason = issue, issue end
@@ -911,6 +916,12 @@ function M.protocol.inventoryCollector(host)
     if current or draining or #queue == 0 or not collectionReady() then return end
     current = table.remove(queue, 1)
     capture = nil
+    if current.kind == "details" and current.expectedId then
+      local item = getItem(current.expectedId)
+      if item and string.match(item.location, "^container:") then
+        finish("failed", "Get the item from its container before requesting details", false); return
+      end
+    end
     reason = "waiting for " .. current.command
     if not armTimeout() then finish("failed", "Inventory timeout timer refused", false); return end
     ownSend = true
@@ -1101,16 +1112,24 @@ function M.protocol.inventoryCollector(host)
     -- commands until waking; an already-cancelled reply may still drain.
     if monitor(line) then return end
     if not collectionReady() and not draining then return end
+    -- Aardwolf returns this terminal error without invdetails tags. Match only
+    -- the expected object before its opening tag; other output cannot prove
+    -- that an in-flight reply has ended.
+    local missingId = inventoryId(string.match(tagLine, "^Item (%d+) not found%.$"))
     if draining then
-      local expected = draining.footers and draining.footers[1]
-        or (draining.kind == "details" and "{/invdetails}" or draining.key == "equipment" and "{/eqdata}" or "{/invdata}")
-      if not draining.ambiguous and line == expected then
-        if draining.footers then table.remove(draining.footers, 1) end
-        if not draining.footers or #draining.footers == 0 then
+      local reply = draining.replies and draining.replies[1] or draining
+      if kind then reply.opened = true end
+      local rejected = missingId and reply.kind == "details" and not reply.opened and missingId == reply.expectedId
+      if not draining.ambiguous and (line == reply.footer or rejected) then
+        if draining.replies then table.remove(draining.replies, 1) end
+        if not draining.replies or #draining.replies == 0 then
           draining, reason, lastError = nil, "ready", nil; notify(); startNext()
         end
       end
       return
+    end
+    if missingId and not capture and current and current.kind == "details" and missingId == current.expectedId then
+      finish("failed", tagLine, false); return
     end
     if kind then
       if capture then
@@ -1190,7 +1209,7 @@ function M.protocol.inventoryCollector(host)
       -- Uncertain/nested frames and manual commands remain visible. A late
       -- owned reply may open after its timeout, while the collector drains it.
       if draining then
-        if draining.hidden and not draining.ambiguous and not draining.footers
+        if draining.hidden and not draining.ambiguous and not draining.replies
           and draining.kind == kind and (kind == "details" or draining.key == key) then
           draining.opened = true
           return true
@@ -1202,7 +1221,7 @@ function M.protocol.inventoryCollector(host)
     end
     local frame = capture and capture.owned and capture or nil
     if not frame and draining and draining.hidden and draining.opened
-      and not draining.ambiguous and not draining.footers then frame = draining end
+      and not draining.ambiguous and not draining.replies then frame = draining end
     if not frame then return false end
     local expected = frame.kind == "details" and "{/invdetails}"
       or frame.key == "equipment" and "{/eqdata}" or "{/invdata}"
@@ -1226,22 +1245,25 @@ function M.protocol.inventoryCollector(host)
     command = string.lower(command)
     local verb = string.match(string.lower(command), "^%s*([%a]+)")
     if verb ~= "invdata" and verb ~= "eqdata" and verb ~= "invdetails" then return end
+    local manual = { key = verb == "eqdata" and "equipment" or "inventory", kind = verb == "invdetails" and "details" or "scope",
+      command = command, waiters = {}, manual = true }
+    local containerId = string.match(command, "^%s*invdata%s+(%d+)%s*$")
+    if containerId then manual.key = containerKey(tonumber(containerId)) end
+    if manual.kind == "details" then manual.expectedId = inventoryInteger(string.match(command, "^%s*invdetails%s+(%d+)%s*$"), 1) end
     if current or draining then
       -- The server may still owe the old reply and the newly sent manual
       -- reply. Drain both in order; consuming only one could let the other
       -- satisfy a later request for the same scope.
       local barrier = draining
       if current then
-        barrier = { footers = { current.kind == "details" and "{/invdetails}"
-          or current.key == "equipment" and "{/eqdata}" or "{/invdata}" } }
+        barrier = { replies = { pendingReply(current, capture ~= nil) } }
         finish("failed", "Manual inventory command interrupted collection", true)
-      elseif not barrier.footers and not barrier.ambiguous then
-        barrier = { footers = { barrier.kind == "details" and "{/invdetails}"
-          or barrier.key == "equipment" and "{/eqdata}" or "{/invdata}" } }
+      elseif not barrier.replies and not barrier.ambiguous then
+        barrier = { replies = { pendingReply(barrier, barrier.opened) } }
       end
-      if barrier.footers then
-        table.insert(barrier.footers, verb == "invdetails" and "{/invdetails}" or verb == "eqdata" and "{/eqdata}" or "{/invdata}")
-        if #barrier.footers > 64 then barrier = { ambiguous = true } end
+      if barrier.replies then
+        table.insert(barrier.replies, pendingReply(manual, false))
+        if #barrier.replies > 64 then barrier = { ambiguous = true } end
       end
       cancelQueue("Manual inventory command interrupted collection")
       stopTimer(); current, capture, draining = nil, nil, barrier
@@ -1252,11 +1274,7 @@ function M.protocol.inventoryCollector(host)
     cancelQueue("Manual inventory command interrupted collection")
     stopTimer(); current, capture = nil, nil
     reason = "waiting for manual inventory output"
-    current = { key = verb == "eqdata" and "equipment" or "inventory", kind = verb == "invdetails" and "details" or "scope",
-      command = command, waiters = {}, manual = true }
-    local containerId = string.match(command, "^%s*invdata%s+(%d+)%s*$")
-    if containerId then current.key = containerKey(tonumber(containerId)) end
-    if current.kind == "details" then current.expectedId = inventoryInteger(string.match(command, "^%s*invdetails%s+(%d+)%s*$"), 1) end
+    current = manual
     if not armTimeout() then finish("failed", "Inventory timeout timer refused", true) end
     notify()
   end

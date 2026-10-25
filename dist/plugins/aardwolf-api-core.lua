@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-api-core", name = "Aardwolf API Core", version = "0.4.1",
+  id = "aardwolf-api-core", name = "Aardwolf API Core", version = "0.4.3",
   author = "Sam Roberts", description = "Shared Aardwolf session and inventory state with exclusive GMCP negotiation."
 }
 
@@ -127,6 +127,16 @@ local function handlePacket(packageName, payload)
   if not initialized or not connected then return end
   local data, invalid = api.protocol.normalize(packageName, payload)
   if type(data) ~= "table" then return end
+  local previousBase = snapshots["char.base"]
+  local characterChanged = packageName == "char.base" and previousBase and type(previousBase.name) == "string"
+    and (invalid.name or (type(data.name) == "string" and string.lower(data.name) ~= string.lower(previousBase.name)))
+  if characterChanged then
+    -- Partial character packets belong to one identity. In particular, a new
+    -- character must never inherit the previous character's level or tier.
+    for _, name in ipairs(api.protocol.statePackages) do
+      if string.sub(name, 1, 5) == "char." then snapshots[name] = nil end
+    end
+  end
   local isState = false
   for _, name in ipairs(api.protocol.statePackages) do if name == packageName then isState = true end end
   if isState then
@@ -147,7 +157,8 @@ local function handlePacket(packageName, payload)
   elseif packageName == "char.status" then inventoryStateReady = true end
   if packageName == "char.base" or packageName == "char.status" then syncInventory() end
   for id in pairs(consumers) do
-    deliver(id, "update", { version = 1, package = packageName, payload = data })
+    if characterChanged then sendState(id)
+    else deliver(id, "update", { version = 1, package = packageName, payload = data }) end
   end
 end
 

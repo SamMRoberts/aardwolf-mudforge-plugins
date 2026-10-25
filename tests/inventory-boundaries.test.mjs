@@ -202,7 +202,8 @@ const cases = {
     local world, inventory = ready()
     inventory.lookIn(101)
     frame(world, "invdata 101", { "301,,a ruby,1,6,0,-1,-1" })
-    inventory.identify(301)
+    -- An unsolicited detail frame seeds the cache; an owned request for a
+    -- bagged item is refused before sending invdetails.
     world.line("{invdetails}"); world.line("{invheader}301|1|Treasure|10|1|none|||none|-1|||1"); world.line("{/invdetails}")
     assert(inventory.getDetails(301))
     inventory.refresh(); frame(world, "invdata", { "103,,a dagger,1,5,0,-1,-1" }); frame(world, "eqdata")

@@ -62,7 +62,11 @@ subscription topics. A state reply supplies current snapshots and notifies
 every state topic; a missing snapshot is passed as `nil`. A normal GMCP packet
 notifies its own topic. Do not count notifications as unique server packets.
 
-Character packets merge fields; an omitted field retains its previous value.
+Character packets merge fields for the same character; an omitted field retains
+its previous value. Core 0.4.3 clears character snapshots when a different
+character name arrives or the known name becomes invalid, then publishes the
+character's state to consumers.
+Levels, tiers and other omitted fields cannot carry across that identity change.
 An explicitly invalid known numeric/text field becomes unknown. Room and
 Group replace their complete snapshots, including exits and membership.
 Group members are normalized to an ordered, one-based Lua list. Server field
@@ -256,7 +260,7 @@ other subscribers. Unsubscribe functions are idempotent.
 | `client.inventory.on(callback)` | Notify `(snapshot, status)` on cache/status changes; `snapshot` is always a table. |
 | `client.inventory.refresh()` | Request carried inventory and equipment through `invdata` and `eqdata`. |
 | `client.inventory.lookIn(containerId)` | Request one container through `invdata <id>`. |
-| `client.inventory.identify(id)` | Request tagged item details through `invdetails <id>`. Does not send the separate `identify` command or cast a spell. |
+| `client.inventory.identify(id)` | Request tagged item details through `invdetails <id>`. Known items inside containers are refused; retrieve and observe the item in inventory first. Does not move items, send the separate `identify` command or cast a spell. |
 | `client.inventory.onResult(callback)` | Notify a result table `{ requestId, outcome, reason? }` for requests issued by this consumer. |
 
 A snapshot is `{ items, scopes, details }`. `items` and `details` use decimal
@@ -316,12 +320,21 @@ interruptions and ambiguous replies stop suppression. MudForge also skips later
 plugins' line hooks and triggers for discarded lines; consumers should use the
 shared inventory API rather than parse these hidden replies themselves.
 
+Library **0.8.4** with Core **0.4.2** rejects details requests for known bagged
+items at dispatch, including requests queued before a move into a container.
+An exact `Item <expected-id> not found.` response before the details opening tag
+ends that request as failed without waiting for a nonexistent closing tag.
+The error stays visible and last-good details remain cached. The same terminal
+response can release a timed-out unopened details reply; manual interruptions
+match each pending reply in order by kind and object ID. Unrelated errors and
+errors after an opening tag retain the normal closing-tag barrier.
+
 A closing tag commits a complete scope atomically. Malformed, incomplete,
 oversized or timed-out collection retains the last-good scope marked stale and
 reports failure; it never publishes a partial replacement. Manual tagged commands
 are observed without assigning their output to an unrelated owned request.
 An interrupted response keeps the collector busy until its matching closing tag
-arrives or the session reconnects. When a manual command interrupts an owned read,
+or recognized terminal details error arrives, or the session reconnects. When a manual command interrupts an owned read,
 both replies must drain. Ambiguous nested/unsolicited frames require reconnecting;
 no read or action is retried automatically. Timer/transport setup failures can be
 retried after Core reload or reconnect.

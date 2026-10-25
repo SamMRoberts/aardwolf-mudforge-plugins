@@ -1,7 +1,7 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.1** uses `aardwolf-api` **0.8.3** and Aardwolf API
-Core **0.4.1**. Install the library and Core first, then
+Inventory Management **0.2.4** uses `aardwolf-api` **0.8.4** and Aardwolf API
+Core **0.4.3**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
 basic inventory data and original actions; unsupported held-item and use actions
@@ -13,6 +13,11 @@ The summary is a normal dockable MudForge widget. It shows the number of items
 directly in carried inventory, including storage bags themselves. Worn equipment
 and bag contents are excluded. Unknown or stale data is labeled rather than
 presented as a fresh count.
+
+The summary uses smaller labels, 22 px minimum bag rows and buttons, and tighter
+spacing. At widths of 280 px or more, its five action buttons share one row;
+narrower docks use two rows. The saved font-size setting still scales the widget,
+and the bag list scrolls within the space left above the controls.
 
 The bag list contains discovered storage containers, with their location shown;
 worn bags are included by default. Drink containers remain a separate item type.
@@ -28,7 +33,16 @@ tagged `invdetails` output. An unopened bag is unknown; an empty bag is shown as
 empty only after a complete listing. Partial, loading and stale states remain
 visible.
 
-Library 0.8.3 and Core 0.4.1 parse plugin-requested `invdata`, `eqdata`,
+For an item inside an accessible carried or worn bag, **View item details**
+shows a preparation confirmation. Aardwolf's
+[`invdetails <objectid>`](https://www.aardwolf.com/wiki/index.php/Help/Invdetails)
+lookup requires the item outside its container. After confirmation, the manager
+retrieves that one item, waits for its observed arrival in inventory, reads its
+details, then returns it to its original bag and waits for that move. The displayed
+details remain available after restoration. Inventory and equipment details still
+load directly. No item is retrieved merely by selecting it.
+
+Library 0.8.4 and Core 0.4.3 parse plugin-requested `invdata`, `eqdata`,
 `invdata <bag-id>` and `invdetails <item-id>` replies before hiding their opening
 tags, recognized data rows and closing tags from the terminal. This also applies
 to automatic reconciliation reads. Manually typed queries and unsolicited frames
@@ -62,6 +76,21 @@ recipients use validated controls; commands target object IDs rather than item
 names. Drop, Sell and Donate ask for confirmation by default. The plugin never
 removes an item's keep protection automatically. Server restrictions, skills,
 item flags, shop availability and other game conditions still determine success.
+
+Items above the character's current item-level allowance appear dimmed, with a
+tooltip explaining the requirement. Wear/equip, Hold, Quaff, Eat, Drink, Recite,
+Zap and Brandish are disabled for those items. Selection, details, bag transfers,
+Remove and disposal remain available. The allowance includes 10 levels per tier,
+capped at level 200 until the character reaches level 201, following Aardwolf's
+[tier rules](https://www.aardwolf.com/wiki/index.php/Help/Tiers).
+
+The manager uses `char.status.level`, falling back to `char.base.level`, and
+`char.base.tier`. Level and tier updates refresh dimming and actions immediately
+without querying inventory. Unknown character level does not become zero or
+cause items to be dimmed. Confirmation, preparation, and dispatch recheck the
+allowance; quick-potion buttons skip over-level matches and disable when no
+eligible match remains in known locations. Core 0.4.3 clears character snapshots
+when the character name changes, preventing inherited levels and tiers.
 
 Sacrifice is absent from carried-item actions: Aardwolf sacrifices ground
 objects, and this plugin does not drop an item as a hidden prerequisite.
@@ -171,6 +200,16 @@ until explicitly refreshed. No gameplay command is retried automatically.
 
 Library 0.8.2 also releases collection when a matching closing tag crosses the
 frame size limit: the oversized listing fails without waiting for a second tag.
+
+Library 0.8.4 handles the exact `Item <id> not found.` response for the expected
+details request before any opening tag. That request fails immediately and
+refresh remains available, including when the error arrives after a timeout.
+Manual interruptions still drain replies in order; an unrelated error or a
+not-found line inside an opened frame cannot release the collection barrier.
+Core also refuses known bagged-item detail requests with a get-first explanation.
+Update Inventory Management to 0.2.2 for the confirmed retrieval/read/return flow.
+If a details workflow cannot safely restore the item, its feedback identifies
+manual restoration; it never retries movement or details commands automatically.
 
 If the expected tag never arrives, reconnect to reset collection, then run
 `awinventory refresh`. If the timeout recurs, retain the complete message and
