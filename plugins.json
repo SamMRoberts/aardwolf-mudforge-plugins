@@ -6,7 +6,7 @@
     {
       "id": "aardwolf-api-core",
       "name": "Aardwolf API Core",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": "Sam Roberts",
       "description": "Shared Aardwolf session and inventory state with exclusive GMCP negotiation.",
       "category": "utilities",
@@ -16,7 +16,7 @@
         "core"
       ],
       "downloadUrl": "dist/plugins/aardwolf-api-core.lua",
-      "sha256": "87de60261aa19da3ba9e3a4bb18fcaf789e5ef7529bb2553f9e06ca780f2aa83",
+      "sha256": "dc58a958758361b3ff63ea5fcd824411639923ea2b5963f1b8dbfde1b56116d8",
       "size": 11006,
       "format": "lua"
     },
@@ -94,7 +94,7 @@
     {
       "id": "aardwolf-inventory",
       "name": "Aardwolf Inventory Management",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": "Sam Roberts",
       "description": "Dockable inventory, bag management, prepared item use and explicit sorting rules.",
       "category": "widgets",
@@ -105,8 +105,8 @@
         "equipment"
       ],
       "downloadUrl": "dist/plugins/aardwolf-inventory.lua",
-      "sha256": "aaa0363034e362d6df428f2c0dfc95506daa55db10c6412a9638890a5256bbc2",
-      "size": 70047,
+      "sha256": "6411a564badaf023bbcf0a04b48e78e1a99feaa6d14e76c86606bd33762b5047",
+      "size": 88543,
       "format": "lua"
     },
     {
@@ -131,7 +131,7 @@
   "libraries": [
     {
       "name": "aardwolf-api",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "author": "Sam Roberts",
       "description": "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers.",
       "tags": [
@@ -140,8 +140,8 @@
         "api"
       ],
       "downloadUrl": "dist/libs/aardwolf-api.lua",
-      "sha256": "1de30801b995ef9fced5145fe6bf112a39661881d47a985d242acbd31b9c4bec",
-      "size": 77268
+      "sha256": "cb5d457e5b1258824c77772e7b919ddc0fe9e5bee0bd29594bcb80c8c83d8511",
+      "size": 80168
     }
   ]
 }

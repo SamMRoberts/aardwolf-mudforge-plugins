@@ -110,7 +110,7 @@ const cases = {
     inventory.lookIn(101); world.tick(1)
     refused(world, results, function() return inventory.use(102, "quaff") end)
     frame(world, "invdata 101", {})
-    world.packet("char.status", { state = 8 })
+    world.packet("char.status", { state = 9 })
     refused(world, results, function() return inventory.use(102, "quaff") end)
     world.packet("char.status", { state = 3 })
     world.refuseCommands = true

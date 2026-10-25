@@ -13,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.7.0, Core is 0.3.0 and the example is 0.1.0, including library
+  library version is 0.8.0, Core is 0.4.0 and the example is 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -63,7 +63,7 @@ acceptance step; loopback transport does not establish live-server behavior.
 
 ## Inventory — pending
 
-API **0.7.0** / Core **0.3.0** inventory acceptance has not been observed in
+API **0.8.0** / Core **0.4.0** inventory acceptance has not been observed in
 MudForge or on live Aardwolf. Existing storage and UI results below do not
 establish inventory behavior. Use an explicitly authorized disposable world and
 local Telnet fixture for native checks; live Aardwolf needs separate authorization.
@@ -102,7 +102,7 @@ a successful local replay does not establish those server contracts.
 
 ## Inventory Management plugin — pending
 
-Inventory Management **0.1.0**, API **0.7.0** and Core **0.3.0** require their own
+Inventory Management **0.2.0**, API **0.8.0** and Core **0.4.0** require their own
 native acceptance. Offline Lua fixtures and standalone browser checks do not
 establish native docking, context-menu delivery, persistence or live gameplay.
 Use only an explicitly authorized disposable world and local transport fixture;
@@ -147,6 +147,25 @@ version and tested artifact versions with any observed results.
   explicitly. Only loose matched non-container items move, one at a time after
   observation; failure/cancellation stops further moves. No login/loot/refresh
   event starts sorting.
+- Configure separate Quick potions choices for Heal and Mana by literal
+  case-insensitive name text and optional bag. Verify old profiles remain
+  unconfigured and empty names disable the corresponding button. Loose inventory
+  matches take priority, and multiple matches retain server listing order. One summary
+  click uses one potion without opening a manager or confirmation dialog. Unknown
+  or stale data triggers only the reads required by that click; unrelated bags
+  are never scanned, and busy clicks never queue another use.
+- Replay primary potion use in combat: only the capability-checked potion action,
+  retrieval/restoration and safe verification reads are allowed. Ordinary
+  management, staff/wand use and background refresh rules remain restricted. Test
+  consumed and surviving retrieved potions, no match, unavailable/full bags,
+  rejected transport, timeouts, cancellation and character/disconnect changes;
+  no command is retried or resumed automatically.
+- Remove a potion/wand workflow's original bag after retrieval while prior held
+  equipment still needs restoration. Independently safe equipment restoration
+  must still proceed, with unresolved bag recovery reported. Move an item out of
+  its expected equipment slot before a planned removal: no stale removal may run.
+  Move an already-held item manually after use: preserve the manual placement
+  and report the changed arrangement without claiming full restoration.
 - Open two disposable worlds with different characters/settings and verify
   widget events, menus, counts, rules, held slots and commands remain isolated.
   Disable/remove fixtures and restore the original selected world. Confirm

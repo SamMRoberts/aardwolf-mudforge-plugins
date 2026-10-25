@@ -1,7 +1,7 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.1.0** uses `aardwolf-api` **0.7.0** and Aardwolf API
-Core **0.3.0**. Install the library and Core first, then
+Inventory Management **0.2.0** uses `aardwolf-api` **0.8.0** and Aardwolf API
+Core **0.4.0**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
 basic inventory data and original actions; unsupported held-item and use actions
@@ -77,15 +77,47 @@ returned. Only one workflow runs at a time.
 Cancel stops further forward steps. Failures and timeouts stop the workflow;
 restoration proceeds only while the same character remains connected and the
 required state is trustworthy. Missing items, disconnected sessions or failed
-restoration leave visible recovery guidance. Commands are never retried
-automatically, and no pending workflow resumes after reconnect or reload.
+restoration leave visible recovery guidance. Independent safe restoration steps
+can still complete when another destination is unavailable. If an item has been
+moved manually, the plugin leaves that new placement alone and reports the
+changed arrangement instead of claiming full restoration. Commands are never
+retried automatically, and no pending workflow resumes after reconnect or reload.
 "Sent" means command dispatch, not proof that a spell or server action succeeded.
+
+## Quick Heal and Mana potions
+
+Setup's **Quick potions** section saves separate choices for the summary's
+**Heal** and **Mana** buttons per character. Each choice has a case-insensitive
+literal potion-name substring and an **Also search bag** dropdown. Choose
+**Inventory only** to omit the fallback bag. Matching is restricted to potions;
+the substring does not interpret Lua patterns or regular expressions. An empty
+name disables that button, and existing profiles start unconfigured.
+
+Each summary button uses one matching potion per click without opening the manager
+or a confirmation dialog. It prefers a loose inventory match; only when no loose
+match exists does it search the configured bag. Within each location, the first
+match in server listing order wins. No other bag is searched. An unavailable bag
+or no matching potion produces feedback without substituting another item.
+
+If carried inventory or the configured bag is unknown or stale, that explicit
+click requests the required fresh listing before selecting an item. It does not
+start a background scan or periodic refresh. Capability-checked potion retrieval,
+quaffing and the reads needed to verify/restore the item are allowed during
+combat; ordinary management and wand/staff workflows keep their existing
+restrictions. A second click while work is pending does not queue another use.
+
+The workflow waits for observed retrieval before quaffing, sends at most one
+quaff command, and returns a surviving retrieved potion to its original bag. It
+never retries gameplay commands automatically or removes keep protection. A
+refused command, cancellation, disconnect or identity change stops forward work
+and reports any restoration that could not be completed.
 
 ## Setup and Organize
 
 Setup saves font size, bag visibility/order and disposal-confirmation preferences
-in native plugin/world storage. Rules and held-slot configuration are specific
-to the identified character. Inventory snapshots and pending workflows are never
+in native plugin/world storage. Rules, quick potion choices and held-slot
+configuration are specific to the identified character. Inventory snapshots and
+pending workflows are never
 persisted. A failed settings save is shown and does not claim persistence.
 
 Setup supports up to 64 sorting rules. Each rule has an enabled state, an item type

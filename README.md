@@ -1,7 +1,7 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.7.0** library provides a session Core, an injected library facade, native
+The **0.8.0** library provides a session Core, an injected library facade, native
 storage and widget helpers, opt-in inventory management, a reactive vitals example,
 and a configurable vitals HUD.
 All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.0**
@@ -82,8 +82,8 @@ have **not been published or installed** by this scaffold.
    [Room Details](#aardwolf-room-details). It enables room tags and requests a look
    after login; it needs no file permission.
 7. Optionally install `dist/plugins/aardwolf-inventory.lua` for
-   [Inventory Management](docs/INVENTORY.md). Update the library to **0.7.0** and
-   API Core to **0.3.0** for held-item preparation and item-use actions.
+   [Inventory Management](docs/INVENTORY.md). Update the library to **0.8.0** and
+   API Core to **0.4.0** for held-item preparation and item-use actions.
 
 With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
@@ -105,7 +105,7 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Inventory Management
 
-[Aardwolf Inventory Management 0.1.0](docs/INVENTORY.md) adds a dockable summary
+[Aardwolf Inventory Management 0.2.0](docs/INVENTORY.md) adds a dockable summary
 with the directly carried item count and discovered storage bags. The count
 includes bags themselves, but excludes worn equipment and items inside bags.
 Double-click a bag, or press Enter on it, to open its contents in the floating
@@ -129,6 +129,17 @@ loose inventory into configured bags, then waits for explicit Start. It leaves
 equipment and existing bag contents in place and never runs automatically.
 Only settings persist; inventory caches remain session-local.
 
+Setup's **Quick potions** section configures separate **Heal** and **Mana**
+summary buttons, each with a case-insensitive literal potion-name substring and
+an optional fallback bag. Each button uses one matching potion per click without
+opening the manager or a confirmation dialog, preferring loose inventory over
+the configured bag and preserving server listing order. It
+works during combat through capability-checked potion use and safe reads. Unknown
+or stale inventory/the selected bag loads only for that explicit click; other bags
+are not scanned. It never queues repeated uses or retries commands automatically.
+Existing profiles start unconfigured. Surviving retrieved items return to their
+original bag.
+
 Use `awinventory show`, `manage`, `setup`, `refresh` or `status` to reopen windows,
 refresh carried inventory/equipment or inspect feedback. MudForge remembers each window's
 placement, size and visibility. Native and live acceptance remain pending in the
@@ -136,7 +147,7 @@ placement, size and visibility. Native and live acceptance remain pending in the
 
 ## Inventory management API
 
-Library **0.7.0** and API Core **0.3.0** provide an optional inventory API for other
+Library **0.8.0** and API Core **0.4.0** provide an optional inventory API for other
 plugins. Construct a consumer with `inventory = true` to share live carried
 inventory/equipment tracking, discover storage bags (including worn bags), and
 request container contents or tagged item details. Other consumers can use this
@@ -151,8 +162,8 @@ The cache is session-local and never persisted. Monitoring is left enabled when
 collection stops because other integrations may share it.
 
 The same API exposes explicit single-item get/put, wear/remove, drop, give,
-sell, donate and sacrifice actions using object IDs. Actions fail while busy or
-inactive and never run later automatically. A sent result reports command
+sell, donate and sacrifice actions using object IDs. Management actions fail while
+busy or inactive and never run later automatically. A sent result reports command
 dispatch; server tags establish observed inventory changes. Sacrifice targets
 an item already on the ground and never automatically drops it first.
 
