@@ -13,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.8.2, Core is 0.4.0 and the example is 0.1.0, including library
+  library version is 0.8.3, Core is 0.4.1 and the example is 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -63,7 +63,7 @@ acceptance step; loopback transport does not establish live-server behavior.
 
 ## Inventory — pending
 
-API **0.8.2** / Core **0.4.0** inventory acceptance has not been observed in
+API **0.8.3** / Core **0.4.1** inventory acceptance has not been observed in
 MudForge or on live Aardwolf. Existing storage and UI results below do not
 establish inventory behavior. Use an explicitly authorized disposable world and
 local Telnet fixture for native checks; live Aardwolf needs separate authorization.
@@ -80,6 +80,13 @@ local Telnet fixture for native checks; live Aardwolf needs separate authorizati
   remain distinct from drink containers. Entirely unobserved contents return nil;
   live movements may expose partial scopes with `known = false, stale = true`,
   without claiming complete contents. Unavailable snapshots contain empty maps.
+- Verify owned `invdata`, `eqdata`, container and `invdetails` opening tags,
+  recognized data and footers stay off screen while caches still update. Test
+  late replies after timeout and malformed rows. Manual/unsolicited frames,
+  prompts, combat, errors and monitoring tags must stay visible. After a manual
+  interruption, ambiguous frame, disconnect or last-consumer removal, ensure
+  unrelated output is never hidden. Verify the documented effect on later
+  plugins' line hooks/triggers; provisional prompts may already be displayed.
 - Interleave gain/loss/equip/put/get/consume/vault/keyring tags with collection.
   Verify newer events survive listing completion and ambiguous changes reconcile
   affected scopes without refresh loops.
@@ -102,7 +109,7 @@ a successful local replay does not establish those server contracts.
 
 ## Inventory Management plugin — pending
 
-Inventory Management **0.2.1**, API **0.8.2** and Core **0.4.0** require their own
+Inventory Management **0.2.1**, API **0.8.3** and Core **0.4.1** require their own
 native acceptance. Offline Lua fixtures and standalone browser checks do not
 establish native docking, context-menu delivery, persistence or live gameplay.
 Use only an explicitly authorized disposable world and local transport fixture;

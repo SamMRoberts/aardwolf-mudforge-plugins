@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-api-core", name = "Aardwolf API Core", version = "0.4.0",
+  id = "aardwolf-api-core", name = "Aardwolf API Core", version = "0.4.1",
   author = "Sam Roberts", description = "Shared Aardwolf session and inventory state with exclusive GMCP negotiation."
 }
 
@@ -237,7 +237,7 @@ function init()
 end
 
 function onLine(sessionId, rawLine, cleanLine)
-  if initialized and sessionId == getSessionId() then inventory.line(rawLine, cleanLine) end
+  if initialized and sessionId == getSessionId() then return inventory.line(rawLine, cleanLine) end
 end
 
 function onSend(sessionId, command)
