@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.8.5", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.9.0", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers."
 }
 
-local M = { version = "0.8.5", coreName = "Aardwolf API Core" }
+local M = { version = "0.9.0", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -522,9 +522,9 @@ local function inventoryKey(value)
 end
 
 local INVENTORY_ACTIONS = { take = true, put = true, wear = true, remove = true,
-  drop = true, give = true, sell = true, donate = true, sacrifice = true, hold = true }
-local INVENTORY_USES = { quaff = 8, eat = true, drink = 12, recite = 2, zap = 3, brandish = 4 }
-local INVENTORY_EXTENSIONS = { "hold", "quaff", "eat", "drink", "recite", "zap", "brandish", "combatPotions" }
+  drop = true, give = true, sell = true, donate = true, sacrifice = true, hold = true, dual = true }
+local INVENTORY_USES = { quaff = 8, eat = true, drink = 12, recite = 2, zap = 3, brandish = 4, enter = 20 }
+local INVENTORY_EXTENSIONS = { "hold", "quaff", "eat", "drink", "recite", "zap", "brandish", "combatPotions", "wearSlots", "enter", "dual" }
 M.protocol.inventoryActions = INVENTORY_EXTENSIONS
 
 local function inventoryTarget(value, allowId)
@@ -542,6 +542,7 @@ end
 local function inventoryCommand(kind, args)
   if type(args) ~= "table" then return nil, "invalid inventory arguments" end
   if kind == "refresh" then return "invdata" end
+  if kind == "wearSlots" then return "wearable" end
   local id = inventoryKey(args.id)
   if kind == "lookIn" then
     local containerId = inventoryKey(args.containerId or args.id)
@@ -558,13 +559,13 @@ local function inventoryCommand(kind, args)
       target = inventoryTarget(target, action == "recite")
       if not target then return nil, "invalid item use target" end
     end
-    if action == "zap" or action == "brandish" then
+    if action == "zap" or action == "brandish" or action == "enter" then
       local slot = finite(args.heldSlot)
       if not slot or slot < 0 or slot > 9007199254740991 or slot ~= math.floor(slot) then return nil, "invalid held slot" end
       if action == "zap" and not target then return nil, "zap requires a target" end
     end
     if action ~= "recite" and action ~= "zap" and target then return nil, "this item use has no target" end
-    if action == "brandish" then return "brandish" end
+    if action == "brandish" or action == "enter" then return action end
     if action == "zap" then return "zap " .. target end
     return action .. " " .. id .. (target and (" " .. target) or "")
   end
@@ -667,8 +668,44 @@ local function inventoryItem(line, location)
 end
 M.protocol.inventoryItem = inventoryItem
 
+local function inventoryWearSlot(line)
+  if type(line) ~= "string" or #line > 4096 then return nil end
+  local id, keyword, description, wearFlag = string.match(line,
+    "^%s*(%d+)%s+([%w]+)%s+%[%s*(.-)%s*%]:%s*([%w]+)%s*$")
+  id = inventoryInteger(id, 0)
+  if not id or id > 255 or not keyword or #keyword > 64 or #description > 256 or #wearFlag > 64 then return nil end
+  return { id = id, keyword = string.lower(keyword), description = description, wearFlag = string.lower(wearFlag) }
+end
+M.protocol.inventoryWearSlot = inventoryWearSlot
+local function wearableSeparator(line)
+  if type(line) ~= "string" or #line > 4096 then return false end
+  -- The server divider starts with the ASCII number-column marker, followed
+  -- by three punctuation-only columns. Avoid literal Unicode in Lua source:
+  -- MudForge's Lua parser accepts ASCII source while server text may be Unicode.
+  return string.match(line, "^%s*%-%-%-%s+[^%w%s]+%s+[^%w%s]+%s+[^%w%s]+%s*$") ~= nil
+    and not string.find(line, "%c")
+end
+local function inventoryWearSlots(value)
+  assert(type(value) == "table" and type(value.known) == "boolean" and type(value.stale) == "boolean")
+  assert(type(value.entries) == "table" and #value.entries <= 256)
+  local result, ids, keywords, count = { known = value.known, stale = value.stale, entries = {} }, {}, {}, 0
+  for index, entry in pairs(value.entries) do
+    local number = tonumber(index)
+    assert(spellInteger(number, 1, #value.entries))
+    assert(type(entry) == "table" and spellInteger(entry.id, 0, 255))
+    assert(type(entry.keyword) == "string" and #entry.keyword <= 64 and string.match(entry.keyword, "^[%w]+$"))
+    assert(inventoryText(entry.description, 256) and type(entry.wearFlag) == "string" and #entry.wearFlag <= 64 and string.match(entry.wearFlag, "^[%w]+$"))
+    assert(not ids[tostring(entry.id)] and not keywords[entry.keyword])
+    ids[tostring(entry.id)], keywords[entry.keyword], count = true, true, count + 1
+    result.entries[number] = { id = entry.id, keyword = entry.keyword, description = entry.description, wearFlag = entry.wearFlag }
+  end
+  assert(count == #value.entries)
+  return result
+end
+
 function M.protocol.inventoryCollector(host)
   local service, owners, scopes, details = {}, {}, {}, {}
+  local wearSlots = { known = false, stale = true, entries = {} }
   local generation, epoch, timeoutSerial = 1, 0, 0
   local connection = { connected = false, negotiated = false }
   local queue, requests, completed, tombstones = {}, {}, {}, {}
@@ -760,6 +797,10 @@ function M.protocol.inventoryCollector(host)
     for key, scope in pairs(scopes) do if key ~= replacementKey then add(scope.entries) end end
     add(replacement or {})
     return count
+  end
+  local function slotNumber(keyword)
+    if not wearSlots.known or wearSlots.stale then return nil end
+    for _, slot in ipairs(wearSlots.entries) do if slot.keyword == keyword then return slot.id end end
   end
   local function getItem(id)
     for _, scope in pairs(scopes) do
@@ -881,12 +922,17 @@ function M.protocol.inventoryCollector(host)
     local job, token = current, epoch
     stopTimer()
     if shouldDrain and job then
-      draining = pendingReply(job, capture ~= nil)
+      draining = job.noBoundary and { ambiguous = true } or pendingReply(job, capture ~= nil)
       draining.hidden = not job.manual
     end
     current, capture = nil, nil
     if issue then lastError, reason = issue, issue end
     if job then
+      if outcome == "failed" and job.wearSlots then
+        wearSlots.stale = true
+        broadcast("inventory-wear-slots", { slots = wearSlots })
+        if token ~= epoch then return end
+      end
       if outcome == "failed" and job.kind ~= "details" then stale(job.key) end
       if token ~= epoch then return end
       jobResult(job, outcome, issue)
@@ -916,6 +962,14 @@ function M.protocol.inventoryCollector(host)
     if current or draining or #queue == 0 or not collectionReady() then return end
     current = table.remove(queue, 1)
     capture = nil
+    if current.kind == "slots" then
+      current.kind, current.key = "scope", "equipment"
+      current.wearSlots = { header = false, ids = {}, keywords = {}, entries = {}, bytes = 0 }
+      local starting, token = current, epoch
+      wearSlots.stale = true
+      broadcast("inventory-wear-slots", { slots = wearSlots })
+      if current ~= starting or token ~= epoch then return end
+    end
     if current.kind == "details" and current.expectedId then
       local item = getItem(current.expectedId)
       if item and string.match(item.location, "^container:") then
@@ -925,9 +979,15 @@ function M.protocol.inventoryCollector(host)
     reason = "waiting for " .. current.command
     if not armTimeout() then finish("failed", "Inventory timeout timer refused", false); return end
     ownSend = true
+    local job, token = current, epoch
     local ok, accepted = pcall(host.send, current.command)
+    if ok and accepted ~= false and job.wearSlots and current == job and token == epoch then
+      ok, accepted = pcall(host.send, "eqdata")
+      if not ok or accepted == false then job.noBoundary = true end
+    end
     ownSend = false
-    if not ok or accepted == false then finish("failed", "Inventory command transport refused", false); return end
+    if current ~= job or token ~= epoch then return end
+    if not ok or accepted == false then finish("failed", "Inventory command transport refused", job.noBoundary == true); return end
     notify()
   end
   enqueue = function(key, kind, command, waiter)
@@ -1135,6 +1195,25 @@ function M.protocol.inventoryCollector(host)
     if missingId and not capture and current and current.kind == "details" and missingId == current.expectedId then
       finish("failed", tagLine, false); return
     end
+    if current and current.wearSlots and not capture and not kind and not closing then
+      local slots = current.wearSlots
+      slots.bytes = slots.bytes + #cleanLine + 1
+      if slots.bytes > 65536 then finish("failed", "Wearable response exceeds 64 KiB", true); return end
+      if string.match(tagLine, "^Num%s+Keyword%s+Description%s+Wear Flag%s*$") then
+        if slots.header then slots.invalid = true end
+        slots.header = true
+      elseif slots.header then
+        local slot = inventoryWearSlot(cleanLine)
+        if slot then
+          if slots.ids[idKey(slot.id)] or slots.keywords[slot.keyword] or #slots.entries >= 256 then slots.invalid = true
+          else
+            slots.ids[idKey(slot.id)], slots.keywords[slot.keyword] = true, true
+            table.insert(slots.entries, slot)
+          end
+        elseif string.match(tagLine, "^%d+%s") then slots.invalid = true end
+      end
+      return
+    end
     if kind then
       if capture then
         finish("failed", "Nested inventory frame interrupted collection; reconnect to reset", true)
@@ -1176,7 +1255,18 @@ function M.protocol.inventoryCollector(host)
           if not details[idKey(detail.id)] and count >= 10000 then ok, issue = false, "Inventory details exceed 10000 items"
           else details[idKey(detail.id)] = detail; broadcast("inventory-details", { details = detail }); ok = true end
         end
-      else ok, issue = commitScope(frame) end
+      else
+        local slots = current and current.wearSlots
+        if slots and (not slots.header or slots.invalid or #slots.entries == 0) then
+          ok, issue = false, "Malformed, duplicate or incomplete wearable response"
+        else
+          ok, issue = commitScope(frame)
+          if ok and slots and frame.epoch == epoch then
+            wearSlots = { known = true, stale = false, entries = slots.entries }
+            broadcast("inventory-wear-slots", { slots = wearSlots })
+          end
+        end
+      end
       if frame.epoch ~= epoch then return end
       if ok then reason, lastError = "ready", nil; finish("complete", nil, false)
       else finish("failed", issue, false) end
@@ -1209,6 +1299,10 @@ function M.protocol.inventoryCollector(host)
     if string.match(cleanLine, "^%s*{invmon}") or string.match(cleanLine, "^%s*{invitem}") then return false end
     local tagLine = string.match(cleanLine, "^%s*(.-)%s*$")
     local kind, key = header(tagLine)
+    if current and current.wearSlots and not capture and not kind and not draining then
+      if string.match(tagLine, "^Num%s+Keyword%s+Description%s+Wear Flag%s*$") then return true end
+      if current.wearSlots.header and (inventoryWearSlot(cleanLine) or wearableSeparator(cleanLine)) then return true end
+    end
     if kind then
       -- Uncertain/nested frames and manual commands remain visible. A late
       -- owned reply may open after its timeout, while the collector drains it.
@@ -1248,7 +1342,14 @@ function M.protocol.inventoryCollector(host)
     if ownSend or not collectionReady() or not monitoring or type(command) ~= "string" then return end
     command = string.lower(command)
     local verb = string.match(string.lower(command), "^%s*([%a]+)")
-    if verb ~= "invdata" and verb ~= "eqdata" and verb ~= "invdetails" then return end
+    if verb ~= "invdata" and verb ~= "eqdata" and verb ~= "invdetails" and verb ~= "wearable" then return end
+    if verb == "wearable" then
+      if current or draining then
+        finish("failed", "Manual wearable interrupted collection; reconnect to reset", true)
+        draining = { ambiguous = true }; notify()
+      end
+      return
+    end
     local manual = { key = verb == "eqdata" and "equipment" or "inventory", kind = verb == "invdetails" and "details" or "scope",
       command = command, waiters = {}, manual = true }
     local containerId = string.match(command, "^%s*invdata%s+(%d+)%s*$")
@@ -1292,6 +1393,8 @@ function M.protocol.inventoryCollector(host)
       deliver(owner, "inventory-scope", { scope = scope })
       if token ~= epoch or not owners[owner] then return end
     end
+    deliver(owner, "inventory-wear-slots", { slots = wearSlots })
+    if token ~= epoch or not owners[owner] then return end
     for _, detail in pairs(details) do
       deliver(owner, "inventory-details", { details = detail })
       if token ~= epoch or not owners[owner] then return end
@@ -1312,6 +1415,7 @@ function M.protocol.inventoryCollector(host)
     stopTimer()
     current, capture, draining, scopes, details, requests, completed, tombstones = nil, nil, nil, {}, {}, {}, {}, {}
     queue, tombstoneOrder, tombstoneSerial = {}, {}, 0
+    wearSlots = { known = false, stale = true, entries = {} }
     monitoring, setupAttempted, reason, lastError = false, false, issue or "waiting for login", nil
     -- The generation reset fails each consumer's pending requests. Publish only
     -- after clearing everything so callbacks can safely start a fresh session.
@@ -1368,6 +1472,9 @@ function M.protocol.inventoryCollector(host)
     if request.kind == "refresh" then
       ok, issue = enqueue("inventory", "scope", "invdata", waiter)
       if ok then ok, issue = enqueue("equipment", "scope", "eqdata", waiter) end
+    elseif request.kind == "wearSlots" then
+      if not active() then result(waiter, "failed", "Slot discovery requires an active character"); return end
+      ok, issue = enqueue("wearSlots", "slots", "wearable", waiter)
     elseif request.kind == "lookIn" then
       local command, issue = M.protocol.inventoryCommand("lookIn", args)
       local id = inventoryInteger(args.containerId or args.id, 1)
@@ -1411,14 +1518,35 @@ function M.protocol.inventoryCollector(host)
           end
         end
       end
+      if request.kind == "dual" then
+        local selected = getItem(inventoryId(args.id))
+        local inventoryScope, equipmentScope = scopes.inventory, scopes.equipment
+        local second, hold, shield = slotNumber("second"), slotNumber("hold"), slotNumber("shield")
+        if not second or not selected or selected.type ~= 5 or selected.location ~= "inventory"
+          or not inventoryScope or not inventoryScope.known or inventoryScope.stale
+          or not equipmentScope or not equipmentScope.known or equipmentScope.stale then
+          result(waiter, "failed", "Dual requires a carried weapon, fresh equipment and discovered slots"); return
+        end
+        for _, equipped in ipairs(equipmentScope.entries) do
+          if equipped.wearLocation == second or equipped.wearLocation == hold or equipped.wearLocation == shield then
+            result(waiter, "failed", "Off-hand equipment slots are occupied"); return
+          end
+        end
+      end
       if request.kind == "use" or request.kind == "hold" then
         local item = getItem(inventoryId(args.id))
         local scope = item and scopes[item.location]
         if not item or not scope or not scope.known or scope.stale then
           result(waiter, "failed", "Item requires a fresh complete inventory listing"); return
         end
-        local held = request.kind == "use" and (args.action == "zap" or args.action == "brandish")
+        local held = request.kind == "use" and (args.action == "zap" or args.action == "brandish" or args.action == "enter")
         if held then
+          if args.action == "enter" then
+            local effective = slotNumber("portal") or slotNumber("hold")
+            if effective == nil or finite(args.heldSlot) ~= effective then
+              result(waiter, "failed", "Enter requires the discovered portal or held slot"); return
+            end
+          end
           if item.location ~= "equipment" or item.wearLocation ~= finite(args.heldSlot) then
             result(waiter, "failed", "Selected item is not in the configured held slot"); return
           end
@@ -1458,6 +1586,7 @@ end
 
 local function inventoryFor(host, enabled, dispatch)
   local scopes, details, generation = {}, {}, nil
+  local wearSlots = { known = false, stale = true, entries = {} }
   local callbacks, results, pending = {}, {}, {}
   local serial, lifetime = 0, 0
   local state = { available = false, connected = false, collecting = false, active = false, potionReady = false,
@@ -1489,6 +1618,7 @@ local function inventoryFor(host, enabled, dispatch)
   end
   local function clear(reason, available)
     scopes, details, generation, extensions = {}, {}, nil, {}
+    wearSlots = { known = false, stale = true, entries = {} }
     local previous = pending
     pending = {}
     lifetime = lifetime + 1
@@ -1531,6 +1661,7 @@ local function inventoryFor(host, enabled, dispatch)
       local previous = {}
       if data.generation ~= generation or data.reset == true then
         scopes, details = {}, {}
+        wearSlots = { known = false, stale = true, entries = {} }
         previous, pending = pending, {}
         lifetime = lifetime + 1
       end
@@ -1549,7 +1680,12 @@ local function inventoryFor(host, enabled, dispatch)
       return
     end
     if generation ~= data.generation or not state.connected then return end
-    if kind == "inventory-scope" then
+    if kind == "inventory-wear-slots" then
+      local ok, slots = pcall(inventoryWearSlots, data.slots)
+      if not ok then return end
+      wearSlots = slots
+      invoke(callbacks)
+    elseif kind == "inventory-scope" then
       local ok, scope = pcall(inventoryScope, data.scope)
       if not ok then return end
       local ids, incoming, count, containers = {}, {}, 0, 0
@@ -1631,11 +1767,11 @@ local function inventoryFor(host, enabled, dispatch)
   function api.supports(action)
     if type(action) ~= "string" or not enabled or not state.available then return false end
     if action == "use" then
-      for name in pairs(INVENTORY_USES) do if not extensions[name] then return false end end
+      for _, name in ipairs({ "quaff", "eat", "drink", "recite", "zap", "brandish" }) do if not extensions[name] then return false end end
       return true
     end
     return action == "refresh" or action == "lookIn" or action == "identify"
-      or (INVENTORY_ACTIONS[action] == true and action ~= "hold") or extensions[action] == true
+      or (INVENTORY_ACTIONS[action] == true and action ~= "hold" and action ~= "dual") or extensions[action] == true
   end
   function api.on(callback) return subscribe(callbacks, callback) end
   function api.onResult(callback) return subscribe(results, callback) end
@@ -1643,6 +1779,10 @@ local function inventoryFor(host, enabled, dispatch)
     local command, reason = inventoryCommand(kind, args)
     if not command then return nil, reason end
     if not enabled or not state.available or not generation then return nil, state.reason or "inventory unavailable" end
+    if (kind == "wearSlots" and not extensions.wearSlots) or (kind == "dual" and not extensions.dual)
+      or (kind == "use" and args.action == "enter" and not extensions.enter) then
+      return nil, "portal actions require API Core 0.5.0 or newer; update Core and reload"
+    end
     if (kind == "hold" and not extensions.hold) or (kind == "use" and not extensions[args.action]) then
       return nil, "item use and Hold require API Core 0.3.0 or newer; update Core and reload"
     end
@@ -1670,6 +1810,8 @@ local function inventoryFor(host, enabled, dispatch)
     if not ok or sent == false then pending[requestId] = nil; return nil, "inventory request transport refused" end
     return requestId
   end
+  function api.getWearSlots() return inventoryWearSlots(wearSlots) end
+  function api.refreshWearSlots() return request("wearSlots", {}) end
   function api.refresh() return request("refresh", {}) end
   function api.lookIn(id) return request("lookIn", { containerId = id }) end
   function api.identify(id) return request("identify", { id = id }) end

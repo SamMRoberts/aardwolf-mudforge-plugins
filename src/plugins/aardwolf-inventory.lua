@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.2.4",
+  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.3.0",
   author = "Sam Roberts", description = "Dockable inventory, bag management, prepared item use and explicit sorting rules."
 }
 
@@ -32,7 +32,7 @@ tr.level-restricted td{color:var(--muted);opacity:.55}
 </style></head><body data-role="__ROLE__">
 <section id="summary-view" hidden><header class="toolbar spread"><h1>Inventory</h1><span id="summary-freshness" class="hint"></span></header><div class="count"><strong id="item-count"> - </strong><span>carried items</span></div><div id="bags" class="bag-list" aria-label="Inventory containers"></div><p id="bags-empty" class="empty" hidden>No storage bags found.</p><div id="summary-notices" class="summary-notices" role="region" aria-label="Inventory status and feedback" tabindex="0" hidden></div><footer class="summary-controls"><button id="heal-button" type="button" class="primary quick-potion" disabled>Heal</button><button id="mana-button" type="button" class="primary quick-potion" disabled>Mana</button><button id="manage-button" type="button" title="Manage Inventory" aria-label="Manage Inventory">Manage</button><button id="setup-button" type="button">Setup</button><button id="summary-refresh" type="button">Refresh</button></footer></section>
 <section id="manager-view" hidden><header class="toolbar spread"><h1>Inventory Manager</h1><div class="toolbar"><button id="manager-refresh" type="button">Refresh</button><button id="organize-button" type="button">Organize</button><button id="manager-setup" type="button">Setup</button></div></header><div class="manager-controls"><label>Location<select id="scope-select" aria-label="Inventory location"></select></label><label>Search<input id="search" type="search" placeholder="Item name" autocomplete="off"></label></div><p id="scope-state" class="muted" role="status"></p><div class="table-wrap" id="items-scroll"><table aria-label="Inventory items"><thead><tr><th><button type="button" data-sort="name">Name</button></th><th><button type="button" data-sort="level">Level</button></th><th><button type="button" data-sort="type">Type</button></th><th><button type="button" data-sort="flags">Flags</button></th><th><button type="button" data-sort="id">ID</button></th></tr></thead><tbody id="items"></tbody></table><p id="items-empty" class="empty" hidden>No items.</p></div><footer class="manager-footer"><button id="actions-button" type="button" disabled>Actions</button><button id="details-button" type="button" disabled>View details</button><button id="workflow-cancel" type="button" hidden>Cancel workflow</button></footer><details id="item-details"><summary>Item details</summary><div id="detail-text" class="detail-text">Select an item and choose View details.</div></details></section>
-<section id="setup-view" hidden><h1>Inventory Setup</h1><form id="settings-form"><h2>Display and actions</h2><div class="form-grid"><label>Font size<input id="font-size" type="number" min="8" max="24" required></label><label class="check"><input id="show-worn" type="checkbox">Show worn bags in summary</label><label class="check wide"><input id="confirm-disposal" type="checkbox">Confirm Drop, Sell, and Donate</label></div><h2>Character&#39;s held slot</h2><div class="form-grid"><label>Slot number<input id="held-slot" type="number" min="0" max="255" placeholder="Unset"></label><label>Currently held item<select id="held-item"><option value="">Select to identify slot...</option></select></label></div><p class="hint" style="margin-top:6px">Select the item you are currently holding, or enter its slot number from Aardwolf&#39;s wearable command. This enables wand/staff preparation and equipment restoration.</p><h2>Quick potions</h2><p class="hint">Heal and Mana quaff one matching potion per click. Carried potions are preferred; optionally search a bag if needed. Leave the name blank to disable a button.</p><div class="quick-settings"><section class="quick-slot"><h3>Heal</h3><label>Heal potion name contains<input id="heal-potion-name" type="text" maxlength="128" autocomplete="off" placeholder="e.g. healing potion"></label><label>Also search bag<select id="heal-potion-bag"></select></label></section><section class="quick-slot"><h3>Mana</h3><label>Mana potion name contains<input id="mana-potion-name" type="text" maxlength="128" autocomplete="off" placeholder="e.g. mana potion"></label><label>Also search bag<select id="mana-potion-bag"></select></label></section></div><h2>Summary bags</h2><p class="hint" style="margin-bottom:8px">Checked bags appear in the summary. Use arrows to change their order.</p><div id="setting-bags" class="setting-bags"></div><div class="section-heading"><h2>Organize rules</h2><button id="add-rule" type="button">Add rule</button></div><p class="hint" style="margin-bottom:8px">The first enabled rule matching type and optional name text wins. Only loose inventory is moved.</p><div id="rules" class="rules"></div><footer class="setup-footer"><button type="submit" class="primary">Save setup</button><span id="draft-state" class="hint"></span></footer></form></section>
+<section id="setup-view" hidden><h1>Inventory Setup</h1><form id="settings-form"><h2>Display and actions</h2><div class="form-grid"><label>Font size<input id="font-size" type="number" min="8" max="24" required></label><label class="check"><input id="show-worn" type="checkbox">Show worn bags in summary</label><label class="check wide"><input id="confirm-disposal" type="checkbox">Confirm Drop, Sell, and Donate</label></div><h2>Character&#39;s held slot</h2><div class="form-grid"><label>Slot number<input id="held-slot" type="number" min="0" max="255" placeholder="Unset"></label><label>Currently held item<select id="held-item"><option value="">Select to identify slot...</option></select></label></div><p class="hint" style="margin-top:6px">Select the item you are currently holding, or enter its slot number from Aardwolf&#39;s wearable command. This enables wand/staff preparation and equipment restoration. Portal actions discover their current equipment slots automatically.</p><p id="portal-slots" class="hint" style="margin-top:6px"></p><h2>Quick potions</h2><p class="hint">Heal and Mana quaff one matching potion per click. Carried potions are preferred; optionally search a bag if needed. Leave the name blank to disable a button.</p><div class="quick-settings"><section class="quick-slot"><h3>Heal</h3><label>Heal potion name contains<input id="heal-potion-name" type="text" maxlength="128" autocomplete="off" placeholder="e.g. healing potion"></label><label>Also search bag<select id="heal-potion-bag"></select></label></section><section class="quick-slot"><h3>Mana</h3><label>Mana potion name contains<input id="mana-potion-name" type="text" maxlength="128" autocomplete="off" placeholder="e.g. mana potion"></label><label>Also search bag<select id="mana-potion-bag"></select></label></section></div><h2>Summary bags</h2><p class="hint" style="margin-bottom:8px">Checked bags appear in the summary. Use arrows to change their order.</p><div id="setting-bags" class="setting-bags"></div><div class="section-heading"><h2>Organize rules</h2><button id="add-rule" type="button">Add rule</button></div><p class="hint" style="margin-bottom:8px">The first enabled rule matching type and optional name text wins. Only loose inventory is moved.</p><div id="rules" class="rules"></div><footer class="setup-footer"><button type="submit" class="primary">Save setup</button><span id="draft-state" class="hint"></span></footer></form></section>
 <section id="prompt-panel" class="panel" hidden aria-labelledby="prompt-title"><h2 id="prompt-title"></h2><form id="prompt-form"><ol id="prompt-steps"></ol><label id="bag-field" hidden>Destination bag<select id="destination-bag"></select></label><label id="recipient-field" hidden>Recipient<input id="recipient" type="text" maxlength="128" autocomplete="off" placeholder="Name or 2.guard"></label><label id="target-field" hidden>Target<input id="use-target" type="text" maxlength="128" autocomplete="off" placeholder="Name or 2.guard"></label><div class="panel-footer"><button id="prompt-submit" type="submit" class="primary">Continue</button><button id="prompt-dismiss" type="button">Cancel</button></div></form></section>
 <section id="preview-panel" class="panel" hidden aria-labelledby="preview-title"><h2 id="preview-title">Organize preview</h2><p class="hint">Review these moves before starting.</p><ol id="preview-list" class="preview-list"></ol><p id="preview-empty" class="muted" hidden>No matching loose items to move.</p><p id="preview-problem" class="preview-problem" role="status" hidden>A destination bag is unavailable. Fix the highlighted rule in Setup, then preview Organize again.</p><div class="panel-footer"><button id="start-organize" type="button" class="primary">Start moves</button><button id="preview-dismiss" type="button">Close preview</button></div></section>
 <p id="status" class="status" role="status"></p><p id="feedback" class="feedback" role="status"></p>
@@ -105,6 +105,7 @@ function updateQuickBagOptions(){
 }
 function renderRules(){const rules=draft.profile.rules||[];$('rules').replaceChildren(...rules.map((rule,index)=>{const row=element('div',null,'rule');const enabled=element('input',null,'rule-enabled');enabled.type='checkbox';enabled.checked=rule.enabled!==false;enabled.setAttribute('aria-label','Enable rule '+(index+1));const type=element('select',null,'rule-type');type.setAttribute('aria-label','Rule '+(index+1)+' item type');setOptions(type,[{value:0,label:'Any type'},...Object.entries(TYPES).map(([value,label])=>({value,label}))],rule.type||0);const name=element('input',null,'rule-name');name.type='text';name.maxLength=128;name.placeholder='Name contains (optional)';name.value=rule.name||'';name.setAttribute('aria-label','Rule '+(index+1)+' name contains');const bag=element('select',null,'rule-bag');bag.required=true;bag.setAttribute('aria-label','Rule '+(index+1)+' destination bag');setOptions(bag,bagOptions(rule.bagId),rule.bagId||((state.bags||[])[0]||{}).id||'');const controls=element('div',null,'rule-actions');const move=delta=>{draft=readDraft();const next=index+delta;if(next<0||next>=draft.profile.rules.length)return;[draft.profile.rules[index],draft.profile.rules[next]]=[draft.profile.rules[next],draft.profile.rules[index]];renderRules();markDirty()};controls.append(button('Up','Move rule '+(index+1)+' up',()=>move(-1)),button('Down','Move rule '+(index+1)+' down',()=>move(1)),button('x','Delete rule '+(index+1),()=>{draft=readDraft();draft.profile.rules.splice(index,1);renderRules();markDirty()}));row.append(enabled,type,name,bag,controls);return row}))}
 function renderSetup(){
+  text('portal-slots',state.portalSlots||'Portal slots are discovered when you confirm Enter portal.');
   const key=JSON.stringify([state.identity,state.settingsRevision]),nextBags=JSON.stringify(state.bags);
   if(key!==setupKey){
     setupKey=key;setupBagsKey=nextBags;
@@ -201,8 +202,8 @@ local publish, synchronize, advance, recover, message, createWindow, resolvePoti
 local TYPE_NAMES = { "Light", "Scroll", "Wand", "Staff", "Weapon", "Treasure", "Armor", "Potion", "Furniture",
   "Trash", "Container", "Drink container", "Key", "Food", "Boat", "Mob corpse", "Player corpse", "Fountain",
   "Pill", "Portal", "Beacon", "Gift card", "Unused", "Raw material", "Campfire", "Forge", "Runestone" }
-local USE_TYPES = { [2] = "recite", [3] = "zap", [4] = "brandish", [8] = "quaff", [12] = "drink", [14] = "eat", [19] = "eat" }
-local USE_LABELS = { recite = "Recite scroll", zap = "Zap wand", brandish = "Brandish staff", quaff = "Quaff potion", drink = "Drink", eat = "Eat" }
+local USE_TYPES = { [2] = "recite", [3] = "zap", [4] = "brandish", [8] = "quaff", [12] = "drink", [14] = "eat", [19] = "eat", [20] = "enter" }
+local USE_LABELS = { recite = "Recite scroll", zap = "Zap wand", brandish = "Brandish staff", quaff = "Quaff potion", drink = "Drink", eat = "Eat", enter = "Enter portal" }
 local STORAGE = "inventory:settings"
 
 local function integer(value, minimum, maximum)
@@ -351,6 +352,7 @@ local function currentReason(potion)
 end
 local function workflowStatus()
   if not workflow then return nil end
+  if workflow.phase == "discover" or workflow.phase == "portal-plan" then return "Discovering equipment slots for portal use" end
   if workflow.phase == "resolve" then return "Finding the configured " .. workflow.slot .. " potion" end
   if workflow.kind == "organize" then return "Organizing item " .. tostring(math.min(workflow.index, #workflow.steps)) .. " of " .. tostring(#workflow.steps) end
   if workflow.phase == "restore" or workflow.phase == "restore-verify" or workflow.phase == "recover" then return "Restoring the previous arrangement" end
@@ -413,10 +415,19 @@ local function eligible(id, action)
     end
   elseif USE_LABELS[action] then
     if USE_TYPES[entry.type] ~= action then return "This item has a different use action" end
-    if not client.inventory.supports(action) then return "Update API Core for item use" end
+    if not client.inventory.supports(action) then
+      return action == "enter" and "Update aardwolf-api to 0.9.0 and API Core to 0.5.0 for portal use" or "Update API Core for item use"
+    end
+    if action == "enter" then
+      if not client.inventory.supports("wearSlots") or not client.inventory.supports("dual")
+        or type(client.inventory.refreshWearSlots) ~= "function" or type(client.inventory.getWearSlots) ~= "function" then
+        return "Update aardwolf-api to 0.9.0 and API Core to 0.5.0 for portal preparation"
+      end
+      if not fresh("inventory") or not fresh("equipment") then return "Refresh inventory and equipment before portal use" end
+    end
     local held = action == "zap" or action == "brandish"
     if held and profile.heldSlot == nil then return "Identify the held slot in Setup first" end
-    if entry.location == "equipment" and (not held or entry.wearLocation ~= profile.heldSlot) then return "Remove this item from equipment first" end
+    if entry.location == "equipment" and action ~= "enter" and (not held or entry.wearLocation ~= profile.heldSlot) then return "Remove this item from equipment first" end
     if entry.location ~= "inventory" and entry.location ~= "equipment" then
       local bagId = tonumber(string.match(entry.location, "^container:(%d+)$"))
       if not bagId or not accessibleBag(bagId) then return "Get the containing bag into inventory first" end
@@ -487,7 +498,20 @@ publish = function()
   end
   local reason = currentReason()
   if status.potionReady and not status.active then reason = status.collecting and "Refreshing potion inventory" or "Combat: potion shortcuts available" end
-  local state = { identity = identity, status = storageError or status.error or workflowStatus() or reason or "", feedback = feedback, busy = workflow ~= nil,
+  local portalSlots
+  if type(client.inventory.getWearSlots) == "function" then
+    local slots = client.inventory.getWearSlots()
+    if slots.known and not slots.stale then
+      local labels = {}
+      for _, slot in ipairs(slots.entries) do
+        if slot.keyword == "hold" or slot.keyword == "shield" or slot.keyword == "second" or slot.keyword == "portal" then
+          table.insert(labels, slot.keyword .. " #" .. key(slot.id))
+        end
+      end
+      portalSlots = "Last discovered slots: " .. table.concat(labels, ", ") .. ". Enter refreshes these before preparation."
+    end
+  end
+  local state = { identity = identity, portalSlots = portalSlots, status = storageError or status.error or workflowStatus() or reason or "", feedback = feedback, busy = workflow ~= nil,
     active = status.active == true and not status.collecting, fontSize = settings.preferences.fontSize,
     characterLevel = currentCharacterLevel, itemLevelLimit = currentItemLevelLimit,
     count = carried and carried.known and #carried.entries or nil,
@@ -552,6 +576,11 @@ local function step(kind, id, argument)
   return { kind = kind, id = id, argument = argument, source = source,
     sourceSlot = kind == "remove" and entry and entry.wearLocation or nil }
 end
+local function equipmentStep(kind, id, slot, blockedSlots)
+  local move = step(kind, id)
+  move.destinationSlot, move.blockedSlots = slot, blockedSlots
+  return move
+end
 local function locationMatches(entry, location, heldSlot)
   return entry and entry.location == location and (heldSlot == nil or entry.wearLocation == heldSlot) and fresh(location)
 end
@@ -561,7 +590,9 @@ local function observed(move)
   -- A positively observed move establishes this item's location even when the
   -- destination bag has never been completely listed. Do not invent a full scope.
   if move.kind == "put" then return entry and entry.location == "container:" .. key(move.argument) end
-  if move.kind == "hold" then return locationMatches(entry, "equipment", profile.heldSlot) end
+  if move.kind == "hold" or move.kind == "wear" or move.kind == "dual" then
+    return locationMatches(entry, "equipment", move.destinationSlot or profile.heldSlot)
+  end
   return false
 end
 local function movementReason(move)
@@ -574,12 +605,15 @@ local function movementReason(move)
     if entry.location ~= "inventory" or not accessibleBag(move.argument) or move.id == move.argument then return "Destination bag or item is unavailable" end
   elseif move.kind == "remove" then
     if entry.location ~= "equipment" then return "Equipment changed" end
-  elseif move.kind == "hold" then
+  elseif move.kind == "hold" or move.kind == "wear" or move.kind == "dual" then
     local issue = levelReason(entry)
     if issue then return issue end
     if entry.location ~= "inventory" then return "Item is no longer carried" end
+    if not fresh("equipment") then return "Refresh equipment before changing the arrangement" end
     for _, equipped in pairs(snapshot.items) do
-      if equipped.location == "equipment" and equipped.wearLocation == profile.heldSlot then return "The held slot is occupied" end
+      local occupied = move.blockedSlots and move.blockedSlots[key(equipped.wearLocation)]
+        or equipped.wearLocation == (move.destinationSlot or profile.heldSlot)
+      if equipped.location == "equipment" and occupied then return "The equipment slot is occupied; its new placement was preserved" end
     end
   end
 end
@@ -597,6 +631,17 @@ local function restoration(work)
       if not previous then issue("Previous held item is missing")
       elseif previous.location == "inventory" and work.removePreviousSent then table.insert(moves, step("hold", previous.id))
       elseif previous.location ~= "equipment" or previous.wearLocation ~= work.heldSlot then issue("Previous held item moved elsewhere; its new placement was preserved") end
+    end
+  end
+  if work.previousEquipment then
+    for _, previous in ipairs(work.previousEquipment) do
+      local equipped = item(previous.id)
+      if not equipped then issue("Previous off-hand equipment is missing")
+      elseif locationMatches(equipped, "equipment", previous.slot) then
+        -- Preparation may have stopped before this item was removed.
+      elseif equipped.location == "inventory" and previous.removed then
+        table.insert(moves, equipmentStep(previous.kind, previous.id, previous.slot, work.blockedSlots))
+      else issue("Previous off-hand equipment moved elsewhere; its new placement was preserved") end
     end
   end
   if work.originalBag and entry then
@@ -618,6 +663,9 @@ local function restorationResult(work)
   local issues = work.restorationIssues or {}
   local entry = item(work.itemId)
   if work.previousHeld and not locationMatches(item(work.previousHeld),"equipment",work.heldSlot) then table.insert(issues,"Previous held equipment was not restored") end
+  for _, previous in ipairs(work.previousEquipment or {}) do
+    if not locationMatches(item(previous.id), "equipment", previous.slot) then table.insert(issues, "Previous off-hand equipment was not restored") end
+  end
   if entry then
     local destination = work.originalHeld and "equipment" or work.originalBag and ("container:" .. key(work.originalBag)) or "inventory"
     if entry.location ~= destination or (work.originalHeld and entry.wearLocation ~= work.heldSlot) then table.insert(issues,"Surviving item placement changed") end
@@ -659,11 +707,71 @@ recover = function(reason)
   end)
 end
 
+local function preparePortal(work)
+  if work.cancelRequested then finishWorkflow("Portal preparation cancelled; equipment was unchanged"); return end
+  local entry, slots = item(work.itemId), client.inventory.getWearSlots()
+  if not entry or entry.type ~= 20 or entry.location ~= work.initialLocation
+    or entry.wearLocation ~= work.initialSlot then finishWorkflow("Selected portal moved during discovery; equipment was unchanged"); return end
+  local issue = levelReason(entry)
+  if issue then finishWorkflow(issue); return end
+  if not fresh("equipment") or not slots or not slots.known or slots.stale then
+    finishWorkflow("Could not discover fresh equipment slots; equipment was unchanged"); return
+  end
+  local roles = {}
+  for _, slot in ipairs(slots.entries) do roles[slot.keyword] = slot.id end
+  work.heldSlot = roles.portal or roles.hold
+  if work.heldSlot == nil then finishWorkflow("No Portal or held equipment slot was discovered"); return end
+  if entry.location == "equipment" and entry.wearLocation ~= work.heldSlot then
+    finishWorkflow("Remove this portal from its other equipment slot first"); return
+  end
+  work.held, work.originalHeld = true, entry.location == "equipment"
+  work.originalBag = tonumber(string.match(entry.location, "^container:(%d+)$"))
+  work.steps, work.index, work.previousEquipment, work.blockedSlots = {}, 1, {}, {}
+  local competing = roles.portal and { "portal" } or { "hold", "shield", "second" }
+  local restoreKinds = { portal = "hold", hold = "hold", shield = "wear", second = "dual" }
+  local occupants = 0
+  for _, role in ipairs(competing) do
+    local slot = roles[role]
+    if slot ~= nil then
+      work.blockedSlots[key(slot)] = true
+      local found
+      for _, equipped in pairs(snapshot.items) do
+        if equipped.location == "equipment" and equipped.wearLocation == slot then
+          if found then finishWorkflow("Equipment slot is ambiguous; refresh before portal use"); return end
+          found = equipped
+        end
+      end
+      if found then occupants = occupants + 1 end
+      if found and found.id ~= entry.id and not work.originalHeld then
+        table.insert(work.previousEquipment, { id = found.id, slot = slot, kind = restoreKinds[role] })
+      end
+    end
+  end
+  -- These are mutually exclusive off-hand roles. Do not dismantle an
+  -- inconsistent snapshot that cannot be safely restored command by command.
+  if occupants > 1 then finishWorkflow("Multiple competing off-hand slots are occupied; refresh equipment before portal use"); return end
+  if work.originalBag then
+    if not accessibleBag(work.originalBag) or not fresh(entry.location) then finishWorkflow("Source bag changed during portal discovery"); return end
+    table.insert(work.steps, step("take", entry.id, work.originalBag))
+  end
+  if not work.originalHeld then
+    for _, previous in ipairs(work.previousEquipment) do table.insert(work.steps, step("remove", previous.id)) end
+    table.insert(work.steps, equipmentStep("hold", entry.id, work.heldSlot, work.blockedSlots))
+  end
+  work.phase = "prepare"
+end
+
 advance = function()
   local work = workflow
   if not work then return end
   if work.phase == "resolve" then resolvePotion(work); return end
   if not trusted(work) then finishWorkflow("Workflow stopped: character or inventory state changed. Inspect the current arrangement."); return end
+  if work.phase == "discover" then return end
+  if work.phase == "portal-plan" then
+    if status.collecting then return end
+    preparePortal(work)
+    if workflow ~= work then return end
+  end
   if work.current then
     if not work.current.sent or not observed(work.current) then return end
     stopTimer(work.timer); work.timer, work.current = nil, nil
@@ -744,6 +852,11 @@ advance = function()
     if move.kind == "take" and move.id == work.itemId then work.takeSent = true end
     if move.kind == "hold" and move.id == work.itemId then work.holdSent = true end
     if move.kind == "remove" and move.id == work.previousHeld then work.removePreviousSent = true end
+    if move.kind == "remove" and work.phase == "prepare" then
+      for _, previous in ipairs(work.previousEquipment or {}) do
+        if previous.id == move.id then previous.removed = true end
+      end
+    end
     scheduleAdvance()
   end)
 end
@@ -753,6 +866,19 @@ local function beginUse(entry, action, target, work)
   if levelIssue then
     if work then finishWorkflow(levelIssue) else feedback = levelIssue; publish() end
     return
+  end
+  if action == "enter" then
+    if target ~= nil and target ~= "" then feedback = "Portal entry has no target"; publish(); return end
+    work = { kind = "use", identity = identity, action = action, itemId = entry.id, phase = "discover",
+      initialLocation = entry.location, initialSlot = entry.wearLocation, steps = {}, index = 1 }
+    prompt, preview, workflow, feedback = nil, nil, work, "Discovering portal equipment slots"
+    request(function() return client.inventory.refreshWearSlots() end, function(result)
+      if workflow ~= work then return end
+      if result.outcome ~= "complete" then finishWorkflow(result.reason or "Equipment slot discovery failed; equipment was unchanged"); return end
+      work.phase = "portal-plan"
+      scheduleAdvance()
+    end)
+    publish(); return
   end
   local held = action == "zap" or action == "brandish"
   if target == "" then target = nil end
@@ -833,6 +959,7 @@ local function cancelWorkflow()
   prompt, preview, menu = nil, nil, nil
   if workflow then
     workflow.cancelRequested = true
+    if workflow.phase == "discover" or workflow.phase == "portal-plan" then finishWorkflow("Portal preparation cancelled; equipment was unchanged"); return end
     if workflow.phase == "resolve" then finishWorkflow("Potion shortcut cancelled"); return end
     if not workflow.current and workflow.phase ~= "settle" and workflow.phase ~= "recover" and workflow.phase ~= "restore" and workflow.phase ~= "restore-verify" then recover("Cancelled") end
   end
@@ -908,10 +1035,13 @@ local function executeAction(id, action)
     prompt = { kind = "confirm", title = "Confirm " .. action .. ": " .. plainName(entry.name), itemId = id, action = action }
   elseif USE_LABELS[action] then
     local steps = {}
+    if action == "enter" then table.insert(steps, "Discover current equipment slots, including the Portal wish slot when available") end
     if string.match(entry.location, "^container:") then table.insert(steps, "Retrieve the item from its bag") end
+    if action == "enter" then table.insert(steps, "Record previous equipment, free the portal slot or off-hand, and hold this portal") end
     if action == "zap" or action == "brandish" then table.insert(steps, "Prepare the selected item in the configured held slot") end
     table.insert(steps, "Send " .. action .. (action == "zap" and " to the chosen target" or ""))
-    table.insert(steps, "Restore prior held equipment and return surviving items to their original bag")
+    table.insert(steps, action == "enter" and "Restore prior equipment to its original slots and return a surviving retrieved portal to its bag"
+      or "Restore prior held equipment and return surviving items to their original bag")
     prompt = { kind = "use", title = USE_LABELS[action] .. ": " .. plainName(entry.name), itemId = id, action = action,
       steps = steps, requireTarget = action == "zap", allowTarget = action == "zap" or action == "recite" }
   else

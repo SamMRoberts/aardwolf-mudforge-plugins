@@ -1,11 +1,11 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.4** uses `aardwolf-api` **0.8.5** and Aardwolf API
-Core **0.4.3**. Install the library and Core first, then
+Inventory Management **0.3.0** uses `aardwolf-api` **0.9.0** and Aardwolf API
+Core **0.5.0**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
-basic inventory data and original actions; unsupported held-item and use actions
-show an upgrade explanation.
+basic inventory data and original actions; unsupported held-item, portal and use
+actions show an upgrade explanation.
 
 ## Summary and manager
 
@@ -69,7 +69,8 @@ selected item's type and location, the menu offers:
 - Open container and view tagged item details.
 - Get from bag, Put into bag, Wear, Hold and Remove.
 - Give, Drop, Sell and Donate.
-- Quaff potion, Eat food/pill, Drink, Recite scroll, Zap wand and Brandish staff.
+- Quaff potion, Eat food/pill, Drink, Recite scroll, Zap wand, Brandish staff and
+  Enter portal (type 20).
 
 Unavailable actions explain the missing requirement. Destination bags and
 recipients use validated controls; commands target object IDs rather than item
@@ -79,8 +80,8 @@ item flags, shop availability and other game conditions still determine success.
 
 Items above the character's current item-level allowance appear dimmed, with a
 tooltip explaining the requirement. Wear/equip, Hold, Quaff, Eat, Drink, Recite,
-Zap and Brandish are disabled for those items. Selection, details, bag transfers,
-Remove and disposal remain available. The allowance includes 10 levels per tier,
+Zap, Brandish and Enter are disabled for those items. Selection, details, bag
+transfers, Remove and disposal remain available. The allowance includes 10 levels per tier,
 capped at level 200 until the character reaches level 201, following Aardwolf's
 [tier rules](https://www.aardwolf.com/wiki/index.php/Help/Tiers).
 
@@ -115,6 +116,28 @@ original bag. It waits for observed inventory/equipment changes between steps,
 dispatches the use command, then restores previous held equipment and returns
 surviving retrieved items to their original bags. Consumed items cannot be
 returned. Only one workflow runs at a time.
+
+**Enter portal** shows preparation steps and requires confirmation. Each confirmed
+action reads `wearable` and tagged `eqdata` before changing equipment. Discovery
+uses slot keywords such as `hold`, `shield`, `second` and `portal`, preserving the
+server's actual slot numbers, including gaps and race-specific locations. The
+owned equipment reply marks the end of the untagged slot list, so discovery does
+not depend on the character's prompt format. It is transient and never runs on
+login or a periodic timer. Setup/status feedback shows discovery and restoration
+state; the saved held-slot setting remains specific to wand/staff preparation.
+
+Without a Portal wish slot, the workflow records and removes competing held,
+shield and secondary-weapon equipment, then holds the portal. With a discovered
+Portal slot, it replaces only the previous portal and leaves off-hand equipment
+in place. Ambiguous slots or multiple competing off-hand occupants stop preparation
+before equipment changes. A selected portal already in its effective slot needs no equipment
+changes. Bagged portals are retrieved and observed first. The plugin sends bare
+`enter` once, refreshes inventory/equipment, removes a surviving temporary portal,
+and restores each previous item using `hold`, `wear` or `dual`, waiting for its
+original slot before continuing. Surviving retrieved portals return to their
+original bags; an originally empty off-hand or Portal slot is left empty.
+See Aardwolf's [Enter](https://www.aardwolf.com/wiki/index.php/Help/Enter) and
+[Dual Wield](https://www.aardwolf.com/wiki/index.php/Help/DualWield) help.
 
 Cancel stops further forward steps. Failures and timeouts stop the workflow;
 restoration proceeds only while the same character remains connected and the

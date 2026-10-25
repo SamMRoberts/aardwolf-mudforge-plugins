@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-api-core", name = "Aardwolf API Core", version = "0.4.3",
+  id = "aardwolf-api-core", name = "Aardwolf API Core", version = "0.5.0",
   author = "Sam Roberts", description = "Shared Aardwolf session and inventory state with exclusive GMCP negotiation."
 }
 
