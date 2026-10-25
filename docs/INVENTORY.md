@@ -1,11 +1,11 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.4** uses `aardwolf-api` **0.8.5** and Aardwolf API
-Core **0.4.3**. Install the library and Core first, then
+Inventory Management **0.4.0** uses `aardwolf-api` **0.9.0** and Aardwolf API
+Core **0.5.0**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
-basic inventory data and original actions; unsupported held-item and use actions
-show an upgrade explanation.
+basic inventory data and original actions; unsupported held-item, portal and use
+actions show an upgrade explanation.
 
 ## Summary and manager
 
@@ -17,7 +17,7 @@ presented as a fresh count.
 The summary uses smaller labels, 22 px minimum bag rows and buttons, and tighter
 spacing. At widths of 280 px or more, its five action buttons share one row;
 narrower docks use two rows. The saved font-size setting still scales the widget,
-and the bag list scrolls within the space left above the controls.
+and pinned items and bags share one scroll area above the fixed controls.
 
 The bag list contains discovered storage containers, with their location shown;
 worn bags are included by default. Drink containers remain a separate item type.
@@ -25,6 +25,29 @@ No background scan opens every bag. Double-click a bag, or focus it and press
 Enter, to open its contents in the floating manager. **Manage Inventory** opens
 that same manager on main inventory. **Setup** opens the floating settings
 window, and **Refresh** requests current data.
+
+### Pinned items
+
+Choose **Pin to Inventory** from any known item's actions menu to add it
+above the summary's bag list. All item types and known locations are supported,
+including equipped items and items inside bags. Clicking a pinned item opens
+its existing native actions menu, with the same eligibility checks and use,
+preparation and disposal confirmations as the manager. Pinning or clicking a pin
+never uses an item automatically.
+
+Pins are saved per character in insertion order, with a maximum of 32. They track
+exact object IDs and follow observed item moves. A cached label identifies an
+unavailable pin when its object is absent or unknown; the plugin does not choose
+a same-named replacement or scan unopened bags to find it. An unavailable pin
+remains removable with **Unpin from Inventory**. Pins do not change the carried-item count.
+
+Pinned items and bags scroll together while summary controls stay visible.
+Ordinary updates preserve scroll and focus, and adding/removing a pin preserves
+unfinished Setup forms. Saving an older open Setup form preserves the current
+pins. Existing characters start with no pins, and saved widget placement, size
+and visibility remain unchanged.
+
+### Manager
 
 The manager can switch between Inventory, Equipment and discovered bags. Search
 filters item names; the table sorts by name, level, type, flags or object ID.
@@ -66,10 +89,11 @@ Right-click an item to select it and open MudForge's context menu. The **Actions
 button and keyboard menu access provide the same choices. Depending on the
 selected item's type and location, the menu offers:
 
-- Open container and view tagged item details.
+- Pin to Inventory or Unpin from Inventory, open container and view tagged item details.
 - Get from bag, Put into bag, Wear, Hold and Remove.
 - Give, Drop, Sell and Donate.
-- Quaff potion, Eat food/pill, Drink, Recite scroll, Zap wand and Brandish staff.
+- Quaff potion, Eat food/pill, Drink, Recite scroll, Zap wand, Brandish staff and
+  Enter portal (type 20).
 
 Unavailable actions explain the missing requirement. Destination bags and
 recipients use validated controls; commands target object IDs rather than item
@@ -79,8 +103,8 @@ item flags, shop availability and other game conditions still determine success.
 
 Items above the character's current item-level allowance appear dimmed, with a
 tooltip explaining the requirement. Wear/equip, Hold, Quaff, Eat, Drink, Recite,
-Zap and Brandish are disabled for those items. Selection, details, bag transfers,
-Remove and disposal remain available. The allowance includes 10 levels per tier,
+Zap, Brandish and Enter are disabled for those items. Selection, details, bag
+transfers, Remove and disposal remain available. The allowance includes 10 levels per tier,
 capped at level 200 until the character reaches level 201, following Aardwolf's
 [tier rules](https://www.aardwolf.com/wiki/index.php/Help/Tiers).
 
@@ -115,6 +139,28 @@ original bag. It waits for observed inventory/equipment changes between steps,
 dispatches the use command, then restores previous held equipment and returns
 surviving retrieved items to their original bags. Consumed items cannot be
 returned. Only one workflow runs at a time.
+
+**Enter portal** shows preparation steps and requires confirmation. Each confirmed
+action reads `wearable` and tagged `eqdata` before changing equipment. Discovery
+uses slot keywords such as `hold`, `shield`, `second` and `portal`, preserving the
+server's actual slot numbers, including gaps and race-specific locations. The
+owned equipment reply marks the end of the untagged slot list, so discovery does
+not depend on the character's prompt format. It is transient and never runs on
+login or a periodic timer. Setup/status feedback shows discovery and restoration
+state; the saved held-slot setting remains specific to wand/staff preparation.
+
+Without a Portal wish slot, the workflow records and removes competing held,
+shield and secondary-weapon equipment, then holds the portal. With a discovered
+Portal slot, it replaces only the previous portal and leaves off-hand equipment
+in place. Ambiguous slots or multiple competing off-hand occupants stop preparation
+before equipment changes. A selected portal already in its effective slot needs no equipment
+changes. Bagged portals are retrieved and observed first. The plugin sends bare
+`enter` once, refreshes inventory/equipment, removes a surviving temporary portal,
+and restores each previous item using `hold`, `wear` or `dual`, waiting for its
+original slot before continuing. Surviving retrieved portals return to their
+original bags; an originally empty off-hand or Portal slot is left empty.
+See Aardwolf's [Enter](https://www.aardwolf.com/wiki/index.php/Help/Enter) and
+[Dual Wield](https://www.aardwolf.com/wiki/index.php/Help/DualWield) help.
 
 Cancel stops further forward steps. Failures and timeouts stop the workflow;
 restoration proceeds only while the same character remains connected and the
@@ -157,7 +203,7 @@ and reports any restoration that could not be completed.
 ## Setup and Organize
 
 Setup saves font size, bag visibility/order and disposal-confirmation preferences
-in native plugin/world storage. Rules, quick potion choices and held-slot
+in native plugin/world storage. Rules, quick potion choices, pins and held-slot
 configuration are specific to the identified character. Inventory snapshots and
 pending workflows are never
 persisted. A failed settings save is shown and does not claim persistence. Widget array

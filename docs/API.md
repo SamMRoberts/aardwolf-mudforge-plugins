@@ -1,4 +1,4 @@
-# Aardwolf API 0.8.5
+# Aardwolf API 0.9.0
 
 ## Lifecycle and host adapters
 
@@ -256,9 +256,11 @@ other subscribers. Unsubscribe functions are idempotent.
 | `client.inventory.getContainers()` | Ordered list of known storage containers, including worn bags; numeric item type 11, without guessing from names. Drink containers (type 12) remain distinct. |
 | `client.inventory.getContents(containerId)` | Cached container scope or `nil` when entirely unobserved. Only `known = true` with empty `entries` means a completed empty listing. |
 | `client.inventory.getDetails(id)` | Cached tagged item details or `nil`. |
+| `client.inventory.getWearSlots()` | Defensive cached `{ known, stale, entries }`; entries are `{ id, keyword, description, wearFlag }`. Never sends a command. |
 | `client.inventory.status()` | Defensive `{ available, connected, active, potionReady, collecting, characterName?, reason?, error? }`. `active` requires an identified character in state 3 and a connected, negotiated session. `potionReady` additionally permits fighting state 8 when Core advertises `combatPotions`; it does not mean the collector is idle. |
 | `client.inventory.on(callback)` | Notify `(snapshot, status)` on cache/status changes; `snapshot` is always a table. |
 | `client.inventory.refresh()` | Request carried inventory and equipment through `invdata` and `eqdata`. |
+| `client.inventory.refreshWearSlots()` | Request current equipment-slot discovery through serialized `wearable` then `eqdata`; requires API 0.9.0 / Core 0.5.0 and capability `wearSlots`. |
 | `client.inventory.lookIn(containerId)` | Request one container through `invdata <id>`. |
 | `client.inventory.identify(id)` | Request tagged item details through `invdetails <id>`. Known items inside containers are refused; retrieve and observe the item in inventory first. Does not move items, send the separate `identify` command or cast a spell. |
 | `client.inventory.onResult(callback)` | Notify a result table `{ requestId, outcome, reason? }` for requests issued by this consumer. |
@@ -365,6 +367,7 @@ inventory data is written to native storage or replayed from an old connection.
 | `client.inventory.donate(id)` | `donate <id>` |
 | `client.inventory.sacrifice(id)` | `sacrifice <id>` |
 | `client.inventory.hold(id)` | `hold <id>`; requires API 0.7.0 / Core 0.3.0. |
+| `client.inventory.dual(id)` | `dual <id>`; requires API 0.9.0 / Core 0.5.0, a fresh carried weapon (5), fresh equipment, a discovered secondary slot and empty competing off-hand slots. |
 
 ### Item use and capability discovery
 
@@ -372,7 +375,9 @@ API **0.7.0** / Core **0.3.0** add
 `client.inventory.use(id, action, options?)` and
 `client.inventory.supports(action)`. `supports` returns a boolean for read names
 (`refresh`, `lookIn`, `identify`), existing single-item action names, `hold`,
-and the six use actions below. `supports("use")` requires all six use actions.
+and the six original use actions below. `supports("use")` continues to require
+only those six actions; check `supports("enter")`, `supports("dual")` and
+`supports("wearSlots")` separately for API 0.9.0 / Core 0.5.0 extensions.
 It reports provider support, not current item eligibility or connection activity.
 An older inventory-capable Core continues to support existing methods; Hold and
 item use fail with an upgrade explanation. A disconnected/unavailable consumer
@@ -386,6 +391,7 @@ clears the advertised extensions.
 | `recite` | Scroll (2), carried inventory | `recite <id> [target]`; optional `options.target`. |
 | `zap` | Wand (3), configured held slot in equipment | `zap <target>`; requires `options.target` and `options.heldSlot`. |
 | `brandish` | Staff (4), configured held slot in equipment | `brandish`; requires `options.heldSlot`, no target. |
+| `enter` | Portal (20), discovered effective Portal or held slot in equipment | `enter`; requires `options.heldSlot`, no target; API 0.9.0 / Core 0.5.0. |
 
 Targets are single alphabetic names/keywords, optionally prefixed by a positive
 selector such as `2.guard`; `all`, whitespace, separators, and arbitrary command
@@ -397,9 +403,31 @@ assuming one race-independent number. Server restrictions and skills still apply
 Core requires a fresh, complete scope containing the selected item for Hold and
 use. Hold requires carried inventory. For Zap and Brandish, Core checks that the
 selected ID has the correct type and occupies `heldSlot` in equipment, with no
-ambiguous duplicate occupying that slot. This matters because those two commands
-do not include the item ID. Bagged items must be explicitly retrieved first;
+ambiguous duplicate occupying that slot. For Enter, Core additionally requires
+fresh slot discovery and the selected portal in the discovered `portal` slot,
+or `hold` when no Portal slot exists. These commands do not include the item ID.
+Bagged items must be explicitly retrieved first;
 none of these primitive methods prepares equipment or restores an arrangement.
+
+### Automatic equipment-slot discovery
+
+`refreshWearSlots()` serializes `wearable` and an owned `eqdata` reply through
+Core's inventory collector. It requires the `Num Keyword Description Wear Flag`
+header, unique well-formed rows and a complete equipment frame before publishing
+a new slot snapshot. A row such as `22 feet [ Worn on hooves ]: feet` becomes
+`{ id = 22, keyword = "feet", description = "Worn on hooves", wearFlag = "feet" }`.
+IDs preserve nonconsecutive and race-specific server locations; keyword and wear
+flag remain distinct (`second` and `wield`, for example).
+
+The tagged equipment reply supplies a completion boundary independent of custom
+prompts. Collection uses bounded output, timeouts, manual-interruption handling
+and connection generations. Missing headers, duplicate/malformed rows, refused
+sends and incomplete equipment replies fail without publishing partial slot
+results. Recognized owned discovery output follows quiet collection rules;
+prompts, errors, unrelated lines and manually requested output remain visible.
+Snapshots are transient and cleared with session/character resets. Portal use
+refreshes discovery for every confirmed action; neither the primitive getter nor
+login starts a discovery read. These methods do not prepare or restore equipment.
 
 ### Combat potion access
 
@@ -495,8 +523,9 @@ registrations by the callback's sender ID, not a payload-provided owner.
 - `update`: targeted JSON `{ version = 1, package = "...", payload = {...} }`.
 
 Inventory adds targeted `inventory-status`, `inventory-scope`,
-`inventory-details` and `inventory-result` messages. Each carries version 1 and
-a connection generation; requests carry consumer-local request IDs. Scopes are
+`inventory-details`, `inventory-wear-slots` and `inventory-result` messages. Each
+carries version 1 and a connection generation; requests carry consumer-local
+request IDs. Scopes are
 transferred separately with inventory-specific validation. Only registered
 inventory consumers can request work or receive inventory data. Core 0.3.0 adds
 an optional `capabilities.inventoryActions` list (`hold`, `quaff`, `eat`, `drink`,
@@ -504,7 +533,9 @@ an optional `capabilities.inventoryActions` list (`hold`, `quaff`, `eat`, `drink
 Core 0.4.0 adds `combatPotions` to that list and the optional boolean
 `inventory-status.status.potionReady`; absence means false, and the consumer
 accepts true only with the matching advertised capability. Older consumers ignore
-these additive fields.
+these additive fields. Core 0.5.0 adds `wearSlots`, `enter` and `dual` capabilities
+and the generation-scoped `inventory-wear-slots` snapshot message. Existing
+inventory protocol version 1 and baseline actions remain compatible.
 
 Only Core-origin state/update/stopped and inventory messages are accepted. Registration
 replies can arrive after `start()` returns; consumers observe availability

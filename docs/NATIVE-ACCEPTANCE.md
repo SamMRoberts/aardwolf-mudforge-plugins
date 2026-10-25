@@ -13,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.8.5, Core is 0.4.3 and the example is 0.1.0, including library
+  library version is 0.9.0, Core is 0.5.0 and the example is 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -63,7 +63,7 @@ acceptance step; loopback transport does not establish live-server behavior.
 
 ## Inventory — pending
 
-API **0.8.5** / Core **0.4.3** inventory acceptance has not been observed in
+API **0.9.0** / Core **0.5.0** inventory acceptance has not been observed in
 MudForge or on live Aardwolf. Existing storage and UI results below do not
 establish inventory behavior. Use an explicitly authorized disposable world and
 local Telnet fixture for native checks; live Aardwolf needs separate authorization.
@@ -117,7 +117,7 @@ a successful local replay does not establish those server contracts.
 
 ## Inventory Management plugin — pending
 
-Inventory Management **0.2.4**, API **0.8.5** and Core **0.4.3** require their own
+Inventory Management **0.4.0**, API **0.9.0** and Core **0.5.0** require their own
 native acceptance. Offline Lua fixtures and standalone browser checks do not
 establish native docking, context-menu delivery, persistence or live gameplay.
 Use only an explicitly authorized disposable world and local transport fixture;
@@ -138,6 +138,18 @@ version and tested artifact versions with any observed results.
   visible, bag names truncate before their location labels, and the list scrolls
   above the footer. Repeat with a larger saved font and long status messages;
   verify keyboard bag activation and scroll/focus preservation.
+- Pin known inventory, equipment and bagged items of different types. Verify
+  insertion order and the 32-pin limit, then save/reopen the disposable world and
+  switch characters: pins remain specific to the correct character. Clicking a
+  pin opens the native actions menu with normal eligibility and confirmation;
+  pinning/clicking alone sends no gameplay command. Observe item moves, stale
+  locations, missing items and duplicate names: exact IDs retain unavailable
+  placeholders, no replacement item is selected and no unopened bag is scanned.
+  Unpin both available and unavailable entries. Pin/unpin while editing Setup,
+  then save the older form: drafts and the latest pins must survive.
+- Fill the summary with pins and bags at 200×150 and 310×220, including long
+  labels and larger fonts. Both sections share one content scroller above the
+  fixed five controls; keyboard focus, scroll and saved geometry remain stable.
 - Double-click and keyboard-open a bag; use Manage Inventory to return to the
   main inventory. Exercise equipment/bag navigation, search, all sort columns,
   details, right-click selection, the Actions button and keyboard menu access.
@@ -171,6 +183,20 @@ version and tested artifact versions with any observed results.
   equipment, selected-ID checks before `zap`/`brandish`, restoration of the prior
   held item and return of surviving retrieved items to their original bags.
   Consumed items are not returned. Items equipped elsewhere need explicit removal.
+- Confirm **Enter portal** preparation, then replay the supplied `wearable`
+  header/rows and tagged `eqdata` boundary with a custom prompt. Preserve
+  nonconsecutive/race-specific slot IDs and distinguish keyword from wear flag.
+  Repeat discovery on each confirmed Enter; no discovery runs on login or timers.
+  Reject missing headers, duplicate/malformed rows, interrupted reads and missing
+  equipment footers without changing equipment or publishing partial slot data.
+- Replay portal use with a held item, shield, secondary weapon and empty off-hand.
+  Observe explicit removals, `hold <portal-id>`, one bare `enter`, post-use refresh,
+  removal of a surviving temporary portal, and restoration through `hold`, `wear`
+  or `dual` to the exact original slot. Repeat for bagged and already-equipped
+  portals, consumed/missing portals, and changed/missing original bags. A Portal
+  wish fixture must replace/restore only its prior Portal-slot item and preserve
+  shield, held and secondary-weapon equipment. Verify Setup/status feedback,
+  over-level refusal, older Core upgrade guidance and preserved saved held slots.
 - Exercise missing/full bags, refused commands, incomplete output, timeout,
   cancellation and restoration failure at every step. Verify bounded work, no
   automatic command retries, and clear recovery guidance. Disconnect, change
@@ -206,7 +232,8 @@ version and tested artifact versions with any observed results.
   unrelated worlds, native map data, plugin settings and layouts are unchanged.
 
 Live acceptance must additionally verify real tag framing, action restrictions,
-held-slot mapping, target syntax and restoration with expendable fixture items.
+held/Portal-slot discovery, target syntax, portal travel and exact-slot off-hand
+restoration with expendable fixture items.
 Do not use valuable items to validate destructive or consumable actions.
 
 ## Native storage and migration — verified subset

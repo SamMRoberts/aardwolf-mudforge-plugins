@@ -1,7 +1,7 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.8.5** library provides a session Core, an injected library facade, native
+The **0.9.0** library provides a session Core, an injected library facade, native
 storage and widget helpers, opt-in inventory management, a reactive vitals example,
 and a configurable vitals HUD.
 All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.1**
@@ -82,8 +82,8 @@ have **not been published or installed** by this scaffold.
    [Room Details](#aardwolf-room-details). It enables room tags and requests a look
    after login; it needs no file permission.
 7. Optionally install `dist/plugins/aardwolf-inventory.lua` for
-   [Inventory Management](docs/INVENTORY.md). Update the library to **0.8.5** and
-   API Core to **0.4.3** for quiet collection, held-item preparation and item-use actions.
+   [Inventory Management](docs/INVENTORY.md). Update the library to **0.9.0** and
+   API Core to **0.5.0** for portal entry, automatic slot discovery and off-hand restoration.
 
 With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
@@ -105,14 +105,18 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Inventory Management
 
-[Aardwolf Inventory Management 0.2.4](docs/INVENTORY.md) adds a dockable summary
+[Aardwolf Inventory Management 0.4.0](docs/INVENTORY.md) adds a dockable summary
 with the directly carried item count and discovered storage bags. The count
 includes bags themselves, but excludes worn equipment and items inside bags.
 Double-click a bag, or press Enter on it, to open its contents in the floating
 manager. **Manage Inventory** opens the same manager on main inventory;
-**Setup** opens a separate floating settings window. Bag contents load on demand;
+**Setup** opens a separate floating settings window. **Pin to Inventory**
+saves any known item above the bag list for that character. Clicking a pin opens
+its normal native actions menu; use and disposal confirmations still apply.
+Pins track exact object IDs and retain unavailable placeholders rather than
+substituting similarly named items. Bag contents load on demand;
 unopened, partial and stale listings stay distinguishable from empty bags.
-With library 0.8.5 and Core 0.4.3, plugin-requested inventory, equipment, bag and
+With library 0.9.0 and Core 0.5.0, plugin-requested inventory, equipment, bag and
 item-detail data is parsed and hidden from the terminal. Manual queries, prompts
 and unrelated game output remain visible.
 
@@ -124,9 +128,14 @@ read its details, then return it to the original bag. A matching untagged
 `Item <id> not found.` response fails the read without blocking later refreshes.
 Item-use actions can retrieve an item and prepare held equipment before use,
 then restore the previous held item and return surviving items to their original
-bags. Configure the held slot in Setup by selecting the currently held item or
-entering the number from `wearable`. Failures stop the workflow and report any
-remaining recovery steps; a command being sent does not prove server success.
+bags. For wand/staff use, configure the held slot in Setup by selecting the
+currently held item or entering the number from `wearable`. **Enter portal**
+automatically discovers current equipment slots on each confirmed action, holds
+the selected portal, sends `enter` once, then restores the previous held item,
+shield or secondary weapon. Characters with the Portal wish use their dedicated
+Portal slot and restore the previous portal without changing off-hand equipment.
+Failures stop the workflow and report remaining recovery steps; a command being
+sent does not prove server success.
 
 Setup also saves font size, bag visibility/order, confirmation preferences and
 ordered sorting rules. Rules match item type and an optional case-insensitive
