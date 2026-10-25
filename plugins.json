@@ -6,7 +6,7 @@
     {
       "id": "aardwolf-api-core",
       "name": "Aardwolf API Core",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "author": "Sam Roberts",
       "description": "Shared Aardwolf session and inventory state with exclusive GMCP negotiation.",
       "category": "utilities",
@@ -16,8 +16,8 @@
         "core"
       ],
       "downloadUrl": "dist/plugins/aardwolf-api-core.lua",
-      "sha256": "9ffac0430d353dcff71e949dc3fb0f475fc009d9b9fbe56284109307e004b6ea",
-      "size": 11013,
+      "sha256": "94cbb5af8fea7eea8bab9a93897fb80d388bfffec8caeb1f72ce12725163a818",
+      "size": 11667,
       "format": "lua"
     },
     {
@@ -94,7 +94,7 @@
     {
       "id": "aardwolf-inventory",
       "name": "Aardwolf Inventory Management",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "author": "Sam Roberts",
       "description": "Dockable inventory, bag management, prepared item use and explicit sorting rules.",
       "category": "widgets",
@@ -105,8 +105,8 @@
         "equipment"
       ],
       "downloadUrl": "dist/plugins/aardwolf-inventory.lua",
-      "sha256": "fbd8712c7679c5e4759bbd349befaeb918232110e5d79bd0c92e1f9d196c3e20",
-      "size": 94463,
+      "sha256": "4140dc4b18756d6670886a8a06ef45343065119b731d51b99992b8c4632fcfcb",
+      "size": 97172,
       "format": "lua"
     },
     {

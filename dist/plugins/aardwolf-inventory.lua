@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.2.3",
+  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.2.4",
   author = "Sam Roberts", description = "Dockable inventory, bag management, prepared item use and explicit sorting rules."
 }
 
@@ -26,6 +26,7 @@ body[data-role=summary] .summary-notices{flex:0 1 auto;min-height:0;max-height:2
 body[data-role=summary] .summary-notices .status,body[data-role=summary] .summary-notices .feedback{max-height:none;overflow:visible;margin:0}
 body[data-role=summary] .summary-notices .feedback:not(:empty){margin-top:2px}
 @media(max-height:180px){body[data-role=summary] .count{margin:1px 0 2px}body[data-role=summary] .summary-controls{gap:3px;padding-top:4px}body[data-role=summary] .summary-notices{margin-top:2px;max-height:1.2em}}
+tr.level-restricted td{color:var(--muted);opacity:.55}
 .quick-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:8px}.quick-slot{padding:10px;border:1px solid var(--line);border-radius:5px}.quick-slot label{display:flex;flex-direction:column;gap:4px;margin-top:8px}.quick-slot input,.quick-slot select{width:100%;min-width:0}.unavailable{color:#f2bf97}.preview-problem{color:#f2bf97;font-size:.92rem;margin:7px 0}
 @media(max-width:560px){.quick-settings{grid-template-columns:1fr}}
 </style></head><body data-role="__ROLE__">
@@ -75,7 +76,7 @@ function selectedItem(){return(state.entries||[]).find(item=>idEqual(item.id,loc
 function select(id){localSelected=id;paintSelection();send('select',{id})}
 function paintSelection(){for(const row of $('items').children)row.setAttribute('aria-selected',idEqual(row.dataset.id,localSelected)?'true':'false');$('actions-button').disabled=localSelected==null;$('details-button').disabled=localSelected==null}
 function requestMenu(event,id){if(id==null)return;event.preventDefault();pendingMenu={x:event.clientX||12,y:event.clientY||12};if(event.type==='keydown'||event.type==='click'){const r=event.currentTarget.getBoundingClientRect();pendingMenu={x:r.left,y:r.bottom}}localSelected=id;paintSelection();send('menu',{id})}
-function renderItems(){const query=$('search').value.toLocaleLowerCase();if(localSelected!=null&&!state.entries.some(item=>idEqual(item.id,localSelected)&&matchesSearch(item,query)))localSelected=null;const key=JSON.stringify([state.entries,query,sortKey,sortDirection]);if(itemsKey===key){paintSelection();renderEmptyState($('items').children.length,query);return}itemsKey=key;const rows=(state.entries||[]).filter(item=>matchesSearch(item,query));rows.sort((a,b)=>{let av=sortKey==='name'?itemName(a):a[sortKey],bv=sortKey==='name'?itemName(b):b[sortKey];if(sortKey==='type'){av=TYPES[av]||String(av);bv=TYPES[bv]||String(bv)}const result=typeof av==='number'&&typeof bv==='number'?av-bv:String(av||'').localeCompare(String(bv||''));return sortDirection*(result||a.id-b.id)});const scroll=$('items-scroll'),top=scroll.scrollTop,left=scroll.scrollLeft,focused=document.activeElement&&document.activeElement.closest('tr[data-id]'),focusId=focused&&focused.dataset.id;const nodes=rows.map(item=>{const row=element('tr');row.dataset.id=item.id;row.tabIndex=0;row.setAttribute('aria-selected',idEqual(item.id,localSelected)?'true':'false');for(const value of [itemName(item),item.level,TYPES[item.type]||item.type,item.flags||' - ',item.id])row.append(element('td',value));row.addEventListener('click',()=>select(item.id));row.addEventListener('contextmenu',e=>requestMenu(e,item.id));row.addEventListener('dblclick',()=>{if(item.type===11)send('open',{scope:'container:'+item.id})});row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(item.id)}else if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10'))requestMenu(e,item.id);else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const next=e.key==='ArrowDown'?row.nextElementSibling:row.previousElementSibling;if(next){next.focus();select(Number(next.dataset.id))}}});return row});$('items').replaceChildren(...nodes);$('items-empty').hidden=rows.length>0;renderEmptyState(rows.length,query);if(focusId){const row=Array.from($('items').children).find(r=>r.dataset.id===focusId);if(row)row.focus({preventScroll:true})}scroll.scrollTop=top;scroll.scrollLeft=left;paintSelection();for(const head of document.querySelectorAll('[data-sort]')){head.parentElement.setAttribute('aria-sort',head.dataset.sort===sortKey?(sortDirection===1?'ascending':'descending'):'none')}}
+function renderItems(){const query=$('search').value.toLocaleLowerCase();if(localSelected!=null&&!state.entries.some(item=>idEqual(item.id,localSelected)&&matchesSearch(item,query)))localSelected=null;const key=JSON.stringify([state.entries,query,sortKey,sortDirection]);if(itemsKey===key){paintSelection();renderEmptyState($('items').children.length,query);return}itemsKey=key;const rows=(state.entries||[]).filter(item=>matchesSearch(item,query));rows.sort((a,b)=>{let av=sortKey==='name'?itemName(a):a[sortKey],bv=sortKey==='name'?itemName(b):b[sortKey];if(sortKey==='type'){av=TYPES[av]||String(av);bv=TYPES[bv]||String(bv)}const result=typeof av==='number'&&typeof bv==='number'?av-bv:String(av||'').localeCompare(String(bv||''));return sortDirection*(result||a.id-b.id)});const scroll=$('items-scroll'),top=scroll.scrollTop,left=scroll.scrollLeft,focused=document.activeElement&&document.activeElement.closest('tr[data-id]'),focusId=focused&&focused.dataset.id;const nodes=rows.map(item=>{const row=element('tr');row.dataset.id=item.id;row.tabIndex=0;if(item.levelRestricted){row.classList.add('level-restricted');row.title=item.levelReason||'Item level requirement not met'};row.setAttribute('aria-selected',idEqual(item.id,localSelected)?'true':'false');for(const value of [itemName(item),item.level,TYPES[item.type]||item.type,item.flags||' - ',item.id])row.append(element('td',value));row.addEventListener('click',()=>select(item.id));row.addEventListener('contextmenu',e=>requestMenu(e,item.id));row.addEventListener('dblclick',()=>{if(item.type===11)send('open',{scope:'container:'+item.id})});row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(item.id)}else if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10'))requestMenu(e,item.id);else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const next=e.key==='ArrowDown'?row.nextElementSibling:row.previousElementSibling;if(next){next.focus();select(Number(next.dataset.id))}}});return row});$('items').replaceChildren(...nodes);$('items-empty').hidden=rows.length>0;renderEmptyState(rows.length,query);if(focusId){const row=Array.from($('items').children).find(r=>r.dataset.id===focusId);if(row)row.focus({preventScroll:true})}scroll.scrollTop=top;scroll.scrollLeft=left;paintSelection();for(const head of document.querySelectorAll('[data-sort]')){head.parentElement.setAttribute('aria-sort',head.dataset.sort===sortKey?(sortDirection===1?'ascending':'descending'):'none')}}
 function renderEmptyState(visibleCount,query){
   $('items-empty').hidden=visibleCount>0;
   const labels={unknown:'Contents have not been loaded. Choose Refresh to load this location.',loading:'Loading contents...',partial:'Complete contents are not yet known. Refresh this location.',stale:'This listing is out of date. Refresh this location.',empty:'This location is empty.'};
@@ -132,7 +133,7 @@ function renderSetup(){
     text('draft-state',state.saveResult.ok?'Saved':state.saveResult.message||'Save failed; draft retained');
   }
 }
-function renderPrompt(){const prompt=state.prompt||null,key=JSON.stringify(prompt);if(key===promptKey)return;promptKey=key;$('prompt-panel').hidden=!prompt;if(!prompt)return;text('prompt-title',prompt.title||'Inventory action');$('prompt-steps').replaceChildren(...(prompt.steps||[]).map(step=>element('li',step)));const isPut=prompt.kind==='put',isGive=prompt.kind==='give',hasTarget=prompt.kind==='use'&&(prompt.allowTarget||prompt.requireTarget);$('bag-field').hidden=!isPut;$('recipient-field').hidden=!isGive;$('target-field').hidden=!hasTarget;$('destination-bag').required=isPut;$('recipient').required=isGive;$('use-target').required=!!prompt.requireTarget;$('recipient').value='';$('use-target').value=prompt.defaultTarget||'';setOptions($('destination-bag'),(prompt.bags||state.bags||[]).map(b=>({value:b.id,label:itemName(b)+' (#'+b.id+')'})),((prompt.bags||state.bags||[])[0]||{}).id);text('prompt-submit',prompt.kind==='use'?'Prepare and use':prompt.kind==='confirm'?'Confirm':'Continue');const field=isPut?$('destination-bag'):isGive?$('recipient'):hasTarget?$('use-target'):$('prompt-submit');field.focus({preventScroll:true});$('prompt-panel').scrollIntoView({block:'nearest'})}
+function renderPrompt(){const prompt=state.prompt||null,key=JSON.stringify(prompt?{...prompt,disabled:undefined,reason:undefined}:null);if(key===promptKey)return;promptKey=key;$('prompt-panel').hidden=!prompt;if(!prompt)return;text('prompt-title',prompt.title||'Inventory action');$('prompt-steps').replaceChildren(...(prompt.steps||[]).map(step=>element('li',step)));const isPut=prompt.kind==='put',isGive=prompt.kind==='give',hasTarget=prompt.kind==='use'&&(prompt.allowTarget||prompt.requireTarget);$('bag-field').hidden=!isPut;$('recipient-field').hidden=!isGive;$('target-field').hidden=!hasTarget;$('destination-bag').required=isPut;$('recipient').required=isGive;$('use-target').required=!!prompt.requireTarget;$('recipient').value='';$('use-target').value=prompt.defaultTarget||'';setOptions($('destination-bag'),(prompt.bags||state.bags||[]).map(b=>({value:b.id,label:itemName(b)+' (#'+b.id+')'})),((prompt.bags||state.bags||[])[0]||{}).id);text('prompt-submit',prompt.kind==='use'?'Prepare and use':prompt.kind==='confirm'?'Confirm':'Continue');const field=isPut?$('destination-bag'):isGive?$('recipient'):hasTarget?$('use-target'):$('prompt-submit');field.focus({preventScroll:true});$('prompt-panel').scrollIntoView({block:'nearest'})}
 function renderPreview(){
   const preview=state.preview,key=JSON.stringify(preview),isPreview=Array.isArray(preview),unavailable=isPreview&&preview.some(move=>move.unavailable);
   $('preview-panel').hidden=!isPreview;
@@ -142,7 +143,7 @@ function renderPreview(){
   $('preview-list').replaceChildren(...preview.map(move=>{const bag=state.bags.find(bag=>idEqual(bag.id,move.bagId)),label=itemName(move)+' -> '+(bag?itemName(bag):move.bagName)+' (#'+move.bagId+')'+(move.unavailable?' - destination unavailable':'');return element('li',label,move.unavailable?'unavailable':'')}));
   $('preview-empty').hidden=preview.length>0;
 }
-function render(value){if(!value||typeof value!=='object')return;const previousIdentity=state.identity,previousScope=state.scope;state=normalizeInventoryState(value);if(previousIdentity!==state.identity){localSelected=null;pendingMenu=null;lastMenu=null}if(state.selected!=null)localSelected=state.selected;else if(previousScope!==state.scope)localSelected=null;document.documentElement.style.fontSize=(Number(state.fontSize)||13)+'px';text('status',state.status);text('feedback',state.feedback);if(role==='summary'){text('item-count',state.count==null?' - ':state.count);text('summary-freshness',state.countState||'');renderBags();renderQuickPotions();$('summary-notices').hidden=!state.status&&!state.feedback;$('summary-notices').title=[state.status,state.feedback].filter(Boolean).join('\n')}if(role==='manager'){if(localSelected!=null&&!(state.entries||[]).some(item=>idEqual(item.id,localSelected)))localSelected=null;renderScopes();text('scope-state',state.scopeState||'');renderItems();renderDetails();if(Number(state.detailsSerial)>0&&state.detailsSerial!==lastDetailsSerial)$('item-details').open=true;lastDetailsSerial=state.detailsSerial;$('workflow-cancel').hidden=!state.busy;$('organize-button').disabled=!!state.busy||!state.active;renderPrompt();renderPreview();$('prompt-submit').disabled=!!state.busy}if(role==='setup')renderSetup();for(const id of ['summary-refresh','manager-refresh'])$(id).disabled=!!state.busy||!state.active;if(pendingMenu&&state.menuSerial!=null&&state.menuSerial!==lastMenu){lastMenu=state.menuSerial;const items=(state.actions||[]).map(action=>({type:'item',id:action.id,text:action.text+(action.reason?'  -  '+action.reason:''),disabled:!!action.disabled}));if(items.length)mudforge.showMenu(items,pendingMenu.x,pendingMenu.y);pendingMenu=null}}
+function render(value){if(!value||typeof value!=='object')return;const previousIdentity=state.identity,previousScope=state.scope;state=normalizeInventoryState(value);if(previousIdentity!==state.identity){localSelected=null;pendingMenu=null;lastMenu=null}if(state.selected!=null)localSelected=state.selected;else if(previousScope!==state.scope)localSelected=null;document.documentElement.style.fontSize=(Number(state.fontSize)||13)+'px';text('status',state.status);text('feedback',state.feedback);if(role==='summary'){text('item-count',state.count==null?' - ':state.count);text('summary-freshness',state.countState||'');renderBags();renderQuickPotions();$('summary-notices').hidden=!state.status&&!state.feedback;$('summary-notices').title=[state.status,state.feedback].filter(Boolean).join('\n')}if(role==='manager'){if(localSelected!=null&&!(state.entries||[]).some(item=>idEqual(item.id,localSelected)))localSelected=null;renderScopes();text('scope-state',state.scopeState||'');renderItems();renderDetails();if(Number(state.detailsSerial)>0&&state.detailsSerial!==lastDetailsSerial)$('item-details').open=true;lastDetailsSerial=state.detailsSerial;$('workflow-cancel').hidden=!state.busy;$('organize-button').disabled=!!state.busy||!state.active;renderPrompt();renderPreview();$('prompt-submit').disabled=!!state.busy||!!(state.prompt&&state.prompt.disabled);$('prompt-submit').title=(state.prompt&&state.prompt.reason)||''}if(role==='setup')renderSetup();for(const id of ['summary-refresh','manager-refresh'])$(id).disabled=!!state.busy||!state.active;if(pendingMenu&&state.menuSerial!=null&&state.menuSerial!==lastMenu){lastMenu=state.menuSerial;const items=(state.actions||[]).map(action=>({type:'item',id:action.id,text:action.text+(action.reason?'  -  '+action.reason:''),disabled:!!action.disabled}));if(items.length)mudforge.showMenu(items,pendingMenu.x,pendingMenu.y);pendingMenu=null}}
 $('summary-view').hidden=role!=='summary';$('manager-view').hidden=role!=='manager';$('setup-view').hidden=role!=='setup';
 if(role==='summary')$('summary-notices').append($('status'),$('feedback'));
 for(const id of ['setup-button','manager-setup'])$(id).addEventListener('click',()=>send('setup'));
@@ -209,6 +210,24 @@ local function integer(value, minimum, maximum)
 end
 local function objectId(value) return integer(value, 1, 9007199254740991) end
 local function key(id) return string.format("%.0f", id) end
+local currentCharacterLevel, currentItemLevelLimit = nil, nil
+local function updateCharacterLevel()
+  local character = client and client.get("char.status") or {}
+  local base = client and client.get("char.base") or {}
+  local level = character.level or base.level
+  currentCharacterLevel, currentItemLevelLimit = nil, nil
+  if not integer(level, 1, 9007199254740991) then return end
+  currentCharacterLevel = level
+  local tier = integer(base.tier, 0, 9) and base.tier or 0
+  -- Tier equipment above level 200 becomes usable at Superhero (201).
+  currentItemLevelLimit = math.min(level + tier * 10, level < 201 and 200 or 9007199254740991)
+end
+local function levelReason(entry)
+  local limit = currentItemLevelLimit
+  if entry and limit and entry.level > limit then
+    return "Item level " .. key(entry.level) .. " exceeds your level allowance of " .. key(limit)
+  end
+end
 local function plainName(value)
   local text, parts, index = string.gsub(value, "\27%[[%d;]*m", ""), {}, 1
   -- Aardwolf colors are presentation, never part of a matching keyword. Decode
@@ -369,6 +388,10 @@ local function eligible(id, action)
   local reason = currentReason(action == "quaff")
   if reason then return reason end
   if not fresh(entry.location) then return "Refresh this item's location first" end
+  if action == "wear" or action == "hold" or USE_LABELS[action] then
+    local issue = levelReason(entry)
+    if issue then return issue end
+  end
   if action == "details" then
     if entry.location ~= "inventory" and entry.location ~= "equipment" then
       local bagId = tonumber(string.match(entry.location, "^container:(%d+)$"))
@@ -422,9 +445,15 @@ end
 local function matchingPotion(location, name)
   local contents = snapshot.scopes[location]
   if not fresh(location) then return nil end
+  local blocked
   for _, entry in ipairs(contents.entries) do
-    if entry.type == 8 and string.find(string.lower(plainName(entry.name)), string.lower(name), 1, true) then return entry end
+    if entry.type == 8 and string.find(string.lower(plainName(entry.name)), string.lower(name), 1, true) then
+      local issue = levelReason(entry)
+      if not issue then return entry end
+      blocked = blocked or issue
+    end
   end
+  return nil, blocked
 end
 local function shortcutState(slot)
   local config = profile.quickPotions[slot]
@@ -432,11 +461,15 @@ local function shortcutState(slot)
   local reason = not configured and ("Configure the " .. slot .. " potion in Setup") or nil
   if not reason and not client.inventory.supports("quaff") then reason = "Update Aardwolf API Core for potion use" end
   if not reason then reason = workflow and "Another inventory workflow is running" or currentReason(true) end
-  if not reason and fresh("inventory") and not matchingPotion("inventory", config.name) then
-    if not config.bagId then reason = "No matching " .. slot .. " potion in inventory"
-    elseif not accessibleBag(config.bagId) then reason = "Configured potion bag is unavailable"
-    elseif fresh("container:" .. key(config.bagId)) and not matchingPotion("container:" .. key(config.bagId), config.name) then
-      reason = "No matching " .. slot .. " potion in inventory or its configured bag"
+  if not reason and fresh("inventory") then
+    local carried, issue = matchingPotion("inventory", config.name)
+    if not carried then
+      if not config.bagId then reason = issue or ("No matching " .. slot .. " potion in inventory")
+      elseif not accessibleBag(config.bagId) then reason = "Configured potion bag is unavailable"
+      elseif fresh("container:" .. key(config.bagId)) then
+        local bagged, bagIssue = matchingPotion("container:" .. key(config.bagId), config.name)
+        if not bagged then reason = bagIssue or issue or ("No matching " .. slot .. " potion in inventory or its configured bag") end
+      end
     end
   end
   return { configured = configured, disabled = reason ~= nil, reason = reason }
@@ -448,17 +481,22 @@ publish = function()
   local equipment = {}; for _, entry in pairs(snapshot.items) do if entry.location == "equipment" then table.insert(equipment, entry) end end
   table.sort(equipment, function(a,b) return a.id < b.id end)
   local entries = snapshot.scopes[scope] and snapshot.scopes[scope].entries or {}
+  if prompt then
+    prompt.reason = prompt.kind == "use" and levelReason(item(prompt.itemId)) or nil
+    prompt.disabled = prompt.reason ~= nil
+  end
   local reason = currentReason()
   if status.potionReady and not status.active then reason = status.collecting and "Refreshing potion inventory" or "Combat: potion shortcuts available" end
   local state = { identity = identity, status = storageError or status.error or workflowStatus() or reason or "", feedback = feedback, busy = workflow ~= nil,
     active = status.active == true and not status.collecting, fontSize = settings.preferences.fontSize,
+    characterLevel = currentCharacterLevel, itemLevelLimit = currentItemLevelLimit,
     count = carried and carried.known and #carried.entries or nil,
     countState = not carried and "unknown" or not carried.known and "partial" or carried.stale and "stale" or "fresh",
     scope = scope, scopeState = scopeState(), entries = entries, selected = selected, equipment = equipment,
     details = selected and (snapshot.details[key(selected)] or (viewedDetails and viewedDetails.id == selected
       and item(selected) and item(selected).location == viewedLocation and viewedDetails)) or nil,
     preferences = settings.preferences, profile = profile,
-    settingsRevision = settingsRevision, actions = menu and menu.actions or actions(selected), menuSerial = menuSerial,
+    settingsRevision = settingsRevision, actions = actions(menu and menu.id or selected), menuSerial = menuSerial,
     detailsSerial = detailsSerial, saveResult = saveResult,
     quickPotions = { heal = shortcutState("heal"), mana = shortcutState("mana") },
     prompt = prompt, preview = preview, types = TYPE_NAMES }
@@ -537,6 +575,8 @@ local function movementReason(move)
   elseif move.kind == "remove" then
     if entry.location ~= "equipment" then return "Equipment changed" end
   elseif move.kind == "hold" then
+    local issue = levelReason(entry)
+    if issue then return issue end
     if entry.location ~= "inventory" then return "Item is no longer carried" end
     for _, equipped in pairs(snapshot.items) do
       if equipped.location == "equipment" and equipped.wearLocation == profile.heldSlot then return "The held slot is occupied" end
@@ -631,6 +671,10 @@ advance = function()
     if work.cancelRequested and work.phase ~= "restore" then recover("Cancelled"); return end
   end
   if work.phase == "settle" or work.phase == "recover" or work.phase == "restore-verify" then return end
+  if work.kind == "use" and work.phase == "prepare" then
+    local issue = levelReason(item(work.itemId))
+    if issue then recover(issue); return end
+  end
   if status.collecting then
     if not work.timer then
       work.timer = timer(10000, function() if workflow == work then recover("Inventory collector stayed busy") end end)
@@ -705,6 +749,11 @@ advance = function()
 end
 
 local function beginUse(entry, action, target, work)
+  local levelIssue = levelReason(entry)
+  if levelIssue then
+    if work then finishWorkflow(levelIssue) else feedback = levelIssue; publish() end
+    return
+  end
   local held = action == "zap" or action == "brandish"
   if target == "" then target = nil end
   local command, issue = libraryApi.protocol.inventoryCommand("use", { id = entry.id, action = action, target = target, heldSlot = profile.heldSlot })
@@ -759,16 +808,18 @@ resolvePotion = function(work)
     end)
   end
   if not fresh("inventory") then read("inventory","readInventory"); return end
-  local entry = matchingPotion("inventory",work.config.name)
+  local entry, levelIssue = matchingPotion("inventory",work.config.name)
   if entry then beginUse(entry,"quaff",nil,work); return end
   if work.config.bagId then
     if not accessibleBag(work.config.bagId) then finishWorkflow("Configured " .. work.slot .. " potion bag is unavailable"); return end
     local location = "container:" .. key(work.config.bagId)
     if not fresh(location) then read(location,"readBag"); return end
-    entry = matchingPotion(location,work.config.name)
+    local bagIssue
+    entry, bagIssue = matchingPotion(location,work.config.name)
+    levelIssue = bagIssue or levelIssue
     if entry then beginUse(entry,"quaff",nil,work); return end
   end
-  finishWorkflow("No matching " .. work.slot .. " potion is available")
+  finishWorkflow(levelIssue or ("No matching " .. work.slot .. " potion is available"))
 end
 local function quickPotion(slot)
   if slot ~= "heal" and slot ~= "mana" then return end
@@ -1023,9 +1074,15 @@ createWindow = function(role, force)
 end
 synchronize = function()
   if not initialized then return end
+  updateCharacterLevel()
   snapshot, status = client.inventory.get(), client.inventory.status()
-  for _, entry in pairs(snapshot.items) do entry.plainName = plainName(entry.name) end
-  for _, contents in pairs(snapshot.scopes) do for _, entry in ipairs(contents.entries) do entry.plainName = plainName(entry.name) end end
+  local function decorate(entry)
+    entry.plainName = plainName(entry.name)
+    entry.levelReason = levelReason(entry)
+    entry.levelRestricted = entry.levelReason ~= nil
+  end
+  for _, entry in pairs(snapshot.items) do decorate(entry) end
+  for _, contents in pairs(snapshot.scopes) do for _, entry in ipairs(contents.entries) do decorate(entry) end end
   local name = status.characterName
   local nextKey = type(name) == "string" and #name > 0 and string.lower(name) or nil
   local nextIdentity = nextKey and (tostring(getSessionId()) .. "/" .. nextKey) or ""
@@ -1084,6 +1141,9 @@ function init()
   lifetime, feedback = lifetime + 1, ""
   createWindow("summary", false)
   table.insert(subscriptions, client.inventory.on(synchronize))
+  for _, topic in ipairs({ "char.base", "char.status" }) do
+    table.insert(subscriptions, client.on(topic, synchronize))
+  end
   table.insert(subscriptions, client.inventory.onResult(function(result)
     local callback = callbacks[result.requestId]
     if callback then callbacks[result.requestId] = nil; callback(result)
@@ -1115,4 +1175,5 @@ function cleanup()
   selected, scope, prompt, preview, menu = nil, "inventory", nil, nil, nil
   viewedDetails, viewedLocation, viewedItem = nil, nil, nil
   snapshot, status = { items = {}, scopes = {}, details = {} }, {}
+  currentCharacterLevel, currentItemLevelLimit = nil, nil
 end

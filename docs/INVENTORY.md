@@ -1,7 +1,7 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.3** uses `aardwolf-api` **0.8.4** and Aardwolf API
-Core **0.4.2**. Install the library and Core first, then
+Inventory Management **0.2.4** uses `aardwolf-api` **0.8.4** and Aardwolf API
+Core **0.4.3**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
 basic inventory data and original actions; unsupported held-item and use actions
@@ -42,7 +42,7 @@ details, then returns it to its original bag and waits for that move. The displa
 details remain available after restoration. Inventory and equipment details still
 load directly. No item is retrieved merely by selecting it.
 
-Library 0.8.4 and Core 0.4.2 parse plugin-requested `invdata`, `eqdata`,
+Library 0.8.4 and Core 0.4.3 parse plugin-requested `invdata`, `eqdata`,
 `invdata <bag-id>` and `invdetails <item-id>` replies before hiding their opening
 tags, recognized data rows and closing tags from the terminal. This also applies
 to automatic reconciliation reads. Manually typed queries and unsolicited frames
@@ -76,6 +76,21 @@ recipients use validated controls; commands target object IDs rather than item
 names. Drop, Sell and Donate ask for confirmation by default. The plugin never
 removes an item's keep protection automatically. Server restrictions, skills,
 item flags, shop availability and other game conditions still determine success.
+
+Items above the character's current item-level allowance appear dimmed, with a
+tooltip explaining the requirement. Wear/equip, Hold, Quaff, Eat, Drink, Recite,
+Zap and Brandish are disabled for those items. Selection, details, bag transfers,
+Remove and disposal remain available. The allowance includes 10 levels per tier,
+capped at level 200 until the character reaches level 201, following Aardwolf's
+[tier rules](https://www.aardwolf.com/wiki/index.php/Help/Tiers).
+
+The manager uses `char.status.level`, falling back to `char.base.level`, and
+`char.base.tier`. Level and tier updates refresh dimming and actions immediately
+without querying inventory. Unknown character level does not become zero or
+cause items to be dimmed. Confirmation, preparation, and dispatch recheck the
+allowance; quick-potion buttons skip over-level matches and disable when no
+eligible match remains in known locations. Core 0.4.3 clears character snapshots
+when the character name changes, preventing inherited levels and tiers.
 
 Sacrifice is absent from carried-item actions: Aardwolf sacrifices ground
 objects, and this plugin does not drop an item as a hidden prerequisite.

@@ -62,7 +62,11 @@ subscription topics. A state reply supplies current snapshots and notifies
 every state topic; a missing snapshot is passed as `nil`. A normal GMCP packet
 notifies its own topic. Do not count notifications as unique server packets.
 
-Character packets merge fields; an omitted field retains its previous value.
+Character packets merge fields for the same character; an omitted field retains
+its previous value. Core 0.4.3 clears character snapshots when a different
+character name arrives or the known name becomes invalid, then publishes the
+character's state to consumers.
+Levels, tiers and other omitted fields cannot carry across that identity change.
 An explicitly invalid known numeric/text field becomes unknown. Room and
 Group replace their complete snapshots, including exits and membership.
 Group members are normalized to an ordered, one-based Lua list. Server field

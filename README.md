@@ -83,7 +83,7 @@ have **not been published or installed** by this scaffold.
    after login; it needs no file permission.
 7. Optionally install `dist/plugins/aardwolf-inventory.lua` for
    [Inventory Management](docs/INVENTORY.md). Update the library to **0.8.4** and
-   API Core to **0.4.2** for quiet collection, held-item preparation and item-use actions.
+   API Core to **0.4.3** for quiet collection, held-item preparation and item-use actions.
 
 With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
@@ -105,14 +105,14 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Inventory Management
 
-[Aardwolf Inventory Management 0.2.3](docs/INVENTORY.md) adds a dockable summary
+[Aardwolf Inventory Management 0.2.4](docs/INVENTORY.md) adds a dockable summary
 with the directly carried item count and discovered storage bags. The count
 includes bags themselves, but excludes worn equipment and items inside bags.
 Double-click a bag, or press Enter on it, to open its contents in the floating
 manager. **Manage Inventory** opens the same manager on main inventory;
 **Setup** opens a separate floating settings window. Bag contents load on demand;
 unopened, partial and stale listings stay distinguishable from empty bags.
-With library 0.8.4 and Core 0.4.2, plugin-requested inventory, equipment, bag and
+With library 0.8.4 and Core 0.4.3, plugin-requested inventory, equipment, bag and
 item-detail data is parsed and hidden from the terminal. Manual queries, prompts
 and unrelated game output remain visible.
 
