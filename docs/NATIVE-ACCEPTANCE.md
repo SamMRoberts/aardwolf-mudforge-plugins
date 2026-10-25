@@ -13,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.4.0 and Core/example versions are 0.1.0, including library
+  library version is 0.6.0, Core is 0.2.0 and the example is 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -27,7 +27,8 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Loopback transport and session isolation
 
 - Connect to a local Telnet/GMCP fixture and observe actual negotiation. Expect
-  the baseline supports list and no automatic channel, debug or tag commands.
+  the baseline supports list and no automatic channel, debug or tag commands
+  when no inventory consumer has opted in.
 - Declare Group from a test consumer, then disable it. Expect Group to leave
   the supports union within the coalescing/cooldown window while baseline
   Char/Comm/Room/Core remain.
@@ -59,6 +60,45 @@ private messages, world exports and raw gameplay logs out of this repository.
 Record observed results and concrete blockers separately from offline tests.
 Any connection to live Aardwolf remains a separate, explicitly authorized
 acceptance step; loopback transport does not establish live-server behavior.
+
+## Inventory — pending
+
+API **0.6.0** / Core **0.2.0** inventory acceptance has not been observed in
+MudForge or on live Aardwolf. Existing storage and UI results below do not
+establish inventory behavior. Use an explicitly authorized disposable world and
+local Telnet fixture for native checks; live Aardwolf needs separate authorization.
+
+- Verify native transpilation, load/reload/disable/re-enable and both Core/consumer
+  load orders. An opted-out consumer sends no inventory setup or reads. An opted-in
+  consumer with an old Core reports unavailable without breaking existing GMCP.
+- With two inventory consumers, send an identified active character. Observe one
+  explicit `config invmon on`, then serialized `invdata` and `eqdata`, with no
+  periodic polling or container scan. Removing the last consumer stops owned work
+  without turning shared monitoring off.
+- Replay carried items, worn bags, comma-containing colored names, empty lists,
+  container frames and `invdetails` headers/type tags. Verify type-11 storage bags
+  remain distinct from drink containers. Entirely unobserved contents return nil;
+  live movements may expose partial scopes with `known = false, stale = true`,
+  without claiming complete contents. Unavailable snapshots contain empty maps.
+- Interleave gain/loss/equip/put/get/consume/vault/keyring tags with collection.
+  Verify newer events survive listing completion and ambiguous changes reconcile
+  affected scopes without refresh loops.
+- Exercise manual tagged commands, incomplete/malformed/oversized frames,
+  timeouts and refused sends/timers. Preserve last-good scopes as stale; do not
+  attribute manual output to an unrelated request or publish partial listings.
+- In the loopback fixture, verify every explicit single-ID action's exact command
+  and `sent`/`failed` result, including recipient selectors, invalid/injected inputs,
+  busy/inactive refusal and no retries, bulk operations or implicit extra commands.
+  Do not use real valuable items for these checks. Sacrifice sends only the
+  supplied ground-item ID, without dropping it first.
+- Disconnect/reconnect, change character, reattach the screen and reload Core while
+  reads are pending. Verify stale callbacks/results cannot restore old data, two
+  sessions remain isolated, caches do not persist, and unrelated native data and
+  layout remain unchanged.
+
+Record the app version, fixture details and observed results separately from
+offline tests. Live acceptance must verify actual tag framing and command behavior;
+a successful local replay does not establish those server contracts.
 
 ## Native storage and migration — verified subset
 
