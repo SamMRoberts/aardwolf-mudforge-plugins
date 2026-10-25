@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-api-core", name = "Aardwolf API Core", version = "0.2.0",
+  id = "aardwolf-api-core", name = "Aardwolf API Core", version = "0.4.0",
   author = "Sam Roberts", description = "Shared Aardwolf session and inventory state with exclusive GMCP negotiation."
 }
 
@@ -41,7 +41,7 @@ local function syncInventory()
 end
 
 local function sendState(id)
-  deliver(id, "state", { version = 1, session = sessionState(), snapshots = snapshots, capabilities = { inventory = 1 } })
+  deliver(id, "state", { version = 1, session = sessionState(), snapshots = snapshots, capabilities = { inventory = 1, inventoryActions = api.protocol.inventoryActions } })
 end
 
 local function publishState()

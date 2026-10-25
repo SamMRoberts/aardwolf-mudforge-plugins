@@ -207,6 +207,8 @@ opted out. This feature uses only the required lifecycle/messaging adapters in
 the consuming plugin. Core owns all inventory commands; consumers do not inject
 `send` or `sendGMCP` for inventory access. An older Core without inventory
 capability reports inventory unavailable while existing GMCP methods still work.
+API **0.8.0** / Core **0.4.0** additionally support explicit combat potion use
+through the additive `combatPotions` capability described below.
 
 ```lua
 local client = aardwolf.new(host, { inventory = true })
@@ -238,7 +240,7 @@ other subscribers. Unsubscribe functions are idempotent.
 | `client.inventory.getContainers()` | Ordered list of known storage containers, including worn bags; numeric item type 11, without guessing from names. Drink containers (type 12) remain distinct. |
 | `client.inventory.getContents(containerId)` | Cached container scope or `nil` when entirely unobserved. Only `known = true` with empty `entries` means a completed empty listing. |
 | `client.inventory.getDetails(id)` | Cached tagged item details or `nil`. |
-| `client.inventory.status()` | Defensive `{ available, connected, active, collecting, characterName?, reason?, error? }`. `active` requires an identified character in state 3 and a connected, negotiated session. |
+| `client.inventory.status()` | Defensive `{ available, connected, active, potionReady, collecting, characterName?, reason?, error? }`. `active` requires an identified character in state 3 and a connected, negotiated session. `potionReady` additionally permits fighting state 8 when Core advertises `combatPotions`; it does not mean the collector is idle. |
 | `client.inventory.on(callback)` | Notify `(snapshot, status)` on cache/status changes; `snapshot` is always a table. |
 | `client.inventory.refresh()` | Request carried inventory and equipment through `invdata` and `eqdata`. |
 | `client.inventory.lookIn(containerId)` | Request one container through `invdata <id>`. |
@@ -273,8 +275,8 @@ See Aardwolf's [Invdata](https://www.aardwolf.com/wiki/index.php/Help/Invdata),
 
 The first interested consumer causes Core to send explicit GMCP
 `config invmon on` and collect carried inventory/equipment once a connected,
-negotiated session has an identified character in active state (`char.status`
-state 3). This is a request to enable monitoring, not proof of a particular
+negotiated session has an identified character in active or fighting state
+(`char.status` state 3 or 8, from Core 0.4.0). This is a request to enable monitoring, not proof of a particular
 undocumented confirmation payload. Core leaves `invmon` enabled on shutdown
 because other integrations may share it.
 
@@ -316,14 +318,87 @@ inventory data is written to native storage or replayed from an old connection.
 | `client.inventory.sell(id)` | `sell <id>` |
 | `client.inventory.donate(id)` | `donate <id>` |
 | `client.inventory.sacrifice(id)` | `sacrifice <id>` |
+| `client.inventory.hold(id)` | `hold <id>`; requires API 0.7.0 / Core 0.3.0. |
+
+### Item use and capability discovery
+
+API **0.7.0** / Core **0.3.0** add
+`client.inventory.use(id, action, options?)` and
+`client.inventory.supports(action)`. `supports` returns a boolean for read names
+(`refresh`, `lookIn`, `identify`), existing single-item action names, `hold`,
+and the six use actions below. `supports("use")` requires all six use actions.
+It reports provider support, not current item eligibility or connection activity.
+An older inventory-capable Core continues to support existing methods; Hold and
+item use fail with an upgrade explanation. A disconnected/unavailable consumer
+clears the advertised extensions.
+
+| Use action | Required item and location | Command / options |
+| --- | --- | --- |
+| `quaff` | Potion (8), carried inventory | `quaff <id>` |
+| `eat` | Food (14) or pill (19), carried inventory | `eat <id>` |
+| `drink` | Drink container (12), carried inventory | `drink <id>` |
+| `recite` | Scroll (2), carried inventory | `recite <id> [target]`; optional `options.target`. |
+| `zap` | Wand (3), configured held slot in equipment | `zap <target>`; requires `options.target` and `options.heldSlot`. |
+| `brandish` | Staff (4), configured held slot in equipment | `brandish`; requires `options.heldSlot`, no target. |
+
+Targets are single alphabetic names/keywords, optionally prefixed by a positive
+selector such as `2.guard`; `all`, whitespace, separators, and arbitrary command
+text are rejected. Recite additionally accepts a positive object ID target.
+`heldSlot` is a nonnegative safe integer, or its numeric string representation;
+learn it from the character's current equipment / `wearable`, rather than
+assuming one race-independent number. Server restrictions and skills still apply.
+
+Core requires a fresh, complete scope containing the selected item for Hold and
+use. Hold requires carried inventory. For Zap and Brandish, Core checks that the
+selected ID has the correct type and occupies `heldSlot` in equipment, with no
+ambiguous duplicate occupying that slot. This matters because those two commands
+do not include the item ID. Bagged items must be explicitly retrieved first;
+none of these primitive methods prepares equipment or restores an arrangement.
+
+### Combat potion access
+
+API **0.8.0** / Core **0.4.0** advertise
+`client.inventory.supports("combatPotions")`. `status().active` retains its
+state-3-only meaning. The separate `status().potionReady` is true for an
+identified, connected, negotiated inventory session in state 3 or fighting
+state 8. It is false for sleep, pager, other inactive states, disconnect,
+unavailable Core, or an older Core without this advertised capability.
+Monitoring and serialized `refresh`, `lookIn`, and `identify` reads can run in
+either ready state; a 3↔8 transition does not cancel an in-flight read.
+
+While fighting, Core permits only explicit single-item `take` / `put` of a
+known type-8 potion and `use(id, "quaff")` of a carried type-8 potion. The potion's
+source scope must be complete and fresh. For moves, Core also validates the
+exact source location and a fresh type-11 storage bag carried directly or worn;
+nested/inaccessible bags, drink containers, stale scopes, and ordinary items are
+rejected. Other actions, including equipment changes, disposal, pills, food,
+scrolls, wands, and staves, still require normal active state 3. Core enforces
+these restrictions even when a consumer bypasses its local action guard.
+
+Busy potion actions fail immediately rather than queueing for later. The caller
+must observe movement or refresh before advancing to another step. A `sent`
+result does not establish consumption. Losing ready state cancels pending reads;
+the current reply may drain, but old work does not resume after waking. Explicit
+live item movement tags continue updating caches; ambiguous inactive-state
+updates mark scopes stale without deferring new reads until wake-up. No gameplay
+action is automatically resumed or retried.
+
+Older Core versions retain normal-state behavior. Combat potion calls refuse
+with a Core 0.4.0 upgrade explanation when `combatPotions` is absent; clients must
+not infer combat support from the existing `quaff` capability alone.
+
+Like existing actions, these methods return a request ID or `nil, reason` and
+notify `onResult` with `sent` or `failed`. Results can arrive synchronously before
+the method returns. `sent` establishes transport handoff only, not a successful
+cast or consumption. Busy/inactive calls are never deferred or retried.
 
 Read-request and action methods return a request ID string or `nil, reason`.
 Result outcomes are `complete` for a completed read, `sent` for a command handed
 to transport and `failed` for failure. An action's `sent` result does not claim
 that the server performed it; inventory changes follow observed server tags.
 
-Actions require the active, identified, connected and negotiated session and an
-idle collector. Busy/inactive actions fail immediately; they are never queued
+Except for the combat potion actions described above, actions require the
+active, identified, connected and negotiated session and an idle collector. Busy/inactive actions fail immediately; they are never queued
 for later execution or retried. Every action targets one positive integer object
 ID. `give` accepts a single alphabetic recipient name/keyword, optionally prefixed
 by a positive selector such as `2.guard`. Whitespace, command separators, bulk
@@ -370,14 +445,20 @@ registrations by the callback's sender ID, not a payload-provided owner.
 - `register`: targeted JSON `{ version = 1, packages = [...], inventory? = true }` replaces a consumer declaration; replies with `state`.
 - `unregister`: targeted withdrawal during consumer cleanup.
 - `ready` / `stopped`: Core lifecycle announcements; consumers rediscover or clear state.
-- `state`: targeted JSON `{ version = 1, session = {...}, snapshots = {...}, capabilities = { inventory = 1 } }`.
+- `state`: targeted JSON `{ version = 1, session = {...}, snapshots = {...}, capabilities = { inventory = 1, inventoryActions = [...] } }`.
 - `update`: targeted JSON `{ version = 1, package = "...", payload = {...} }`.
 
 Inventory adds targeted `inventory-status`, `inventory-scope`,
 `inventory-details` and `inventory-result` messages. Each carries version 1 and
 a connection generation; requests carry consumer-local request IDs. Scopes are
 transferred separately with inventory-specific validation. Only registered
-inventory consumers can request work or receive inventory data.
+inventory consumers can request work or receive inventory data. Core 0.3.0 adds
+an optional `capabilities.inventoryActions` list (`hold`, `quaff`, `eat`, `drink`,
+`recite`, `zap`, `brandish`) without changing `inventory = 1` or protocol version 1.
+Core 0.4.0 adds `combatPotions` to that list and the optional boolean
+`inventory-status.status.potionReady`; absence means false, and the consumer
+accepts true only with the matching advertised capability. Older consumers ignore
+these additive fields.
 
 Only Core-origin state/update/stopped and inventory messages are accepted. Registration
 replies can arrive after `start()` returns; consumers observe availability

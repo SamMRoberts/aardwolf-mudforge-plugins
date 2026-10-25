@@ -1,7 +1,7 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.6.0** library provides a session Core, an injected library facade, native
+The **0.8.0** library provides a session Core, an injected library facade, native
 storage and widget helpers, opt-in inventory management, a reactive vitals example,
 and a configurable vitals HUD.
 All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.0**
@@ -17,6 +17,7 @@ File System Access.
 | Aardwolf Vitals | HP/mana/moves, target HP, alignment and character status with floating settings |
 | Aardwolf Spells | Native skill/spell snapshots and a dockable panel of learned damage abilities |
 | Aardwolf Room Details | Formatted tagged room characters/objects, selection, and automatic room refreshes |
+| [Aardwolf Inventory Management](docs/INVENTORY.md) | Dockable carried-item count and bags, floating manager/setup, item actions and explicit sorting |
 | [Aardwolf Atlas](docs/ATLAS.md) | Standalone native-map explorer with overhead/3D terrain views, room inspection and read-only routes |
 | Aardwolf Terrain Icons | Importable pack of 114 fantasy terrain tiles with matching material edges |
 
@@ -80,6 +81,9 @@ have **not been published or installed** by this scaffold.
 6. Optionally install `dist/plugins/aardwolf-room-details.lua` for
    [Room Details](#aardwolf-room-details). It enables room tags and requests a look
    after login; it needs no file permission.
+7. Optionally install `dist/plugins/aardwolf-inventory.lua` for
+   [Inventory Management](docs/INVENTORY.md). Update the library to **0.8.0** and
+   API Core to **0.4.0** for held-item preparation and item-use actions.
 
 With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
@@ -99,13 +103,55 @@ Core discovers registered consumers in either load order. Each consuming
 plugin gets its own library instance; Core communicates with them using
 world/session-scoped messages. The API does not connect to the MUD itself.
 
+## Aardwolf Inventory Management
+
+[Aardwolf Inventory Management 0.2.0](docs/INVENTORY.md) adds a dockable summary
+with the directly carried item count and discovered storage bags. The count
+includes bags themselves, but excludes worn equipment and items inside bags.
+Double-click a bag, or press Enter on it, to open its contents in the floating
+manager. **Manage Inventory** opens the same manager on main inventory;
+**Setup** opens a separate floating settings window. Bag contents load on demand;
+unopened, partial and stale listings stay distinguishable from empty bags.
+
+The manager browses inventory, equipment and bags, with search, sortable item
+columns, details and a right-click action menu. **Actions** and keyboard access
+provide the same menu. Drop, Sell and Donate ask for confirmation by default.
+Item-use actions can retrieve an item and prepare held equipment before use,
+then restore the previous held item and return surviving items to their original
+bags. Configure the held slot in Setup by selecting the currently held item or
+entering the number from `wearable`. Failures stop the workflow and report any
+remaining recovery steps; a command being sent does not prove server success.
+
+Setup also saves font size, bag visibility/order, confirmation preferences and
+ordered sorting rules. Rules match item type and an optional case-insensitive
+literal name substring; the first match wins. **Organize** previews moves from
+loose inventory into configured bags, then waits for explicit Start. It leaves
+equipment and existing bag contents in place and never runs automatically.
+Only settings persist; inventory caches remain session-local.
+
+Setup's **Quick potions** section configures separate **Heal** and **Mana**
+summary buttons, each with a case-insensitive literal potion-name substring and
+an optional fallback bag. Each button uses one matching potion per click without
+opening the manager or a confirmation dialog, preferring loose inventory over
+the configured bag and preserving server listing order. It
+works during combat through capability-checked potion use and safe reads. Unknown
+or stale inventory/the selected bag loads only for that explicit click; other bags
+are not scanned. It never queues repeated uses or retries commands automatically.
+Existing profiles start unconfigured. Surviving retrieved items return to their
+original bag.
+
+Use `awinventory show`, `manage`, `setup`, `refresh` or `status` to reopen windows,
+refresh carried inventory/equipment or inspect feedback. MudForge remembers each window's
+placement, size and visibility. Native and live acceptance remain pending in the
+[Inventory Management checklist](docs/NATIVE-ACCEPTANCE.md#inventory-management-plugin--pending).
+
 ## Inventory management API
 
-Library **0.6.0** and API Core **0.2.0** add an optional inventory API for other
+Library **0.8.0** and API Core **0.4.0** provide an optional inventory API for other
 plugins. Construct a consumer with `inventory = true` to share live carried
 inventory/equipment tracking, discover storage bags (including worn bags), and
-request container contents or tagged item details. No inventory panel or extra
-plugin installation is required. Existing consumers remain opted out.
+request container contents or tagged item details. Other consumers can use this
+API without installing Inventory Management. Existing consumers remain opted out.
 
 Core enables `invmon` explicitly and collects inventory/equipment after an
 identified character becomes active. Containers and details load on demand;
@@ -116,10 +162,16 @@ The cache is session-local and never persisted. Monitoring is left enabled when
 collection stops because other integrations may share it.
 
 The same API exposes explicit single-item get/put, wear/remove, drop, give,
-sell, donate and sacrifice actions using object IDs. Actions fail while busy or
-inactive and never run later automatically. A sent result reports command
+sell, donate and sacrifice actions using object IDs. Management actions fail while
+busy or inactive and never run later automatically. A sent result reports command
 dispatch; server tags establish observed inventory changes. Sacrifice targets
 an item already on the ground and never automatically drops it first.
+
+The additive `hold`, `use` and `supports` methods expose capability-checked item
+use without implicit preparation. Inventory Management coordinates its explicit
+multi-step workflows through these same single-item methods. Older Core versions
+continue supporting the original actions; unsupported additions report an upgrade
+requirement.
 
 See [the inventory API reference](docs/API.md#inventory) for methods, callback
 results, validation and freshness. Native transpiler/loopback checks and live
