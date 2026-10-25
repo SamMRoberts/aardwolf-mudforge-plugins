@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.2.1",
+  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.2.2",
   author = "Sam Roberts", description = "Dockable inventory, bag management, prepared item use and explicit sorting rules."
 }
 
@@ -182,6 +182,9 @@ local widgets, ready, subscriptions, callbacks = {}, {}, {}, {}
 local snapshot, status = { items = {}, scopes = {}, details = {} }, {}
 local settings, profile, identity, characterKey = nil, nil, "", nil
 local selected, scope, prompt, preview = nil, "inventory", nil, nil
+-- Keep the explicitly viewed details across our get/put round trip. Core
+-- invalidates cached details on movement, including returning an item to a bag.
+local viewedDetails, viewedLocation, viewedItem = nil, nil, nil
 local feedback, storageError, settingsRevision, menuSerial = "", nil, 0, 0
 local menu, workflow, issuing, advanceTimer = nil, nil, nil, nil
 local promptSerial, detailsSerial, saveSerial = 0, 0, 0
@@ -326,7 +329,7 @@ local function workflowStatus()
   if workflow.phase == "resolve" then return "Finding the configured " .. workflow.slot .. " potion" end
   if workflow.kind == "organize" then return "Organizing item " .. tostring(math.min(workflow.index, #workflow.steps)) .. " of " .. tostring(#workflow.steps) end
   if workflow.phase == "restore" or workflow.phase == "restore-verify" or workflow.phase == "recover" then return "Restoring the previous arrangement" end
-  if workflow.phase == "settle" then return "Use command sent; verifying inventory" end
+  if workflow.phase == "settle" then return workflow.kind == "details" and "Loading item details" or "Use command sent; verifying inventory" end
   return "Preparing the selected item"
 end
 local function inList(list, id) for _, value in ipairs(list) do if value == id then return true end end; return false end
@@ -360,7 +363,14 @@ local function eligible(id, action)
   local reason = currentReason(action == "quaff")
   if reason then return reason end
   if not fresh(entry.location) then return "Refresh this item's location first" end
-  if action == "details" then return nil end
+  if action == "details" then
+    if entry.location ~= "inventory" and entry.location ~= "equipment" then
+      local bagId = tonumber(string.match(entry.location, "^container:(%d+)$"))
+      if not bagId or not accessibleBag(bagId) then return "Get the containing bag into inventory first" end
+      if not fresh("inventory") then return "Refresh inventory before retrieving this item" end
+    end
+    return nil
+  end
   if action == "take" then
     local bagId = tonumber(string.match(entry.location, "^container:(%d+)$"))
     if not bagId or not accessibleBag(bagId) then return "Item must be in an accessible carried bag" end
@@ -439,7 +449,9 @@ publish = function()
     count = carried and carried.known and #carried.entries or nil,
     countState = not carried and "unknown" or not carried.known and "partial" or carried.stale and "stale" or "fresh",
     scope = scope, scopeState = scopeState(), entries = entries, selected = selected, equipment = equipment,
-    details = selected and snapshot.details[key(selected)] or nil, preferences = settings.preferences, profile = profile,
+    details = selected and (snapshot.details[key(selected)] or (viewedDetails and viewedDetails.id == selected
+      and item(selected) and item(selected).location == viewedLocation and viewedDetails)) or nil,
+    preferences = settings.preferences, profile = profile,
     settingsRevision = settingsRevision, actions = menu and menu.actions or actions(selected), menuSerial = menuSerial,
     detailsSerial = detailsSerial, saveResult = saveResult,
     quickPotions = { heal = shortcutState("heal"), mana = shortcutState("mana") },
@@ -586,7 +598,7 @@ recover = function(reason)
     end)
     return
   end
-  if work.kind ~= "use" or work.phase == "restore-verify" or work.phase == "recover" or not trusted(work) then
+  if (work.kind ~= "use" and work.kind ~= "details") or work.phase == "restore-verify" or work.phase == "recover" or not trusted(work) then
     finishWorkflow(reason .. "; workflow stopped. Inspect the current arrangement."); return
   end
   work.problem, work.phase = reason, "recover"
@@ -630,6 +642,27 @@ advance = function()
     if work.cancelRequested then recover("Cancelled"); return end
     if status.collecting then return end
     local entry = item(work.itemId)
+    if work.kind == "details" then
+      if not locationMatches(entry, "inventory") then recover("Selected item moved before reading details"); return end
+      work.phase = "settle"
+      request(function() return client.inventory.identify(work.itemId) end, function(result)
+        if workflow ~= work then return end
+        if result.outcome ~= "complete" then
+          -- Core delivers the result before publishing its final idle/draining
+          -- status. Recover after that publication so a terminal error can restore.
+          work.timer = timer(1, function()
+            if workflow == work then work.timer = nil; recover(result.reason or "Details request failed") end
+          end)
+          if not work.timer then finishWorkflow("Details request failed; restoration timer unavailable. Restore manually.") end
+          return
+        end
+        viewedDetails, viewedLocation = snapshot.details[key(work.itemId)], "container:" .. key(work.originalBag)
+        viewedItem = copy(item(work.itemId))
+        work.problem = work.cancelRequested and "Cancelled after details were read" or "Item details refreshed"
+        restore(work)
+      end)
+      return
+    end
     if not entry or USE_TYPES[entry.type] ~= work.action then recover("Selected item changed before use"); return end
     work.phase = "settle"
     request(function() return client.inventory.use(work.itemId, work.action, { target = work.target, heldSlot = work.heldSlot }) end, function(result)
@@ -801,10 +834,16 @@ local function executeAction(id, action)
   if action == "open" then openScope("container:" .. key(id)); return end
   createWindow("manager", true)
   if action == "details" then
-    detailsSerial = detailsSerial + 1
-    request(function() return client.inventory.identify(id) end, function(result)
-      feedback = result.outcome == "complete" and "Item details refreshed" or (result.reason or "Details request failed"); publish()
-    end)
+    viewedDetails, viewedLocation, viewedItem = nil, nil, nil
+    if string.match(entry.location, "^container:") then
+      prompt = { kind = "details", title = "View item details: " .. plainName(entry.name), itemId = id,
+        steps = { "Retrieve the item from its bag", "Read tagged item details", "Return the item to its original bag" } }
+    else
+      detailsSerial = detailsSerial + 1
+      request(function() return client.inventory.identify(id) end, function(result)
+        feedback = result.outcome == "complete" and "Item details refreshed" or (result.reason or "Details request failed"); publish()
+      end)
+    end
   elseif action == "put" or action == "give" then
     local destinations = {}; for _, bag in ipairs(bags(true)) do if bag.id ~= id and accessibleBag(bag.id) then table.insert(destinations, bag) end end
     prompt = { kind = action, title = action == "put" and "Put item into bag" or "Give item", itemId = id, bags = destinations }
@@ -841,6 +880,14 @@ local function submit(data)
   local id, argument = prompt.itemId, nil
   local reason = eligible(id, action)
   if reason then feedback = reason; publish(); return end
+  if action == "details" then
+    local bagId = tonumber(string.match(entry.location, "^container:(%d+)$"))
+    detailsSerial = detailsSerial + 1
+    workflow = { kind = "details", identity = identity, phase = "prepare", itemId = id, originalBag = bagId,
+      steps = { step("take", id, bagId) }, index = 1 }
+    prompt, feedback = nil, "Preparing item details"
+    scheduleAdvance(); publish(); return
+  end
   if action == "put" then
     if not objectId(data.containerId) or data.containerId == id or not accessibleBag(data.containerId) then feedback = "Choose an available destination bag"; publish(); return end
     argument = data.containerId
@@ -982,9 +1029,22 @@ synchronize = function()
     profile = normalizedProfile(characterKey and settings.profiles[characterKey])
     saveResult = nil
     selected, scope, prompt, preview, menu = nil, "inventory", nil, nil, nil
+    viewedDetails, viewedLocation, viewedItem = nil, nil, nil
     settingsRevision = settingsRevision + 1
   end
-  if selected and not item(selected) then selected, prompt, menu = nil, nil, nil end
+  if selected and not item(selected) and not (workflow and workflow.kind == "details" and workflow.itemId == selected) then
+    selected, prompt, menu = nil, nil, nil
+  end
+  if viewedDetails and not workflow then
+    local entry = item(viewedDetails.id)
+    local unchanged = entry and entry.location == viewedLocation and viewedItem ~= nil
+    if unchanged then
+      for _, field in ipairs({ "name", "flags", "level", "type", "unique", "wearLocation", "timer" }) do
+        if entry[field] ~= viewedItem[field] then unchanged = false; break end
+      end
+    end
+    if not unchanged then viewedDetails, viewedLocation, viewedItem = nil, nil, nil end
+  end
   if scope ~= "inventory" and scope ~= "equipment" then
     local bag = item(tonumber(string.match(scope,"^container:(%d+)$")))
     if not bag or bag.type ~= 11 then scope, selected, prompt, menu = "inventory", nil, nil, nil end
@@ -1047,5 +1107,6 @@ function cleanup()
   for _, id in pairs(widgets) do destroyWidget(id) end
   widgets, ready, client = {}, {}, nil
   selected, scope, prompt, preview, menu = nil, "inventory", nil, nil, nil
+  viewedDetails, viewedLocation, viewedItem = nil, nil, nil
   snapshot, status = { items = {}, scopes = {}, details = {} }, {}
 end

@@ -333,9 +333,9 @@ const cases = {
     inventory.lookIn(101); world.tick(1)
     frame(world, "invdata 101", { "301,,a small pouch,1,11,0,-1,-1", "302,,a map,1,10,0,-1,-1" })
     inventory.lookIn(301); world.tick(1); frame(world, "invdata 301", { "401,,a ruby,1,6,0,-1,-1" })
-    inventory.identify(301); world.tick(1)
+    -- Seed unsolicited details to exercise descendant-cache invalidation.
+    -- Owned details requests correctly refuse items still inside a bag.
     frame(world, "invdetails", { "{invheader}301|1|Container|100|2|none||Fixture||-1|||1" })
-    inventory.identify(401); world.tick(1)
     frame(world, "invdetails", { "{invheader}401|1|Treasure|100|2|none||Fixture||-1|||1" })
     assert(inventory.getDetails(301) and inventory.getDetails(401))
     world.line("{invmon}3,101,-1,-1")

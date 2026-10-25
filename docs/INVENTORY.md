@@ -1,7 +1,7 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.1** uses `aardwolf-api` **0.8.3** and Aardwolf API
-Core **0.4.1**. Install the library and Core first, then
+Inventory Management **0.2.2** uses `aardwolf-api` **0.8.4** and Aardwolf API
+Core **0.4.2**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
 basic inventory data and original actions; unsupported held-item and use actions
@@ -28,7 +28,16 @@ tagged `invdetails` output. An unopened bag is unknown; an empty bag is shown as
 empty only after a complete listing. Partial, loading and stale states remain
 visible.
 
-Library 0.8.3 and Core 0.4.1 parse plugin-requested `invdata`, `eqdata`,
+For an item inside an accessible carried or worn bag, **View item details**
+shows a preparation confirmation. Aardwolf's
+[`invdetails <objectid>`](https://www.aardwolf.com/wiki/index.php/Help/Invdetails)
+lookup requires the item outside its container. After confirmation, the manager
+retrieves that one item, waits for its observed arrival in inventory, reads its
+details, then returns it to its original bag and waits for that move. The displayed
+details remain available after restoration. Inventory and equipment details still
+load directly. No item is retrieved merely by selecting it.
+
+Library 0.8.4 and Core 0.4.2 parse plugin-requested `invdata`, `eqdata`,
 `invdata <bag-id>` and `invdetails <item-id>` replies before hiding their opening
 tags, recognized data rows and closing tags from the terminal. This also applies
 to automatic reconciliation reads. Manually typed queries and unsolicited frames
@@ -171,6 +180,16 @@ until explicitly refreshed. No gameplay command is retried automatically.
 
 Library 0.8.2 also releases collection when a matching closing tag crosses the
 frame size limit: the oversized listing fails without waiting for a second tag.
+
+Library 0.8.4 handles the exact `Item <id> not found.` response for the expected
+details request before any opening tag. That request fails immediately and
+refresh remains available, including when the error arrives after a timeout.
+Manual interruptions still drain replies in order; an unrelated error or a
+not-found line inside an opened frame cannot release the collection barrier.
+Core also refuses known bagged-item detail requests with a get-first explanation.
+Update Inventory Management to 0.2.2 for the confirmed retrieval/read/return flow.
+If a details workflow cannot safely restore the item, its feedback identifies
+manual restoration; it never retries movement or details commands automatically.
 
 If the expected tag never arrives, reconnect to reset collection, then run
 `awinventory refresh`. If the timeout recurs, retain the complete message and
