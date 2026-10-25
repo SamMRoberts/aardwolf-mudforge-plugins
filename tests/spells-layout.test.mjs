@@ -32,7 +32,7 @@ const cases = {
     local before = #world.sends
     for _, damageType in ipairs(state().layout.order) do
       assert(state().layout.types[damageType])
-      assert(state().layout.slots.skill[damageType] and state().layout.slots.spell[damageType])
+      assert(state().layout.slots.skill[damageType] and state().layout.slots.spell[damageType] and state().layout.slots.area[damageType])
     end
     world.action("refresh-all")
     change({ operation = "edit" })
@@ -193,6 +193,53 @@ const cases = {
     provider.env.cleanup(); provider.env.init(); ready()
     assert(state().layout.order[2] == "fire" and state().feedback == "")
   `,
+  'Area slot visibility saves independently and survives reload and type visibility changes': `
+    change({ operation = "edit" })
+    change({ operation = "slot", damageType = "fire", kind = "area", visible = false })
+    assert(not state().layout.slots.area.fire and state().layout.slots.spell.fire and state().layout.slots.skill.fire)
+    assert(not provider.storage[storageKey].value.fixture.slots.area.fire and provider.writes == 1)
+    change({ operation = "type", damageType = "fire", visible = false })
+    change({ operation = "type", damageType = "fire", visible = true })
+    assert(not state().layout.slots.area.fire and state().layout.slots.spell.fire)
+    provider.env.cleanup(); provider.env.init(); ready()
+    assert(not state().editing and not state().layout.slots.area.fire and state().layout.slots.spell.fire)
+    provider.refuseWrites = true
+    change({ operation = "edit" })
+    change({ operation = "slot", damageType = "fire", kind = "area", visible = true })
+    assert(not state().layout.slots.area.fire and state().feedback ~= "" and provider.writes == 3)
+  `,
+  'layouts without Area migrate visibly without writing or resetting existing preferences': `
+    change({ operation = "edit" })
+    change({ operation = "move", damageType = "fire", target = "acid", after = false })
+    change({ operation = "type", damageType = "bash", visible = false })
+    change({ operation = "slot", damageType = "fire", kind = "spell", visible = false })
+    local legacy = provider.storage[storageKey].value.fixture
+    legacy.slots.area = nil
+    provider.env.cleanup(); provider.env.init(); ready()
+    assert(state().feedback == "" and provider.writes == 3 and legacy.slots.area == nil)
+    assert(state().layout.order[1] == "fire" and not state().layout.types.bash and not state().layout.slots.spell.fire)
+    for _, damageType in ipairs(state().layout.order) do assert(state().layout.slots.area[damageType]) end
+    change({ operation = "edit" })
+    change({ operation = "slot", damageType = "fire", kind = "area", visible = false })
+    assert(not provider.storage[storageKey].value.fixture.slots.area.fire and provider.writes == 4)
+    assert(not state().layout.slots.spell.fire and state().layout.order[1] == "fire")
+  `,
+  'malformed Area visibility falls back without rewriting saved layout data': `
+    change({ operation = "edit" })
+    change({ operation = "move", damageType = "fire", target = "acid", after = false })
+    local valid = json.decode(json.encode(provider.storage[storageKey].value.fixture))
+    for _, invalid in ipairs({ false, {}, { fire = true }, "visible" }) do
+      local saved = json.decode(json.encode(valid)); saved.slots.area = invalid
+      local envelope = { schemaVersion = 1, value = { fixture = saved } }
+      provider.env.cleanup(); provider.storage[storageKey] = envelope; provider.env.init(); ready()
+      assert(state().feedback ~= "" and state().layout.order[1] == "acid" and state().layout.slots.area.fire)
+      assert(provider.writes == 1 and provider.storage[storageKey] == envelope)
+    end
+    local saved = json.decode(json.encode(valid)); saved.slots.area.fire = "false"
+    provider.env.cleanup(); provider.storage[storageKey] = { schemaVersion = 1, value = { fixture = saved } }
+    provider.env.init(); ready()
+    assert(state().feedback ~= "" and state().layout.slots.area.fire and provider.writes == 1)
+  `,
   'legacy layouts preserve order and visibility while appending the new damage types': `
     change({ operation = "edit" })
     change({ operation = "move", damageType = "fire", target = "acid", after = false })
@@ -205,12 +252,13 @@ const cases = {
         if value == damageType then table.remove(legacy.order, index); break end
       end
     end
+    legacy.slots.area = nil
     assert(#legacy.order == 18)
     provider.env.cleanup(); provider.env.init(); ready()
     assert(state().feedback == "" and not state().editing and provider.writes == 3)
     assert(state().layout.order[1] == "fire" and state().layout.order[19] == "disease" and state().layout.order[20] == "special")
     assert(not state().layout.types.bash and not state().layout.slots.spell.fire)
-    assert(state().layout.types.disease and state().layout.slots.skill.special)
+    assert(state().layout.types.disease and state().layout.slots.skill.special and state().layout.slots.area.special)
     change({ operation = "edit" })
     change({ operation = "type", damageType = "special", visible = false })
     assert(#provider.storage[storageKey].value.fixture.order == 20 and not state().layout.types.bash)

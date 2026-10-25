@@ -60,6 +60,7 @@ const cases = {
       function(value) value.schemaVersion = 2 end,
       function(value) value.characterKey = "other" end,
       function(value) value.snapshot.entries[1].level = 0 end,
+      function(value) value.snapshot.entries[2].area = "true" end,
       function(value) value.snapshot.entries[2].name = "axe" end,
       function(value) value.damage.members["spell:fire"].missing = true end,
       function(value) value.damage.times["spell:fire"] = -1 end,
@@ -237,6 +238,8 @@ const cases = {
     value.snapshot.entries[1].name = "Éclair"
     value.snapshot.entries[1].percent = nil
     value.snapshot.entries[2].unusable = true
+    value.snapshot.entries[1].area = false
+    value.snapshot.entries[2].area = true
     value.damage.commands = {}
     value.damage.details.fireball.mana = nil
     import(world, value)
@@ -245,6 +248,7 @@ const cases = {
     assert(saved.snapshot.entries[1].name == "Éclair" and saved.snapshot.entries[1].percent == nil)
     assert(saved.snapshot.entries[1].sn == nil and saved.damage.details.fireball.mana == nil)
     assert(saved.snapshot.entries[2].unusable and saved.snapshot.collectedAt == 12345)
+    assert(saved.snapshot.entries[1].area == false and saved.snapshot.entries[2].area == true)
     assert(saved.damage.times["spell:fire"] == 12346)
   `,
   'native explicit nil fields verify imports and preserve duplicate no-op feedback': `

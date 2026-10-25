@@ -57,7 +57,7 @@
     {
       "id": "aardwolf-spells",
       "name": "Aardwolf Spells",
-      "version": "0.3.2",
+      "version": "0.4.1",
       "author": "Sam Roberts",
       "description": "Character-specific skills, spells and damage ability buttons saved in native MudForge storage.",
       "category": "widgets",
@@ -69,8 +69,8 @@
         "storage"
       ],
       "downloadUrl": "dist/plugins/aardwolf-spells.lua",
-      "sha256": "654e3d08badb476247c9b3d5ead4731a18f526f4d6aeb66267a6419945b60868",
-      "size": 64431,
+      "sha256": "c48d9ddd658ba03f50567e101a78df9d27c46c5052b1510ae7acf83f7c618a7c",
+      "size": 67569,
       "format": "lua"
     },
     {
@@ -113,7 +113,7 @@
   "libraries": [
     {
       "name": "aardwolf-api",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "author": "Sam Roberts",
       "description": "Session-scoped Aardwolf data, events, native storage and UI helpers.",
       "tags": [
@@ -122,8 +122,8 @@
         "api"
       ],
       "downloadUrl": "dist/libs/aardwolf-api.lua",
-      "sha256": "1686e9ab349fb228e80b771f9c8a9ec76a67e50dd7b8e3becf81d790914b5603",
-      "size": 24451
+      "sha256": "c1fd70255dfd805574b5317d54db6f9de9d80c3ce2dc2ec70c033755c80f4cfa",
+      "size": 24567
     }
   ]
 }

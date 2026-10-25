@@ -70,6 +70,7 @@ function spellsWorld(readerFirst)
         table.insert(extras, "mana")
       end
       if type(value.name) == "string" and type(value.level) == "number" then
+        if value.area == nil then table.insert(extras, "area") end
         if value.sn == nil then table.insert(extras, "sn") end
         if value.percent == nil then table.insert(extras, "percent") end
       end
@@ -122,7 +123,7 @@ function spellsWorld(readerFirst)
     panel.events.luamsg({ event = "import", data = data, sessionId = sessionId or world.id })
   end
   function world.action(action) world.panel().events.action({ action = action }) end
-  -- An outgoing manual bulk query is captured without the UI's two-query queue.
+  -- An outgoing manual bulk query is captured without the UI's refresh queue.
   function world.query(kind) env.onSend(world.id, kind .. "s combat") end
   function world.damageHeader(kind)
     world.line(kind == "skill" and "           Skill name                 Learned  Damage"
