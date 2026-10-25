@@ -13,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.8.4, Core is 0.4.3 and the example is 0.1.0, including library
+  library version is 0.8.5, Core is 0.4.3 and the example is 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -63,7 +63,7 @@ acceptance step; loopback transport does not establish live-server behavior.
 
 ## Inventory — pending
 
-API **0.8.4** / Core **0.4.3** inventory acceptance has not been observed in
+API **0.8.5** / Core **0.4.3** inventory acceptance has not been observed in
 MudForge or on live Aardwolf. Existing storage and UI results below do not
 establish inventory behavior. Use an explicitly authorized disposable world and
 local Telnet fixture for native checks; live Aardwolf needs separate authorization.
@@ -84,6 +84,10 @@ local Telnet fixture for native checks; live Aardwolf needs separate authorizati
   tags. Verify immediate failure, visible error and a working subsequent refresh.
   Repeat after timeout and after manual interruption with both reply orders.
   Wrong IDs and errors inside opened frames must not clear the barrier.
+- Replay both 13- and 14-field detail headers, including the reported Boot Lyceum
+  potion with blank timer and score `0`. Verify details reach the manager,
+  unknown optional numbers stay unknown, and bag restoration completes. Invalid
+  populated numbers must still fail while preserving prior details.
 - Verify owned `invdata`, `eqdata`, container and `invdetails` opening tags,
   recognized data and footers stay off screen while caches still update. Test
   late replies after timeout and malformed rows. Manual/unsolicited frames,
@@ -113,7 +117,7 @@ a successful local replay does not establish those server contracts.
 
 ## Inventory Management plugin — pending
 
-Inventory Management **0.2.4**, API **0.8.4** and Core **0.4.3** require their own
+Inventory Management **0.2.4**, API **0.8.5** and Core **0.4.3** require their own
 native acceptance. Offline Lua fixtures and standalone browser checks do not
 establish native docking, context-menu delivery, persistence or live gameplay.
 Use only an explicitly authorized disposable world and local transport fixture;
@@ -365,7 +369,7 @@ legacy databases separately. These tests do not execute MudForge's transpiler,
 storage engine, picker, command hooks, provisional output, pager or connected
 Aardwolf transport.
 
-- With separate authorization, install library 0.8.4, API Core 0.4.3 and Spells 0.5.1
+- With separate authorization, install library 0.8.5, API Core 0.4.3 and Spells 0.5.1
   in a disposable world. Record the client version and confirm both
   provider/consumer load orders and actual installed IDs.
 - With File System Access off and no helper, complete simulated login. Refuse

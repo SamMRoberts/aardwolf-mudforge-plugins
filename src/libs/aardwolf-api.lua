@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.8.4", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.8.5", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers."
 }
 
-local M = { version = "0.8.4", coreName = "Aardwolf API Core" }
+local M = { version = "0.8.5", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -1032,11 +1032,15 @@ function M.protocol.inventoryCollector(host)
     if not text then return nil end
     local values = {}
     for value in string.gmatch(text .. "|", "(.-)|") do table.insert(values, value) end
-    if #values ~= 13 then return nil end
+    -- The documented layout has 13 fields; observed replies add a reserved
+    -- field before the final item score. Timer/score may be blank, meaning
+    -- unknown rather than zero. Keep rejecting nonempty invalid numbers.
+    if #values ~= 13 and #values ~= 14 then return nil end
     local id, level = inventoryInteger(values[1], 1), inventoryInteger(values[2], 0)
     local value, weight = finite(values[4]), finite(values[5])
-    local timer, itemScore = finite(values[10]), finite(values[13])
-    if not id or not level or not value or not weight or not timer or not itemScore then return nil end
+    local timer, itemScore = finite(values[10]), finite(values[#values])
+    if not id or not level or not value or not weight
+      or (values[10] ~= "" and not timer) or (values[#values] ~= "" and not itemScore) then return nil end
     return { id = id, level = level, itemType = values[3], value = value, weight = weight,
       wearLocation = values[6], flags = values[7], owner = values[8], fromClanName = values[9],
       timer = timer, itemScore = itemScore, tags = {}, collectedAt = host.getCurrentTime() }
