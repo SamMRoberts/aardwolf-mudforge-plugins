@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.4.0",
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.4.1",
   author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons saved in native MudForge storage."
 }
 
@@ -25,6 +25,7 @@ local restoredIdentity = false
 local damage = { details = {}, members = {}, times = {}, commands = {} }
 local TYPES = { "acid", "air", "bash", "cold", "disease", "earth", "electric", "energy", "fire", "holy",
   "light", "magic", "mental", "negative", "pierce", "slash", "shadow", "sonic", "special", "water" }
+local SLOTS = { "skill", "spell", "area" }
 local ADDED_TYPES = { disease = true, special = true }
 local typeSet = {}
 for _, value in ipairs(TYPES) do typeSet[value] = true end
@@ -58,11 +59,11 @@ local function equal(left, right)
 end
 
 local function defaultLayout()
-  local value = { order = {}, types = {}, slots = { skill = {}, spell = {} } }
+  local value = { order = {}, types = {}, slots = { skill = {}, spell = {}, area = {} } }
   for _, damageType in ipairs(TYPES) do
     table.insert(value.order, damageType)
     value.types[damageType] = true
-    value.slots.skill[damageType], value.slots.spell[damageType] = true, true
+    for _, kind in ipairs(SLOTS) do value.slots[kind][damageType] = true end
   end
   return value
 end
@@ -82,7 +83,8 @@ local function validateLayout(value)
   local legacy = type(value.types.disease) == "nil" and type(value.types.special) == "nil"
   local expected = legacy and #TYPES - 2 or #TYPES
   if not validVisibility(value.types, legacy) or type(value.slots) ~= "table"
-    or not validVisibility(value.slots.skill, legacy) or not validVisibility(value.slots.spell, legacy) then return nil end
+    or not validVisibility(value.slots.skill, legacy) or not validVisibility(value.slots.spell, legacy)
+    or (type(value.slots.area) ~= "nil" and not validVisibility(value.slots.area, legacy)) then return nil end
   local result, seen, positions, count = defaultLayout(), {}, {}, 0
   result.order = {}
   for index, damageType in pairs(value.order) do
@@ -100,6 +102,7 @@ local function validateLayout(value)
     else
       result.types[damageType] = value.types[damageType]
       result.slots.skill[damageType], result.slots.spell[damageType] = value.slots.skill[damageType], value.slots.spell[damageType]
+      if type(value.slots.area) == "table" then result.slots.area[damageType] = value.slots.area[damageType] end
     end
   end
   return result
@@ -109,7 +112,8 @@ local function sameLayout(left, right)
   for index, damageType in ipairs(left.order) do if right.order[index] ~= damageType then return false end end
   for _, damageType in ipairs(TYPES) do
     if left.types[damageType] ~= right.types[damageType] or left.slots.skill[damageType] ~= right.slots.skill[damageType]
-      or left.slots.spell[damageType] ~= right.slots.spell[damageType] then return false end
+      or left.slots.spell[damageType] ~= right.slots.spell[damageType]
+      or left.slots.area[damageType] ~= right.slots.area[damageType] then return false end
   end
   return true
 end
@@ -252,8 +256,10 @@ local function validateRecord(value, key)
       and trim(result.snapshot.characterName) == result.snapshot.characterName, "different character")
     for _, item in ipairs(result.snapshot.entries) do names[string.lower(item.name)] = true end
   end
-  onlyFields(value.damage, { details = true, members = true, times = true, commands = true })
+  onlyFields(value.damage, { details = true, members = true, times = true, commands = true, areaCollectedAt = true })
   local original, restored = value.damage, result.damage
+  assert(type(original.areaCollectedAt) == "nil" or integer(original.areaCollectedAt), "invalid area refresh")
+  restored.areaCollectedAt = original.areaCollectedAt
   assert(type(original.details) == "table" and type(original.members) == "table"
     and type(original.times) == "table" and type(original.commands) == "table", "invalid damage state")
   local count = 0
@@ -358,6 +364,7 @@ persist = function(entries, request)
     local names = {}
     for _, item in ipairs(entries) do names[string.lower(item.name)] = true end
     combined = clone(snapshot.entries)
+    updated.areaCollectedAt = getCurrentTime()
     -- The filtered list classifies known names; its practice/level columns do
     -- not replace the canonical list, and omitted names lose stale area flags.
     for _, item in ipairs(combined) do
@@ -754,7 +761,7 @@ function onDisconnect(sessionId)
 end
 
 local function abilityCommand(item, kind)
-  if kind == "spell" then return item.sn and ("cast " .. tostring(item.sn)) or nil end
+  if kind == "spell" or kind == "area" then return item.sn and ("cast " .. tostring(item.sn)) or nil end
   local name = string.lower(item.name)
   local command = damage.commands[name] or SKILL_COMMANDS[name] or name
   return singleCommand(command) and command or nil
@@ -762,14 +769,17 @@ end
 
 local function selected(kind, damageType)
   if not snapshot then return nil end
-  local members = damage.members[groupKey(kind, damageType)] or {}
+  local abilityKind = kind == "area" and "spell" or kind
+  local members = damage.members[groupKey(abilityKind, damageType)] or {}
   local status, base = client.get("char.status") or {}, client.get("char.base") or {}
   local level = status.level or base.level
   local best
   for _, item in ipairs(snapshot.entries) do
     local name = string.lower(item.name)
     local info = damage.details[name]
-    if members[name] and info and info.kind == kind and not item.unusable and item.percent and item.percent > 1
+    local matchesSlot = kind == "skill" or (kind == "area" and item.area == true)
+      or (kind == "spell" and item.area ~= true)
+    if matchesSlot and members[name] and info and info.kind == abilityKind and not item.unusable and item.percent and item.percent > 1
       and (not level or item.level <= level) then
       if not best or item.level > best.level or (item.level == best.level and (item.percent > best.percent
         or (item.percent == best.percent and name < string.lower(best.name)))) then best = item end
@@ -791,13 +801,26 @@ render = function()
   local canRefresh = ready and characterKey and not busy and status.state == 3
   setBoundValue(widget, "refreshDisabled", canRefresh and "false" or "true")
   setBoundValue(widget, "cancelDisabled", busy and not collectionCancelled and "false" or "true")
+  local areaTimestamp = damage.areaCollectedAt
+  -- 0.4.0 records stored flags without a separate area collection timestamp.
+  if not areaTimestamp and snapshot then
+    for _, item in ipairs(snapshot.entries) do
+      if item.area == true then areaTimestamp = snapshot.collectedAt; break end
+    end
+  end
   for _, damageType in ipairs(TYPES) do
-    for _, kind in ipairs({ "skill", "spell" }) do
-      local key = groupKey(kind, damageType)
+    for _, kind in ipairs(SLOTS) do
+      local key = groupKey(kind == "area" and "spell" or kind, damageType)
       local binding = kind .. "_" .. damageType
-      local item, timestamp = selected(kind, damageType), damage.times[key]
+      local item = selected(kind, damageType)
+      local timestamp = damage.times[key]
+      if kind == "area" then
+        -- Both damage membership and area classification must be collected.
+        if timestamp and areaTimestamp then timestamp = math.min(timestamp, areaTimestamp)
+        else timestamp = nil end
+      end
       local label = timestamp and "None learned" or "Not refreshed"
-      local tooltip = timestamp and ("No eligible learned " .. kind .. ". Last refreshed: " .. refreshTime(timestamp) .. ".")
+      local tooltip = timestamp and ("No eligible learned " .. (kind == "area" and "area spell" or kind) .. ". Last refreshed: " .. refreshTime(timestamp) .. ".")
         or "Use Refresh all to collect damage abilities."
       local command
       if item then
@@ -824,13 +847,13 @@ button[aria-pressed="true"]{background:#355779;border-color:#8bc3ff}.icon{flex:n
 .feedback,.edit-help{font-size:11px;color:#b9c7d8;margin:0 0 4px;overflow-wrap:anywhere}.feedback{color:#ffd18b}
 #rows,#column-headings{display:grid;grid-template-columns:repeat(var(--columns,1),minmax(0,1fr));column-gap:10px;min-width:0}
 #rows{grid-auto-flow:column;align-content:start}
-.row,.headings{display:grid;grid-template-columns:58px minmax(0,1fr) minmax(0,1fr);gap:4px;align-items:center}
+.row,.headings{display:grid;grid-template-columns:58px repeat(3,minmax(0,1fr));gap:4px;align-items:center}
 .headings{color:#9eafc3;font-size:10px;margin-bottom:2px}.row{padding:2px 0;border-top:1px solid #29374b;min-width:0;align-self:start}
 .damage{display:flex;align-items:center;gap:3px;min-width:0;text-transform:capitalize;font-weight:600}
-.ability{display:flex;gap:3px;min-width:0;align-items:center}.skill{grid-column:2}.spell{grid-column:3}
+.ability{display:flex;gap:3px;min-width:0;align-items:center}.skill{grid-column:2}.spell{grid-column:3}.area{grid-column:4}
 .use{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
-.kind,.edit-control{display:none}body.editing .edit-control{display:inline-block}body.editing .row{grid-template-columns:98px minmax(0,1fr) minmax(0,1fr)}
-body.editing .headings{grid-template-columns:98px minmax(0,1fr) minmax(0,1fr)}input[type="checkbox"]{margin:0;width:13px;height:13px;flex:none;accent-color:#8bc3ff}
+.kind,.edit-control{display:none}body.editing .edit-control{display:inline-block}body.editing .row{grid-template-columns:98px repeat(3,minmax(0,1fr))}
+body.editing .headings{grid-template-columns:98px repeat(3,minmax(0,1fr))}input[type="checkbox"]{margin:0;width:13px;height:13px;flex:none;accent-color:#8bc3ff}
 .handle{width:17px;min-height:24px;padding:0;border-color:transparent;background:transparent;cursor:grab;flex:none;font-size:16px}
 .row[data-type-visible="false"] .damage,.ability[data-slot-visible="false"] .use{opacity:.55}.row.dragging{opacity:.5}
 .row.drop-before{box-shadow:0 -2px #8bc3ff}.row.drop-after{box-shadow:0 2px #8bc3ff}
@@ -838,26 +861,26 @@ body.compact .row{padding:1px 0}body.compact .use,body.compact .handle{min-heigh
 body.compact .feedback,body.compact .edit-help{margin-bottom:2px}
 body.compact .toolbar{padding-top:2px}
 body.stacked #column-headings{display:none}body.stacked .row,body.editing.stacked .row{grid-template-columns:58px minmax(0,1fr);gap:3px 4px}
-body.editing.stacked .row{grid-template-columns:98px minmax(0,1fr)}body.stacked .damage{grid-row:1 / span 2}body.stacked .row.single-slot .damage{grid-row:1}
-body.stacked .row .skill,body.stacked .row .spell{grid-column:2}body.stacked .kind{display:inline-block;width:28px;flex:none;font-size:10px;color:#9eafc3}
+body.editing.stacked .row{grid-template-columns:98px minmax(0,1fr)}body.stacked .damage{grid-row:1 / span var(--visible-slots,3)}
+body.stacked .row .skill,body.stacked .row .spell,body.stacked .row .area{grid-column:2}body.stacked .kind{display:inline-block;width:28px;flex:none;font-size:10px;color:#9eafc3}
 @media(max-width:259px){body.editing.stacked .row{grid-template-columns:minmax(0,1fr)}body.editing.stacked .damage{grid-row:auto}
-body.editing.stacked .row .skill,body.editing.stacked .row .spell{grid-column:1}}
+body.editing.stacked .row .skill,body.editing.stacked .row .spell,body.editing.stacked .row .area{grid-column:1}}
 </style></head><body>
 <p id="layout-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
 <p id="edit-help" class="edit-help" hidden>Checked = visible. Drag types or focus a handle and use Alt+&#8593;/&#8595;.</p>
-<div id="column-headings" aria-hidden="true"><div class="headings"><span>Damage</span><span>Skill</span><span>Spell</span></div></div><main id="rows">]] }
+<div id="column-headings" aria-hidden="true"><div class="headings"><span>Damage</span><span>Skill</span><span>Spell</span><span>Area</span></div></div><main id="rows">]] }
   for _, damageType in ipairs(TYPES) do
     table.insert(html, '<section class="row" data-type="' .. damageType .. '"><div class="damage">'
       .. '<button type="button" class="handle edit-control" draggable="false" aria-label="Move ' .. damageType
       .. '" title="Drag to reorder; Alt+Up/Down" aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown">&#8942;</button>'
       .. '<input type="checkbox" class="type-visible edit-control" aria-label="Show ' .. damageType .. ' damage type" checked>'
       .. '<span>' .. damageType .. '</span></div>')
-    for _, kind in ipairs({ "skill", "spell" }) do
+    for _, kind in ipairs(SLOTS) do
       local key = kind .. "_" .. damageType
       local actionKey = groupKey(kind, damageType)
       table.insert(html, '<div class="ability ' .. kind .. '" data-kind="' .. kind .. '">'
         .. '<input type="checkbox" class="slot-visible edit-control" aria-label="Show ' .. damageType .. ' ' .. kind .. '" checked>'
-        .. '<span class="kind">' .. (kind == "skill" and "Skill" or "Spell") .. '</span>'
+        .. '<span class="kind">' .. (kind == "skill" and "Skill" or (kind == "area" and "Area" or "Spell")) .. '</span>'
         .. '<button type="button" class="use" data-mud-action="use:' .. actionKey .. '" aria-disabled="true" disabled'
         .. ' data-mud-bind-attr="title:' .. key .. '_tip;aria-disabled:' .. key .. '_disabled" data-mud-bind="' .. key .. '_name">Not refreshed</button></div>')
     end
@@ -891,7 +914,7 @@ function chooseColumns(width, availableHeight, rowHeight, count, minimumWidth) {
 function reflow() {
   reflowFrame = null;
   var scroll = document.scrollingElement.scrollTop;
-  var minimumWidth = layoutState && layoutState.editing ? 400 : 340;
+  var minimumWidth = layoutState && layoutState.editing ? 520 : 460;
   document.body.classList.toggle('compact', window.innerHeight < 360);
   document.body.classList.toggle('stacked', rows.clientWidth < minimumWidth);
   var visible = rowElements.filter(function(row) { return !row.hidden; });
@@ -959,8 +982,9 @@ function applyLayout(state) {
     var visible = state.layout.types[type];
     row.dataset.typeVisible = String(visible);
     row.querySelector('.type-visible').checked = visible;
-    row.hidden = !state.editing && (!visible || (!state.layout.slots.skill[type] && !state.layout.slots.spell[type]));
-    row.classList.toggle('single-slot', !state.editing && (!state.layout.slots.skill[type] || !state.layout.slots.spell[type]));
+    var visibleSlots = ['skill', 'spell', 'area'].filter(function(kind) { return state.layout.slots[kind][type]; }).length;
+    row.hidden = !state.editing && (!visible || visibleSlots === 0);
+    row.style.setProperty('--visible-slots', state.editing ? 3 : visibleSlots);
     row.querySelectorAll('.ability').forEach(function(slot) {
       var shown = state.layout.slots[slot.dataset.kind][type];
       slot.dataset.slotVisible = String(shown);
@@ -1039,7 +1063,7 @@ local function layoutMessage(event)
   local candidate = validateLayout(layout)
   if change.operation == "type" and type(change.visible) == "boolean" then
     candidate.types[change.damageType] = change.visible
-  elseif change.operation == "slot" and (change.kind == "skill" or change.kind == "spell")
+  elseif change.operation == "slot" and (change.kind == "skill" or change.kind == "spell" or change.kind == "area")
     and type(change.visible) == "boolean" then
     candidate.slots[change.kind][change.damageType] = change.visible
   elseif change.operation == "move" and typeSet[change.target] and change.target ~= change.damageType
@@ -1073,7 +1097,7 @@ local function panelAction(event)
   if event.action == "refresh-all" then lastError = nil; response = refreshAll()
   else
     local verb, kind, damageType = string.match(event.action, "^(%a+):(%a+):(%a+)$")
-    if (kind ~= "skill" and kind ~= "spell") or not typeSet[damageType] then return end
+    if (kind ~= "skill" and kind ~= "spell" and kind ~= "area") or not typeSet[damageType] then return end
     if verb == "use" then
       local status = client and client.get("char.status") or {}
       if not connected() or not characterKey or busy or editing or not layout.types[damageType]

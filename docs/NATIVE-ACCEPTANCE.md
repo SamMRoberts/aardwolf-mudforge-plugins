@@ -220,7 +220,7 @@ legacy databases separately. These tests do not execute MudForge's transpiler,
 storage engine, picker, command hooks, provisional output, pager or connected
 Aardwolf transport.
 
-- With separate authorization, install library 0.5.0, API Core and Spells 0.4.0
+- With separate authorization, install library 0.5.0, API Core and Spells 0.4.1
   in a disposable world. Record the client version and confirm both
   provider/consumer load orders and actual installed IDs.
 - With File System Access off and no helper, complete simulated login. Refuse
@@ -338,6 +338,16 @@ rows and kept the toolbar and final row reachable without horizontal overflow.
   Test manual `spells area`, cancellation, timeout, malformed rows and refused
   saves retaining prior flags. Reload and save/reopen the disposable world to
   verify persistence. Full/combat refreshes must preserve retained area flags.
+- Verify Skill, Spell and Area columns appear in that order for every damage
+  type. Flagged area spells must never appear in Spell, even when no non-area
+  spell qualifies. Check independent winners, practice/level/star eligibility,
+  casting by Sn, tooltips, editing and busy/disconnected/combat guards. Change
+  classification and verify buttons move between Spell and Area immediately.
+  Load a layout without Area preferences: preserve order and Skill/Spell
+  visibility, show Area by default, and do not write until an edit. Hide/reload
+  Area independently; a row remains when any of its three slots is visible.
+  Check narrow stacked rows with one, two and three visible slots and a wide
+  multi-column pane for clipping, scrolling, heading alignment and focus.
 - Save, inspect and reset a skill command override. Reload/reopen and switch
   characters; verify native record isolation, persistence and command precedence.
   Check a converted legacy database retains its abilities and command overrides.

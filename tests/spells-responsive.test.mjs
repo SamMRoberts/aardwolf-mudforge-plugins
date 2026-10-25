@@ -22,12 +22,12 @@ test('column selection uses the fewest columns that fit the available height', (
 });
 
 test('normal and edit column widths include the gap at the exact boundary', () => {
-  assert.deepEqual(geometry(689, 10, 25, 20, 340), { columns: 1, rows: 20 });
-  assert.deepEqual(geometry(690, 10, 25, 20, 340), { columns: 2, rows: 10 });
-  assert.deepEqual(geometry(809, 10, 25, 20, 400), { columns: 1, rows: 20 });
-  assert.deepEqual(geometry(810, 10, 25, 20, 400), { columns: 2, rows: 10 });
-  assert.deepEqual(geometry(1100, 150, 25, 20, 340), { columns: 3, rows: 7 });
-  assert.deepEqual(geometry(1100, 150, 25, 20, 400), { columns: 2, rows: 10 });
+  assert.deepEqual(geometry(929, 10, 25, 20, 460), { columns: 1, rows: 20 });
+  assert.deepEqual(geometry(930, 10, 25, 20, 460), { columns: 2, rows: 10 });
+  assert.deepEqual(geometry(1049, 10, 25, 20, 520), { columns: 1, rows: 20 });
+  assert.deepEqual(geometry(1050, 10, 25, 20, 520), { columns: 2, rows: 10 });
+  assert.deepEqual(geometry(1470, 150, 25, 20, 460), { columns: 3, rows: 7 });
+  assert.deepEqual(geometry(1470, 150, 25, 20, 520), { columns: 2, rows: 10 });
 });
 
 test('insufficient height caps columns to readable widths and leaves rows to scroll', () => {
@@ -45,7 +45,7 @@ test('zero, single and hidden rows do not create unnecessary columns', () => {
 
 // These stubs exercise production measurement/geometry behavior, not a browser's
 // CSS layout. Actual rendering, focus, docking and native bindings need separate QA.
-function panel({ width = 1200, height = 500, scroll = 0, editing = false, count = 20 } = {}) {
+function panel({ width = 1600, height = 500, scroll = 0, editing = false, count = 20 } = {}) {
   const classes = new Set();
   const body = { classList: { toggle(name, enabled) { if (enabled) classes.add(name); else classes.delete(name); } } };
   const style = () => ({ setProperty(name, value) { this[name] = String(value); } });
@@ -84,7 +84,7 @@ test('reflow enables compact mode strictly below 360px and stacks by current mod
     assert.equal(view.classes.has('compact'), compact);
     assert.match(view.rows.style.gridTemplateRows, new RegExp(`,${compact ? 25 : 29}px\\)`));
   }
-  for (const [width, editing, stacked] of [[339, false, true], [340, false, false], [399, true, true], [400, true, false]]) {
+  for (const [width, editing, stacked] of [[459, false, true], [460, false, false], [519, true, true], [520, true, false]]) {
     const view = panel({ width, editing }); view.reflow();
     assert.equal(view.classes.has('stacked'), stacked, `${width}px, editing=${editing}`);
   }
