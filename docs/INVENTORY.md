@@ -1,7 +1,7 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.2.1** uses `aardwolf-api` **0.8.2** and Aardwolf API
-Core **0.4.0**. Install the library and Core first, then
+Inventory Management **0.2.1** uses `aardwolf-api` **0.8.3** and Aardwolf API
+Core **0.4.1**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
 basic inventory data and original actions; unsupported held-item and use actions
@@ -27,6 +27,19 @@ Selecting an item makes its actions available. Item details load explicitly from
 tagged `invdetails` output. An unopened bag is unknown; an empty bag is shown as
 empty only after a complete listing. Partial, loading and stale states remain
 visible.
+
+Library 0.8.3 and Core 0.4.1 parse plugin-requested `invdata`, `eqdata`,
+`invdata <bag-id>` and `invdetails <item-id>` replies before hiding their opening
+tags, recognized data rows and closing tags from the terminal. This also applies
+to automatic reconciliation reads. Manually typed queries and unsolicited frames
+stay visible. Prompts, combat, server errors, malformed rows and live `invmon` /
+`invitem` events remain visible. Recognized late data stays hidden while a known
+owned reply drains; ambiguous replies and manual interruptions stay visible.
+
+MudForge's documented `onLine` return value (`false`) provides suppression.
+Because that hook also stops later plugins' line hooks and triggers for discarded
+lines, other integrations should consume the shared inventory API for these reads.
+Update the library and Core, then reload Core to activate quiet collection.
 
 MudForge saves each widget's placement, size and visibility. Setup and the
 manager float initially, and subsequent player layout choices are respected.

@@ -60,7 +60,7 @@ const cases = {
     assert(string.find(provider.errors[#provider.errors], "aardwolf-api 0.5.0", 1, true))
     assert(#world.sends == 0 and reader.client.spells.get() == nil)
   `,
-  'spells captures the supplied column format and preserves all output': `
+  'spells captures the supplied column format while hiding owned tables and preserving prompts': `
     local world, reader = spellsWorld()
     assert(#world.sends == 0)
     world.active()
@@ -68,6 +68,8 @@ const cases = {
     world.line("> allspells")
     world.sample()
     world.line("[1277/1277hp 789/1057mn 1395/1395mv 0qt 1136tnl] >")
+    assert(not world.output[1].hidden and not world.output[#world.output].hidden)
+    for index = 2, #world.output - 1 do assert(world.output[index].hidden) end
     local saved = reader.client.spells.get()
     assert(saved.characterName == "Fixture" and #saved.entries == 4)
     assert(saved.entries[1].name == "Axe" and saved.entries[1].sn == nil and saved.entries[1].percent == 85)

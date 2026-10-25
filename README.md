@@ -1,10 +1,10 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.8.2** library provides a session Core, an injected library facade, native
+The **0.8.3** library provides a session Core, an injected library facade, native
 storage and widget helpers, opt-in inventory management, a reactive vitals example,
 and a configurable vitals HUD.
-All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.0**
+All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.1**
 retains the native storage introduced in 0.3.0; preserve legacy SQLite data with the
 [one-time migration guide](docs/SQLITE.md). Normal use needs no Python process or
 File System Access.
@@ -82,8 +82,8 @@ have **not been published or installed** by this scaffold.
    [Room Details](#aardwolf-room-details). It enables room tags and requests a look
    after login; it needs no file permission.
 7. Optionally install `dist/plugins/aardwolf-inventory.lua` for
-   [Inventory Management](docs/INVENTORY.md). Update the library to **0.8.2** and
-   API Core to **0.4.0** for held-item preparation and item-use actions.
+   [Inventory Management](docs/INVENTORY.md). Update the library to **0.8.3** and
+   API Core to **0.4.1** for quiet collection, held-item preparation and item-use actions.
 
 With these files hosted, the root `plugins.json` publishes plugin and
 library listings. Add the repository URL in MudForge's repository manager,
@@ -112,6 +112,9 @@ Double-click a bag, or press Enter on it, to open its contents in the floating
 manager. **Manage Inventory** opens the same manager on main inventory;
 **Setup** opens a separate floating settings window. Bag contents load on demand;
 unopened, partial and stale listings stay distinguishable from empty bags.
+With library 0.8.3 and Core 0.4.1, plugin-requested inventory, equipment, bag and
+item-detail data is parsed and hidden from the terminal. Manual queries, prompts
+and unrelated game output remain visible.
 
 The manager browses inventory, equipment and bags, with search, sortable item
 columns, details and a right-click action menu. **Actions** and keyboard access
@@ -366,11 +369,21 @@ or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#
 
 ## Aardwolf Spells
 
-Aardwolf Spells **0.5.0** collects plain `allspells` once after login and stores
+Aardwolf Spells **0.5.1** collects plain `allspells` once after login and stores
 every skill and spell row, including future-level entries and rows with a dash
 Sn or percentage. It also creates a dockable **Aardwolf Damage Abilities** panel.
 Drag it into MudForge's tiled layout; its saved placement and visibility survive
-reloads. The original command output, pager controls and prompt remain visible.
+reloads. Plugin-requested table headers, rows, separators, summaries and footers
+are parsed before being hidden from the terminal. This covers automatic login
+collection, `awspells refresh`, `awspells refresh-all` and the panel's Refresh all
+commands. Manually typed queries, pager controls, prompts, errors and unrelated
+game output remain visible. Cancelled owned queries keep hiding recognized table
+lines until the existing footer, empty result, prompt or timeout boundary.
+
+Suppression uses MudForge's `onLine` return value (`false`), which also prevents
+later plugins' line hooks and triggers from seeing those lines. Other plugins
+should read the shared Spells API for collected data. Update and reload Spells
+**0.5.1** to activate quiet refreshes.
 
 Install the **0.5.0** `aardwolf-api` library and API Core. Collection waits for a
 verified `char.base.name`, connected/negotiated Core state and

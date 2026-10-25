@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.8.2", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.8.3", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers."
 }
 
-local M = { version = "0.8.2", coreName = "Aardwolf API Core" }
+local M = { version = "0.8.3", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -876,7 +876,9 @@ function M.protocol.inventoryCollector(host)
   finish = function(outcome, issue, shouldDrain)
     local job, token = current, epoch
     stopTimer()
-    if shouldDrain and job then draining = { key = job.key, kind = job.kind } end
+    if shouldDrain and job then
+      draining = { key = job.key, kind = job.kind, hidden = not job.manual, opened = capture ~= nil }
+    end
     current, capture = nil, nil
     if issue then lastError, reason = issue, issue end
     if job then
@@ -1075,7 +1077,7 @@ function M.protocol.inventoryCollector(host)
     sendScope(scope)
     return true
   end
-  function service.line(rawLine, cleanLine)
+  local function collectLine(rawLine, cleanLine)
     if not interested() or not connection.connected or not monitoring or type(cleanLine) ~= "string" then return end
     -- ANSI-stripped host lines may still contain surrounding whitespace.
     -- Normalize standalone tags only: item names and detail values stay intact.
@@ -1120,7 +1122,7 @@ function M.protocol.inventoryCollector(host)
         finish("failed", "Unsolicited inventory frame interrupted collection; reconnect to reset", true)
         draining = { ambiguous = true }; return
       end
-      capture = { epoch = epoch, kind = kind, key = key, owned = matches == true, entries = {}, ids = {}, overrides = {}, bytes = #cleanLine,
+      capture = { epoch = epoch, kind = kind, key = key, owned = matches == true and not current.manual, entries = {}, ids = {}, overrides = {}, bytes = #cleanLine,
         tags = 0, dirty = false }
       if not current then
         current = { key = key, kind = kind, command = "manual tagged inventory", waiters = {}, manual = true }
@@ -1178,6 +1180,46 @@ function M.protocol.inventoryCollector(host)
         frame.tags = frame.tags + 1; table.insert(frame.details.tags, { tag = tag, value = value })
       end
     end
+  end
+  local function hiddenLine(cleanLine)
+    if not interested() or not connection.connected or not monitoring or type(cleanLine) ~= "string" then return false end
+    if string.match(cleanLine, "^%s*{invmon}") or string.match(cleanLine, "^%s*{invitem}") then return false end
+    local tagLine = string.match(cleanLine, "^%s*(.-)%s*$")
+    local kind, key = header(tagLine)
+    if kind then
+      -- Uncertain/nested frames and manual commands remain visible. A late
+      -- owned reply may open after its timeout, while the collector drains it.
+      if draining then
+        if draining.hidden and not draining.ambiguous and not draining.footers
+          and draining.kind == kind and (kind == "details" or draining.key == key) then
+          draining.opened = true
+          return true
+        end
+        return false
+      end
+      return not capture and current ~= nil and not current.manual
+        and current.kind == kind and (kind == "details" or current.key == key)
+    end
+    local frame = capture and capture.owned and capture or nil
+    if not frame and draining and draining.hidden and draining.opened
+      and not draining.ambiguous and not draining.footers then frame = draining end
+    if not frame then return false end
+    local expected = frame.kind == "details" and "{/invdetails}"
+      or frame.key == "equipment" and "{/eqdata}" or "{/invdata}"
+    if tagLine == expected then return true end
+    -- Hide recognized data only. Prompts, combat, errors and malformed rows
+    -- remain visible, including while an interrupted reply is draining.
+    if frame.kind == "scope" then return inventoryItem(cleanLine, frame.key) ~= nil end
+    if string.match(cleanLine, "^{invheader}") then return detailsHeader(cleanLine) ~= nil end
+    local tag, value = string.match(cleanLine, "^{([%w_%-]+)}(.*)$")
+    return tag ~= nil and #tag <= 128 and #value <= 65536
+  end
+  function service.line(rawLine, cleanLine)
+    -- Decide against the pre-parse frame: a footer can finish this request and
+    -- synchronously start another one. Parse before Core gags the original line.
+    local hidden = hiddenLine(cleanLine)
+    collectLine(rawLine, cleanLine)
+    if hidden then return false end
   end
   function service.sent(command)
     if ownSend or not collectionReady() or not monitoring or type(command) ~= "string" then return end

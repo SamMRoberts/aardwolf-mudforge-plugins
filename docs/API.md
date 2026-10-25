@@ -308,6 +308,14 @@ already drained: the oversized response fails and preserves stale cache, while
 subsequent explicit reads remain available. A mismatched footer cannot release
 the drain barrier.
 
+Library **0.8.3** with Core **0.4.1** parses owned read responses before returning
+`false` from Core's `onLine` hook to hide their tags and recognized data. Manual
+and unsolicited frames, malformed rows, prompts, errors and live monitoring tags
+remain visible. Known owned replies retain suppression while draining; manual
+interruptions and ambiguous replies stop suppression. MudForge also skips later
+plugins' line hooks and triggers for discarded lines; consumers should use the
+shared inventory API rather than parse these hidden replies themselves.
+
 A closing tag commits a complete scope atomically. Malformed, incomplete,
 oversized or timed-out collection retains the last-good scope marked stale and
 reports failure; it never publishes a partial replacement. Manual tagged commands

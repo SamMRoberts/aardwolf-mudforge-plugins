@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.5.0",
+  id = "aardwolf-spells", name = "Aardwolf Spells", version = "0.5.1",
   author = "Sam Roberts", description = "Character-specific skills, spells and damage ability buttons saved in native MudForge storage."
 }
 
@@ -34,6 +34,10 @@ local layoutRevision, layoutFeedback = 0, ""
 local syncLayout, loadLayout
 local LAYOUT_STORAGE = "spells-panel-layouts"
 local DAMAGE_FOOTER = "To see all skills/spells for your class, use 'allspells <class>'"
+-- JSON escapes produce the same characters in Lua fixtures and MudForge's JS
+-- strings, without relying on byte escapes or string.char's character range.
+local EM_DASH = json.decode('"\\u2014"')
+local BOX_DASH = json.decode('"\\u2500"')
 local SKILL_COMMANDS = { ["dirt kicking"] = "dirt" }
 local USAGE = 'Usage: awspells refresh | refresh-all | cancel | show | status | import | import-paste | command "<skill>" [command] | command-reset "<skill>"'
 
@@ -427,8 +431,8 @@ persist = function(entries, request)
   writeCandidate(candidate, updated)
 end
 
-local function arm(request)
-  capture = { request = request, started = false, entries = {}, names = {}, rowCount = 0, expiresAt = getCurrentTime() + 60000 }
+local function arm(request, owned)
+  capture = { request = request, owned = owned == true, started = false, entries = {}, names = {}, rowCount = 0, expiresAt = getCurrentTime() + 60000 }
   reason, lastError = "waiting for " .. request.command .. " header", nil
   captureTimer = addTimer(60000, function()
     if initialized and capture then
@@ -465,7 +469,7 @@ refresh = function(request)
     if issue then failure(issueText(issue)); return end
     local ready = eligible()
     if not ready then failure("Character is no longer active; previous list retained."); return end
-    if arm(request) then
+    if arm(request, true) then
       expectedSend = true
       local ok, accepted = pcall(send, request.command)
       expectedSend = false
@@ -522,16 +526,35 @@ local function validateRow(item)
   })
 end
 
-local function damageLine(line, cleanLine)
-  local request = capture.request
-  if line == "No " .. request.kind .. "s found." and not capture.started then finishCapture(); return end
-  local header = request.area and "^Spell name%s+Mana%s+Learned%s+Spell#%s*$"
+local function captureHeader(request, line)
+  if not request.kind then return string.match(line, "^Skill/Spell name%s+Level%s+Sn%s+%%%s*$") ~= nil end
+  local pattern = request.area and "^Spell name%s+Mana%s+Learned%s+Spell#%s*$"
     or request.kind == "skill" and "^Skill name%s+Learned%s+Damage%s*$"
     or "^Spell name%s+Mana%s+Learned%s+Spell#%s+Damage%s*$"
-  if string.match(line, header) then capture.started, reason = true, "collecting " .. request.command; publish(); return end
+  return string.match(line, pattern) ~= nil
+end
+
+local function tableSeparator(line)
+  if line == "" then return false end
+  local remainder = string.gsub(line, EM_DASH, "")
+  remainder = string.gsub(remainder, BOX_DASH, "")
+  remainder = string.gsub(remainder, "[-=]", "")
+  return string.match(remainder, "^%s*$") ~= nil
+end
+
+local function forgottenSummary(line)
+  return string.match(line, "^You have %d+ abilities forgotten%.$") ~= nil
+    or string.match(line, "^You have %d+ ability forgotten%.$") ~= nil
+end
+
+local function damageLine(line, cleanLine)
+  local request = capture.request
+  if line == "No " .. request.kind .. "s found." and not capture.started then finishCapture(); return true end
+  if captureHeader(request, line) then capture.started, reason = true, "collecting " .. request.command; publish(); return true end
   if not capture.started then return end
-  if line == DAMAGE_FOOTER then finishCapture(); return end
-  if line == "" or not string.find(line, "%w") then return end
+  if line == DAMAGE_FOOTER then finishCapture(); return true end
+  if forgottenSummary(line) then return true end
+  if line == "" or not string.find(line, "%w") then return tableSeparator(line) end
   local levelText, body = string.match(line, "^Level%s+(%d+)%s*:%s*(.+)$")
   if string.match(line, "^Level%s") then
     if not levelText then failure("Malformed damage level; previous list retained."); return end
@@ -579,16 +602,39 @@ local function damageLine(line, cleanLine)
     end
     if damageType then existing.damageTypes[damageType] = true
     else existing.blankDamage = true end
-    return
+    return true
   end
   -- Combat lists can omit Damage; retain the ability without assigning a group.
   item.damageTypes, item.blankDamage = {}, not damageType
   if damageType then item.damageTypes[damageType] = true end
   capture.names[key] = item
   table.insert(capture.entries, item)
+  return true
 end
 
-function onLine(sessionId, rawLine, cleanLine)
+local function discardedLine(line, cleanLine)
+  local request = capture.request
+  if captureHeader(request, line) then capture.started = true; return true end
+  if (not request.kind and line == FOOTER) or (request.kind and (line == DAMAGE_FOOTER
+    or line == "No " .. request.kind .. "s found.")) then finishCancelled(); return true end
+  if string.match(line, "^%[.*%]%s*>$") then finishCancelled(); return end
+  if not capture.started then return end
+  if tableSeparator(line) or (request.kind and forgottenSummary(line)) then return true end
+  -- Cancelled rows are discarded without validation or persistence. Recognize
+  -- only table-shaped lines, keeping prompts, pager controls and chatter visible.
+  if not request.kind then
+    return string.match(cleanLine, "^%s+.-%s+%d+%s+[%d%-]+%s+[%d%-]+%s*$") ~= nil
+  end
+  local body = string.match(line, "^Level%s+%d+%s*:%s*(.+)$")
+  if not body and string.match(cleanLine, "^%s%s+%S") then body = line end
+  if not body then return end
+  if request.kind == "skill" then
+    return string.match(body, "^.-%s+%d+%%%s*%a*%s*$") ~= nil
+  end
+  return string.match(body, "^.-%s+%d+%s+%d+%%%s+%d+%s*%a*%s*$") ~= nil
+end
+
+local function collectLine(sessionId, rawLine, cleanLine)
   if not initialized or sessionId ~= getSessionId() or not capture or type(cleanLine) ~= "string" then return end
   if getCurrentTime() >= capture.expiresAt then
     if capture.discard then finishCancelled()
@@ -596,22 +642,17 @@ function onLine(sessionId, rawLine, cleanLine)
     return
   end
   local line = trim(cleanLine)
-  if capture.discard then
-    local request = capture.request
-    if (not request.kind and line == FOOTER) or (request.kind and (line == DAMAGE_FOOTER
-      or line == "No " .. request.kind .. "s found.")) or string.match(line, "^%[.*%]%s*>$") then finishCancelled() end
-    return
-  end
-  if capture.request.kind then damageLine(line, cleanLine); return end
-  if string.match(line, "^Skill/Spell name%s+Level%s+Sn%s+%%%s*$") then
+  if capture.discard then return discardedLine(line, cleanLine) end
+  if capture.request.kind then return damageLine(line, cleanLine) end
+  if captureHeader(capture.request, line) then
     capture.started, reason = true, "collecting"
     publish()
-    return
+    return true
   end
   if not capture.started then return end
-  if line == FOOTER then finishCapture(); return end
+  if line == FOOTER then finishCapture(); return true end
   -- Separators can use Unicode dashes; avoid byte/UTF-16 assumptions.
-  if line == "" or not string.find(line, "%w") then return end
+  if line == "" or not string.find(line, "%w") then return tableSeparator(line) end
   local name, levelText, snText, percentText = string.match(cleanLine, "^%s+(.-)%s+(%d+)%s+([%d%-]+)%s+([%d%-]+)%s*$")
   if not name then
     -- A table-shaped line with invalid column tokens must not silently disappear.
@@ -639,6 +680,15 @@ function onLine(sessionId, rawLine, cleanLine)
   if #capture.entries >= 1000 then failure("allspells exceeds 1,000 rows; previous list retained."); return end
   capture.names[key] = true
   table.insert(capture.entries, item)
+  return true
+end
+
+function onLine(sessionId, rawLine, cleanLine)
+  -- A footer can synchronously save and start the next refresh. Retain the
+  -- ownership of this line, and parse it before suppressing terminal display.
+  local owned = capture and capture.owned
+  local recognized = collectLine(sessionId, rawLine, cleanLine)
+  if owned and recognized then return false end
 end
 
 function onSend(sessionId, text)
