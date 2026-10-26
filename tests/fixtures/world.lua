@@ -9,6 +9,22 @@ function freshLibrary()
   return load_source("aardwolf-api", libraryEnvironment())
 end
 
+function useStringifyingPairs()
+  local original = libraryEnvironment
+  function libraryEnvironment()
+    local env = original()
+    env.pairs = function(value)
+      local iterator, state, key = pairs(value)
+      return function()
+        local item
+        key, item = iterator(state, key)
+        if key ~= nil then return tostring(key), item end
+      end
+    end
+    return env
+  end
+end
+
 function newWorld(sessionId)
   local world = { id = sessionId or "session-a", connected = false, time = 0, plugins = {}, sent = {}, commands = {}, timers = {}, cache = {}, nextTimer = 0, nextWidget = 0 }
   function world.context(id, name)

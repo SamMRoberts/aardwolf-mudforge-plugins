@@ -4,7 +4,7 @@ import { runLua } from './lua-runtime.mjs';
 const cases = {
   'library loads without host globals or registrations': `
     local lib = freshLibrary()
-    assert(lib.version == "0.9.0" and type(lib.new) == "function")
+    assert(lib.version == "0.9.1" and type(lib.new) == "function")
     assert(not pcall(lib.new, {}))
   `,
   'removed SQLite options fail clearly without invoking host APIs': `
@@ -59,19 +59,7 @@ const cases = {
     end
   `,
   'vitals consumers load and register with string keys from pairs': `
-    local original = libraryEnvironment
-    function libraryEnvironment()
-      local env = original()
-      env.pairs = function(value)
-        local iterator, state, key = pairs(value)
-        return function()
-          local item
-          key, item = iterator(state, key)
-          if key ~= nil then return tostring(key), item end
-        end
-      end
-      return env
-    end
+    useStringifyingPairs()
     for _, source in ipairs({ "vitals", "example" }) do
       local world = newWorld()
       local panel = world.loadPlugin(source, "panel", "Fixture Vitals")
@@ -200,6 +188,112 @@ const cases = {
     assert(#group.members == 2 and group.members[1].name == "A" and group.members[1].info.hp == 10)
     world.packet("group", { count = 1, members = { { name = "B" } } })
     group = consumer.client.get("group"); assert(#group.members == 1 and group.members[1].name == "B")
+  `,
+  'Group normalization preserves numeric and string member values in index order': `
+    for _, shim in ipairs({ false, true }) do
+      if shim then useStringifyingPairs() end
+      local normalize = freshLibrary().protocol.normalize
+      for _, members in ipairs({
+        { [0] = { name = "A" }, [1] = { name = "B" } },
+        { { name = "A" }, { name = "B" } },
+        { ["0"] = { name = "A" }, ["1"] = { name = "B" } },
+        { ["1"] = { name = "A" }, ["2"] = { name = "B" } },
+        { ["10"] = { name = "B" }, [2] = { name = "A" } },
+        { [0] = { name = "A" }, [2] = { name = "B" }, ["5"] = { name = "C" }, ["10"] = { name = "D" } }
+      }) do
+        local expected = members["5"] and 4 or 2
+        local group = normalize("group", { count = tostring(expected), members = members })
+        assert(group.count == expected and #group.members == expected, "member count must survive")
+        for index, name in ipairs({ "A", "B", "C", "D" }) do
+          if index <= expected then assert(group.members[index].name == name, "members must follow numeric index order") end
+        end
+      end
+    end
+  `,
+  'Group normalization ignores malformed entries and omits every ambiguous index': `
+    for _, shim in ipairs({ false, true }) do
+      if shim then useStringifyingPairs() end
+      local normalize = freshLibrary().protocol.normalize
+      local members = {
+        [0] = { name = "Keep" }, [1] = { name = "Numeric" }, ["1"] = { name = "String" },
+        ["01"] = { name = "Padded" }, [2] = false, ["3"] = "bad", [4] = 7,
+        [-1] = {}, [1.5] = {}, named = {}, [""] = {}, [" "] = {}, ["-2"] = {},
+        ["2.5"] = {}, ["1e1"] = {}, ["+5"] = {}, ["0x10"] = {}, [" 6"] = {},
+        [string.rep("9", 400)] = {},
+        ["9"] = { name = false, info = "bad", extension = "retained" }
+      }
+      local group = normalize("group", { count = "9", members = members })
+      assert(group.count == 9 and #group.members == 2)
+      assert(group.members[1].name == "Keep")
+      assert(group.members[2].name == nil and group.members[2].info == nil and group.members[2].extension == "retained")
+      assert(#normalize("group", { members = { ["2"] = {}, ["02"] = {} } }).members == 0)
+      for _, keys in ipairs({ { 1, "1" }, { "1", 1 }, { 1, "1", "01" }, { "01", "1", 1 } }) do
+        local ambiguous = { [5] = { name = "Keep" } }
+        for _, key in ipairs(keys) do ambiguous[key] = { name = tostring(key) } end
+        local result = normalize("group", { members = ambiguous })
+        assert(#result.members == 1 and result.members[1].name == "Keep")
+      end
+      assert(normalize("group", { members = false }).members == nil)
+      assert(normalize("group", { members = {} }).members[1] == nil)
+      assert(normalize("group", { members = { ["0"] = { info = { hp = function() end } } } }) == nil)
+    end
+  `,
+  'Group normalization keeps defensive copies and normalizes nested member fields': `
+    local normalize = freshLibrary().protocol.normalize
+    local member = { name = "A", info = { hp = "10", mhp = "bad", lvl = "20" }, extension = { role = "fixture" } }
+    local input = { members = { ["0"] = member }, extension = { source = "fixture" } }
+    local group = normalize("group", input)
+    assert(group.members[1].info.hp == 10 and group.members[1].info.mhp == nil and group.members[1].info.lvl == 20)
+    assert(member.info.hp == "10" and member.info.mhp == "bad")
+    group.members[1].extension.role = "changed"; group.extension.source = "changed"
+    assert(member.extension.role == "fixture" and input.extension.source == "fixture")
+    member.info.hp = "99"
+    assert(group.members[1].info.hp == 10)
+  `,
+  'Group Core updates and replay survive stringifying pairs with snapshot and copy isolation': `
+    -- The shim stringifies copied list keys, but Fengari still distinguishes
+    -- numeric/string lookups. Observe either representation without normalizing.
+    local function members(group)
+      local result = {}
+      for key, member in pairs(group.members or {}) do result[tonumber(key)] = member end
+      return result
+    end
+    for _, shim in ipairs({ false, true }) do
+      if shim then useStringifyingPairs() end
+      local world, consumer, core = runningWorld({ "Group" })
+      local seen = nil
+      consumer.client.on("group", function(data)
+        local first = members(data)[1]
+        if first and first.info then first.info.hp = 999 end
+      end)
+      consumer.client.on("group", function(data) seen = data end)
+      local payload = { count = "4", groupname = "Fixture", members = {
+        [0] = { name = "A", info = { hp = "10" } }, [2] = { name = "B" },
+        ["5"] = { name = "C" }, ["10"] = { name = "D" }
+      } }
+      world.packet("group", payload)
+      assert(seen.count == 4 and #members(seen) == 4 and members(seen)[1].info.hp == 10)
+      assert(members(seen)[2].name == "B" and members(seen)[3].name == "C" and members(seen)[4].name == "D")
+      payload.members[0].name = "mutated"
+      local snapshot = consumer.client.get("group"); members(snapshot)[1].name = "changed"
+      assert(members(consumer.client.get("group"))[1].name == "A")
+      local late = world.consumer("late", { "Group" })
+      assert(#members(late.client.get("group")) == 4 and members(late.client.get("group"))[1].info.hp == 10)
+      world.packet("group", { count = 1, members = { ["7"] = { name = "Only", info = { hp = "5" } } } })
+      assert(#members(seen) == 1 and members(seen)[1].name == "Only" and seen.groupname == nil)
+      assert(#members(late.client.get("group")) == 1 and late.client.get("group").groupname == nil)
+      world.packet("group", { count = 3, members = {
+        [1] = { name = "Ambiguous" }, ["01"] = { name = "Also ambiguous" },
+        [9] = { name = "Keep" }
+      } })
+      assert(seen.count == 3 and #members(seen) == 1 and members(seen)[1].name == "Keep")
+      assert(#members(late.client.get("group")) == 1 and members(late.client.get("group"))[1].name == "Keep")
+      world.packet("group", { members = {} })
+      assert(#members(consumer.client.get("group")) == 0 and consumer.client.get("group").count == nil)
+      world.packet("group", {})
+      assert(consumer.client.get("group").members == nil and late.client.get("group").members == nil)
+      assert(#core.errors == 0 and #consumer.errors == 0 and #late.errors == 0)
+    end
   `,
   'snapshots and subscriber payloads are isolated defensive copies': `
     local world, consumer = runningWorld()
