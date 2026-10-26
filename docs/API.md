@@ -1,4 +1,4 @@
-# Aardwolf API 0.9.1
+# Aardwolf API 0.10.0
 
 ## Lifecycle and host adapters
 
@@ -266,12 +266,47 @@ other subscribers. Unsubscribe functions are idempotent.
 | `client.inventory.getDetails(id)` | Cached tagged item details or `nil`. |
 | `client.inventory.getWearSlots()` | Defensive cached `{ known, stale, entries }`; entries are `{ id, keyword, description, wearFlag }`. Never sends a command. |
 | `client.inventory.status()` | Defensive `{ available, connected, active, potionReady, collecting, characterName?, reason?, error? }`. `active` requires an identified character in state 3 and a connected, negotiated session. `potionReady` additionally permits fighting state 8 when Core advertises `combatPotions`; it does not mean the collector is idle. |
+| `client.inventory.diagnostics(scopeKey?)` | API 0.10.0: bounded, defensive, passive diagnostics. Includes local/provider versions, readiness, advertised capabilities, collector details when supported, and freshness summaries for inventory/equipment plus one optional `container:<id>`. No names, raw output or exception text. |
 | `client.inventory.on(callback)` | Notify `(snapshot, status)` on cache/status changes; `snapshot` is always a table. |
 | `client.inventory.refresh()` | Request carried inventory and equipment through `invdata` and `eqdata`. |
 | `client.inventory.refreshWearSlots()` | Request current equipment-slot discovery through serialized `wearable` then `eqdata`; requires API 0.9.0 / Core 0.5.0 and capability `wearSlots`. |
 | `client.inventory.lookIn(containerId)` | Request one container through `invdata <id>`. |
 | `client.inventory.identify(id)` | Request tagged item details through `invdetails <id>`. Known items inside containers are refused; retrieve and observe the item in inventory first. Does not move items, send the separate `identify` command or cast a spell. |
 | `client.inventory.onResult(callback)` | Notify a result table `{ requestId, outcome, reason? }` for requests issued by this consumer. |
+
+Diagnostics schema version 1 returns `{ version, libraryVersion, provider,
+available, connected, active, potionReady, readiness, capabilities, collector?,
+scopes }`. `provider` contains optional `coreVersion` and `libraryVersion` advertised
+by Core; these may differ from the consumer's library version. Unknown versions
+are omitted. `readiness` is `unavailable`, `disconnected`, `waiting`, `ready` or
+`combat-ready`; this is character eligibility, independent of a busy collector.
+Capabilities include `inventory`, `inventoryDiagnostics` and a filtered
+`inventoryActions` list. Missing/unsupported diagnostics capability or invalid
+collector schema omits `collector`, never fabricates idle or zero queued reads.
+
+Core 0.6.0 advertises `capabilities.inventoryDiagnostics = 1` and `provider` in
+`state`. Its existing `inventory-status.status` adds optional `diagnostics` with
+`{ version = 1, phase, drain, queuedReads, monitoring, operation?, lastFailure? }`.
+`phase` is `idle`, `waiting`, `reading` or `draining`; `drain` is `none`,
+`closing-tag` or `reconnect` (ambiguous boundaries). `queuedReads` is 0–64 jobs,
+excluding the active read and coalesced request waiters. `operation` contains
+`{ kind, waitingFor, manual }`; kind is `inventory`, `equipment`, `container`,
+`details` or `wearSlots`, and waitingFor is `opening-tag` or `closing-tag`.
+Wearable discovery waits for the tagged equipment boundary, even while its
+untagged slot rows arrive. Failure categories are `timeout`, `transport-refused`,
+`interrupted`, `invalid-response`, `limit`, `not-ready` or `request-failed`;
+successful reads/drains retain history until generation reset.
+
+`scopes` contains at most three `{ scope, freshness, count?, collectedAt? }`
+summaries. Freshness is `unknown`, `partial`, `stale`, `empty` or `fresh`; a
+partial scope has no complete count. These labels describe cache completeness
+and invalidation, with the existing collection timestamp when present; reads do
+not apply an age threshold. Invalid optional scope selectors are ignored.
+Reading diagnostics allocates only a result copy: it never sends, schedules,
+publishes, saves, advances work or releases a drain barrier. Existing status and
+snapshot contracts remain compatible. Inventory Management adds its own workflow
+phase/outcome and bounded manual recovery guidance to its widget diagnostic
+property and terminal report; those are not collector API fields.
 
 A snapshot is `{ items, scopes, details }`. `items` and `details` use decimal
 object-ID strings as keys. `scopes` uses `inventory`, `equipment` and

@@ -1,7 +1,7 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.9.1** library provides a session Core, an injected library facade, native
+The **0.10.0** library provides a session Core, an injected library facade, native
 storage and widget helpers, opt-in inventory management, a reactive vitals example,
 and a configurable vitals HUD.
 All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.1**
@@ -112,7 +112,7 @@ world/session-scoped messages. The API does not connect to the MUD itself.
 
 ## Aardwolf Inventory Management
 
-[Aardwolf Inventory Management 0.4.0](docs/INVENTORY.md) adds a dockable summary
+[Aardwolf Inventory Management 0.5.0](docs/INVENTORY.md) adds a dockable summary
 with the directly carried item count and discovered storage bags. The count
 includes bags themselves, but excludes worn equipment and items inside bags.
 Double-click a bag, or press Enter on it, to open its contents in the floating
@@ -161,6 +161,12 @@ or stale inventory/the selected bag loads only for that explicit click; other ba
 are not scanned. It never queues repeated uses or retries commands automatically.
 Existing profiles start unconfigured. Surviving retrieved items return to their
 original bag.
+
+Library **0.10.0**, Core **0.6.0** and Inventory **0.5.0** add passive
+collection/workflow diagnostics to `awinventory status` and the manager's collapsed
+**Collection and recovery details**. They report loaded versions, capabilities,
+freshness, pending reads, drain barriers and remaining manual restoration steps.
+Reading diagnostics sends no command and cannot clear a barrier or resume work.
 
 Use `awinventory show`, `manage`, `setup`, `refresh` or `status` to reopen windows,
 refresh carried inventory/equipment or inspect feedback. MudForge remembers each window's

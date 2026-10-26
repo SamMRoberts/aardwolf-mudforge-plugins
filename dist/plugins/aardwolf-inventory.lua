@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.4.0",
+  id = "aardwolf-inventory", name = "Aardwolf Inventory Management", version = "0.5.0",
   author = "Sam Roberts", description = "Dockable inventory, bag management, prepared item use and explicit sorting rules."
 }
 
@@ -36,7 +36,7 @@ body[data-role=summary] .summary-heading{font-size:.92em;margin:4px 0 3px;color:
 body[data-role=summary] .pin-unavailable{color:var(--muted)}
 </style></head><body data-role="__ROLE__">
 <section id="summary-view" hidden><header class="toolbar spread"><h1>Inventory</h1><span id="summary-freshness" class="hint"></span></header><div class="count"><strong id="item-count"> - </strong><span>carried items</span></div><div id="summary-items"><section id="pinned-section" hidden><h2 class="summary-heading">Pinned items</h2><div id="pins" class="bag-list" aria-label="Pinned items"></div><h2 class="summary-heading">Bags</h2></section><div id="bags" class="bag-list" aria-label="Inventory containers"></div><p id="bags-empty" class="empty" hidden>No storage bags found.</p></div><div id="summary-notices" class="summary-notices" role="region" aria-label="Inventory status and feedback" tabindex="0" hidden></div><footer class="summary-controls"><button id="heal-button" type="button" class="primary quick-potion" disabled>Heal</button><button id="mana-button" type="button" class="primary quick-potion" disabled>Mana</button><button id="manage-button" type="button" title="Manage Inventory" aria-label="Manage Inventory">Manage</button><button id="setup-button" type="button">Setup</button><button id="summary-refresh" type="button">Refresh</button></footer></section>
-<section id="manager-view" hidden><header class="toolbar spread"><h1>Inventory Manager</h1><div class="toolbar"><button id="manager-refresh" type="button">Refresh</button><button id="organize-button" type="button">Organize</button><button id="manager-setup" type="button">Setup</button></div></header><div class="manager-controls"><label>Location<select id="scope-select" aria-label="Inventory location"></select></label><label>Search<input id="search" type="search" placeholder="Item name" autocomplete="off"></label></div><p id="scope-state" class="muted" role="status"></p><div class="table-wrap" id="items-scroll"><table aria-label="Inventory items"><thead><tr><th><button type="button" data-sort="name">Name</button></th><th><button type="button" data-sort="level">Level</button></th><th><button type="button" data-sort="type">Type</button></th><th><button type="button" data-sort="flags">Flags</button></th><th><button type="button" data-sort="id">ID</button></th></tr></thead><tbody id="items"></tbody></table><p id="items-empty" class="empty" hidden>No items.</p></div><footer class="manager-footer"><button id="actions-button" type="button" disabled>Actions</button><button id="details-button" type="button" disabled>View details</button><button id="workflow-cancel" type="button" hidden>Cancel workflow</button></footer><details id="item-details"><summary>Item details</summary><div id="detail-text" class="detail-text">Select an item and choose View details.</div></details></section>
+<section id="manager-view" hidden><header class="toolbar spread"><h1>Inventory Manager</h1><div class="toolbar"><button id="manager-refresh" type="button">Refresh</button><button id="organize-button" type="button">Organize</button><button id="manager-setup" type="button">Setup</button></div></header><div class="manager-controls"><label>Location<select id="scope-select" aria-label="Inventory location"></select></label><label>Search<input id="search" type="search" placeholder="Item name" autocomplete="off"></label></div><p id="scope-state" class="muted" role="status"></p><div class="table-wrap" id="items-scroll"><table aria-label="Inventory items"><thead><tr><th><button type="button" data-sort="name">Name</button></th><th><button type="button" data-sort="level">Level</button></th><th><button type="button" data-sort="type">Type</button></th><th><button type="button" data-sort="flags">Flags</button></th><th><button type="button" data-sort="id">ID</button></th></tr></thead><tbody id="items"></tbody></table><p id="items-empty" class="empty" hidden>No items.</p></div><footer class="manager-footer"><button id="actions-button" type="button" disabled>Actions</button><button id="details-button" type="button" disabled>View details</button><button id="workflow-cancel" type="button" hidden>Cancel workflow</button></footer><details id="item-details"><summary>Item details</summary><div id="detail-text" class="detail-text">Select an item and choose View details.</div></details><details id="inventory-diagnostics"><summary>Collection and recovery details</summary><pre id="diagnostics-text" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details></section>
 <section id="setup-view" hidden><h1>Inventory Setup</h1><form id="settings-form"><h2>Display and actions</h2><div class="form-grid"><label>Font size<input id="font-size" type="number" min="8" max="24" required></label><label class="check"><input id="show-worn" type="checkbox">Show worn bags in summary</label><label class="check wide"><input id="confirm-disposal" type="checkbox">Confirm Drop, Sell, and Donate</label></div><h2>Character&#39;s held slot</h2><div class="form-grid"><label>Slot number<input id="held-slot" type="number" min="0" max="255" placeholder="Unset"></label><label>Currently held item<select id="held-item"><option value="">Select to identify slot...</option></select></label></div><p class="hint" style="margin-top:6px">Select the item you are currently holding, or enter its slot number from Aardwolf&#39;s wearable command. This enables wand/staff preparation and equipment restoration. Portal actions discover their current equipment slots automatically.</p><p id="portal-slots" class="hint" style="margin-top:6px"></p><h2>Quick potions</h2><p class="hint">Heal and Mana quaff one matching potion per click. Carried potions are preferred; optionally search a bag if needed. Leave the name blank to disable a button.</p><div class="quick-settings"><section class="quick-slot"><h3>Heal</h3><label>Heal potion name contains<input id="heal-potion-name" type="text" maxlength="128" autocomplete="off" placeholder="e.g. healing potion"></label><label>Also search bag<select id="heal-potion-bag"></select></label></section><section class="quick-slot"><h3>Mana</h3><label>Mana potion name contains<input id="mana-potion-name" type="text" maxlength="128" autocomplete="off" placeholder="e.g. mana potion"></label><label>Also search bag<select id="mana-potion-bag"></select></label></section></div><h2>Summary bags</h2><p class="hint" style="margin-bottom:8px">Checked bags appear in the summary. Use arrows to change their order.</p><div id="setting-bags" class="setting-bags"></div><div class="section-heading"><h2>Organize rules</h2><button id="add-rule" type="button">Add rule</button></div><p class="hint" style="margin-bottom:8px">The first enabled rule matching type and optional name text wins. Only loose inventory is moved.</p><div id="rules" class="rules"></div><footer class="setup-footer"><button type="submit" class="primary">Save setup</button><span id="draft-state" class="hint"></span></footer></form></section>
 <section id="prompt-panel" class="panel" hidden aria-labelledby="prompt-title"><h2 id="prompt-title"></h2><form id="prompt-form"><ol id="prompt-steps"></ol><label id="bag-field" hidden>Destination bag<select id="destination-bag"></select></label><label id="recipient-field" hidden>Recipient<input id="recipient" type="text" maxlength="128" autocomplete="off" placeholder="Name or 2.guard"></label><label id="target-field" hidden>Target<input id="use-target" type="text" maxlength="128" autocomplete="off" placeholder="Name or 2.guard"></label><div class="panel-footer"><button id="prompt-submit" type="submit" class="primary">Continue</button><button id="prompt-dismiss" type="button">Cancel</button></div></form></section>
 <section id="preview-panel" class="panel" hidden aria-labelledby="preview-title"><h2 id="preview-title">Organize preview</h2><p class="hint">Review these moves before starting.</p><ol id="preview-list" class="preview-list"></ol><p id="preview-empty" class="muted" hidden>No matching loose items to move.</p><p id="preview-problem" class="preview-problem" role="status" hidden>A destination bag is unavailable. Fix the highlighted rule in Setup, then preview Organize again.</p><div class="panel-footer"><button id="start-organize" type="button" class="primary">Start moves</button><button id="preview-dismiss" type="button">Close preview</button></div></section>
@@ -167,7 +167,7 @@ function renderPreview(){
   $('preview-list').replaceChildren(...preview.map(move=>{const bag=state.bags.find(bag=>idEqual(bag.id,move.bagId)),label=itemName(move)+' -> '+(bag?itemName(bag):move.bagName)+' (#'+move.bagId+')'+(move.unavailable?' - destination unavailable':'');return element('li',label,move.unavailable?'unavailable':'')}));
   $('preview-empty').hidden=preview.length>0;
 }
-function render(value){if(!value||typeof value!=='object')return;const previousIdentity=state.identity,previousScope=state.scope;state=normalizeInventoryState(value);if(previousIdentity!==state.identity){localSelected=null;pendingMenu=null;lastMenu=null}if(state.selected!=null)localSelected=state.selected;else if(previousScope!==state.scope)localSelected=null;document.documentElement.style.fontSize=(Number(state.fontSize)||13)+'px';text('status',state.status);text('feedback',state.feedback);if(role==='summary'){text('item-count',state.count==null?' - ':state.count);text('summary-freshness',state.countState||'');renderBags();renderPins();renderQuickPotions();$('summary-notices').hidden=!state.status&&!state.feedback;$('summary-notices').title=[state.status,state.feedback].filter(Boolean).join('\n')}if(role==='manager'){if(localSelected!=null&&!(state.entries||[]).some(item=>idEqual(item.id,localSelected)))localSelected=null;renderScopes();text('scope-state',state.scopeState||'');renderItems();renderDetails();if(Number(state.detailsSerial)>0&&state.detailsSerial!==lastDetailsSerial)$('item-details').open=true;lastDetailsSerial=state.detailsSerial;$('workflow-cancel').hidden=!state.busy;$('organize-button').disabled=!!state.busy||!state.active;renderPrompt();renderPreview();$('prompt-submit').disabled=!!state.busy||!!(state.prompt&&state.prompt.disabled);$('prompt-submit').title=(state.prompt&&state.prompt.reason)||''}if(role==='setup')renderSetup();for(const id of ['summary-refresh','manager-refresh'])$(id).disabled=!!state.busy||!state.active;if(pendingMenu&&state.menuSerial!=null&&state.menuSerial!==lastMenu){lastMenu=state.menuSerial;const items=(state.actions||[]).map(action=>({type:'item',id:action.id,text:action.text+(action.reason?'  -  '+action.reason:''),disabled:!!action.disabled}));if(items.length)mudforge.showMenu(items,pendingMenu.x,pendingMenu.y);pendingMenu=null}}
+function render(value){if(!value||typeof value!=='object')return;const previousIdentity=state.identity,previousScope=state.scope;state=normalizeInventoryState(value);if(previousIdentity!==state.identity){localSelected=null;pendingMenu=null;lastMenu=null}if(state.selected!=null)localSelected=state.selected;else if(previousScope!==state.scope)localSelected=null;document.documentElement.style.fontSize=(Number(state.fontSize)||13)+'px';text('status',state.status);text('feedback',state.feedback);if(role==='summary'){text('item-count',state.count==null?' - ':state.count);text('summary-freshness',state.countState||'');renderBags();renderPins();renderQuickPotions();$('summary-notices').hidden=!state.status&&!state.feedback;$('summary-notices').title=[state.status,state.feedback].filter(Boolean).join('\n')}if(role==='manager'){text('diagnostics-text',state.diagnosticsText||'Diagnostics unavailable');if(localSelected!=null&&!(state.entries||[]).some(item=>idEqual(item.id,localSelected)))localSelected=null;renderScopes();text('scope-state',state.scopeState||'');renderItems();renderDetails();if(Number(state.detailsSerial)>0&&state.detailsSerial!==lastDetailsSerial)$('item-details').open=true;lastDetailsSerial=state.detailsSerial;$('workflow-cancel').hidden=!state.busy;$('organize-button').disabled=!!state.busy||!state.active;renderPrompt();renderPreview();$('prompt-submit').disabled=!!state.busy||!!(state.prompt&&state.prompt.disabled);$('prompt-submit').title=(state.prompt&&state.prompt.reason)||''}if(role==='setup')renderSetup();for(const id of ['summary-refresh','manager-refresh'])$(id).disabled=!!state.busy||!state.active;if(pendingMenu&&state.menuSerial!=null&&state.menuSerial!==lastMenu){lastMenu=state.menuSerial;const items=(state.actions||[]).map(action=>({type:'item',id:action.id,text:action.text+(action.reason?'  -  '+action.reason:''),disabled:!!action.disabled}));if(items.length)mudforge.showMenu(items,pendingMenu.x,pendingMenu.y);pendingMenu=null}}
 $('summary-view').hidden=role!=='summary';$('manager-view').hidden=role!=='manager';$('setup-view').hidden=role!=='setup';
 if(role==='summary')$('summary-notices').append($('status'),$('feedback'));
 for(const id of ['setup-button','manager-setup'])$(id).addEventListener('click',()=>send('setup'));
@@ -221,6 +221,7 @@ local menu, workflow, issuing, advanceTimer = nil, nil, nil, nil
 local promptSerial, detailsSerial, saveSerial = 0, 0, 0
 local saveResult = nil
 local lifetime = 0
+local lastWorkflow = nil
 local publish, synchronize, advance, recover, message, createWindow, resolvePotion, changePin
 local TYPE_NAMES = { "Light", "Scroll", "Wand", "Staff", "Weapon", "Treasure", "Armor", "Potion", "Furniture",
   "Trash", "Container", "Drink container", "Key", "Food", "Boat", "Mob corpse", "Player corpse", "Fountain",
@@ -418,6 +419,73 @@ local function scopeState()
   if #entry.entries == 0 then return "empty" end
   return "fresh"
 end
+-- Keep only object/slot references needed for manual recovery, never names,
+-- targets, server replies or exception text. Reading this plan is passive.
+local function recoverySteps(work)
+  local steps = {}
+  if not work or work.restored then return steps end
+  if work.identity ~= identity then
+    return { "Inspect the previous character's arrangement manually; no workflow will resume." }
+  end
+  local function matches(id, location, slot)
+    local entry = item(id)
+    return entry and entry.location == location and (slot == nil or entry.wearLocation == slot) and fresh(location)
+  end
+  if work.kind == "organize" then
+    if work.outcome ~= "complete" then table.insert(steps, "Inspect completed moves; preview Organize again only when ready.") end
+    return steps
+  end
+  local entry = work.itemId and item(work.itemId)
+  local missing = not entry and work.outcome ~= "complete"
+  if work.holdSent and not work.originalHeld and (missing or entry and entry.location == "equipment") then
+    table.insert(steps, "Inspect temporary item #" .. key(work.itemId) .. "; remove it from slot #" .. key(work.heldSlot) .. " only if still equipped there.")
+  end
+  if work.removePreviousSent and not matches(work.previousHeld, "equipment", work.heldSlot) then
+    table.insert(steps, "Inspect and restore previous item #" .. key(work.previousHeld) .. " with hold to slot #" .. key(work.heldSlot) .. ".")
+  end
+  for _, previous in ipairs(work.previousEquipment or {}) do
+    if previous.removed and not matches(previous.id, "equipment", previous.slot) then
+      table.insert(steps, "Inspect and restore previous item #" .. key(previous.id) .. " with " .. previous.kind .. " to slot #" .. key(previous.slot) .. ".")
+    end
+  end
+  if work.takeSent and work.originalBag and (missing or entry and entry.location ~= "container:" .. key(work.originalBag)) then
+    table.insert(steps, "If item #" .. key(work.itemId) .. " survived, inspect and return it to bag #" .. key(work.originalBag) .. ".")
+  end
+  if work.originalHeld and (entry or missing) and not matches(work.itemId, "equipment", work.heldSlot) then
+    table.insert(steps, "If item #" .. key(work.itemId) .. " survived, inspect and restore it to slot #" .. key(work.heldSlot) .. ".")
+  end
+  return steps
+end
+local function diagnostics()
+  local result
+  if type(client.inventory.diagnostics) == "function" then result = client.inventory.diagnostics(scope)
+  else result = { version = 1, libraryVersion = libraryApi.version, readiness = "unknown", provider = {}, scopes = {}, capabilities = {} } end
+  local work = workflow or lastWorkflow
+  result.workflow = { kind = work and work.kind or "none", phase = workflow and (workflow.phase or "move") or "idle",
+    outcome = not workflow and work and work.outcome or nil, cancelRequested = workflow and workflow.cancelRequested == true or false,
+    step = workflow and workflow.index or nil, total = workflow and workflow.steps and #workflow.steps or nil }
+  result.manualRecovery = recoverySteps(work)
+  return result
+end
+local function diagnosticText(result)
+  local provider, collector, work = result.provider or {}, result.collector, result.workflow
+  local lines = { "Aardwolf Inventory diagnostics",
+    "Loaded library: " .. (result.libraryVersion or "unknown") .. "; Core: " .. (provider.coreVersion or "unknown") .. "; collector library: " .. (provider.libraryVersion or "unknown"),
+    "Readiness: " .. result.readiness .. "; Inventory capability: " .. tostring(result.capabilities.inventory == true) .. "; diagnostics capability: " .. tostring(result.capabilities.inventoryDiagnostics == true),
+    "Advertised actions: " .. (#(result.capabilities.inventoryActions or {}) > 0 and table.concat(result.capabilities.inventoryActions, ", ") or "none/unknown") }
+  if collector then
+    table.insert(lines, "Collector: " .. collector.phase .. "; queued reads: " .. tostring(collector.queuedReads) .. "; monitoring: " .. tostring(collector.monitoring))
+    if collector.operation then table.insert(lines, "Read: " .. collector.operation.kind .. "; waiting for " .. collector.operation.waitingFor .. (collector.operation.manual and " (manual)" or "")) end
+    table.insert(lines, "Drain: " .. collector.drain .. "; last collection failure: " .. (collector.lastFailure or "none"))
+    if collector.drain == "closing-tag" then table.insert(lines, "Wait for the interrupted reply's closing tag; if it never arrives, reconnect manually, then refresh.")
+    elseif collector.drain == "reconnect" then table.insert(lines, "Reply boundaries are ambiguous; reconnect manually, then refresh.") end
+  else table.insert(lines, "Collector details unavailable; update the loaded library and Core for diagnostics.") end
+  for _, entry in ipairs(result.scopes) do table.insert(lines, entry.scope .. ": " .. entry.freshness .. (entry.count ~= nil and (" (" .. tostring(entry.count) .. ")") or "")) end
+  table.insert(lines, "Workflow: " .. work.kind .. "; phase: " .. work.phase .. (work.outcome and ("; last outcome: " .. work.outcome) or "") .. (work.cancelRequested and "; cancellation requested" or ""))
+  if work.step then table.insert(lines, "Workflow step: " .. tostring(work.step) .. "/" .. tostring(work.total or 0)) end
+  for _, step in ipairs(result.manualRecovery) do table.insert(lines, "Manual recovery: " .. step) end
+  return table.concat(lines, "\r\n")
+end
 local function eligible(id, action)
   local entry = item(id)
   if action == "pin" or action == "unpin" then
@@ -564,6 +632,7 @@ publish = function()
       portalSlots = "Last discovered slots: " .. table.concat(labels, ", ") .. ". Enter refreshes these before preparation."
     end
   end
+  local diagnostic = diagnostics()
   local state = { identity = identity, portalSlots = portalSlots, status = storageError or status.error or workflowStatus() or reason or "", feedback = feedback, busy = workflow ~= nil,
     active = status.active == true and not status.collecting, fontSize = settings.preferences.fontSize,
     characterLevel = currentCharacterLevel, itemLevelLimit = currentItemLevelLimit,
@@ -574,6 +643,7 @@ publish = function()
       and item(selected) and item(selected).location == viewedLocation and viewedDetails)) or nil,
     preferences = settings.preferences, profile = profile, pins = pins,
     settingsRevision = settingsRevision, actions = actions(menu and menu.id or selected), menuSerial = menuSerial,
+    diagnostics = diagnostic, diagnosticsText = diagnosticText(diagnostic),
     detailsSerial = detailsSerial, saveResult = saveResult,
     quickPotions = { heal = shortcutState("heal"), mana = shortcutState("mana") },
     prompt = prompt, preview = preview, types = TYPE_NAMES }
@@ -608,8 +678,15 @@ local function readScope(target)
     publish()
   end)
 end
-local function finishWorkflow(text)
-  if workflow then stopTimer(workflow.timer) end
+local function finishWorkflow(text, outcome, arrangementRestored)
+  if workflow then
+    local work = workflow
+    lastWorkflow = { identity = work.identity, kind = work.kind, restored = arrangementRestored == true or outcome == "complete", outcome = work.cancelRequested and "cancelled" or outcome or "stopped",
+      itemId = work.itemId, heldSlot = work.heldSlot, originalHeld = work.originalHeld, originalBag = work.originalBag,
+      takeSent = work.takeSent, holdSent = work.holdSent, removePreviousSent = work.removePreviousSent,
+      previousHeld = work.previousHeld, previousEquipment = copy(work.previousEquipment or {}) }
+    stopTimer(workflow.timer)
+  end
   stopTimer(advanceTimer); advanceTimer = nil
   workflow, preview, prompt = nil, nil, nil
   feedback = text; publish()
@@ -846,9 +923,12 @@ advance = function()
   if not work.current then stopTimer(work.timer); work.timer = nil end
   local move = work.steps[work.index]
   if not move then
-    if work.kind == "organize" then finishWorkflow("Organize complete: " .. tostring(#work.steps) .. " moves observed"); return end
+    if work.kind == "organize" then finishWorkflow("Organize complete: " .. tostring(#work.steps) .. " moves observed", "complete"); return end
     if work.phase == "restore" then
-      finishWorkflow(restorationResult(work)); return
+      local text = restorationResult(work)
+      local outcome = #(work.restorationIssues or {}) > 0 and "incomplete"
+        or work.problem and work.problem ~= "Item details refreshed" and "stopped" or "complete"
+      finishWorkflow(text, outcome, #(work.restorationIssues or {}) == 0); return
     end
     if work.cancelRequested then recover("Cancelled"); return end
     if status.collecting then return end
@@ -1302,6 +1382,9 @@ synchronize = function()
   local nextIdentity = nextKey and (tostring(getSessionId()) .. "/" .. nextKey) or ""
   if identity ~= nextIdentity then
     if workflow then finishWorkflow("Character changed; workflow stopped. Inspect the previous character's arrangement.") end
+    if lastWorkflow and not lastWorkflow.restored then
+      lastWorkflow = { identity = "previous", kind = lastWorkflow.kind, outcome = "identity-changed" }
+    else lastWorkflow = nil end
     characterKey, identity = nextKey, nextIdentity
     profile = normalizedProfile(characterKey and settings.profiles[characterKey])
     saveResult = nil
@@ -1352,6 +1435,7 @@ function init()
     settings = defaults()
   end
   initialized, profile, identity, characterKey = true, defaultProfile(), "", nil
+  lastWorkflow = nil
   lifetime, feedback = lifetime + 1, ""
   createWindow("summary", false)
   table.insert(subscriptions, client.inventory.on(synchronize))
@@ -1365,6 +1449,7 @@ function init()
   end))
   registerCommand("awinventory", function(args)
     local command = type(args) == "string" and string.lower(string.match(args, "^%s*(.-)%s*$")) or ""
+    if command == "" or command == "status" then return diagnosticText(diagnostics()) end
     if command == "show" then createWindow("summary", true)
     elseif command == "manage" then openScope("inventory")
     elseif command == "setup" then createWindow("setup", true)
@@ -1389,5 +1474,5 @@ function cleanup()
   selected, scope, prompt, preview, menu = nil, "inventory", nil, nil, nil
   viewedDetails, viewedLocation, viewedItem = nil, nil, nil
   snapshot, status = { items = {}, scopes = {}, details = {} }, {}
-  currentCharacterLevel, currentItemLevelLimit = nil, nil
+  currentCharacterLevel, currentItemLevelLimit, lastWorkflow = nil, nil, nil
 end

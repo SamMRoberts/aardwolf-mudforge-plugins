@@ -54,6 +54,34 @@ test('Inventory manager preserves search and prompt drafts through updates', asy
   await noHorizontalOverflow(page);
 });
 
+test('Inventory diagnostics opens passively and preserves details state and drafts through updates', async ({ page, openWidget, documents }) => {
+  await openWidget('inventory-manager');
+  const details = page.locator('#inventory-diagnostics');
+  await expect(details).not.toHaveAttribute('open', '');
+  const before = await page.evaluate(() => window.smoke.messages.length);
+  const toggle = details.locator('summary');
+  await toggle.focus();
+  await page.keyboard.press('Enter');
+  await expect(details).toHaveAttribute('open', '');
+  await expect(page.locator('#diagnostics-text')).toContainText('Loaded library: 0.10.0; Core: 0.6.0; collector library: 0.10.0');
+  await expect(page.locator('#diagnostics-text')).toContainText('inventory: fresh (6)');
+  expect(await page.evaluate(() => window.smoke.messages.length)).toBe(before);
+  const search = page.locator('#search');
+  await search.fill('potion draft');
+  const scroll = await page.evaluate(() => document.scrollingElement.scrollTop);
+  const update = state(documents, 'inventory-manager', 'inventory');
+  update.diagnosticsText = 'Collector: draining; queued reads: 0\nManual recovery: inspect item #301 and bag #101.\n<img src=x onerror=bad()>';
+  await property(page, 'inventory', update);
+  await expect(details).toHaveAttribute('open', '');
+  await expect(page.locator('#diagnostics-text')).toContainText('Manual recovery: inspect item #301');
+  await expect(page.locator('#diagnostics-text img')).toHaveCount(0);
+  await expect(search).toHaveValue('potion draft');
+  await expect(search).toBeFocused();
+  expect(await page.evaluate(() => document.scrollingElement.scrollTop)).toBe(scroll);
+  expect(await page.evaluate(() => window.smoke.messages.length)).toBe(before);
+  await noHorizontalOverflow(page);
+});
+
 test('Inventory setup retains unsaved controls, focus and scroll as bags update', async ({ page, openWidget, documents }) => {
   await openWidget('inventory-setup');
   const name = page.locator('#heal-potion-name');
