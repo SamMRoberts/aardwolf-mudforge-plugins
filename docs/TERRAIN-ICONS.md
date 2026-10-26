@@ -128,6 +128,10 @@ not prove native import or persistence.
 
 ## Acceptance evidence
 
+The [versioned acceptance evidence matrix](ACCEPTANCE-EVIDENCE.md) keeps
+offline, synthetic-browser, actual browser-client and desktop native results
+separate. Historical import results do not validate newer artwork or pack bytes.
+
 ### 4.2.1 named vendor terrain styles
 
 The JSON now includes `shop-smith`, `shop-apothecary` and `shop-merchant` as

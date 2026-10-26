@@ -5,6 +5,11 @@ not establish native rendering, persistence, picker, transport or live Aardwolf
 acceptance. The checks below remain pending unless observed results are
 recorded explicitly for their version and environment.
 
+Record observations in the [versioned acceptance evidence matrix](ACCEPTANCE-EVIDENCE.md).
+It identifies tested artifacts, environments and layers, preserves historical
+results and leaves missing evidence visible. A blocked result does not pass a
+component release gate; the target above is not a claim about every tested build.
+
 Use an explicitly authorized disposable world for these checks. Record the
 actual app version, original selected world and a private backup before writes.
 Do not use an existing character profile or map as the fixture. Keep credentials,

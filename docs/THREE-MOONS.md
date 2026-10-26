@@ -129,6 +129,9 @@ guarantee that every painted border pixel has that same color.
 
 ## Sources, builds and verification
 
+See the [versioned acceptance evidence matrix](ACCEPTANCE-EVIDENCE.md) for
+artifact hashes, environment details and the limits of historical offline checks.
+
 The checked-in registry retains all 112 environments from Aardwolf client database
 revision `ac6e40ff5596e285cfcef6739d1dfdc257cfa162`, plus `default` and `water`.
 Names use lowercase normalization, including `mudschool`. Coverage does not assert
