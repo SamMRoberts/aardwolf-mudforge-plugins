@@ -644,6 +644,12 @@ consumer with storage and widgets.
 
 ## Development and verification
 
+Pull requests run [repository CI](docs/CI.md) on Ubuntu 24.04 with Node.js 24.x
+and Python 3.14.x. CI installs locked dependencies, checks the PR diff for
+whitespace errors, compares committed artifacts before tests and runs the full
+Node/Python suite. It never rebuilds outputs before checking them or publishes
+artifacts. The CI guide also includes disposable failure probes.
+
 ```sh
 npm ci
 npm run build
