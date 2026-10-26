@@ -171,6 +171,10 @@ browser results do not establish native compatibility or live-game acceptance.
 
 ## Indicator verification (0.3.0)
 
+The [versioned acceptance evidence matrix](ACCEPTANCE-EVIDENCE.md) indexes
+historical results and current artifact hashes. The observations below apply
+only to their named versions; blocked native import does not pass a release gate.
+
 The automated suite passes 282 JavaScript tests and 25 Python tests, including
 82 focused Atlas adapter, settings and renderer tests. Browser checks exercised
 all five visibility controls, custom color synchronization, overhead and exploded

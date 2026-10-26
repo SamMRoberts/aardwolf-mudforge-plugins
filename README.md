@@ -655,8 +655,12 @@ tests and the one-time converter. The installed plugins have no Python dependenc
 The initial native target was MudForge **2.0.3701**; Spells storage migration
 was verified on **2.0.3915** on **2026-10-24**, separately from fixture coverage.
 Remaining native and live-MUD checks are tracked in
-[the acceptance checklist](docs/NATIVE-ACCEPTANCE.md). Aardwolf Vitals
-has repository fixture coverage and standalone Chromium layout checks; native
+[the acceptance checklist](docs/NATIVE-ACCEPTANCE.md). The
+[versioned acceptance evidence matrix](docs/ACCEPTANCE-EVIDENCE.md) records source
+revisions, artifact hashes, actual test environments and results by layer;
+historical results and blocked checks do not pass current component release gates.
+Aardwolf Vitals has repository fixture coverage and standalone Chromium layout
+checks; native
 rendering, pulse behavior, keyboard interaction, disk persistence and live GMCP
 acceptance remain pending.
 
