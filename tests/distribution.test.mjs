@@ -27,7 +27,7 @@ test('catalog lists exact generated source bytes and correct integrity metadata'
   assert.equal(catalog.libraries.length, 1);
   assert.equal(catalog.libraries[0].name, 'aardwolf-api');
   for (const listing of [...catalog.plugins, ...catalog.libraries]) {
-    assert.equal(listing.version, listing.id === 'aardwolf-vitals' ? '0.1.6' : listing.name === 'aardwolf-api' ? '0.9.1' : listing.id === 'aardwolf-api-core' ? '0.5.0' : listing.id === 'aardwolf-inventory' ? '0.4.0' : listing.id === 'aardwolf-spells' ? '0.5.1' : listing.id === 'aardwolf-room-details' ? '0.2.3' : listing.id === 'aardwolf-atlas' ? '0.3.0' : '0.1.0');
+    assert.equal(listing.version, listing.id === 'aardwolf-vitals' ? '0.1.6' : listing.name === 'aardwolf-api' ? '0.9.1' : listing.id === 'aardwolf-api-core' ? '0.5.0' : listing.id === 'aardwolf-inventory' ? '0.4.0' : listing.id === 'aardwolf-spells' ? '0.5.1' : listing.id === 'aardwolf-room-details' ? '0.3.0' : listing.id === 'aardwolf-atlas' ? '0.3.0' : '0.1.0');
     assert(!listing.downloadUrl.startsWith('https:'));
     const source = outputs.get(listing.downloadUrl);
     assert.equal(listing.size, source.length);

@@ -36,7 +36,8 @@ function panel(clipboard) {
   }
   const ids = Object.fromEntries(['chars', 'objs', 'chars-count', 'objs-count', 'auto', 'refresh', 'details',
     'status', 'main', 'detail-dialog', 'detail-title', 'detail-text', 'copy', 'close', 'copy-status',
-    'settings', 'font-dialog', 'font-status', 'font-size', 'ui-font-size', 'font-reset', 'font-close']
+    'settings', 'font-dialog', 'font-status', 'font-size', 'ui-font-size', 'font-reset', 'font-close',
+    'filter', 'filter-clear', 'selection-status', 'collapse-status', 'chars-toggle', 'objs-toggle', 'chars-empty', 'objs-empty']
     .map(id => [id, new Element()]));
   const selection = { toString: () => '', removeAllRanges() {}, addRange(range) { this.range = range; } };
   const document = {
@@ -50,6 +51,7 @@ function panel(clipboard) {
       : [...ids.chars.children, ...ids.objs.children].filter(child => child.tag === 'button'),
   };
   let receive;
+  ids.filter.value = '';
   const messages = [];
   runInNewContext(script, {
     document, navigator: { clipboard },
@@ -73,6 +75,89 @@ function panel(clipboard) {
     },
   };
 }
+
+test('literal case-insensitive filter uses original markers and preserves duplicate identity and ANSI spans', () => {
+  const view = panel(), text = '(White Aura) <b>A man.</b>';
+  const runs = [{ text: '(White Aura)', color: '#ffcc00', underline: true }, { text: ' <b>A man.</b>' }];
+  view.update({ chars: { revision: 1, rows: [{ text: 'Other', runs: [{ text: 'Other' }] },
+    { text, runs }, { text, runs }, { text: '  ', runs: [{ text: '  ' }] }] } });
+  const entries = [...view.ids.chars.children], spans = [...entries[1].children];
+  view.ids.filter.value = 'WHITE AURA'; view.ids.filter.handlers.input();
+  assert.equal(entries[0].hidden, true);
+  assert.equal(entries[1].hidden, false);
+  assert.equal(entries[2].hidden, false);
+  assert.equal(view.ids['chars-count'].textContent, '2/3');
+  assert.equal(entries[1].children[0].style.color, '#ffcc00');
+  assert.equal(entries[1].children[0].style.textDecoration, 'underline');
+  assert.deepEqual(entries[1].children, spans);
+  entries[2].handlers.click();
+  assert.deepEqual(JSON.parse(JSON.stringify(view.messages.at(-1))), { event: 'select', data: { kind: 'chars', revision: 1, index: 3 } });
+  view.ids.filter.value = '.*'; view.ids.filter.handlers.input();
+  assert.equal(view.ids['chars-count'].textContent, '0/3');
+  assert.equal(view.ids['chars-empty'].textContent, 'No matches');
+  assert.equal(view.ids['chars-empty'].hidden, false);
+  view.ids.filter.value = '<B>'; view.ids.filter.handlers.input();
+  assert.equal(view.ids['chars-count'].textContent, '2/3');
+  assert.deepEqual(view.ids.chars.children, entries);
+  assert.deepEqual(view.messages.map(message => message.event), ['ready', 'select']);
+});
+
+test('collapse is independent, reflects accepted preferences, and counts actually visible rows', () => {
+  const view = panel(); view.render([{ text: 'A man.' }]);
+  view.ids['chars-toggle'].handlers.click();
+  assert.deepEqual(JSON.parse(JSON.stringify(view.messages.at(-1))), { event: 'collapse', data: { chars: true, objs: false } });
+  view.update({ collapsePreferences: { chars: true, objs: false } });
+  assert.equal(view.ids.chars.hidden, true);
+  assert.equal(view.ids.objs.hidden, false);
+  assert.equal(view.ids['chars-count'].textContent, '0/1');
+  assert.equal(view.ids['objs-count'].textContent, '1/1');
+  assert.equal(view.ids['chars-toggle'].getAttribute('aria-expanded'), 'false');
+  view.ids['objs-toggle'].handlers.click();
+  assert.deepEqual(JSON.parse(JSON.stringify(view.messages.at(-1))), { event: 'collapse', data: { chars: true, objs: true } });
+  view.update({ collapsePreferences: { chars: true, objs: false }, collapseError: 'Native save failed' });
+  assert.equal(view.ids.objs.hidden, false, 'a rejected save never changes accepted visibility');
+});
+
+test('hidden selection keeps Details and Copy; close focuses a visible control; clearing restores the same row', async () => {
+  const copied = [], view = panel({ writeText: async text => copied.push(text) });
+  const { character } = view.render([{ text: '(White Aura) A man.' }]);
+  view.select(); character.focus(); view.ids.details.handlers.click();
+  view.ids.filter.value = 'absent'; view.ids.filter.handlers.input();
+  assert.equal(view.ids['detail-dialog'].open, true);
+  assert.equal(view.ids.details.disabled, false);
+  assert.equal(view.ids['selection-status'].hidden, false);
+  await view.ids.copy.handlers.click();
+  assert.deepEqual(copied, ['(White Aura) A man.']);
+  view.ids.close.handlers.click();
+  assert.equal(view.document.activeElement, view.ids['chars-toggle']);
+  view.ids['filter-clear'].handlers.click();
+  assert.equal(view.ids.filter.value, '');
+  assert.equal(view.document.activeElement, view.ids.filter);
+  assert.equal(view.ids.chars.children[0], character);
+  assert.equal(character.getAttribute('aria-pressed'), 'true');
+  assert.equal(view.ids['selection-status'].hidden, true);
+  view.update({ collapsePreferences: { chars: true, objs: false } });
+  view.ids.details.handlers.click();
+  assert.equal(view.ids['detail-dialog'].open, true);
+  view.update({ selection: null, chars: { revision: 3, rows: [] } });
+  assert.equal(view.ids['detail-dialog'].open, false);
+});
+
+test('view updates preserve filter focus, query, scroll and DOM; hiding a focused row uses its section toggle', () => {
+  const view = panel(), { character } = view.render([{ text: 'A man.' }]);
+  view.ids.filter.value = 'MAN'; view.ids.filter.handlers.input(); view.ids.filter.focus();
+  view.document.scrollingElement.scrollTop = 123;
+  const writes = view.writes;
+  view.update();
+  assert.equal(view.writes, writes);
+  view.update({ automatic: false, status: 'Waiting', statusVisible: true });
+  assert.equal(view.ids.filter.value, 'MAN');
+  assert.equal(view.document.activeElement, view.ids.filter);
+  assert.equal(view.document.scrollingElement.scrollTop, 123);
+  assert.equal(view.ids.chars.children[0], character);
+  character.focus(); view.update({ collapsePreferences: { chars: true, objs: false } });
+  assert.equal(view.document.activeElement, view.ids['chars-toggle']);
+});
 
 test('characters shorten all simple markers while objects shorten only leading markers', () => {
   for (const [original, characterText, objectText] of [

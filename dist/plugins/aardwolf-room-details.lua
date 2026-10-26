@@ -1,5 +1,5 @@
 plugin = {
-  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.2.3",
+  id = "aardwolf-room-details", name = "Aardwolf Room Details", version = "0.3.0",
   author = "Sam Roberts", description = "Formatted, selectable room characters and objects in a compact dockable panel."
 }
 
@@ -22,6 +22,13 @@ local ITEM_COMMANDS = { get = true, take = true, drop = true, put = true, give =
 local FONT_FIELDS = { "family", "size", "weight" }
 local font = nil
 local fontPreferences = { size = 0, uiSize = 12 }
+local collapsePreferences = { chars = false, objs = false }
+
+local function validCollapsePreferences(value)
+  if type(value) ~= "table" or type(value.chars) ~= "boolean" or type(value.objs) ~= "boolean" then return false end
+  for key in pairs(value) do if key ~= "chars" and key ~= "objs" then return false end end
+  return true
+end
 
 local function validFontPreferences(value)
   return type(value) == "table" and type(value.size) == "number" and type(value.uiSize) == "number"
@@ -82,7 +89,7 @@ local function waitingReason()
 end
 
 local function statusText()
-  for _, key in ipairs({ "panel", "setup", "send", "timer", "preference", "fontPreference", "response" }) do
+  for _, key in ipairs({ "panel", "setup", "send", "timer", "preference", "fontPreference", "collapsePreference", "response" }) do
     if faults[key] then return faults[key] end
   end
   for _, kind in ipairs({ "chars", "objs" }) do
@@ -108,7 +115,8 @@ publish = function()
       selection and selection.kind or "", selection and selection.revision or 0, selection and selection.index or 0,
       automatic, status, statusVisible, disabled, inFlight, pending, hint, roomNumber or 0, character or "",
       font and font.family or "", font and font.size or 0, font and font.weight or "",
-      fontPreferences.size, fontPreferences.uiSize, faults.fontPreference or "" }
+      fontPreferences.size, fontPreferences.uiSize, faults.fontPreference or "",
+      collapsePreferences.chars, collapsePreferences.objs, faults.collapsePreference or "" }
     local changed = lastPublished == nil
     for index, value in ipairs(signature) do if not lastPublished or lastPublished[index] ~= value then changed = true end end
     if not changed then return end
@@ -116,6 +124,7 @@ publish = function()
       chars = snapshots.chars, objs = snapshots.objs, selection = selection,
       automatic = automatic, status = status, font = font, fontPreferences = fontPreferences, statusVisible = statusVisible,
       fontError = faults.fontPreference,
+      collapsePreferences = collapsePreferences, collapseError = faults.collapsePreference,
       refreshDisabled = disabled, refreshBusy = inFlight, refreshPending = pending, refreshHint = hint
     }))
     if ok then lastPublished = signature
@@ -146,6 +155,20 @@ local function saveFonts(value)
   fontPreferences = preferences
   updateFont(); publish()
   return "Room Details font sizes saved."
+end
+
+local function saveCollapse(value)
+  if not validCollapsePreferences(value) then return end
+  local preferences = { chars = value.chars, objs = value.objs }
+  local saved, reason = client.storage.set("room-details:collapse", preferences)
+  if not saved then
+    faults.collapsePreference = "Could not save section collapse: " .. (reason or "storage unavailable")
+  else
+    faults.collapsePreference = nil
+    collapsePreferences = preferences
+  end
+  -- A refused save must also return the accepted state to the widget.
+  lastPublished = nil; publish()
 end
 
 -- Keep a bounded SGR state, including attributes set before the opening tag.
@@ -496,6 +519,9 @@ header strong{margin-right:auto}button{color:inherit;background:#233247;border:1
 .panel-actions button{width:24px;height:24px;padding:1px;font-size:17px;line-height:1}button:disabled{opacity:.5;cursor:default}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #c7e2ff;outline-offset:1px}
 label{display:flex;align-items:center;gap:3px;white-space:nowrap}input{margin:0}h2{font:600 .916667rem system-ui,sans-serif;color:#b9c7d8;margin:3px 0 1px}
+.filter-bar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:2px 0}.filter-bar label{flex:1;min-width:0}.filter-bar input{min-width:0;width:100%;color:inherit;background:#1b2738;border:1px solid #43546b;border-radius:4px;font:inherit;padding:3px}.filter-bar button{min-height:24px}
+.section-toggle{display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;min-height:24px;text-align:left;padding:2px 4px}.section-toggle::before{content:'\25be'}.section-toggle[aria-expanded="false"]::before{content:'\25b8'}
+#selection-status,#collapse-status{color:#aebdcc;font:.916667rem system-ui,sans-serif;margin:2px 0;overflow-wrap:anywhere}
 .entry{display:block;width:100%;text-align:left;color:inherit;background:transparent;border:0;border-radius:3px;padding:0 2px;margin:0;
 font:inherit;white-space:pre;overflow:hidden;text-overflow:ellipsis;user-select:text;cursor:pointer;line-height:1.2}
 .entry[aria-pressed="true"]{outline:1px solid #8bc3ff;outline-offset:-1px}.entry:focus-visible{outline:2px solid #c7e2ff;outline-offset:-2px}
@@ -507,13 +533,16 @@ dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:f
 #copy-status:empty{display:none}
 #font-dialog{max-width:300px}#font-dialog label{justify-content:space-between;flex-wrap:wrap;gap:4px 8px;margin:8px 0;white-space:normal}select{color:inherit;background:#233247;border:1px solid #43546b;border-radius:4px;font:inherit;padding:2px}#font-dialog p{color:#aebdcc;margin:6px 0;white-space:normal}
 </style></head><body><header><strong>Room Details</strong></header>
-<div id="status" role="status" hidden></div><main class="terminal"><section aria-labelledby="chars-title"><h2 id="chars-title">Characters <span id="chars-count">0</span></h2><div id="chars"></div></section>
-<section aria-labelledby="objs-title"><h2 id="objs-title">Objects <span id="objs-count">0</span></h2><div id="objs"></div></section></main>
+<div id="status" role="status" hidden></div><div class="filter-bar"><label for="filter">Filter<input id="filter" type="search" maxlength="256" placeholder="Original room text" aria-label="Filter characters and objects by original text"></label><button id="filter-clear" type="button">Clear</button></div>
+<div id="selection-status" role="status" hidden></div><div id="collapse-status" role="status" hidden></div>
+<main class="terminal"><section aria-labelledby="chars-title"><h2 id="chars-title"><button id="chars-toggle" class="section-toggle" type="button" aria-expanded="true" aria-controls="chars chars-empty">Characters <span id="chars-count">0/0</span></button></h2><div id="chars"></div><div id="chars-empty" class="empty"></div></section>
+<section aria-labelledby="objs-title"><h2 id="objs-title"><button id="objs-toggle" class="section-toggle" type="button" aria-expanded="true" aria-controls="objs objs-empty">Objects <span id="objs-count">0/0</span></button></h2><div id="objs"></div><div id="objs-empty" class="empty"></div></section></main>
 <footer class="panel-actions" aria-label="Room details controls"><button id="settings" type="button" aria-label="Font settings" title="Font settings">&#9881;</button><label><input id="auto" type="checkbox" checked>Auto</label><button id="details" type="button" aria-label="Show selected entry details" title="Show selected entry details" disabled>&#9432;</button><button id="refresh" type="button" aria-label="Refresh room" title="Refresh room">&#8635;</button></footer>
 <dialog id="detail-dialog" aria-labelledby="detail-title"><header><strong id="detail-title">Entry details</strong></header><div id="detail-text" class="terminal" tabindex="0"></div><div id="copy-status" role="status"></div><footer class="dialog-actions" aria-label="Entry details controls"><button id="copy" type="button">Copy</button><button id="close" type="button">Close</button></footer></dialog>
 <dialog id="font-dialog" aria-labelledby="font-title"><header><strong id="font-title">Font sizes</strong></header><label for="font-size">Room text<select id="font-size"></select></label><label for="ui-font-size">Interface text<select id="ui-font-size"></select></label><p>Smaller text fits more in the panel. Changes save automatically.</p><div id="font-status" role="status" hidden></div><footer class="dialog-actions"><button id="font-reset" type="button">Reset</button><button id="font-close" type="button">Close</button></footer></dialog><script>
 (function(){
   var current={chars:null,objs:null}, snapshots={}, selected=null, selectedKey='', detailsKey='', pendingDetails='', opener=null, copyGeneration=0;
+  var entries={chars:[],objs:[]}, collapsed={chars:false,objs:false}, filter=document.getElementById('filter');
   var dialog=document.getElementById('detail-dialog'), detailText=document.getElementById('detail-text');
   var fontDialog=document.getElementById('font-dialog'), fontSize=document.getElementById('font-size'), uiFontSize=document.getElementById('ui-font-size');
   function sizes(target,min,max,terminal){
@@ -592,12 +621,12 @@ dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:f
     if(current[kind]===(snapshot && snapshot.revision)) return false;
     var focus=document.activeElement,restore=root.contains(focus)?Number(focus.dataset.index):null;
     root.replaceChildren();current[kind]=snapshot && snapshot.revision;
-    var entries=array(snapshot && snapshot.rows),count=0;
-    entries.forEach(function(row,offset){
+    entries[kind]=[];
+    array(snapshot && snapshot.rows).forEach(function(row,offset){
       var nonempty=typeof row.text==='string' && row.text.trim().length>0;
       var entry=document.createElement(nonempty?'button':'div');entry.className=nonempty?'entry':'blank';
       if(nonempty){
-        count++;entry.type='button';entry.dataset.kind=kind;entry.dataset.index=String(offset+1);entry.title=row.text;
+        entries[kind].push({element:entry,text:row.text});entry.type='button';entry.dataset.kind=kind;entry.dataset.index=String(offset+1);entry.title=row.text;
         entry.setAttribute('aria-pressed','false');
         entry.addEventListener('click',function(event){if((event && event.detail===0) || !String(window.getSelection())) select(kind,snapshot.revision,offset+1);});
         entry.addEventListener('dblclick',function(){
@@ -613,14 +642,35 @@ dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:f
       }
       appendRuns(entry,displayRuns(array(row.runs),kind));root.appendChild(entry);
     });
-    document.getElementById(kind+'-count').textContent=String(count);
-    if(!count){var empty=document.createElement('div');empty.className='empty';empty.textContent=snapshot?'None here':'Waiting for room output';root.appendChild(empty);}
     if(snapshot && snapshot.incomplete){var note=document.createElement('div');note.className='incomplete';note.textContent='Incomplete room output';root.appendChild(note);}
     if(restore!==null){var buttons=root.querySelectorAll('button');var target=Array.from(buttons).find(function(b){return Number(b.dataset.index)===restore;})||buttons[0];if(target)target.focus({preventScroll:true});}
     return true;
   }
   function property(element,name,value){if(element[name]!==value) element[name]=value;}
   function attribute(element,name,value){if(element.getAttribute(name)!==value) element.setAttribute(name,value);}
+  function view(){
+    var query=filter.value.toLowerCase();
+    ['chars','objs'].forEach(function(kind){
+      var root=document.getElementById(kind),toggle=document.getElementById(kind+'-toggle'),count=0;
+      entries[kind].forEach(function(row){
+        var hidden=row.text.toLowerCase().indexOf(query)===-1;
+        if(!hidden && !collapsed[kind]) count++;
+        if((hidden || collapsed[kind]) && document.activeElement===row.element) toggle.focus({preventScroll:true});
+        property(row.element,'hidden',hidden);
+      });
+      property(root,'hidden',collapsed[kind]);
+      attribute(toggle,'aria-expanded',String(!collapsed[kind]));
+      attribute(toggle,'aria-label',(kind==='chars'?'Characters':'Objects')+', '+count+' of '+entries[kind].length+' visible');
+      property(document.getElementById(kind+'-count'),'textContent',count+'/'+entries[kind].length);
+      var empty=document.getElementById(kind+'-empty');
+      property(empty,'textContent',!snapshots[kind]?'Waiting for room output':(entries[kind].length?'No matches':'None here'));
+      property(empty,'hidden',collapsed[kind] || count>0);
+    });
+    var hidden=selectedRow() && (collapsed[selected.kind] || selectedRow().text.toLowerCase().indexOf(query)===-1);
+    var hint=document.getElementById('selection-status');
+    property(hint,'textContent',hidden?'Selected '+(selected.kind==='chars'?'character':'object')+' is hidden; Details still available.':'');
+    property(hint,'hidden',!hidden);
+  }
   mudforge.onProperty('roomDetails',function(encoded){
     var scroll=document.scrollingElement.scrollTop,value=JSON.parse(encoded);
     snapshots={chars:value.chars,objs:value.objs};
@@ -633,6 +683,9 @@ dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:f
     }
     if(detailsKey && (detailsKey!==selectedKey || !selectedRow())) closeDetails();
     if(pendingDetails && pendingDetails===selectedKey) openDetails(opener);
+    if(value.collapsePreferences) collapsed={chars:value.collapsePreferences.chars===true,objs:value.collapsePreferences.objs===true};
+    view();
+    var collapseStatus=document.getElementById('collapse-status');property(collapseStatus,'textContent',value.collapseError||'');property(collapseStatus,'hidden',!value.collapseError);
     var status=document.getElementById('status');property(status,'textContent',value.status||'');property(status,'hidden',value.statusVisible!==true);
     property(document.getElementById('auto'),'checked',value.automatic===true);
     var refresh=document.getElementById('refresh');property(refresh,'disabled',value.refreshDisabled===true);
@@ -648,6 +701,11 @@ dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:f
     var fontStatus=document.getElementById('font-status');property(fontStatus,'textContent',value.fontError||'');property(fontStatus,'hidden',!value.fontError);
     document.scrollingElement.scrollTop=scroll;
   });
+  filter.addEventListener('input',function(){var scroll=document.scrollingElement.scrollTop;view();document.scrollingElement.scrollTop=scroll;});
+  document.getElementById('filter-clear').addEventListener('click',function(){filter.value='';view();filter.focus({preventScroll:true});});
+  ['chars','objs'].forEach(function(kind){document.getElementById(kind+'-toggle').addEventListener('click',function(){
+    var next={chars:collapsed.chars,objs:collapsed.objs};next[kind]=!next[kind];mudforge.send('collapse',next);
+  });});
   document.getElementById('settings').addEventListener('click',function(){fontDialog.showModal();fontSize.focus();});
   function closeFonts(){fontDialog.close();}
   document.getElementById('font-close').addEventListener('click',closeFonts);
@@ -663,7 +721,9 @@ dialog::backdrop{background:#0008}.dialog-actions{display:flex;justify-content:f
   dialog.addEventListener('cancel',function(event){event.preventDefault();closeDetails();});
   dialog.addEventListener('close',function(){
     detailsKey='';copyGeneration++;
-    (opener && opener.isConnected && !opener.disabled?opener:document.getElementById('auto')).focus({preventScroll:true});opener=null;
+    var target=opener && opener.isConnected && !opener.disabled?opener:document.getElementById('auto');
+    if(target.dataset.kind && (target.hidden || collapsed[target.dataset.kind])) target=document.getElementById(target.dataset.kind+'-toggle');
+    target.focus({preventScroll:true});opener=null;
   });
   document.getElementById('copy').addEventListener('click',async function(){
     var row=selectedRow(),generation=++copyGeneration;if(!row || !dialog.open) return;
@@ -688,6 +748,7 @@ local function widgetMessage(event)
   elseif event.event == "auto" and type(event.data) == "table" and type(event.data.enabled) == "boolean" then
     command(event.data.enabled and "auto on" or "auto off")
   elseif event.event == "fonts" then saveFonts(event.data)
+  elseif event.event == "collapse" then saveCollapse(event.data)
   elseif event.event == "select" and type(event.data) == "table" then
     local data = event.data
     if data.kind ~= "chars" and data.kind ~= "objs" then return end
@@ -712,6 +773,9 @@ function init()
   local savedFonts = client.storage.get("room-details:fonts")
   fontPreferences = validFontPreferences(savedFonts) and { size = savedFonts.size, uiSize = savedFonts.uiSize }
     or { size = 0, uiSize = 12 }
+  local savedCollapse = client.storage.get("room-details:collapse")
+  collapsePreferences = validCollapsePreferences(savedCollapse) and { chars = savedCollapse.chars, objs = savedCollapse.objs }
+    or { chars = false, objs = false }
   widget = createWidget({ type = "html", name = "room-details", title = "Room Details",
     position = { x = 50, y = 150 }, size = { width = 360, height = 240 } })
   if type(widget) ~= "string" or widget == "" then

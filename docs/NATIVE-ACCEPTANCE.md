@@ -339,7 +339,7 @@ helper, SQL facade and SQLite demonstration plugin have been removed.
   disposable fixtures and restore the originally selected world. Record native
   evidence separately from connected Aardwolf acceptance.
 
-## Room Details — 0.2.3 acceptance pending
+## Room Details — 0.3.0 acceptance pending
 
 Offline fixtures exercise capture/suppression return values, ANSI state passed
 to a stubbed native formatter, bounded recovery, login sequencing, selection,
@@ -348,7 +348,7 @@ transpiler, ANSI parser, actual suppression or docking. Browser checks exercise
 the real panel markup with synthetic native messages, not live room transport.
 
 - In an independently authorized disposable world, install `aardwolf-api`, API
-  Core and Room Details 0.2.3. No helper, database or file permission is required.
+  Core and Room Details 0.3.0. No helper, database or file permission is required.
   Record the client version. Keep Core as the only GMCP negotiation owner.
 - Observe the initial 360 × 240 widget, drag-to-dock, resizing at 200/360/540/900 px,
   close/show, reload and world reopen. Confirm saved placement/visibility.
@@ -406,8 +406,28 @@ the real panel markup with synthetic native messages, not live room transport.
   response timeout. Pending/in-flight feedback stays in the toolbar; sleeping,
   pager, prompt, Spells and connection waits explain the actual blocking reason.
   Resolved capture/refresh faults disappear while unrelated failures remain.
-  Auto is the only persisted preference. Cleanup must cancel
+  Auto, font sizes and section collapse are the only persisted preferences. Cleanup must cancel
   timers/unsubscribe/destroy the widget and must not send tag-off commands.
+
+- Filter by original text (including an unabbreviated aura), mixed case, literal
+  punctuation/markup, whitespace, no matches and duplicate rows. Verify original
+  styled spans/details/copy and row indices remain intact; visible/total counts
+  exclude blank lines and show zero visible for collapsed sections. Test empty,
+  waiting and incomplete sections. Clear restores the same selected row.
+- Toggle Characters and Objects independently with mouse, Enter and Space at
+  narrow floating/docked sizes and larger fonts. Keep controls reachable and
+  unrelated-update focus, filter edits and scroll stable. A focused row becoming
+  hidden must move focus to its section toggle; filter typing retains input focus.
+  Hide a selected row while Details is open: Details/Copy remain available;
+  Close/Escape returns to a visible opener or the appropriate section toggle.
+  Changed authoritative selection/snapshot still closes Details.
+- Reload and reopen the disposable world; only validated collapse booleans
+  persist, separately from transient filter text. Verify a second world starts
+  independently. Refuse saves and confirm previous collapse state, actionable
+  feedback and explicit retry recovery without clearing unrelated errors. Invalid
+  stored records default expanded without writes. Filtering/collapse must never
+  send gameplay commands or cause extra refreshes. No 0.3.0 native/live checks
+  have been performed; authorization is still required.
 - Record connected Aardwolf acceptance separately, including automatic look
   timing with real command aliases and server output. Complete preservation and
   cleanup checks before marking native or live acceptance complete.
