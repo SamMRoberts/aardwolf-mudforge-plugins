@@ -30,6 +30,10 @@ const cases = {
     assert(not world.state("manager").busy and world.count("put 301 101") == 0)
     local feedback = string.lower(world.state("manager").feedback)
     assert(string.find(feedback,"bag",1,true) and not string.find(feedback,"original arrangement restored",1,true))
+    local d = world.state("manager").diagnostics
+    assert(d.workflow.outcome == "incomplete")
+    local recovery = table.concat(d.manualRecovery," ")
+    assert(string.find(recovery,"bag #101",1,true) and not string.find(recovery,"previous item #202",1,true))
   `,
   'planned removal refuses an item manually moved out of the expected held slot': `
     local world = inventoryWorld(); world.loaded(); world.open()
@@ -70,6 +74,10 @@ const cases = {
     world.monitor(6,301,101); world.tick(20)
     assert(not world.state("manager").busy and attempts == 1)
     assert(string.find(world.state("manager").feedback,"restoration incomplete",1,true))
+    local d = world.state("manager").diagnostics
+    assert(d.workflow.outcome == "incomplete")
+    local recovery = table.concat(d.manualRecovery," ")
+    assert(string.find(recovery,"previous item #202",1,true) and not string.find(recovery,"bag #101",1,true))
   `,
   'manually relocated used equipment is preserved while previous held equipment can still restore': `
     ${prepareBaggedWand}

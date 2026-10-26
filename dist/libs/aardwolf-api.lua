@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.9.1", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.10.0", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers."
 }
 
-local M = { version = "0.9.1", coreName = "Aardwolf API Core" }
+local M = { version = "0.10.0", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -712,6 +712,39 @@ local function inventoryWearSlots(value)
   return result
 end
 
+-- Diagnostics use fixed vocabulary, never transport errors or captured server text.
+local INVENTORY_FAILURES = { "timeout", "transport-refused", "interrupted", "invalid-response", "limit", "not-ready", "request-failed" }
+local INVENTORY_OPERATIONS = { "inventory", "equipment", "container", "details", "wearSlots" }
+local function inventoryFailure(issue)
+  local text = string.lower(type(issue) == "string" and issue or "")
+  if string.find(text, "timed out", 1, true) then return "timeout" end
+  if string.find(text, "refused", 1, true) then return "transport-refused" end
+  if string.find(text, "interrupted", 1, true) then return "interrupted" end
+  if string.find(text, "exceed", 1, true) or string.find(text, "limit", 1, true) or string.find(text, "full", 1, true) then return "limit" end
+  if string.find(text, "ready", 1, true) or string.find(text, "active", 1, true) then return "not-ready" end
+  if string.find(text, "malformed", 1, true) or string.find(text, "mismatch", 1, true) then return "invalid-response" end
+  return "request-failed"
+end
+local function inventoryDiagnosticState(value)
+  assert(type(value) == "table" and value.version == 1)
+  assert(contains({ "idle", "waiting", "reading", "draining" }, value.phase))
+  assert(contains({ "none", "closing-tag", "reconnect" }, value.drain))
+  assert(spellInteger(value.queuedReads, 0, 64) and type(value.monitoring) == "boolean")
+  assert(value.lastFailure == nil or contains(INVENTORY_FAILURES, value.lastFailure))
+  local result = { version = 1, phase = value.phase, drain = value.drain,
+    queuedReads = value.queuedReads, monitoring = value.monitoring, lastFailure = value.lastFailure }
+  if value.operation ~= nil then
+    local operation = value.operation
+    assert(type(operation) == "table" and contains(INVENTORY_OPERATIONS, operation.kind))
+    assert(contains({ "opening-tag", "closing-tag" }, operation.waitingFor) and type(operation.manual) == "boolean")
+    result.operation = { kind = operation.kind, waitingFor = operation.waitingFor, manual = operation.manual }
+  end
+  return result
+end
+local function diagnosticVersion(value)
+  if type(value) == "string" and #value <= 32 and string.match(value, "^%d+%.%d+%.%d+$") then return value end
+end
+
 function M.protocol.inventoryCollector(host)
   local service, owners, scopes, details = {}, {}, {}, {}
   local wearSlots = { known = false, stale = true, entries = {} }
@@ -722,6 +755,7 @@ function M.protocol.inventoryCollector(host)
   local current, capture, timeout, ownSend, draining = nil, nil, nil, false, nil
   local monitoring, setupAttempted, stopped = false, false, false
   local reason, lastError = "waiting for an inventory consumer", nil
+  local lastFailure = nil
   local startNext, enqueue, notify, finish, reconcile
 
   local function idKey(id) return string.format("%.0f", id) end
@@ -748,8 +782,19 @@ function M.protocol.inventoryCollector(host)
       deliver(owner, kind, data)
     end
   end
+  local function diagnostics()
+    local operation
+    if current then
+      local kind = current.wearSlots and "wearSlots" or current.kind == "details" and "details"
+        or current.key == "inventory" and "inventory" or current.key == "equipment" and "equipment" or "container"
+      operation = { kind = kind, waitingFor = capture and "closing-tag" or "opening-tag", manual = current.manual == true }
+    end
+    return { version = 1, phase = draining and "draining" or current and "reading" or #queue > 0 and "waiting" or "idle",
+      drain = draining and (draining.ambiguous and "reconnect" or "closing-tag") or "none",
+      queuedReads = #queue, monitoring = monitoring, operation = operation, lastFailure = lastFailure }
+  end
   local function state()
-    return { available = true, connected = connection.connected == true, active = active(), potionReady = collectionReady(),
+    return { diagnostics = diagnostics(), available = true, connected = connection.connected == true, active = active(), potionReady = collectionReady(),
       collecting = current ~= nil or #queue > 0 or draining ~= nil,
       characterName = connection.characterName, reason = reason, error = lastError }
   end
@@ -774,12 +819,15 @@ function M.protocol.inventoryCollector(host)
       if pending.remaining > 0 then return end
     end
     requests[key] = nil
+    if outcome == "failed" then lastFailure = inventoryFailure(issue) end
     local history = completed[waiter.owner]
     if not history then history = { ids = {}, order = {} }; completed[waiter.owner] = history end
     history.ids[waiter.requestId] = { outcome = outcome, reason = issue }
     table.insert(history.order, waiter.requestId)
     if #history.order > 256 then history.ids[table.remove(history.order, 1)] = nil end
+    local token = epoch
     deliver(waiter.owner, "inventory-result", { requestId = waiter.requestId, outcome = outcome, reason = issue })
+    if outcome == "failed" and token == epoch then notify() end
   end
   local function jobResult(job, outcome, issue)
     for _, waiter in ipairs(job and job.waiters or {}) do result(waiter, outcome, issue) end
@@ -876,7 +924,7 @@ function M.protocol.inventoryCollector(host)
       for _, existing in ipairs(target.entries) do if existing.id ~= id then table.insert(candidate, existing) end end
       table.insert(candidate, item)
       if not scopeFits(destination, candidate) then
-        lastError, reason = "Inventory scope exceeds message size limit", "Inventory scope exceeds message size limit"
+        lastError, reason, lastFailure = "Inventory scope exceeds message size limit", "Inventory scope exceeds message size limit", "limit"
         notify(); return false
       end
     end
@@ -927,15 +975,15 @@ function M.protocol.inventoryCollector(host)
     return { key = job.key, kind = job.kind, expectedId = job.expectedId, opened = opened == true,
       footer = job.kind == "details" and "{/invdetails}" or job.key == "equipment" and "{/eqdata}" or "{/invdata}" }
   end
-  finish = function(outcome, issue, shouldDrain)
+  finish = function(outcome, issue, shouldDrain, ambiguous)
     local job, token = current, epoch
     stopTimer()
     if shouldDrain and job then
-      draining = job.noBoundary and { ambiguous = true } or pendingReply(job, capture ~= nil)
+      draining = (job.noBoundary or ambiguous) and { ambiguous = true } or pendingReply(job, capture ~= nil)
       draining.hidden = not job.manual
     end
     current, capture = nil, nil
-    if issue then lastError, reason = issue, issue end
+    if issue then lastError, reason, lastFailure = issue, issue, inventoryFailure(issue) end
     if job then
       if outcome == "failed" and job.wearSlots then
         wearSlots.stale = true
@@ -1225,13 +1273,11 @@ function M.protocol.inventoryCollector(host)
     end
     if kind then
       if capture then
-        finish("failed", "Nested inventory frame interrupted collection; reconnect to reset", true)
-        draining = { ambiguous = true }; return
+        finish("failed", "Nested inventory frame interrupted collection; reconnect to reset", true, true); return
       end
       local matches = current and current.kind == kind and (kind == "details" or current.key == key)
       if current and not matches then
-        finish("failed", "Unsolicited inventory frame interrupted collection; reconnect to reset", true)
-        draining = { ambiguous = true }; return
+        finish("failed", "Unsolicited inventory frame interrupted collection; reconnect to reset", true, true); return
       end
       capture = { epoch = epoch, kind = kind, key = key, owned = matches == true and not current.manual, entries = {}, ids = {}, overrides = {}, bytes = #cleanLine,
         tags = 0, dirty = false }
@@ -1381,7 +1427,7 @@ function M.protocol.inventoryCollector(host)
       end
       cancelQueue("Manual inventory command interrupted collection")
       stopTimer(); current, capture, draining = nil, nil, barrier
-      reason, lastError = "Waiting for interrupted inventory output or reconnect", "Manual inventory command interrupted collection"
+      reason, lastError, lastFailure = "Waiting for interrupted inventory output or reconnect", "Manual inventory command interrupted collection", "interrupted"
       notify(); return
     end
     -- Idle manual output may update the cache, but has no owned waiters.
@@ -1426,6 +1472,7 @@ function M.protocol.inventoryCollector(host)
     queue, tombstoneOrder, tombstoneSerial = {}, {}, 0
     wearSlots = { known = false, stale = true, entries = {} }
     monitoring, setupAttempted, reason, lastError = false, false, issue or "waiting for login", nil
+    lastFailure = nil
     -- The generation reset fails each consumer's pending requests. Publish only
     -- after clearing everything so callbacks can safely start a fresh session.
     notify(true)
@@ -1449,7 +1496,7 @@ function M.protocol.inventoryCollector(host)
     if not setupAttempted then
       setupAttempted = true
       local ok, accepted = pcall(host.sendGMCP, "config invmon on")
-      if not ok or accepted ~= true then lastError, reason = "Inventory monitoring transport refused", "Inventory monitoring transport refused"; notify(); return end
+      if not ok or accepted ~= true then lastError, reason, lastFailure = "Inventory monitoring transport refused", "Inventory monitoring transport refused", "transport-refused"; notify(); return end
       monitoring, reason = true, "collecting inventory"
       enqueue("inventory", "scope", "invdata"); enqueue("equipment", "scope", "eqdata")
     end
@@ -1469,7 +1516,10 @@ function M.protocol.inventoryCollector(host)
     local outstanding = 0
     for _, pending in pairs(requests) do if pending.owner == owner then outstanding = outstanding + 1 end end
     if outstanding >= 64 then
+      lastFailure = "limit"
+      local token = epoch
       deliver(owner, "inventory-result", { requestId = request.requestId, outcome = "failed", reason = "Inventory request limit reached" })
+      if token == epoch then notify() end
       return
     end
     requests[requestKey] = { owner = owner, remaining = request.kind == "refresh" and 2 or 1 }
@@ -1601,6 +1651,7 @@ local function inventoryFor(host, enabled, dispatch)
   local state = { available = false, connected = false, collecting = false, active = false, potionReady = false,
     reason = enabled and "not started" or "not enabled" }
   local api, extensions = {}, {}
+  local provider, diagnosticCapability, collectorDiagnostics = {}, false, nil
   local function snapshot()
     local value = { items = {}, scopes = {}, details = {} }
     for key, scope in pairs(scopes) do
@@ -1627,6 +1678,7 @@ local function inventoryFor(host, enabled, dispatch)
   end
   local function clear(reason, available)
     scopes, details, generation, extensions = {}, {}, nil, {}
+    provider, diagnosticCapability, collectorDiagnostics = {}, false, nil
     wearSlots = { known = false, stale = true, entries = {} }
     local previous = pending
     pending = {}
@@ -1639,7 +1691,7 @@ local function inventoryFor(host, enabled, dispatch)
     end
     if token == lifetime then invoke(callbacks) end
   end
-  local function capability(value, session, actions)
+  local function capability(value, session, actions, diagnostics, versions)
     if not enabled then return end
     extensions = {}
     if type(actions) == "table" then
@@ -1648,6 +1700,7 @@ local function inventoryFor(host, enabled, dispatch)
       end
     end
     if not extensions.combatPotions then state.potionReady = false end
+    local token = lifetime
     if value ~= 1 then clear("inventory requires API Core 0.2.0 or newer", false)
     elseif not session.connected then clear(session.reason or "disconnected", true)
     else
@@ -1655,6 +1708,12 @@ local function inventoryFor(host, enabled, dispatch)
       state.connected = true
       if not session.negotiated then state.active, state.potionReady = false, false; state.reason = session.reason end
     end
+    -- clear() calls subscribers, which may stop or restart the consumer.
+    if lifetime > token + 1 then return end
+    diagnosticCapability = value == 1 and diagnostics == 1
+    if not diagnosticCapability then collectorDiagnostics = nil end
+    provider = { coreVersion = diagnosticVersion(type(versions) == "table" and versions.coreVersion),
+      libraryVersion = diagnosticVersion(type(versions) == "table" and versions.libraryVersion) }
   end
   local function receive(kind, data)
     if not enabled or not state.available then return end
@@ -1673,6 +1732,11 @@ local function inventoryFor(host, enabled, dispatch)
         wearSlots = { known = false, stale = true, entries = {} }
         previous, pending = pending, {}
         lifetime = lifetime + 1
+      end
+      collectorDiagnostics = nil
+      if diagnosticCapability then
+        local valid, normalized = pcall(inventoryDiagnosticState, value.diagnostics)
+        if valid then collectorDiagnostics = normalized end
       end
       generation = data.generation
       state = { available = true, connected = value.connected, collecting = value.collecting,
@@ -1773,6 +1837,27 @@ local function inventoryFor(host, enabled, dispatch)
   end
   function api.getDetails(id) return copyInventoryDetails(details[inventoryKey(id)]) end
   function api.status() return copy(state) end
+  function api.diagnostics(scopeKey)
+    local summaries = {}
+    local function add(key)
+      local scope = scopes[key]
+      local freshness = not scope and "unknown" or not scope.known and "partial" or scope.stale and "stale"
+        or #scope.entries == 0 and "empty" or "fresh"
+      table.insert(summaries, { scope = key, freshness = freshness,
+        count = scope and scope.known and #scope.entries or nil, collectedAt = scope and scope.collectedAt })
+    end
+    add("inventory"); add("equipment")
+    if type(scopeKey) == "string" and #scopeKey <= 26 and string.match(scopeKey, "^container:%d+$")
+      and inventoryKey(string.sub(scopeKey, 11)) then add(scopeKey) end
+    local actions = {}
+    for _, action in ipairs(INVENTORY_EXTENSIONS) do if extensions[action] then table.insert(actions, action) end end
+    return { version = 1, libraryVersion = M.version, provider = copy(provider),
+      available = state.available, connected = state.connected, active = state.active, potionReady = state.potionReady,
+      readiness = not state.available and "unavailable" or not state.connected and "disconnected"
+        or state.active and "ready" or state.potionReady and "combat-ready" or "waiting",
+      capabilities = { inventory = state.available, inventoryDiagnostics = diagnosticCapability, inventoryActions = actions },
+      collector = collectorDiagnostics and copy(collectorDiagnostics) or nil, scopes = summaries }
+  end
   function api.supports(action)
     if type(action) ~= "string" or not enabled or not state.available then return false end
     if action == "use" then
@@ -1948,7 +2033,8 @@ function M.new(host, options)
         end
       end
       inventoryCapability(type(data.capabilities) == "table" and data.capabilities.inventory or nil, session,
-        type(data.capabilities) == "table" and data.capabilities.inventoryActions or nil)
+        type(data.capabilities) == "table" and data.capabilities.inventoryActions or nil,
+        type(data.capabilities) == "table" and data.capabilities.inventoryDiagnostics or nil, data.provider)
       if epoch ~= deliveryEpoch then return end
       notify("session", session)
       for _, packageName in ipairs(STATE) do

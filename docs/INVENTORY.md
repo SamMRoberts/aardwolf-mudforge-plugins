@@ -1,7 +1,7 @@
 # Aardwolf Inventory Management
 
-Inventory Management **0.4.0** uses `aardwolf-api` **0.9.0** and Aardwolf API
-Core **0.5.0**. Install the library and Core first, then
+Inventory Management **0.5.0** uses `aardwolf-api` **0.10.0** and Aardwolf API
+Core **0.6.0**. Install the library and Core first, then
 [`dist/plugins/aardwolf-inventory.lua`](../dist/plugins/aardwolf-inventory.lua).
 It needs no Python process or File System Access. An older Core can provide
 basic inventory data and original actions; unsupported held-item, portal and use
@@ -233,7 +233,43 @@ login, loot, refresh or a timer.
 | `awinventory manage` | Open the manager on main inventory. |
 | `awinventory setup` | Open settings. |
 | `awinventory refresh` | Refresh carried inventory and equipment. |
-| `awinventory status` | Report inventory/workflow status and feedback. |
+| `awinventory status` | Report passive collection/workflow diagnostics and manual recovery steps. |
+
+## Collection and recovery details
+
+`awinventory status` (or bare `awinventory`) reports the consumer's loaded library,
+Core's advertised plugin/library versions, advertised action capabilities and
+readiness. The manager offers the same report in **Collection and recovery
+details**, collapsed initially. Opening it sends no widget message and updates
+preserve its open state, focus and unfinished forms. There is no additional
+summary dashboard or background refresh.
+
+The report distinguishes fresh, complete empty, partial, stale and unknown
+inventory/equipment plus the selected bag. Collector details include monitoring,
+current read type, opening/closing-tag wait, queued-read count and known versus
+ambiguous drain barriers. A sanitized last-failure category survives successful
+reads and drains, until the collection generation resets. Raw server replies,
+exception messages, character/item names and use targets are omitted. Numeric
+item, bag and slot references appear only where needed to explain manual recovery.
+
+Workflow details show preparation, discovery, verification, restoration or
+cancellation and retain an incomplete/stopped outcome after work ends. Recovery
+steps identify temporary equipment to inspect, previous items and original slots
+to restore with Hold/Wear/Dual, and surviving items to return to their original
+bags. During an active workflow these describe what would remain if it stopped.
+Inspect current placement and slot occupancy before acting; a missing object may
+have been consumed. A completed restoration does not turn later manual moves into
+new recovery obligations. Disconnect/identity changes discard object references
+and retain only a reminder to inspect the previous character's arrangement;
+cleanup/reload clears the transient report. Existing feedback stays visible.
+
+The report is read-only: no game command, request, timer, save, drain release,
+retry or workflow resumption follows from reading it. An interrupted known reply
+waits for its closing tag; ambiguous output requires manual reconnect. No
+force-clear control is offered. An older Core or library reports unavailable
+collector details and unknown versions, while existing supported actions remain
+available. Update the loaded library, Core and Inventory together, then reload
+them to obtain full diagnostics.
 
 ## Timeout troubleshooting
 

@@ -145,7 +145,7 @@ a successful local replay does not establish those server contracts.
 
 ## Inventory Management plugin — pending
 
-Inventory Management **0.4.0**, API **0.9.0** and Core **0.5.0** require their own
+Inventory Management **0.5.0**, API **0.10.0** and Core **0.6.0** require their own
 native acceptance. Offline Lua fixtures and standalone browser checks do not
 establish native docking, context-menu delivery, persistence or live gameplay.
 Use only an explicitly authorized disposable world and local transport fixture;
@@ -155,6 +155,14 @@ version and tested artifact versions with any observed results.
 - Import the plugin with the current library/Core, in both load orders. Verify
   load/reload, disable/re-enable, file-import-generated IDs and missing/old Core
   feedback. No duplicate windows, subscriptions or commands should remain.
+- Read `awinventory status` and open the collapsed manager's **Collection and
+  recovery details** during a queued read, opening/closing-tag wait, timeout,
+  known/ambiguous drain, cancellation and incomplete restoration. Verify actual
+  loaded consumer/collector versions, old-Core absence, scope freshness and
+  specific item/bag/slot recovery guidance without names, targets or raw output.
+  Reading/opening must send nothing, preserve drain barriers and drafts/focus,
+  and never retry or resume a workflow. Disconnect/change identity and verify old
+  object references disappear; reload must discard transient diagnostics.
 - Replay loose items, worn bags, unopened bags and nested discovered bags. The
   summary count includes directly carried bags but excludes equipment and bag
   contents. Unknown/stale counts and unknown/partial/empty bag contents remain
