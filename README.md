@@ -1,7 +1,7 @@
 # aardwolf-mudforge-plugins
 
 A shared Lua API and Aardwolf plugins for [MudForge](https://mudforge.org/).
-The **0.9.0** library provides a session Core, an injected library facade, native
+The **0.9.1** library provides a session Core, an injected library facade, native
 storage and widget helpers, opt-in inventory management, a reactive vitals example,
 and a configurable vitals HUD.
 All plugin persistence uses MudForge's native plugin/world storage. Spells **0.5.1**
@@ -98,6 +98,13 @@ API Core and Vitals. Earlier library copies rejected the numeric string keys
 returned by MudForge's `pairs()` when reading a valid `{ "Char" }` package list.
 Check for an older user-edited/file library taking precedence over the updated
 repository copy.
+
+Library **0.9.1** also preserves Group members indexed by numbers or digit-only
+strings, including zero-based and sparse lists. Equivalent duplicate indices
+are omitted deterministically; see the [Group contract](docs/API.md#state-and-events).
+Reload Core and consumers after updating the library. Offline regressions cover
+delivery and snapshot replacement; [native Group acceptance](docs/NATIVE-ACCEPTANCE.md#group-member-indices--api-091)
+remains pending.
 
 Core discovers registered consumers in either load order. Each consuming
 plugin gets its own library instance; Core communicates with them using

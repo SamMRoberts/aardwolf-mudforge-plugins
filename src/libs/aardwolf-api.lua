@@ -1,9 +1,9 @@
 library = {
-  name = "aardwolf-api", version = "0.9.0", author = "Sam Roberts",
+  name = "aardwolf-api", version = "0.9.1", author = "Sam Roberts",
   description = "Session-scoped Aardwolf data, events, inventory, native storage and UI helpers."
 }
 
-local M = { version = "0.9.0", coreName = "Aardwolf API Core" }
+local M = { version = "0.9.1", coreName = "Aardwolf API Core" }
 local PREFIX = "aardwolf-api:"
 local STATE = {
   "char.base", "char.vitals", "char.stats", "char.maxstats",
@@ -110,23 +110,32 @@ local function normalize(packageName, payload)
     else data.coord = nil end
   elseif packageName == "group" then
     if type(data.members) == "table" then
-      -- JS-origin arrays may be zero-based. Sort numeric keys explicitly so
-      -- both representations produce the same ordered Lua member list.
-      local keys = {}
-      for key, member in pairs(data.members) do
-        if type(key) == "number" and key >= 0 and key == math.floor(key) and type(member) == "table" then
-          table.insert(keys, key)
+      -- Keep values with their sortable index: a converted key cannot be used
+      -- to look up an original string-keyed member. Read the validated source
+      -- so copying through stringifying pairs cannot hide equivalent keys.
+      local entries, counts = {}, {}
+      for key, member in pairs(payload.members) do
+        local listKey = type(key) == "number" or (type(key) == "string" and string.match(key, "^%d+$") ~= nil)
+        local index = nil
+        if listKey then index = finite(key) end
+        if index ~= nil and index >= 0 and index == math.floor(index) and type(member) == "table" then
+          table.insert(entries, { index = index, member = copy(member) })
+          counts[index] = (counts[index] or 0) + 1
         end
       end
-      table.sort(keys)
+      table.sort(entries, function(left, right) return left.index < right.index end)
       local members = {}
-      for _, key in ipairs(keys) do
-        local member = data.members[key]
-        fields(member, { "name" }, false, {})
-        if type(member.info) == "table" then
-          fields(member.info, { "hp", "mhp", "mn", "mmn", "mv", "mmv", "align", "tnl", "qt", "qs", "lvl", "here" }, true, {})
-        else member.info = nil end
-        table.insert(members, member)
+      for _, entry in ipairs(entries) do
+        -- Omit all ambiguous equivalents rather than pick a member according
+        -- to host iteration order (for example 1, "1" and "01").
+        if counts[entry.index] == 1 then
+          local member = entry.member
+          fields(member, { "name" }, false, {})
+          if type(member.info) == "table" then
+            fields(member.info, { "hp", "mhp", "mn", "mmn", "mv", "mmv", "align", "tnl", "qt", "qs", "lvl", "here" }, true, {})
+          else member.info = nil end
+          table.insert(members, member)
+        end
       end
       data.members = members
     else data.members = nil end

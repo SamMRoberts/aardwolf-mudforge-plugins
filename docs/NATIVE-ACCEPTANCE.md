@@ -13,7 +13,7 @@ private messages, world exports and raw gameplay logs out of this repository.
 ## Native library and lifecycle
 
 - Install the library separately, then Core and the example. Verify each loaded
-  library version is 0.9.0, Core is 0.5.0 and the example is 0.1.0, including library
+  library version is 0.9.1, Core is 0.5.0 and the example is 0.1.0, including library
   precedence over repository/package copies.
 - Try both load orders, reload Core with consumers enabled, then disable and
   re-enable the example. Expect one panel, one subscription per source and no
@@ -42,6 +42,25 @@ private messages, world exports and raw gameplay logs out of this repository.
   Refresh button and observe a single `request char` and a fresh response.
 - Feed repeated `char.base`; confirm no negotiation/request feedback loop.
   Inspect nested data copying against the actual transpiler.
+
+### Group member indices — API 0.9.1
+
+Native MudForge transpiler and loopback/live transport verification for issue #45
+remain pending. No disposable-world or live access was authorized for this fix.
+Fengari regressions exercise direct normalization and Core-to-consumer updates
+and replay, with numeric/string, zero-/one-based and sparse keys, malformed
+entries, equivalent indices, defensive copies and full-snapshot replacement.
+The stringifying `pairs()` fixture covers library iteration; it is not the
+MudForge transpiler or JavaScript table implementation.
+
+In an authorized disposable world with library **0.9.1** loaded by Core **0.5.0**
+and a Group consumer, deliver mixed numeric/string member indices through the
+native host boundary. Confirm numeric ordering and original member values;
+equivalent duplicate indices must all be omitted, with server `count` retained
+independently. Verify a late consumer receives the same membership, subscriber
+and read mutations cannot change cached members, and smaller, empty and omitted
+membership snapshots remove prior data. Record the client version, actual
+runtime key representation and observations separately from the offline tests.
 
 ## UI, persistence and preservation
 

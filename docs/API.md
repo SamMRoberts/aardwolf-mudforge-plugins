@@ -1,4 +1,4 @@
-# Aardwolf API 0.9.0
+# Aardwolf API 0.9.1
 
 ## Lifecycle and host adapters
 
@@ -69,8 +69,16 @@ character's state to consumers.
 Levels, tiers and other omitted fields cannot carry across that identity change.
 An explicitly invalid known numeric/text field becomes unknown. Room and
 Group replace their complete snapshots, including exits and membership.
-Group members are normalized to an ordered, one-based Lua list. Server field
-names stay intact; vitals maxima come from `char.maxstats`, not `char.vitals`.
+Group members are normalized to an ordered, one-based Lua list. Library 0.9.1
+accepts non-negative integer keys and digit-only string keys, including zero-based,
+one-based and sparse indices, and orders members by numeric index. Non-table
+members and malformed indices are ignored. If several table members share an
+equivalent numeric index (for example `1`, `"1"` and `"01"`), all members at that
+index are omitted; selection never depends on host iteration order. The server's
+`count` is normalized independently and is not recomputed from accepted members.
+Member values and extension fields are defensively copied through Core updates,
+snapshot replay and consumer reads. Server field names stay intact; vitals maxima
+come from `char.maxstats`, not `char.vitals`.
 Useful unknown extension fields survive bounded copying. No missing numeric
 value is filled with zero.
 
