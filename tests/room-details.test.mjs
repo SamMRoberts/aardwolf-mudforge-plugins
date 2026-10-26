@@ -7,6 +7,102 @@ import { root } from '../tools/build-repository.mjs';
 const fixture = readFileSync(resolve(root, 'tests/fixtures/room-details.lua'), 'utf8');
 const setup = `local world, context, env = roomWorld(); world.ready(); world.active(); world.tick(300); world.prompt()`;
 const cases = {
+  'collapse preferences are independent and leave authoritative rows, selection and commands unchanged': `
+    ${setup}
+    assert(not world.state().collapsePreferences.chars and not world.state().collapsePreferences.objs)
+    world.block("chars", { "(White Aura) A man.", "(White Aura) A man." })
+    world.block("objs", { "  A key.", "", "A chest." })
+    local before, sends, writes = world.state(), #world.sends, context.writes
+    world.message("select", { kind = "chars", revision = before.chars.revision, index = 2 })
+    world.message("collapse", { chars = true, objs = false })
+    local state = world.state()
+    assert(state.collapsePreferences.chars and not state.collapsePreferences.objs)
+    assert(state.chars.revision == before.chars.revision and state.objs.revision == before.objs.revision)
+    assert(#state.chars.rows == 2 and state.chars.rows[1].text == "(White Aura) A man.")
+    assert(state.objs.rows[1].text == "  A key." and state.objs.rows[2].text == "")
+    assert(state.selection.kind == "chars" and state.selection.index == 2)
+    world.message("collapse", { chars = true, objs = true })
+    assert(world.state().collapsePreferences.chars and world.state().collapsePreferences.objs)
+    world.message("collapse", { chars = false, objs = true })
+    assert(not world.state().collapsePreferences.chars and world.state().collapsePreferences.objs)
+    assert(world.state().selection.index == 2 and #world.sends == sends)
+    assert(context.writes == writes + 3 and world.panel().contentWrites == 1)
+  `,
+  'collapse preferences persist only validated booleans and remain scoped to their world': `
+    local world, context, env = roomWorld(); world.ready()
+    world.message("collapse", { chars = true, objs = false })
+    local stored
+    for key, value in pairs(context.storage) do
+      if string.find(key, "room-details:collapse", 1, true) then stored = value end
+    end
+    assert(stored and stored.value.chars == true and stored.value.objs == false)
+    local fields = 0
+    for key in pairs(stored.value) do assert(key == "chars" or key == "objs"); fields = fields + 1 end
+    assert(fields == 2)
+    env.cleanup(); env.init(); world.ready()
+    assert(world.state().collapsePreferences.chars and not world.state().collapsePreferences.objs)
+    local other, otherContext, otherEnv = roomWorld()
+    other.ready()
+    assert(not other.state().collapsePreferences.chars and not other.state().collapsePreferences.objs)
+    other.message("collapse", { chars = false, objs = true })
+    assert(world.state().collapsePreferences.chars and not world.state().collapsePreferences.objs)
+    otherEnv.cleanup(); env.cleanup()
+  `,
+  'malformed and cross-session collapse messages cannot change or save preferences': `
+    ${setup}
+    local writes, sends = context.writes, #world.sends
+    for _, value in ipairs({ false, true, "chars", {}, { chars = true }, { objs = true },
+      { chars = "false", objs = false }, { chars = false, objs = 0 },
+      { chars = 1, objs = false }, { chars = {}, objs = false },
+      { chars = false, objs = false, filter = "man" },
+      { chars = false, objs = false, version = 2 } }) do world.message("collapse", value) end
+    world.message("collapse", { chars = true, objs = true }, "other-session")
+    assert(context.writes == writes and #world.sends == sends)
+    assert(not world.state().collapsePreferences.chars and not world.state().collapsePreferences.objs)
+  `,
+  'malformed or future stored collapse preferences expand both sections without replacing saved data': `
+    local world, context, env = roomWorld(); world.ready()
+    world.message("collapse", { chars = true, objs = true })
+    local stored
+    for key, value in pairs(context.storage) do
+      if string.find(key, "room-details:collapse", 1, true) then stored = value end
+    end
+    assert(stored)
+    for _, value in ipairs({ false, "collapsed", {}, { chars = true }, { objs = true },
+      { chars = "true", objs = false }, { chars = true, objs = 1 },
+      { chars = true, objs = true, version = 2 } }) do
+      stored.value = value
+      local original, writes = json.encode(stored), context.writes
+      env.cleanup(); env.init(); world.ready()
+      assert(not world.state().collapsePreferences.chars and not world.state().collapsePreferences.objs)
+      assert(context.writes == writes and json.encode(stored) == original)
+    end
+  `,
+  'failed collapse saves retain prior preferences and selection, report failure, and recover explicitly': `
+    ${setup}
+    world.block("chars", { "A man.", "A man." })
+    local revision, sends = world.state().chars.revision, #world.sends
+    world.message("select", { kind = "chars", revision = revision, index = 2 })
+    world.message("collapse", { chars = true, objs = false })
+    context.refuseWrites = true
+    world.message("collapse", { chars = false, objs = true })
+    assert(world.state().collapsePreferences.chars and not world.state().collapsePreferences.objs)
+    assert(world.state().collapseError and world.state().statusVisible)
+    assert(string.find(world.state().status, "write", 1, true))
+    assert(world.state().chars.revision == revision and world.state().selection.index == 2)
+    world.message("fonts", { size = 10, uiSize = 11 })
+    local fontError = world.state().fontError
+    assert(fontError)
+    context.refuseWrites = false
+    world.message("collapse", { chars = false, objs = true })
+    assert(not world.state().collapsePreferences.chars and world.state().collapsePreferences.objs)
+    assert(world.state().collapseError == nil and world.state().fontError == fontError)
+    world.message("fonts", { size = 10, uiSize = 11 })
+    assert(world.state().status == "" and world.state().fontError == nil)
+    assert(world.state().selection.index == 2 and #world.sends == sends)
+    env.cleanup(); env.init(); world.ready()
+    assert(not world.state().collapsePreferences.chars and world.state().collapsePreferences.objs)
+  `,
   'font sizes are independent, durable and terminal following can be restored': `
     ${setup}
     assert(world.state().fontPreferences.size == 0 and world.state().fontPreferences.uiSize == 12)

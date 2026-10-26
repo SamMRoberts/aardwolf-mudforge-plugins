@@ -308,7 +308,7 @@ does not automatically send refresh requests.
 
 ## Aardwolf Room Details
 
-**0.2.3** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
+**0.3.0** moves `{roomchars}` and `{roomobjs}` output into one compact, dockable
 **Room Details** panel with Characters above Objects. Initial size is 360 × 240;
 drag it to an edge of another widget to dock it. MudForge restores saved placement,
 size and visibility. Each completed tagged block replaces its own section;
@@ -320,6 +320,24 @@ simple parenthesized markers to their first non-space character and join adjacen
 markers: `(Golden Aura) (White Aura)` displays as `(G)(W)`. Objects remove leading
 indentation for display and abbreviate only consecutive leading markers:
 `    (Magic) (Hum) A bag (open).` displays as `(M)(H) A bag (open).`
+
+**Filter** matches a case-insensitive literal substring of each original plain-text
+description, including full markers such as `White Aura` and original whitespace.
+It applies to both sections; **Clear** restores all rows. Each section heading is
+a keyboard-operable collapse toggle. Its count shows **visible/total** nonblank
+rows, including `0/total` while collapsed. Filtering and collapse preserve row
+order, distinct duplicates, colors and full descriptions without sending commands
+or changing tagged snapshots. A hidden selection stays selected: the panel explains
+that it is hidden, **Details** remains available, and open Details/Copy keep the
+original description. Revealing the row restores its outline; closing Details
+returns focus to the section toggle if its opening row is hidden. Authoritative
+selection invalidation still clears selection and closes Details as described below.
+
+Characters and Objects collapse preferences save independently per plugin/world
+and survive reloads. Invalid saved preferences default to expanded without being
+overwritten. A refused save leaves the previous collapse state and shows an error;
+retry with the section toggle after storage recovers. Filter text lasts only for
+the current panel document, including room changes, and resets on plugin reload.
 
 The **Font settings** gear opens separate controls for **Room text** (6–32 px,
 or **Terminal** to follow the console) and **Interface text** (8–20 px). Sizes
@@ -381,10 +399,10 @@ Each block is bounded to 500 lines, 128 KiB and five seconds. Malformed boundari
 missing closing tags or overflow surface buffered content as incomplete and
 release console suppression. Missing/failed formatting leaves output visible.
 Room/character changes and disconnects clear stale selection and room data;
-Auto and font-size preferences persist.
+Auto, font-size and section-collapse preferences persist.
 
 Offline and browser checks do not establish native formatting, gagging, docking,
-or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--023-acceptance-pending).
+or live transport acceptance. See [native acceptance](docs/NATIVE-ACCEPTANCE.md#room-details--030-acceptance-pending).
 
 ## Aardwolf Spells
 
