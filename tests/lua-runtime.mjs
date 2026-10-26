@@ -44,7 +44,7 @@ function readValue(L, index) {
   return Object.fromEntries(entries);
 }
 
-export function runLua(source, globals = {}) {
+export function runLua(source, globals = {}, { distribution = false } = {}) {
   const L = lauxlib.luaL_newstate();
   lualib.luaL_openlibs(L);
   const fail = error => lauxlib.luaL_error(L, to_luastring(error.message));
@@ -72,7 +72,8 @@ export function runLua(source, globals = {}) {
       inventory: 'src/plugins/aardwolf-inventory.lua',
     };
     if (!files[name]) return lauxlib.luaL_error(state, to_luastring('unknown fixture source'));
-    const code = readFileSync(resolve(root, files[name]), 'utf8');
+    const path = distribution ? files[name].replace(/^src\//, 'dist/') : files[name];
+    const code = readFileSync(resolve(root, path), 'utf8');
     const status = lauxlib.luaL_loadbuffer(state, to_luastring(code), null, to_luastring(name));
     if (status !== lua.LUA_OK) return lua.lua_error(state);
     lua.lua_pushvalue(state, 2);

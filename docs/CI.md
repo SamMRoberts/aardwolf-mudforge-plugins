@@ -30,6 +30,11 @@ It has no publication, deployment, native MudForge or live Aardwolf steps.
 Offline fixture results retain the limits described in
 [native acceptance](NATIVE-ACCEPTANCE.md).
 
+The optional [browser smoke command](BROWSER-SMOKE.md) runs separately from this
+workflow and `npm test`. It requires the pinned Playwright Chromium installation
+and produces synthetic-browser evidence; this offline job does not establish a
+browser pass.
+
 ## Local verification and failure probes
 
 With the supported runtimes selected, verify a clean checkout without rebuilding:

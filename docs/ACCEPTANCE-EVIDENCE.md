@@ -200,3 +200,50 @@ These temporary files are local evidence, not a committed browser harness.
 | R62-03 | R62; local synthetic widget | synthetic-browser | passed | `node /private/tmp/issue62-browser/check.cjs`: page URL/title, nonblank content, no application error overlay, zero page/console errors on the checked reload; widths/heights 200×150, 260×180, 360×240, 640×480 with 12/20 px interface and 32 px room text. No horizontal overflow; toolbar remained in viewport. Tab/Enter Clear, Space/Enter collapse/expand, independent counts, duplicate selection, hidden Details/Copy, Escape focus restoration, literal filtering, retained row/focus/scroll and simulated save refusal/retry passed. Only ready/select/collapse bridge events occurred. Screenshots inspected separately at 360×240, 260×180 and 200×150. An initial missing fixture favicon returned 404; adding the local fixture icon removed it before the checked reload. |
 | R62-04 | R62; affected [native checklist](NATIVE-ACCEPTANCE.md#room-details--030-acceptance-pending) | native-disposable-world | not run | No disposable world was authorized. Native transpilation, ANSI formatting, widget bridge/docking, storage refusal and world reopen remain pending; browser/host passes do not clear this gate. |
 | R62-05 | R62; connected room capture | live | not run | No Aardwolf access was authorized. Live formatting, suppression and refresh scheduling remain unverified. |
+
+## Browser smoke R48 — reproducible harness
+
+Observed **2026-10-26** on **macOS 27.0.1 (26A434), arm64**, with
+**Node.js v26.10.0**, **Playwright 1.64.1** and headless **Chromium 156.0.8078.4**
+(Playwright revision 1248, SwiftShader software WebGL). MudForge build:
+**not applicable**. No client, native world, storage engine or live transport
+was exercised.
+
+Source revision: `5fecb07ea0eefefb28826f3af2f095f8652c8018` plus the local
+`codex/issue-48` tracked patch SHA-256
+`e1a283c1226fd7f9e2ae90b2e8aec1a7080b0f5553bb21dbd3fafc3cc15821f7`.
+The run's per-test `evidence.json` records hashes of all untracked inputs,
+including `playwright.config.mjs` and the six `tests/browser/` modules,
+as well as captured HTML hashes and the documents actually loaded.
+These identify the local uncommitted harness; they are not a published revision.
+Subsequent additions to this ledger are documentation only.
+
+| Artifact | Version | SHA-256 |
+| --- | --- | --- |
+| [aardwolf-api](../dist/libs/aardwolf-api.lua) | 0.9.1 | `f7b209db1a7b754e0ac0871ad9eef1522eb4e89266f24be2c60ebd536bf2437c` |
+| [aardwolf-api-core](../dist/plugins/aardwolf-api-core.lua) | 0.5.0 | `b47db8e42cf040f3ea8b94f0709dc042cb0fef4079e1be9a1b8f9b9210df2c49` |
+| [aardwolf-vitals](../dist/plugins/aardwolf-vitals.lua) | 0.1.6 | `132ffef843ae6ba642405f71e1a0163e33b5cb73d2e3c49dbe3fd9ecdd0c46a5` |
+| [aardwolf-spells](../dist/plugins/aardwolf-spells.lua) | 0.5.1 | `953dc3035da56f762c5137641c6e5e0e5ec2db4fef4f48a7b6c9913bfd3da298` |
+| [aardwolf-room-details](../dist/plugins/aardwolf-room-details.lua) | 0.3.0 | `2212b404e34f2ee3994f0638bae04d7ef7e9e4f5f5ba71f8865f0d8826658a60` |
+| [aardwolf-inventory](../dist/plugins/aardwolf-inventory.lua) | 0.4.0 | `32a1974a34ee5e4954abc0e93e1e897c3d2ec599368c215b24a5d75cffac98e1` |
+| [aardwolf-atlas](../dist/plugins/aardwolf-atlas.lua) | 0.3.0 | `1a10d1aae33924b90221d866e4cef57db676f8860157e5f049149ab30d1aac55` |
+
+Command: `PLAYWRIGHT_BROWSERS_PATH=/private/tmp/issue48-browsers
+SMOKE_OUTPUT_DIR=/private/tmp/issue48-final npm run test:browser`.
+[Harness setup, bridge contract and coverage](BROWSER-SMOKE.md) describe the
+repeatable procedure. Local temporary evidence: `/private/tmp/issue48-final/`
+contains `results.json`, per-test console/network/message/provenance JSON, and
+initial/final PNG files. These files are local observations, not committed assets;
+retain them externally before temporary cleanup.
+
+| Result ID | Profile / scope | Layer | Result | Observation/evidence |
+| --- | --- | --- | --- | --- |
+| R48-01 | R48; built Inventory, Spells, Room Details, Vitals/settings and Atlas main widget | synthetic-browser | passed | All 18 checks passed at 320×480 and 1280×720; Spells additionally resized at 220 px height. Keyboard actions, draft/focus/scroll stability, representative updates, no document overflow, actual WebGL pixels, unavailable-WebGL feedback and actual context loss passed. No unexpected console errors, uncaught exceptions or failed requests. The unavailable-WebGL case emitted its exact expected renderer error. Representative narrow widget, resized Spells and Atlas screenshots were visually inspected. |
+| R48-02 | R48; component native acceptance gates | native-disposable-world | not run | No disposable world authorized; native transpilation, bridge, docking, storage and reload remain pending. |
+| R48-03 | R48; connected collection/gameplay | live | not run | No Aardwolf access authorized or performed. |
+
+Separate diagnostic probes in `/private/tmp/issue48-probes/` deliberately emitted
+a console error, uncaught page exception, HTTP 404 and page close. All four
+produced failed checks in `/private/tmp/issue48-probe-results-2/results.json`;
+the closed-page case still retained its console and capture-failure evidence.
+These validate failure detection, not a component failure or native acceptance.
