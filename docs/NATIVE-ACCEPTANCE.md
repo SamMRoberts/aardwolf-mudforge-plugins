@@ -10,6 +10,10 @@ It identifies tested artifacts, environments and layers, preserves historical
 results and leaves missing evidence visible. A blocked result does not pass a
 component release gate; the target above is not a claim about every tested build.
 
+The [browser smoke harness](BROWSER-SMOKE.md) provides repeatable synthetic
+rendering and interaction checks. Its bridge, bindings and fixture responses do
+not establish the native behavior below.
+
 Use an explicitly authorized disposable world for these checks. Record the
 actual app version, original selected world and a private backup before writes.
 Do not use an existing character profile or map as the fixture. Keep credentials,

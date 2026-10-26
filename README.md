@@ -658,6 +658,11 @@ npm run build:check
 git diff --check
 ```
 
+Repeatable [browser smoke checks](docs/BROWSER-SMOKE.md) run separately with
+`npm run test:browser` after installing the pinned Chromium browser. They exercise
+built widget documents with a synthetic bridge and retain screenshots, console
+logs and provenance outside the checkout; they do not pass native/live gates.
+
 Edit `src/`; `build` copies exact Lua bytes into `dist/` and regenerates catalog
 hashes/sizes. Commit source and generated files together when making a release.
 The generator has no timestamps or network dependency and resolves paths
